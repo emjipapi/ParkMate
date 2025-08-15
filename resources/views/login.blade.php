@@ -8,11 +8,11 @@
 
   <!-- Bootstrap 5 CDN -->
   <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-  <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script> />
+  <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
   <!-- Inter font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
   <!-- Font Awesome -->
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
 
   <style>
     body,

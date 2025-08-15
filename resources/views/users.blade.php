@@ -100,7 +100,7 @@
             background-color: #EAEEF4;
         }
 
-        .edit-bar {
+        .live-btn-bar {
             display: flex;
             align-items: center;
             background-color: white;
@@ -109,7 +109,7 @@
             height: 30px;
         }
 
-        .edit-bar input[type="text"] {
+        .live-btn-bar input[type="text"] {
             border: none;
             padding: 4px 10px;
             font-size: 0.9rem;
@@ -117,7 +117,7 @@
             width: 180px;
         }
 
-        .edit-btn {
+        .live-btn {
             background-color: #256a99;
             color: white;
             border: none;
@@ -127,7 +127,7 @@
             height: 100%;
         }
 
-        .edit-btn:hover {
+        .live-btn:hover {
             background-color: #1b5c7d;
         }
 
@@ -342,11 +342,12 @@
 
     <div class="top-bar">
         <span style="flex: 1;"></span>
-        <div class="edit-bar">
-            <input type="text" placeholder="Awaiting RFID Tag" id="editInput" readonly>
-            <button class="edit-btn" title="Edit" onclick="enableEditing()">
-                <i class="bi bi-pencil"></i>
+        <div class="live-btn-bar">
+            <a href="{{ url('/live-attendance-mode') }}" href="users.php" style="text-decoration: none;">
+            <button class="live-btn">
+                Live Attendance Mode
             </button>
+            </a>
         </div>
     </div>
 

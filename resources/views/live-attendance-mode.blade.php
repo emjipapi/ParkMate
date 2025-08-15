@@ -93,11 +93,7 @@
             min-height: calc(100vh - 96px);
             display: flex;
             flex-direction: column;
-            background-image: url('{{ asset('images/image1.png') }}');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            box-shadow: inset 0 60px 30px -20px rgba(0, 0, 0, 0.5);
+            background-color: #EAEEF4;
         }
 
         .live-btn-bar {
@@ -131,8 +127,6 @@
             background-color: #1b5c7d;
         }
 
-
-
         .content .cards-container {
             margin-top: auto;
         }
@@ -142,11 +136,11 @@
         }
 
         .content h3 {
-            color: white;
+            color: black;
         }
 
         .content h6 {
-            color: white;
+            color: black;
         }
 
         .bottom-bar {
@@ -163,45 +157,6 @@
             padding: 0 20px;
             font-weight: 500;
         }
-
-        .card {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .card-footer {
-            padding: 0;
-            white-space: normal;
-            text-align: center;
-            background-color: rgba(0, 0, 0, 0.1);
-            border: none;
-            line-height: 2;
-        }
-
-        .card-1 {
-            border: 0px;
-            border-radius: 0px;
-            background-color: #00B8EE;
-            color: white;
-            height: 200px;
-        }
-
-        .card-2 {
-            border: 0px;
-            border-radius: 0px;
-            background-color: #F09113;
-            color: white;
-            height: 200px;
-        }
-
-        .card-3 {
-            border: 0px;
-            border-radius: 0px;
-            background-color: #019C50;
-            color: white;
-            height: 200px;
-        }
     </style>
 </head>
 
@@ -213,7 +168,11 @@
             <h4>Admin</h4>
         </div>
 
-        <div class="btn-wrapper mt-3"><button class="btn active">Dashboard</button></div>
+        <div class="btn-wrapper mt-3">
+            <a href="{{ url('/') }}" style="text-decoration: none;">
+                <button class="btn active">Dashboard</button>
+            </a>
+        </div>
         <div class="btn-wrapper">
             <a href="{{ url('/parking-slots') }}" style="text-decoration: none;">
                 <button class="btn">Parking Slots</button>
@@ -226,18 +185,18 @@
         </div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
-    <form action="{{ route('logout') }}" method="POST">
-        @csrf
-        <button type="submit" class="btn btn-danger w-100">Logout</button>
-    </form>
-</div>
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger w-100">Logout</button>
+            </form>
+        </div>
 
     </div>
 
     <div class="top-bar">
         <span style="flex: 1;"></span>
         <div class="live-btn-bar">
-            <a href="{{ url('/live-attendance-mode') }}" href="users.php" style="text-decoration: none;">
+            <a  style="text-decoration: none;">
             <button class="live-btn">
                 Live Attendance Mode
             </button>
@@ -245,28 +204,29 @@
         </div>
     </div>
 
-
-
-
     <!-- Main Content -->
-    <div class="content">
-        <div class="d-flex align-items-baseline justify-content-between mb-3">
-            <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Dashboard</h3>
-                <h6 class="mb-0">Control Panel</h6>
-            </div>
-            <span class="text-white">Home > Dashboard</span>
+<div class="content">
+    <!-- Header stays at the top -->
+    <div class="d-flex align-items-baseline justify-content-between mb-3">
+        <div class="d-flex align-items-baseline">
+            <h3 class="mb-0 me-3">Dashboard</h3>
+            <h6 class="mb-0">Live Attendance</h6>
         </div>
-
-        <livewire:first-component />
-        
+        <span class="text-black">Home > Dashboard</span>
     </div>
+
+    <!-- Centering only this section -->
+    <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+        <livewire:live-attendance-component />
+    </div>
+</div>
+
+
     <!-- Bottom Bar -->
     <div class="bottom-bar">
         <span>Copyright © 2025 - 2025 All rights reserved</span>
         <span>ParkMate</span>
     </div>
-
 
 
 

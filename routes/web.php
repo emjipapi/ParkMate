@@ -28,9 +28,10 @@ Route::get('/sample', function () {
     return view('sample');
 });
 
-Route::get('/scan-status', function () {
-    return view('scan-status');
+Route::get('/live-attendance-mode', function () {
+    return view('live-attendance-mode');
 });
+
 
 /*
 |--------------------------------------------------------------------------
