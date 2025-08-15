@@ -4,8 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth; // ✅ Needed for Auth::guard()
-use App\Models\User;                // ✅ If you access the User model
-use App\Models\Admin;               // ✅ If you access the Admin model
+
 
 
 class AuthController extends Controller

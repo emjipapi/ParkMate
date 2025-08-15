@@ -1,58 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - ParkMate</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <title>Login - ParkMate</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Bootstrap 5 CDN -->
+  <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+  <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script> />
+  <!-- Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+  <style>
+    body,
+    html {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background-color: #CDD1D9;
+    }
+
+    .center-box {
+      max-width: 440px;
+      /* keeps original width on desktop */
+      x;
+      min-height: 240px;
+      background-color: #ffffff;
+      padding: 20px;
+    }
+
+    h2 {
+      font-weight: 600;
+    }
+
+    .offset-up {
+      transform: translateY(-140px);
+    }
+
+    .btn-signin {
+      background-color: #3481B4;
+      color: white;
+      border: none;
+      padding: 8px 24px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .btn-signin:hover {
+      background-color: rgb(110, 172, 213);
+    }
+
+    .text-error {
+      color: red;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
-<body class="bg-light">
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-4">
-            <div class="card shadow-sm">
-                <div class="card-header text-center">
-                    <h3>Admin Login</h3>
-                </div>
-                <div class="card-body">
-                    <!-- Display errors -->
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul class="mb-0">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
+<body>
+  <div class="d-flex flex-column justify-content-center align-items-center vh-100 offset-up">
+    <h2 class="mb-4">Welcome to ParkMate</h2>
+    <div class="center-box">
 
-                    <!-- Login form -->
-                    <form action="{{ url('/login') }}" method="POST">
-                        @csrf
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Username</label>
-                            <input type="text" class="form-control" name="username" id="username" required autofocus>
-                        </div>
+      <p class="text-center mb-4">Sign in to start your session.</p>
 
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" name="password" id="password" required>
-                        </div>
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Login</button>
-                        </div>
-                    </form>
-                </div>
-                <div class="card-footer text-center text-muted">
-                    ParkMate Admin Panel
-                </div>
-            </div>
+      <!-- Display errors -->
+      @if ($errors->any())
+      <div class="alert alert-danger text-center">
+      <ul class="mb-0">
+        @foreach ($errors->all() as $error)
+      {{ $error }}
+      @endforeach
+      </ul>
+      </div>
+    @endif
+
+      <form action="{{ url('/login') }}" method="POST">
+        @csrf
+        <div class="mb-3">
+          <input type="text" name="username" class="form-control" placeholder="Username" required />
         </div>
+        <div class="input-group mb-3">
+          <input type="password" name="password" class="form-control" placeholder="Password" required />
+          <span class="input-group-text bg-white border-start-0">
+            <i class="fas fa-lock text-secondary"></i>
+          </span>
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+          <button type="submit" class="btn-signin">Sign In</button>
+        </div>
+      </form>
     </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+  </div>
