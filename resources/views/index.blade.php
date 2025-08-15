@@ -245,9 +245,6 @@
         </div>
     </div>
 
-
-
-
     <!-- Main Content -->
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">

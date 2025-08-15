@@ -6,9 +6,12 @@ use Livewire\Component;
 
 class LiveAttendanceComponent extends Component
 {
+
+    public $profilePicture;
+
     public $namedEpcs = [];
     public $latestEpc = null; // 👈 add this here
-
+    public $status = null;
     // private $epcNames = [
     //     '3268191180' => 'MJ',
     //     '3268191184' => 'Jobert',
@@ -20,7 +23,11 @@ class LiveAttendanceComponent extends Component
     // 🕒 Cooldown duration in seconds
     private $cooldownSeconds = 5;
 
-    
+    public function mount()
+    {
+        // Initialize with placeholder
+        $this->profilePicture = asset('images/placeholder.jpg');
+    }
     
     public function pollEpc()
 {
@@ -53,7 +60,14 @@ class LiveAttendanceComponent extends Component
 
         // 📝 Log name and status
         $this->namedEpcs[] = "$name ($epc) - $newStatus";
-        $this->latestEpc = "$name ($epc) - $newStatus";
+        $this->latestEpc = "$name ($epc)";
+        $this->status = $newStatus;
+// Set profile picture, or placeholder if not uploaded
+            $this->profilePicture = $user->profile_picture
+                ? route('profile.picture', ['filename' => $user->profile_picture])
+                : asset('images/placeholder.jpg');
+
+
 
         // 🔄 Update lastStates and cooldowns
         $lastStates[$epc] = !$isCurrentlyIn;
@@ -63,7 +77,6 @@ class LiveAttendanceComponent extends Component
     \Cache::put('rfid_cooldowns', $cooldowns, 60);
     \Cache::put('rfid_last_states', $lastStates, 60);
 }
-
     private function getScannedTags()
     {
         // 🟡 Replace this with your real reader logic

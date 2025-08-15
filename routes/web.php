@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProfilePictureController;
 use Illuminate\Support\Facades\Auth;
 
 /*
@@ -31,6 +32,10 @@ Route::get('/sample', function () {
 Route::get('/live-attendance-mode', function () {
     return view('live-attendance-mode');
 });
+
+Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
+     ->name('profile.picture');
+
 
 
 /*

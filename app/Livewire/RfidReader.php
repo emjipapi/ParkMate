@@ -55,8 +55,6 @@ class RfidReader extends Component
         $this->namedEpcs[] = "$name ($epc) - $newStatus";
         $this->latestEpc = "$name ($epc) - $newStatus";
 
-
-
         // 🔄 Update lastStates and cooldowns
         $lastStates[$epc] = !$isCurrentlyIn;
         $cooldowns[$epc] = $now->addSeconds($this->cooldownSeconds);
@@ -65,8 +63,6 @@ class RfidReader extends Component
     \Cache::put('rfid_cooldowns', $cooldowns, 60);
     \Cache::put('rfid_last_states', $lastStates, 60);
 }
-
-
 
     private function getScannedTags()
     {
