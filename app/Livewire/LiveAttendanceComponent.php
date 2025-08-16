@@ -6,7 +6,8 @@ use Livewire\Component;
 
 class LiveAttendanceComponent extends Component
 {
-
+    // 🕒 Cooldown duration in seconds
+    private $cooldownSeconds = 5;    
     public $profilePicture;
 
     public $namedEpcs = [];
@@ -20,8 +21,8 @@ class LiveAttendanceComponent extends Component
     private $cooldowns = [];
     private $lastStates = [];
 
-    // 🕒 Cooldown duration in seconds
-    private $cooldownSeconds = 5;
+
+    public $scans = []; 
 
     public function mount()
     {
@@ -72,6 +73,21 @@ class LiveAttendanceComponent extends Component
         // 🔄 Update lastStates and cooldowns
         $lastStates[$epc] = !$isCurrentlyIn;
         $cooldowns[$epc] = $now->addSeconds($this->cooldownSeconds);
+        // 📝 Log scan
+$scan = [
+    'name' => "$name ($epc)",
+    'status' => $newStatus,
+    'picture' => $user->profile_picture
+        ? route('profile.picture', ['filename' => $user->profile_picture])
+        : asset('images/placeholder.jpg'),
+];
+
+// Put newest scan at the start
+array_unshift($this->scans, $scan);
+
+// Keep only the last 10 for frontend queue
+$this->scans = array_slice($this->scans, 0, 3);
+
     }
 
     \Cache::put('rfid_cooldowns', $cooldowns, 60);

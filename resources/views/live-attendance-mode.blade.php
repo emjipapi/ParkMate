@@ -194,7 +194,10 @@
     </div>
 
     <div class="top-bar">
+                <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
+
+
         <div class="live-btn-bar">
             <a  style="text-decoration: none;">
             <button class="live-btn">
@@ -229,7 +232,20 @@
     </div>
 
 
+<script>
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
 
+        document.getElementById('clock').textContent =
+            `${hours}:${minutes}:${seconds}`;
+    }
+
+    setInterval(updateClock, 1000);
+    updateClock(); // run once immediately
+</script>
 </body>
 
 </html>

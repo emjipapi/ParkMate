@@ -36,8 +36,6 @@ Route::get('/live-attendance-mode', function () {
 Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
      ->name('profile.picture');
 
-
-
 /*
 |--------------------------------------------------------------------------
 | Protected Admin Routes

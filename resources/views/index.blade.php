@@ -235,6 +235,7 @@
     </div>
 
     <div class="top-bar">
+        <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div class="live-btn-bar">
             <a href="{{ url('/live-attendance-mode') }}" href="users.php" style="text-decoration: none;">

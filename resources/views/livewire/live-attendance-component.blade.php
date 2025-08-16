@@ -1,21 +1,35 @@
 <div wire:poll.100ms="pollEpc" 
-     class="d-flex justify-content-center align-items-center w-100 h-100">
-    <div class="d-flex align-items-center p-5 border rounded shadow-sm bg-white" 
-         style="font-size: 2rem; width: 1500px;">
-        <!-- Column 1: Picture -->
-<img src="{{ $profilePicture }}" 
-     alt="Profile" 
-     class="rounded-circle me-5"
-     style="width: 250px; height: 250px; object-fit: cover;">
+     class="d-flex flex-column justify-content-center align-items-center w-100 h-100 gap-4 p-4 overflow-auto">
 
-        <!-- Column 2: Texts -->
-        <div>
-            <div class="fw-bold" style="font-size: 3.5rem;">
-                {{ $latestEpc ?? 'Name, EPC' }}
-            </div>
-                        <div style="font-size: 3rem; color: {{ $status === 'IN' ? 'green' : ($status === 'OUT' ? 'red' : 'gray') }};">
-                {{ $status ?? 'Status' }}
+    @foreach ($scans as $index => $scan)
+        <div class="d-flex align-items-center border rounded shadow-sm bg-white" 
+             style="font-size: {{ $loop->first ? '1.8rem' : ($loop->iteration <= 3 ? '1.3rem' : '1rem') }};
+                    width: 100%; max-width: {{ $loop->first ? '1200px' : '900px' }};
+                    padding: {{ $loop->first ? '2.5rem' : '1rem' }};
+                    transform: {{ $loop->first ? 'scale(1)' : 'scale(1)' }};
+                    transition: transform 0.3s ease;">
+
+            <!-- Picture -->
+            <img src="{{ $scan['picture'] }}" 
+                 alt="Profile" 
+                 class="rounded-circle me-4"
+                 style="width: {{ $loop->first ? '220px' : '100px' }};
+                        height: {{ $loop->first ? '220px' : '100px' }};
+                        object-fit: cover;">
+
+            <!-- Texts -->
+            <div>
+                <div class="fw-bold" 
+                     style="font-size: {{ $loop->first ? '2.2rem' : '1.5rem' }};">
+                    {{ $scan['name'] ?? 'Name, EPC' }}
+                </div>
+                <div style="font-size: {{ $loop->first ? '2rem' : '1.2rem' }};
+                            font-weight: bold;
+                            color: {{ $scan['status'] === 'IN' ? 'green' : ($scan['status'] === 'OUT' ? 'red' : 'gray') }};">
+                    {{ $scan['status'] ?? 'Status' }}
+                </div>
             </div>
         </div>
-    </div>
+    @endforeach
+
 </div>
