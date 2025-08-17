@@ -15,6 +15,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <livewire:styles />
     <style>
         :root {
             --sidebar-bg: #182125;
@@ -352,7 +353,6 @@
         </div>
     </div>
 
-
     <!-- Main Content -->
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
@@ -366,38 +366,10 @@
             Add User
         </button>
 
-
         <div class="square-box">
-            <div class="d-flex align-items-center mb-3">
-                <span class="me-2">Show</span>
-                <select class="form-select form-select-sm w-auto me-2">
-                    <option value="all">All</option>
-                </select>
-                <span>Entries</span>
-            </div>
-
-            <table class="table table-striped custom-table">
-                <thead>
-                    <tr>
-                        <th>User ID</th>
-                        <th>Firstname</th>
-                        <th>Middlename</th>
-                        <th>Lastname</th>
-                        <th>Program</th>
-                        <th>Department</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php
-                   
-                    ?>
-                </tbody>
-            </table>
-            <div class="mt-2 text-start small text-muted">
-                Showing 1 to <?php  ?> of <?php  ?> entries
-            </div>
+    @livewire('users-table')
         </div>
+
 
     </div>
     <!-- Bottom Bar -->
@@ -406,7 +378,7 @@
         <span>ParkMate</span>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+<livewire:scripts />
 
 <script>
     function updateClock() {
