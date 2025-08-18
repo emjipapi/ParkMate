@@ -6,21 +6,22 @@
         wire:model.live.debounce.300ms="search"
     />
 
-    <div class="d-flex gap-3 mb-3">
-        <select class="form-control" wire:model.live="filterDepartment">
-            <option value="">All Departments</option>
-            @foreach($departments as $dept)
-                <option value="{{ $dept }}">{{ $dept }}</option>
-            @endforeach
-        </select>
+<div class="d-flex justify-content gap-2 mb-3">
+    <select class="form-select form-select-sm w-auto" wire:model.live="filterDepartment">
+        <option value="">All Departments</option>
+        @foreach($departments as $dept)
+            <option value="{{ $dept }}">{{ $dept }}</option>
+        @endforeach
+    </select>
 
-        <select class="form-control" wire:model.live="filterProgram">
-            <option value="">All Programs</option>
-            @foreach($programs as $prog)
-                <option value="{{ $prog }}">{{ $prog }}</option>
-            @endforeach
-        </select>
-    </div>
+    <select class="form-select form-select-sm w-auto" wire:model.live="filterProgram">
+        <option value="">All Programs</option>
+        @foreach($programs as $prog)
+            <option value="{{ $prog }}">{{ $prog }}</option>
+        @endforeach
+    </select>
+</div>
+
 
 
     <table class="table table-striped custom-table">
