@@ -331,9 +331,10 @@
         </div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
-            <form action="logout.php" method="post">
-                <button type="submit" class="btn btn-danger w-100">Logout</button>
-            </form>
+                <form action="{{ route('logout') }}" method="POST">
+        @csrf
+        <button type="submit" class="btn btn-danger w-100">Logout</button>
+    </form>
         </div>
     </div>
 
