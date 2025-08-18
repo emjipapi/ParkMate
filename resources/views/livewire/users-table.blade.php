@@ -1,5 +1,10 @@
 <div>
-    <input type="text" wire:model.debounce.300ms="search" placeholder="Search users..." class="form-control mb-3">
+    <input
+  type="text"
+  class="form-control mb-3"
+  placeholder="Search users..."
+  wire:model.live.debounce.300ms="search"
+/>
 
 
     <table class="table table-striped custom-table">

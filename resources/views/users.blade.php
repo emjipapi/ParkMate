@@ -312,6 +312,8 @@
             pointer-events: auto;
         }
     </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
 </head>
 
 <body>
@@ -321,7 +323,6 @@
         <div class="admin-header">
             <h4>Admin</h4>
         </div>
-
         <div class="btn-wrapper mt-3">
             <a href="{{ url('/') }}" style="text-decoration: none;">
                 <button class="btn">Dashboard</button>
