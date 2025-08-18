@@ -1,10 +1,26 @@
 <div>
     <input
-  type="text"
-  class="form-control mb-3"
-  placeholder="Search users..."
-  wire:model.live.debounce.300ms="search"
-/>
+        type="text"
+        class="form-control mb-3"
+        placeholder="Search users..."
+        wire:model.live.debounce.300ms="search"
+    />
+
+    <div class="d-flex gap-3 mb-3">
+        <select class="form-control" wire:model.live="filterDepartment">
+            <option value="">All Departments</option>
+            @foreach($departments as $dept)
+                <option value="{{ $dept }}">{{ $dept }}</option>
+            @endforeach
+        </select>
+
+        <select class="form-control" wire:model.live="filterProgram">
+            <option value="">All Programs</option>
+            @foreach($programs as $prog)
+                <option value="{{ $prog }}">{{ $prog }}</option>
+            @endforeach
+        </select>
+    </div>
 
 
     <table class="table table-striped custom-table">
@@ -20,7 +36,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($users as $user)
+            @forelse ($users as $user)
                 <tr>
                     <td>{{ $user->id }}</td>
                     <td>{{ $user->firstname }}</td>
@@ -33,9 +49,16 @@
                         <button class="btn btn-sm btn-danger">Delete</button>
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="7" class="text-center">No users found.</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
+        <div class="mb-2 small text-muted">
+        Showing {{ $users->count() }} of {{ $users->total() }} users
+    </div>
 
     {{ $users->links() }}
 </div>

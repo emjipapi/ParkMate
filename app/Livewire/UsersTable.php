@@ -10,24 +10,50 @@ class UsersTable extends Component
     use WithPagination;
 
     public $search = '';
+    public $filterDepartment = '';
+    public $filterProgram = '';
 
-    public function updatingSearch()
-    {
-        $this->resetPage(); // so pagination resets when you type
-    }
+    public function updatingSearch()        { $this->resetPage(); }
+    public function updatedFilterDepartment(){ $this->resetPage(); /* optional: $this->filterProgram = ''; */ }
+    public function updatedFilterProgram()  { $this->resetPage(); }
 
     public function render()
     {
-        $users = User::query()
-            ->where('firstname', 'like', "%{$this->search}%")
-            ->orWhere('lastname', 'like', "%{$this->search}%")
-            ->orWhere('middlename', 'like', "%{$this->search}%")
-            ->orWhere('program', 'like', "%{$this->search}%")
-            ->orWhere('department', 'like', "%{$this->search}%")
-            ->paginate(10);
+        $query = User::query();
+
+        if ($this->search !== '') {
+            $s = $this->search;
+            $query->where(function ($q) use ($s) {
+                $q->where('firstname', 'like', "%$s%")
+                  ->orWhere('middlename','like', "%$s%")
+                  ->orWhere('lastname',  'like', "%$s%")
+                  ->orWhere('program',   'like', "%$s%")
+                  ->orWhere('department','like', "%$s%");
+            });
+        }
+
+        if ($this->filterDepartment !== '') {
+            $query->where('department', $this->filterDepartment);
+        }
+
+        if ($this->filterProgram !== '') {
+            $query->where('program', $this->filterProgram);
+        }
+
+        $users = $query->paginate(10);
+
+        // dropdown data
+        $departments = User::select('department')->distinct()->orderBy('department')->pluck('department');
+        $programsQuery = User::query();
+        if ($this->filterDepartment !== '') {
+            $programsQuery->where('department', $this->filterDepartment); // cascade programs by department (optional)
+        }
+        $programs = $programsQuery->select('program')->distinct()->orderBy('program')->pluck('program');
 
         return view('livewire.users-table', [
-            'users' => $users,
+            'users'       => $users,
+            'departments' => $departments,
+            'programs'    => $programs,
         ]);
     }
 }
