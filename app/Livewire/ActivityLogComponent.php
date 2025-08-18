@@ -41,4 +41,9 @@ class ActivityLogComponent extends Component
 
         return view('livewire.activity-log-component', compact('activityLogs'));
     }
+    public function refreshLogs()
+{
+    // Simply re-fetch data, Livewire will auto re-render
+    $this->resetPage(); 
+}
 }

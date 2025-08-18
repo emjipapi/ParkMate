@@ -9,7 +9,6 @@
     <title>ParkMate - Users</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap 5 CDN -->
   <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
   <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
   <!-- Inter font -->
@@ -25,7 +24,11 @@
             --admin-bg: #2E739F;
             --admin-text: #ffffff;
         }
-
+.big-arrow, 
+.some-class::before, 
+.some-class::after {
+    display: none !important;
+}
         body {
             margin: 0;
             overflow-x: hidden;
@@ -381,7 +384,6 @@
         <span>Copyright © 2025 - 2025 All rights reserved</span>
         <span>ParkMate</span>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <livewire:scripts />
 
     <script>

@@ -2,6 +2,9 @@
     <input type="text" class="form-control mb-3" placeholder="Search..." 
         wire:model.live.debounce.300ms="search" style="width: 300px">
 
+            <button class="btn btn-outline-secondary ms-2" wire:click="refreshLogs">
+        Refresh
+    </button>
     <table class="table table-striped custom-table">
         <thead>
             <tr>
@@ -31,5 +34,5 @@
         </tbody>
     </table>
 
-    {{ $activityLogs->links() }}
+    {{ $activityLogs->links('pagination::bootstrap-5') }}
 </div>

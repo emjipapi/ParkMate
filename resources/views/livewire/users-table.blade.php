@@ -64,5 +64,5 @@
         Showing {{ $users->count() }} of {{ $users->total() }} users
     </div>
 
-    {{ $users->links() }}
+    {{ $users->links('pagination::bootstrap-5') }}
 </div>
