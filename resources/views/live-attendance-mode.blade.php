@@ -206,7 +206,6 @@
             </a>
         </div>
     </div>
-
     <!-- Main Content -->
 <div class="content">
     <!-- Header stays at the top -->
@@ -215,7 +214,7 @@
             <h3 class="mb-0 me-3">Dashboard</h3>
             <h6 class="mb-0">Live Attendance</h6>
         </div>
-        <span class="text-black">Home > Dashboard</span>
+        <span class="text-black">Home > Dashboard > Live Attendance Mode</span>
     </div>
 
     <!-- Centering only this section -->

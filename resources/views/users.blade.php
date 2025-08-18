@@ -336,10 +336,10 @@
         <div class="btn-wrapper"><button class="btn active">Users</button></div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
-                <form action="{{ route('logout') }}" method="POST">
-        @csrf
-        <button type="submit" class="btn btn-danger w-100">Logout</button>
-    </form>
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger w-100">Logout</button>
+            </form>
         </div>
     </div>
 
@@ -347,10 +347,10 @@
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div class="live-btn-bar">
-            <a href="{{ url('/live-attendance-mode') }}" href="users.php" style="text-decoration: none;">
-            <button class="live-btn">
-                Live Attendance Mode
-            </button>
+            <a href="{{ url('/live-attendance-mode') }}" style="text-decoration: none;">
+                <button class="live-btn">
+                    Live Attendance Mode
+                </button>
             </a>
         </div>
     </div>
@@ -364,14 +364,15 @@
             </div>
             <span class="text-muted">Home > Users</span>
         </div>
-        <button type="button" class="btn-add-slot btn btn-primary">
-            Add User
-        </button>
+        <a href="{{ url('/user-create') }}">
+            <button type="button" class="btn-add-slot btn btn-primary">
+                Add User
+            </button>
+        </a>
 
         <div class="square-box">
-    @livewire('users-table')
+            @livewire('users-table')
         </div>
-
 
     </div>
     <!-- Bottom Bar -->
@@ -380,22 +381,22 @@
         <span>ParkMate</span>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<livewire:scripts />
+    <livewire:scripts />
 
-<script>
-    function updateClock() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
 
-        document.getElementById('clock').textContent =
-            `${hours}:${minutes}:${seconds}`;
-    }
+            document.getElementById('clock').textContent =
+                `${hours}:${minutes}:${seconds}`;
+        }
 
-    setInterval(updateClock, 1000);
-    updateClock(); // run once immediately
-</script>
+        setInterval(updateClock, 1000);
+        updateClock(); // run once immediately
+    </script>
 </body>
 
 </html>

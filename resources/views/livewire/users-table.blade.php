@@ -22,12 +22,11 @@
     </select>
 </div>
 
-
-
     <table class="table table-striped custom-table">
         <thead>
             <tr>
                 <th>User ID</th>
+                <th>Student/Employee ID</th>
                 <th>Firstname</th>
                 <th>Middlename</th>
                 <th>Lastname</th>
@@ -40,6 +39,9 @@
             @forelse ($users as $user)
                 <tr>
                     <td>{{ $user->id }}</td>
+                    <td>
+                    {{ $user->student_id ?? $user->employee_id }}
+                </td>
                     <td>{{ $user->firstname }}</td>
                     <td>{{ $user->middlename }}</td>
                     <td>{{ $user->lastname }}</td>

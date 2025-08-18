@@ -1,15 +1,21 @@
+<?php
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>ParkMate - Parking Slots</title>
+    <title>ParkMate - Users</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <livewire:styles />
     <style>
         :root {
             --sidebar-bg: #182125;
@@ -306,6 +312,8 @@
             pointer-events: auto;
         }
     </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
 </head>
 
 <body>
@@ -315,26 +323,23 @@
         <div class="admin-header">
             <h4>Admin</h4>
         </div>
-
         <div class="btn-wrapper mt-3">
             <a href="{{ url('/') }}" style="text-decoration: none;">
                 <button class="btn">Dashboard</button>
             </a>
         </div>
         <div class="btn-wrapper">
-            <button class="btn active">Parking Slots</button>
-        </div>
-        <div class="btn-wrapper">
-            <a href="{{ url('/users') }}" style="text-decoration: none;">
-                <button class="btn">Users</button>
+            <a href="{{ url('/parking-slots') }}" style="text-decoration: none;">
+                <button class="btn">Parking Slots</button>
             </a>
         </div>
+        <div class="btn-wrapper"><button class="btn active">Users</button></div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
-                <form action="{{ route('logout') }}" method="POST">
-        @csrf
-        <button type="submit" class="btn btn-danger w-100">Logout</button>
-    </form>
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger w-100">Logout</button>
+            </form>
         </div>
     </div>
 
@@ -343,9 +348,9 @@
         <span style="flex: 1;"></span>
         <div class="live-btn-bar">
             <a href="{{ url('/live-attendance-mode') }}" style="text-decoration: none;">
-            <button class="live-btn">
-                Live Attendance Mode
-            </button>
+                <button class="live-btn">
+                    Live Attendance Mode
+                </button>
             </a>
         </div>
     </div>
@@ -354,149 +359,35 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Manage</h3>
-                <h6 class="mb-0">Slots</h6>
+                <h3 class="mb-0 me-3">Create</h3>
+                <h6 class="mb-0">User</h6>
             </div>
-            <span class="text-muted">Home > Slots</span>
-        </div>
-        <button type="button" class="btn-add-slot btn btn-primary" data-bs-toggle="modal"
-            data-bs-target="#addSlotModal">
-            Add Slot
-        </button>
-        <!-- Modal -->
-        <div class="modal fade" id="addSlotModal" tabindex="-1" aria-labelledby="addSlotModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addSlotModalLabel">Add New Parking Slot</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-
-                    <div class="modal-body">
-                        <form id="addSlotForm" method="post">
-
-                            <div class="mb-3">
-                                <label for="slotType" class="form-label">Slot Area</label>
-                                <select class="form-select" id="slotType" name="area_name" required>
-                                    <option value="CCS">CCS</option>
-                                    <option value="Talipapa">Talipapa</option>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label for="slotNumber" class="form-label">Slot Number</label>
-                                <input type="number" class="form-control" id="slotNumber" name="slot_number" min="1"
-                                    required value="<?php  ?>">
-
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" form="addSlotForm" formaction="add_slot.php"
-                            class="btn btn-success">Create</button>
-
-                    </div>
-
-                </div>
-            </div>
+            <span class="text-muted">Home > Users > Create</span>
         </div>
 
-
- <div class="square-box">
-    <div class="d-flex align-items-center mb-3">
-        <span class="me-2">Show</span>
-        <select class="form-select form-select-sm w-auto me-2">
-            <option value="all">All</option>
-        </select>
-        <span>Entries</span>
     </div>
-    <table class="table table-striped custom-table">
-        <thead>
-            <tr>
-                <th>Slot Name</th>
-                <th>Area</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="parking-slots-body">
-            <!-- Data from API will appear here -->
-        </tbody>
-    </table>
-
-    <div class="mt-2 text-start small text-muted" id="table-summary">
-        <!-- Entry count here -->
-    </div>
-</div>
-
-    </div>
-
     <!-- Bottom Bar -->
     <div class="bottom-bar">
         <span>Copyright © 2025 - 2025 All rights reserved</span>
         <span>ParkMate</span>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
- <script>
-document.addEventListener('DOMContentLoaded', function() {
-    loadParkingSlots();
+    <livewire:scripts />
 
-    setInterval(loadParkingSlots, 3000);  // Every 3 seconds (good balance)
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
 
-    function loadParkingSlots() {
-        fetch('http://127.0.0.1:8000/api/parking-slots')
-            .then(response => response.json())
-            .then(data => {
-                let tableBody = document.getElementById('parking-slots-body');
-                let totalEntries = data.length;
-                let output = '';
+            document.getElementById('clock').textContent =
+                `${hours}:${minutes}:${seconds}`;
+        }
 
-                data.forEach(function(slot) {
-                    let statusBadge = (slot.status == 1) 
-                        ? '<span class="badge bg-success">Occupied</span>' 
-                        : '<span class="badge bg-secondary">Vacant</span>';
-
-                    output += `
-                        <tr>
-                            <td>Slot ${slot.slot_number}</td>
-                            <td>${slot.area_name}</td>
-                            <td>${statusBadge}</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary">Edit</button>
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </td>
-                        </tr>
-                    `;
-                });
-
-                tableBody.innerHTML = output;
-                document.getElementById('table-summary').innerText = 
-                    `Showing 1 to ${totalEntries} of ${totalEntries} entries`;
-            })
-            .catch(error => console.error('Error fetching parking slots:', error));
-    }
-});
-</script>
-<script>
-    function updateClock() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-
-        document.getElementById('clock').textContent =
-            `${hours}:${minutes}:${seconds}`;
-    }
-
-    setInterval(updateClock, 1000);
-    updateClock(); // run once immediately
-</script>
-
-
-
+        setInterval(updateClock, 1000);
+        updateClock(); // run once immediately
+    </script>
 </body>
 
 </html>

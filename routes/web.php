@@ -33,6 +33,9 @@ Route::get('/live-attendance-mode', function () {
     return view('live-attendance-mode');
 });
 
+Route::get('/user-create', function () {
+    return view('user-create');
+});
 Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
      ->name('profile.picture');
 
