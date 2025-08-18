@@ -30,16 +30,15 @@ class UsersTable extends Component
     {
         $query = User::query();
 
-        if ($this->search !== '') {
-            $s = $this->search;
-            $query->where(function ($q) use ($s) {
-                $q->where('firstname', 'like', "%$s%")
-                    ->orWhere('middlename', 'like', "%$s%")
-                    ->orWhere('lastname', 'like', "%$s%")
-                    ->orWhere('student_id', 'like', "%$s%")   // for students
-                    ->orWhere('employee_id', 'like', "%$s%"); // for employees
-            });
-        }
+if ($this->search !== '') {
+    $s = $this->search;
+    $query->where(function ($q) use ($s) {
+        $q->whereRaw("CONCAT_WS(' ', firstname, middlename, lastname) LIKE ?", ["%$s%"])
+          ->orWhere('student_id', 'like', "%$s%")   // for students
+          ->orWhere('employee_id', 'like', "%$s%"); // for employees
+    });
+}
+
         if ($this->filterDepartment !== '') {
             $query->where('department', $this->filterDepartment);
         }
