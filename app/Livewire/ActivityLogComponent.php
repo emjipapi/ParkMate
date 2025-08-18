@@ -9,18 +9,33 @@ class ActivityLogComponent extends Component
 {
     use WithPagination;
 
-    public $search;
+    public $search = '';
+
+    public function updatingSearch()
+    {
+        // reset to page 1 when typing a new search
+        $this->resetPage();
+    }
 
     public function render()
     {
-        $activityLogs = ActivityLog::with('user') // ✅ model query
-            ->when($this->search, fn($query) => 
-                $query->whereHas('user', fn($q) => 
-                    $q->where('firstname', 'like', "%{$this->search}%")
-                      ->orWhere('lastname', 'like', "%{$this->search}%")
-                      ->orWhere('rfid_tag', 'like', "%{$this->search}%")
-                )
-            )
+        $activityLogs = ActivityLog::with('user')
+            ->when($this->search, function ($query) {
+                $s = $this->search;
+
+                $query->where(function ($q) use ($s) {
+                    // Search RFID directly on activity_logs
+                    $q->where('rfid_tag', 'like', "%{$s}%")
+                      ->orWhereHas('user', function ($uq) use ($s) {
+                          // Search user fields
+                          $uq->where('firstname', 'like', "%{$s}%")
+                             ->orWhere('lastname', 'like', "%{$s}%")
+                             ->orWhereRaw("CONCAT_WS(' ', firstname, middlename, lastname) LIKE ?", ["%$s%"])
+                             ->orWhere('student_id', 'like', "%{$s}%")
+                             ->orWhere('employee_id', 'like', "%{$s}%");
+                      });
+                });
+            })
             ->latest()
             ->paginate(10);
 

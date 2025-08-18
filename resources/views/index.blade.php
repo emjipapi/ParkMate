@@ -227,6 +227,11 @@
                 <button class="btn">Users</button>
             </a>
         </div>
+        <div class="btn-wrapper">
+            <a href="{{ url('/activity-log') }}" href="users.php" style="text-decoration: none;">
+                <button class="btn">Activity Log</button>
+            </a>
+        </div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
     <form action="{{ route('logout') }}" method="POST">

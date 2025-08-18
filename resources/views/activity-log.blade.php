@@ -324,6 +324,7 @@
         <div class="admin-header">
             <h4>Admin</h4>
         </div>
+
         <div class="btn-wrapper mt-3">
             <a href="{{ url('/') }}" style="text-decoration: none;">
                 <button class="btn">Dashboard</button>
@@ -334,14 +335,20 @@
                 <button class="btn">Parking Slots</button>
             </a>
         </div>
-        <div class="btn-wrapper"><button class="btn active">Users</button></div>
+        <div class="btn-wrapper">
+            <a href="{{ url('/users') }}" href="users.php" style="text-decoration: none;">
+                <button class="btn">Users</button>
+            </a>
+        </div>
+        <div class="btn-wrapper"><button class="btn active">Activity Log</button></div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-danger w-100">Logout</button>
-            </form>
-        </div>
+    <form action="{{ route('logout') }}" method="POST">
+        @csrf
+        <button type="submit" class="btn btn-danger w-100">Logout</button>
+    </form>
+</div>
+
     </div>
 
     <div class="top-bar">

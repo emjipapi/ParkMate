@@ -4,7 +4,7 @@
         class="form-control mb-3"
         placeholder="Search users..."
         wire:model.live.debounce.300ms="search"
-        style="width: 300px"
+        style="width: 400px"
     />
 
 <div class="d-flex justify-content gap-2 mb-3">
