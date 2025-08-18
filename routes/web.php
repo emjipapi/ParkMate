@@ -36,9 +36,13 @@ Route::get('/live-attendance-mode', function () {
 Route::get('/user-create', function () {
     return view('user-create');
 });
+
 Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
      ->name('profile.picture');
 
+Route::get('/activity-log', function () {
+    return view('activity-log');
+});
 /*
 |--------------------------------------------------------------------------
 | Protected Admin Routes
