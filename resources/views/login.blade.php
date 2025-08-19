@@ -10,7 +10,7 @@
   <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
   <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
   <!-- Inter font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter&display=swap" rel="stylesheet" />
+  <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
 
