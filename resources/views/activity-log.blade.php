@@ -24,11 +24,6 @@
             --admin-bg: #2E739F;
             --admin-text: #ffffff;
         }
-.big-arrow, 
-.some-class::before, 
-.some-class::after {
-    display: none !important;
-}
         body {
             margin: 0;
             overflow-x: hidden;
@@ -400,6 +395,10 @@
         setInterval(updateClock, 1000);
         updateClock(); // run once immediately
     </script>
+    <script>
+    flatpickr("#startDate", { dateFormat: "Y-m-d" });
+    flatpickr("#endDate", { dateFormat: "Y-m-d" });
+</script>
 </body>
 
 </html>

@@ -26,9 +26,23 @@
             <option value="employee">Employees</option>
         </select>
 
-        {{-- Date Range --}}
-        <input type="date" class="form-select form-select-sm w-auto" wire:model.live="startDate">
-        <input type="date" class="form-select form-select-sm w-auto" wire:model.live="endDate">
+{{-- Date Range --}}
+<input 
+    type="date" 
+    class="form-control form-control-sm w-auto d-inline" 
+    wire:model.live="startDate"
+    onfocus="this.showPicker();"
+    onmousedown="event.preventDefault(); this.showPicker();"
+>
+<span class="mx-1">-</span>
+<input 
+    type="date" 
+    class="form-control form-control-sm w-auto d-inline" 
+    wire:model.live="endDate"
+    onfocus="this.showPicker();"
+    onmousedown="event.preventDefault(); this.showPicker();"
+>
+
     </div>
 
     {{-- Activity Logs Table --}}
