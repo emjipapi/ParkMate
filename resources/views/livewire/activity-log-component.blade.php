@@ -1,17 +1,18 @@
 <div>
-    {{-- Filter Bar --}}
-    <div class="d-flex align-items-center gap-2 mb-3">
-
-        {{-- Search Box --}}
+            {{-- Search Box --}}
         <input type="text"
-            class="form-control"
+            class="form-control mb-3"
             placeholder="Search by name, ID, or RFID..."
             wire:model.live.debounce.300ms="search"
-            style="width: 250px"
+            style="width: 400px"
         >
+    {{-- Filter Bar --}}
+    <div class="d-flex justify-content gap-2 mb-3">
+
+
 
         {{-- Status Filter --}}
-        <select class="form-select w-auto" wire:model.live="statusFilter">
+        <select class="form-select form-select-sm w-auto" wire:model.live="statusFilter">
             <option value="">All Status</option>
             <option value="IN">IN</option>
             <option value="OUT">OUT</option>
@@ -19,15 +20,15 @@
         </select>
 
         {{-- User Type Filter --}}
-        <select class="form-select w-auto" wire:model.live="userType">
+        <select class="form-select form-select-sm w-auto" wire:model.live="userType">
             <option value="">All Users</option>
             <option value="student">Students</option>
             <option value="employee">Employees</option>
         </select>
 
         {{-- Date Range --}}
-        <input type="date" class="form-control w-auto" wire:model.live="startDate">
-        <input type="date" class="form-control w-auto" wire:model.live="endDate">
+        <input type="date" class="form-select form-select-sm w-auto" wire:model.live="startDate">
+        <input type="date" class="form-select form-select-sm w-auto" wire:model.live="endDate">
     </div>
 
     {{-- Activity Logs Table --}}
