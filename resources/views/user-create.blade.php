@@ -32,6 +32,7 @@
             margin: 0;
             overflow-x: hidden;
             font-family: 'Inter', sans-serif;
+            
         }
 
         .sidebar {
@@ -154,7 +155,7 @@
         }
 
         .bottom-bar {
-            position: fixed;
+             position: relative;
             bottom: 0;
             left: 250px;
             width: calc(100% - 250px);
@@ -166,6 +167,7 @@
             align-items: center;
             padding: 0 20px;
             font-weight: 500;
+            
         }
 
 
