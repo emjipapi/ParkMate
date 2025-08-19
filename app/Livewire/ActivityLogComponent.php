@@ -27,8 +27,8 @@ class ActivityLogComponent extends Component
         'statusFilter' => ['except' => ''],
         'userType'     => ['except' => ''],
         'startDate'    => ['except' => null],
-        'endDate'      => ['except' => null],
-        'page'         => ['except' => 1],
+        'endDate'      => ['except' => null]
+        
     ];
 
     // Reset pagination whenever a filter/search changes

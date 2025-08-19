@@ -61,9 +61,5 @@
     </table>
 
     {{-- Pagination --}}
-    <div class="mb-2 small text-muted">
-        Showing {{ $activityLogs->count() }} of {{ $activityLogs->total() }} logs
-    </div>
-
     {{ $activityLogs->links('pagination::bootstrap-5') }}
 </div>
