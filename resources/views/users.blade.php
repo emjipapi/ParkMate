@@ -355,7 +355,7 @@
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div class="live-btn-bar">
-            <a href="{{ url('/live-attendance-mode') }}" style="text-decoration: none;">
+            <a href="{{ url('/dashboard/live-attendance-mode') }}" style="text-decoration: none;">
                 <button class="live-btn">
                     Live Attendance Mode
                 </button>
@@ -372,7 +372,7 @@
             </div>
             <span class="text-muted">Home > Users</span>
         </div>
-        <a href="{{ url('/user-create') }}">
+        <a href="{{ url('/users/create') }}">
             <button type="button" class="btn-add-slot btn btn-primary">
                 Add User
             </button>

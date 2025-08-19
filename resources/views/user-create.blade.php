@@ -336,7 +336,11 @@
                 <button class="btn">Parking Slots</button>
             </a>
         </div>
-        <div class="btn-wrapper"><button class="btn active">Users</button></div>
+                <div class="btn-wrapper">
+            <a href="{{ url('/users') }}"  style="text-decoration: none;">
+                <button class="btn active">Users</button>
+            </a>
+        </div>
                 <div class="btn-wrapper">
             <a href="{{ url('/activity-log') }}" href="users.php" style="text-decoration: none;">
                 <button class="btn">Activity Log</button>
@@ -355,7 +359,7 @@
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div class="live-btn-bar">
-            <a href="{{ url('/live-attendance-mode') }}" style="text-decoration: none;">
+            <a href="{{ url('/dashboard/live-attendance-mode') }}" style="text-decoration: none;">
                 <button class="live-btn">
                     Live Attendance Mode
                 </button>

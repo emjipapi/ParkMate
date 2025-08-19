@@ -29,11 +29,11 @@ Route::get('/sample', function () {
     return view('sample');
 });
 
-Route::get('/live-attendance-mode', function () {
+Route::get('/dashboard/live-attendance-mode', function () {
     return view('live-attendance-mode');
 });
 
-Route::get('/user-create', function () {
+Route::get('/users/create', function () {
     return view('user-create');
 });
 
