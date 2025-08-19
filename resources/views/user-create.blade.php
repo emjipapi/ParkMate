@@ -376,6 +376,86 @@
             </div>
             <span class="text-muted">Home > Users > Create</span>
         </div>
+    <div class="square-box">
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            <div class="row mb-3">
+                <div class="col">
+                    <label>Student ID</label>
+                    <input type="text" name="student_id" class="form-control" value="{{ old('student_id') }}">
+                </div>
+                <div class="col">
+                    <label>Employee ID</label>
+                    <input type="text" name="employee_id" class="form-control" value="{{ old('employee_id') }}">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label>Email</label>
+                <input type="email" name="email" class="form-control" value="{{ old('email') }}" required>
+            </div>
+
+            <div class="mb-3">
+                <label>Password</label>
+                <input type="password" name="password" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label>RFID Tag</label>
+                <input type="text" name="rfid_tag" class="form-control" value="{{ old('rfid_tag') }}" required>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col">
+                    <label>First Name</label>
+                    <input type="text" name="firstname" class="form-control" value="{{ old('firstname') }}" required>
+                </div>
+                <div class="col">
+                    <label>Middle Name</label>
+                    <input type="text" name="middlename" class="form-control" value="{{ old('middlename') }}">
+                </div>
+                <div class="col">
+                    <label>Last Name</label>
+                    <input type="text" name="lastname" class="form-control" value="{{ old('lastname') }}" required>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col">
+                    <label>Program</label>
+                    <input type="text" name="program" class="form-control" value="{{ old('program') }}" required>
+                </div>
+                <div class="col">
+                    <label>Department</label>
+                    <input type="text" name="department" class="form-control" value="{{ old('department') }}" required>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label>License Number</label>
+                <input type="text" name="license_number" class="form-control" value="{{ old('license_number') }}">
+            </div>
+
+            <div class="mb-3">
+                <label>Profile Picture</label>
+                <input type="file" name="profile_picture" class="form-control">
+            </div>
+
+            <button type="submit" class="btn-add-slot">Add User</button>
+        </form>
+    </div>
+
+
 
     </div>
     <!-- Bottom Bar -->
