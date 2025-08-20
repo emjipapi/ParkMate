@@ -354,7 +354,7 @@
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div class="live-btn-bar">
-            <a href="{{ url('/live-attendance-mode') }}" style="text-decoration: none;">
+            <a href="{{ url('/dashboard/live-attendance-mode') }}" style="text-decoration: none;">
                 <button class="live-btn">
                     Live Attendance Mode
                 </button>
@@ -366,10 +366,10 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Dashboard</h3>
+                <h3 class="mb-0 me-3">Manage</h3>
                 <h6 class="mb-0">Activity Log</h6>
             </div>
-            <span class="text-muted">Home > Dashboard > Activity Log</span>
+            <span class="text-muted">Home > Activity Log</span>
         </div>
         <div class="square-box">
             @livewire('activity-log-component')
