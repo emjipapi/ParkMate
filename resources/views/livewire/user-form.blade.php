@@ -54,6 +54,7 @@
                     @endforeach
                 </select>
             </div>
+            
 
             <div class="col">
                 <label>Program</label>
@@ -67,12 +68,12 @@
         </div>
 
         <div class="mb-3">
-            <label>License Number</label>
+            <label>License Number <small class="text-muted">(optional)</small></label>
             <input type="text" wire:model="license_number" class="form-control">
         </div>
 
         <div class="mb-3">
-            <label>Profile Picture</label>
+            <label>Profile Picture <small class="text-muted">(optional)</small></label>
             <input type="file" wire:model="profile_picture" class="form-control">
         </div>
 

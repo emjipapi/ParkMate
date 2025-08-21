@@ -5,6 +5,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class UserForm extends Component
 {
@@ -42,46 +43,61 @@ class UserForm extends Component
         'profile_picture' => 'nullable|image|max:2048',
     ];
 
-    public function save()
-    {
-        // Custom validation for student_id / employee_id
-        if (empty($this->student_id) && empty($this->employee_id)) {
-            $this->addError('id', 'Please provide either Student ID or Employee ID.');
-            return;
-        }
-
-        if (!empty($this->student_id) && !empty($this->employee_id)) {
-            $this->addError('id', 'Please provide only one: Student ID or Employee ID, not both.');
-            return;
-        }
-
-        $data = $this->validate();
-
-        $data['password'] = Hash::make($data['password']);
-
-        if ($this->profile_picture) {
-            $data['profile_picture'] = $this->profile_picture->store('profiles', 'public');
-        }
-
-        User::create($data);
-
-        session()->flash('success', 'User created successfully!');
-
-        $this->reset([
-            'student_id',
-            'employee_id',
-            'email',
-            'password',
-            'rfid_tag',
-            'firstname',
-            'middlename',
-            'lastname',
-            'program',
-            'department',
-            'license_number',
-            'profile_picture'
-        ]);
+public function save()
+{
+    // Custom validation for student_id / employee_id
+    if (empty($this->student_id) && empty($this->employee_id)) {
+        $this->addError('id', 'Please provide either Student ID or Employee ID.');
+        return;
     }
+
+    if (!empty($this->student_id) && !empty($this->employee_id)) {
+        $this->addError('id', 'Please provide only one: Student ID or Employee ID, not both.');
+        return;
+    }
+
+    $data = $this->validate();
+
+    $data['password'] = Hash::make($data['password']);
+
+if ($this->profile_picture) {
+    // Get original extension
+    $ext = $this->profile_picture->getClientOriginalExtension();
+
+    // Create random 8-character hash
+    $hash = substr(md5(uniqid(rand(), true)), 0, 8);
+
+    // Use student_id or employee_id as prefix
+    $prefix = $this->student_id ?: $this->employee_id;
+
+    $filename = $prefix . '.' . $hash . '.' . $ext;
+
+    // Store in storage/app/profile_pics
+    $this->profile_picture->storeAs('profile_pics', $filename);
+
+    $data['profile_picture'] = $filename; // save only the filename in DB
+}
+
+
+    User::create($data);
+
+    session()->flash('success', 'User created successfully!');
+
+    $this->reset([
+        'student_id',
+        'employee_id',
+        'email',
+        'password',
+        'rfid_tag',
+        'firstname',
+        'middlename',
+        'lastname',
+        'program',
+        'department',
+        'license_number',
+        'profile_picture'
+    ]);
+}
 
     public function render()
     {

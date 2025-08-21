@@ -7,7 +7,7 @@ class ProfilePictureController extends Controller
 {
     public function show($filename)
     {
-        $path = storage_path('app/profile_pics/' . $filename);
+        $path = storage_path('app/private/profile_pics/' . $filename);
 
         if (!file_exists($path)) {
             abort(404);
