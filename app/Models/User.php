@@ -18,9 +18,18 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'student_id',
+        'employee_id',
         'email',
         'password',
+        'rfid_tag',
+        'firstname',
+        'middlename',
+        'lastname',
+        'program',
+        'department',
+        'license_number',
+        'profile_picture',
     ];
 public $timestamps = false;
 

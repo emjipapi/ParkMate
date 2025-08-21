@@ -10,10 +10,11 @@ public function create() {
     return view('user-create');
 }
 
-public function store(Request $request) {
+public function store(Request $request)
+{
     $data = $request->validate([
-        'student_id' => 'nullable|string|max:10',
-        'employee_id' => 'nullable|string|max:10',
+    'student_id' => 'nullable',
+    'employee_id' => 'nullable',
         'email' => 'required|email|unique:users,email',
         'password' => 'required|string|min:6',
         'rfid_tag' => 'required|string|unique:users,rfid_tag|max:10',
@@ -25,7 +26,13 @@ public function store(Request $request) {
         'license_number' => 'nullable|string|max:11',
         'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ]);
+if (empty($request->student_id) && empty($request->employee_id)) {
+    return back()->withErrors(['id' => 'Please provide either Student ID or Employee ID.'])->withInput();
+}
 
+if (!empty($request->student_id) && !empty($request->employee_id)) {
+    return back()->withErrors(['id' => 'Please provide only one: Student ID or Employee ID, not both.'])->withInput();
+}
     $data['password'] = Hash::make($data['password']);
 
     if ($request->hasFile('profile_picture')) {
@@ -36,4 +43,7 @@ public function store(Request $request) {
 
     return redirect()->route('users')->with('success', 'User created successfully!');
 }
+
+
+
 }

@@ -382,15 +382,7 @@
             <span class="text-muted">Home > Users > Create</span>
         </div>
         <div class="flex-grow-1 d-flex justify-content-center align-items-center square-box">
-            @if ($errors->any())
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+
 
             <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
@@ -460,6 +452,16 @@
                 </div>
 
                 <button type="submit" class="btn-add-slot">Add User</button>
+                
+                            @if ($errors->any())
+                <div class="alert alert-danger mt-3 p-3 rounded">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             </form>
         </div>
 
@@ -488,6 +490,7 @@
         setInterval(updateClock, 1000);
         updateClock(); // run once immediately
     </script>
+
 </body>
 
 </html>
