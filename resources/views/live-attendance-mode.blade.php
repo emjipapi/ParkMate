@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ParkMate - Dashboard</title>
+    <title>ParkMate - Live Attendance Mode</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap 5 CDN -->
