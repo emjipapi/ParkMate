@@ -1,6 +1,8 @@
 <?php
 
 ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -9,6 +11,7 @@
     <title>ParkMate - Users</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+  <!-- Bootstrap 5 CDN -->
   <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
   <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
   <!-- Inter font -->
@@ -24,11 +27,11 @@
             --admin-bg: #2E739F;
             --admin-text: #ffffff;
         }
+
         body {
             margin: 0;
             overflow-x: hidden;
             font-family: 'Inter', sans-serif;
-            
         }
 
         .sidebar {
@@ -323,7 +326,6 @@
         <div class="admin-header">
             <h4>Admin</h4>
         </div>
-
         <div class="btn-wrapper mt-3">
             <a href="{{ url('/') }}" style="text-decoration: none;">
                 <button class="btn">Dashboard</button>
@@ -334,25 +336,24 @@
                 <button class="btn">Parking Slots</button>
             </a>
         </div>
-        <div class="btn-wrapper">
-            <a href="{{ url('/users') }}" href="users.php" style="text-decoration: none;">
-                <button class="btn">Users</button>
+        <div class="btn-wrapper"><button class="btn">Users</button></div>
+                <div class="btn-wrapper">
+           
+                <button class="btn active">Sticker Generator</button>
+            
+        </div>
+                <div class="btn-wrapper">
+            <a href="{{ url('/activity-log') }}" href="users.php" style="text-decoration: none;">
+                <button class="btn">Activity Log</button>
             </a>
         </div>
-                        <div class="btn-wrapper">
-            <a href="{{ url('/sticker-generator') }}"  style="text-decoration: none;">
-                <button class="btn">Sticker Generator</button>
-            </a>
-        </div>
-        <div class="btn-wrapper"><button class="btn active">Activity Log</button></div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
-    <form action="{{ route('logout') }}" method="POST">
-        @csrf
-        <button type="submit" class="btn btn-danger w-100">Logout</button>
-    </form>
-</div>
-
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger w-100">Logout</button>
+            </form>
+        </div>
     </div>
 
     <div class="top-bar">
@@ -371,20 +372,24 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Manage</h3>
-                <h6 class="mb-0">Activity Log</h6>
+                <h3 class="mb-0 me-3">Generate</h3>
+                <h6 class="mb-0">Sticker</h6>
             </div>
-            <span class="text-muted">Home > Activity Log</span>
+            <span class="text-muted">Home > Sticker Generator</span>
         </div>
+
+
         <div class="square-box">
-            @livewire('activity-log-component')
+            @livewire('generator-component')
         </div>
+
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
         <span>Copyright © 2025 - 2025 All rights reserved</span>
         <span>ParkMate</span>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <livewire:scripts />
 
     <script>
@@ -401,10 +406,6 @@
         setInterval(updateClock, 1000);
         updateClock(); // run once immediately
     </script>
-    <script>
-    flatpickr("#startDate", { dateFormat: "Y-m-d" });
-    flatpickr("#endDate", { dateFormat: "Y-m-d" });
-</script>
 </body>
 
 </html>

@@ -38,6 +38,9 @@ Route::get('/dashboard/live-attendance-mode', function () {
     return view('live-attendance-mode');
 });
 
+Route::get('/sticker-generator', function () {
+    return view('sticker-generator');
+});
 
 
 

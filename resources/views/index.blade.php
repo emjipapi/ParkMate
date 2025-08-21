@@ -223,8 +223,13 @@
             </a>
         </div>
         <div class="btn-wrapper">
-            <a href="{{ url('/users') }}" href="users.php" style="text-decoration: none;">
+            <a href="{{ url('/users') }}"  style="text-decoration: none;">
                 <button class="btn">Users</button>
+            </a>
+        </div>
+                <div class="btn-wrapper">
+            <a href="{{ url('/sticker-generator') }}"  style="text-decoration: none;">
+                <button class="btn">Sticker Generator</button>
             </a>
         </div>
         <div class="btn-wrapper">
@@ -232,7 +237,12 @@
                 <button class="btn">Activity Log</button>
             </a>
         </div>
-        <div class="btn-wrapper"><button class="btn">Settings</button></div>
+                        <div class="btn-wrapper">
+            <a href=""  style="text-decoration: none;">
+                <button class="btn">Settings</button>
+            </a>
+        </div>
+        
         <div class="mt-auto p-3">
     <form action="{{ route('logout') }}" method="POST">
         @csrf
@@ -283,7 +293,6 @@
         document.getElementById('clock').textContent =
             `${hours}:${minutes}:${seconds}`;
     }
-
     setInterval(updateClock, 1000);
     updateClock(); // run once immediately
 </script>

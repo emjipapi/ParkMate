@@ -346,6 +346,10 @@
             <a href="{{ url('/users') }}" style="text-decoration: none;">
                 <button class="btn active">Users</button>
             </a>
+                <div class="btn-wrapper">
+            <a href="{{ url('/sticker-generator') }}"  style="text-decoration: none;">
+                <button class="btn">Sticker Generator</button>
+            </a>
         </div>
         <div class="btn-wrapper">
             <a href="{{ url('/activity-log') }}" href="users.php" style="text-decoration: none;">
