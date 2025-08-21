@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController;
+use App\Livewire\UserForm;
 use App\Http\Controllers\ProfilePictureController;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,7 +28,7 @@ Route::get('/users', function () {
 
 Route::get('/users/create', function () {
     return view('user-create');
-});
+})->name('users.create');
 
 Route::get('/sample', function () {
     return view('sample');
@@ -38,8 +38,7 @@ Route::get('/dashboard/live-attendance-mode', function () {
     return view('live-attendance-mode');
 });
 
-Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
-Route::post('/users', [UserController::class, 'store'])->name('users.store');
+
 
 
 Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])

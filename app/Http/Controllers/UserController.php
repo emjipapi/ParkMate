@@ -6,9 +6,14 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-public function create() {
-    return view('user-create');
+public function create()
+{
+    $departments = \App\Models\User::select('department')->distinct()->pluck('department');
+    $programs = \App\Models\User::select('program')->distinct()->pluck('program');
+
+    return view('user-create', compact('departments', 'programs'));
 }
+
 
 public function store(Request $request)
 {
