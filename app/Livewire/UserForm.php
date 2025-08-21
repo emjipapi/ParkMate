@@ -40,11 +40,20 @@ class UserForm extends Component
         'program' => 'required|string|max:50',
         'department' => 'required|string|max:50',
         'license_number' => 'nullable|string|max:11',
-        'profile_picture' => 'nullable|image|max:2048',
+        'profile_picture' => 'nullable|image|max:5120', // 5 MB limit
+    ];
+    protected $messages = [
+        'profile_picture.max' => 'Profile picture must be less than 5 MB.',
     ];
 
 public function save()
 {
+    // Check profile picture size before validation
+    if ($this->profile_picture && $this->profile_picture->getSize() > 5 * 1024 * 1024) {
+        $this->addError('profile_picture', 'Profile picture must be less than 5 MB.');
+        return;
+    }
+
     // Custom validation for student_id / employee_id
     if (empty($this->student_id) && empty($this->employee_id)) {
         $this->addError('id', 'Please provide either Student ID or Employee ID.');
@@ -60,24 +69,14 @@ public function save()
 
     $data['password'] = Hash::make($data['password']);
 
-if ($this->profile_picture) {
-    // Get original extension
-    $ext = $this->profile_picture->getClientOriginalExtension();
-
-    // Create random 8-character hash
-    $hash = substr(md5(uniqid(rand(), true)), 0, 8);
-
-    // Use student_id or employee_id as prefix
-    $prefix = $this->student_id ?: $this->employee_id;
-
-    $filename = $prefix . '.' . $hash . '.' . $ext;
-
-    // Store in storage/app/profile_pics
-    $this->profile_picture->storeAs('profile_pics', $filename);
-
-    $data['profile_picture'] = $filename; // save only the filename in DB
-}
-
+    if ($this->profile_picture) {
+        $ext = $this->profile_picture->getClientOriginalExtension();
+        $hash = substr(md5(uniqid(rand(), true)), 0, 8);
+        $prefix = $this->student_id ?: $this->employee_id;
+        $filename = $prefix . '.' . $hash . '.' . $ext;
+        $this->profile_picture->storeAs('profile_pics', $filename);
+        $data['profile_picture'] = $filename;
+    }
 
     User::create($data);
 
@@ -98,6 +97,7 @@ if ($this->profile_picture) {
         'profile_picture'
     ]);
 }
+
 
     public function render()
     {
