@@ -336,7 +336,16 @@
                 <button class="btn">Parking Slots</button>
             </a>
         </div>
-        <div class="btn-wrapper"><button class="btn">Users</button></div>
+                <div class="btn-wrapper">
+            <a href="{{ url('/violation-tracking') }}"  style="text-decoration: none;">
+                <button class="btn">Violation Tracking</button>
+            </a>
+        </div>
+                        <div class="btn-wrapper">
+            <a href="{{ url('/users') }}"  style="text-decoration: none;">
+                <button class="btn">Users</button>
+            </a>
+        </div>
                 <div class="btn-wrapper">
            
                 <button class="btn active">Sticker Generator</button>

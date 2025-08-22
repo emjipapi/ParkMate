@@ -42,6 +42,10 @@ Route::get('/sticker-generator', function () {
     return view('sticker-generator');
 });
 
+Route::get('/violation-tracking', function () {
+    return view('violation-tracking');
+});
+
 
 
 Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])

@@ -1,9 +1,14 @@
+<?php
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>ParkMate - Dashboard</title>
+    <title>ParkMate - Users</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap 5 CDN -->
@@ -13,6 +18,7 @@
   <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    <livewire:styles />
     <style>
         :root {
             --sidebar-bg: #182125;
@@ -94,13 +100,8 @@
             padding: 20px;
             padding-bottom: 60px;
             min-height: calc(100vh - 96px);
-            display: flex;
-            flex-direction: column;
-            background-image: url('{{ asset('images/image1.png') }}');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            box-shadow: inset 0 60px 30px -20px rgba(0, 0, 0, 0.5);
+
+            background-color: #EAEEF4;
         }
 
         .live-btn-bar {
@@ -145,11 +146,11 @@
         }
 
         .content h3 {
-            color: white;
+            color: black;
         }
 
         .content h6 {
-            color: white;
+            color: black;
         }
 
         .bottom-bar {
@@ -167,45 +168,155 @@
             font-weight: 500;
         }
 
-        .card {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
 
-        .card-footer {
-            padding: 0;
-            white-space: normal;
-            text-align: center;
-            background-color: rgba(0, 0, 0, 0.1);
+        .btn-add-slot {
+            display: inline-block;
+            width: auto;
+            background-color: #3481B4;
+            color: white;
             border: none;
-            line-height: 2;
+            padding: 6px 16px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
         }
 
-        .card-1 {
-            border: 0px;
-            border-radius: 0px;
-            background-color: #00B8EE;
-            color: white;
-            height: 200px;
+        .btn-add-slot:hover {
+            background-color: rgb(110, 172, 213);
         }
 
-        .card-2 {
-            border: 0px;
-            border-radius: 0px;
-            background-color: #F09113;
-            color: white;
-            height: 200px;
+        .square-box {
+            background-color: white;
+            width: 100%;
+            min-height: 100px;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        .card-3 {
-            border: 0px;
-            border-radius: 0px;
-            background-color: #019C50;
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
+            table-layout: fixed;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            border: none;
+            padding: 10px;
+            background-color: white;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .custom-table thead th {
+            font-weight: bold;
+        }
+
+        .custom-table tbody tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+
+        .btn-action {
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 0 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+        .btn-edit {
+            color: #D48112;
+        }
+
+        .btn-edit:hover {
+            text-decoration: none;
+            color: rgb(230, 162, 74);
+        }
+
+        .btn-delete {
+            color: #B04141;
+        }
+
+        .btn-delete:hover {
+            text-decoration: none;
+            color: rgb(201, 84, 84);
+        }
+
+        .btn-occupy {
+            color: #1565c0;
+        }
+
+        .btn-occupy:hover {
+            text-decoration: none;
+            color: #0d47a1;
+        }
+
+        .status-label {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 4px;
             color: white;
-            height: 200px;
+            font-weight: 600;
+            font-size: 0.9em;
+            user-select: none;
+        }
+
+        .status-available {
+            background-color: #28a745;
+        }
+
+        .status-occupied {
+            background-color: #fd7e14;
+        }
+
+        .btn-action.btn-occupy:disabled {
+            color: #999;
+            cursor: not-allowed;
+            opacity: 0.6;
+            background: none;
+            border: none;
+            pointer-events: none;
+        }
+
+        .status-label.status-occupied.tooltip-container {
+            position: relative;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .status-label.status-occupied .tooltip-text {
+            visibility: hidden;
+            width: max-content;
+            max-width: 200px;
+            background-color: rgba(0, 0, 0, 0.75);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .status-label.status-occupied.tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+            pointer-events: auto;
         }
     </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
 </head>
 
 <body>
@@ -215,19 +326,19 @@
         <div class="admin-header">
             <h4>Admin</h4>
         </div>
-
-        <div class="btn-wrapper mt-3"><button class="btn active">Dashboard</button></div>
+        <div class="btn-wrapper mt-3">
+            <a href="{{ url('/') }}" style="text-decoration: none;">
+                <button class="btn">Dashboard</button>
+            </a>
+        </div>
         <div class="btn-wrapper">
             <a href="{{ url('/parking-slots') }}" style="text-decoration: none;">
                 <button class="btn">Parking Slots</button>
             </a>
         </div>
+        
+        <div class="btn-wrapper"><button class="btn active">Violation Tracking</button></div>
                 <div class="btn-wrapper">
-            <a href="{{ url('/violation-tracking') }}"  style="text-decoration: none;">
-                <button class="btn">Violation Tracking</button>
-            </a>
-        </div>
-        <div class="btn-wrapper">
             <a href="{{ url('/users') }}"  style="text-decoration: none;">
                 <button class="btn">Users</button>
             </a>
@@ -237,24 +348,18 @@
                 <button class="btn">Sticker Generator</button>
             </a>
         </div>
-        <div class="btn-wrapper">
+                <div class="btn-wrapper">
             <a href="{{ url('/activity-log') }}" href="users.php" style="text-decoration: none;">
                 <button class="btn">Activity Log</button>
             </a>
         </div>
-                        <div class="btn-wrapper">
-            <a href=""  style="text-decoration: none;">
-                <button class="btn">Settings</button>
-            </a>
-        </div>
-        
+        <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
-    <form action="{{ route('logout') }}" method="POST">
-        @csrf
-        <button type="submit" class="btn btn-danger w-100">Logout</button>
-    </form>
-</div>
-
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger w-100">Logout</button>
+            </form>
+        </div>
     </div>
 
     <div class="top-bar">
@@ -262,9 +367,9 @@
         <span style="flex: 1;"></span>
         <div class="live-btn-bar">
             <a href="{{ url('/dashboard/live-attendance-mode') }}" style="text-decoration: none;">
-            <button class="live-btn">
-                Live Attendance Mode
-            </button>
+                <button class="live-btn">
+                    Live Attendance Mode
+                </button>
             </a>
         </div>
     </div>
@@ -273,35 +378,40 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Dashboard</h3>
-                <h6 class="mb-0">Control Panel</h6>
+                <h3 class="mb-0 me-3">Ano ilalagay ko</h3>
+                <h6 class="mb-0">otid</h6>
             </div>
-            <span class="text-white">Home > Dashboard</span>
+            <span class="text-muted">Home > Violation Tracking</span>
         </div>
 
-        <livewire:first-component />
-        
+
+        <div class="square-box">
+            
+        </div>
+
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
         <span>Copyright © 2025 - 2025 All rights reserved</span>
         <span>ParkMate</span>
     </div>
-<script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <livewire:scripts />
 
-    function updateClock() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
 
-        document.getElementById('clock').textContent =
-            `${hours}:${minutes}:${seconds}`;
-    }
-    setInterval(updateClock, 1000);
-    updateClock(); // run once immediately
-</script>
+            document.getElementById('clock').textContent =
+                `${hours}:${minutes}:${seconds}`;
+        }
 
+        setInterval(updateClock, 1000);
+        updateClock(); // run once immediately
+    </script>
 </body>
 
 </html>

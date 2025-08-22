@@ -2,7 +2,6 @@
 
     <form wire:submit.prevent="save" enctype="multipart/form-data">
         @csrf
-
         <div class="row mb-3">
             <div class="col">
                 <label>Student ID</label>

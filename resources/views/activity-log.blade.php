@@ -335,7 +335,12 @@
             </a>
         </div>
         <div class="btn-wrapper">
-            <a href="{{ url('/users') }}" href="users.php" style="text-decoration: none;">
+            <a href="{{ url('/violation-tracking') }}"  style="text-decoration: none;">
+                <button class="btn">Violation Tracking</button>
+            </a>
+        </div>
+        <div class="btn-wrapper">
+            <a href="{{ url('/users') }}" style="text-decoration: none;">
                 <button class="btn">Users</button>
             </a>
         </div>

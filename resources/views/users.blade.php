@@ -336,6 +336,11 @@
                 <button class="btn">Parking Slots</button>
             </a>
         </div>
+                <div class="btn-wrapper">
+            <a href="{{ url('/violation-tracking') }}"  style="text-decoration: none;">
+                <button class="btn">Violation Tracking</button>
+            </a>
+        </div>
         <div class="btn-wrapper"><button class="btn active">Users</button></div>
                 <div class="btn-wrapper">
             <a href="{{ url('/sticker-generator') }}"  style="text-decoration: none;">
