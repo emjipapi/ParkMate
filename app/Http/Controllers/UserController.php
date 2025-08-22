@@ -3,13 +3,14 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use \App\Models\ActivityLog;
 
 class UserController extends Controller
 {
 public function create()
 {
-    $departments = \App\Models\User::select('department')->distinct()->pluck('department');
-    $programs = \App\Models\User::select('program')->distinct()->pluck('program');
+    $departments = User::select('department')->distinct()->pluck('department');
+    $programs = User::select('program')->distinct()->pluck('program');
 
     return view('user-create', compact('departments', 'programs'));
 }
@@ -44,8 +45,16 @@ if (!empty($request->student_id) && !empty($request->employee_id)) {
         $data['profile_picture'] = $request->file('profile_picture')->store('profiles', 'public');
     }
 
-    User::create($data);
+     $user = User::create($data);
 
+        ActivityLog::create([
+        'actor_type' => 'admin',
+        'actor_id'   => auth()->id(), // currently logged-in admin
+        'action'     => 'create',
+        'details'    => "Admin " . auth()->user()->firstname . " " . auth()->user()->lastname .
+                        " created user {$user->firstname} {$user->lastname}",
+        'created_at' => now(),
+    ]);
     return redirect()->route('users')->with('success', 'User created successfully!');
 }
 
