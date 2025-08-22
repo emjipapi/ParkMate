@@ -1,22 +1,25 @@
 <div>
-            {{-- Search Box --}}
-        <input type="text"
-            class="form-control mb-3"
-            placeholder="Search by name, ID, or RFID..."
-            wire:model.live.debounce.300ms="search"
-            style="width: 400px"
-        >
-    {{-- Filter Bar --}}
-    <div class="d-flex justify-content gap-2 mb-3">
+    {{-- 🔍 Search Box --}}
+    <input type="text"
+        class="form-control mb-3"
+        placeholder="Search by name, ID, or action..."
+        wire:model.live.debounce.300ms="search"
+        style="width: 400px"
+    >
 
+    {{-- 🎛 Filter Bar --}}
+    <div class="d-flex justify-content-start gap-2 mb-3">
 
-
-        {{-- Status Filter --}}
-        <select class="form-select form-select-sm w-auto" wire:model.live="statusFilter">
-            <option value="">All Status</option>
-            <option value="IN">IN</option>
-            <option value="OUT">OUT</option>
-            <option value="DENIED">DENIED</option>
+        {{-- Action Filter --}}
+        <select class="form-select form-select-sm w-auto" wire:model.live="actionFilter">
+            <option value="">All Actions</option>
+            <option value="login">Login</option>
+            <option value="logout">Logout</option>
+            <option value="entry">Entry</option>
+            <option value="exit">Exit</option>
+            <option value="update">Update</option>
+            <option value="create">Create</option>
+            <option value="delete">Delete</option>
         </select>
 
         {{-- User Type Filter --}}
@@ -24,57 +27,59 @@
             <option value="">All Users</option>
             <option value="student">Students</option>
             <option value="employee">Employees</option>
+            <option value="admin">Admins</option>
         </select>
 
-{{-- Date Range --}}
-<input 
-    type="date" 
-    class="form-control form-control-sm w-auto d-inline" 
-    wire:model.live="startDate"
-    onfocus="this.showPicker();"
-    onmousedown="event.preventDefault(); this.showPicker();"
->
-<span class="mx-1">-</span>
-<input 
-    type="date" 
-    class="form-control form-control-sm w-auto d-inline" 
-    wire:model.live="endDate"
-    onfocus="this.showPicker();"
-    onmousedown="event.preventDefault(); this.showPicker();"
->
-
+        {{-- Date Range --}}
+        <input 
+            type="date" 
+            class="form-control form-control-sm w-auto d-inline" 
+            wire:model.live="startDate"
+        >
+        <span class="mx-1">-</span>
+        <input 
+            type="date" 
+            class="form-control form-control-sm w-auto d-inline" 
+            wire:model.live="endDate"
+        >
     </div>
 
-    {{-- Activity Logs Table --}}
-    <table class="table table-striped custom-table">
-        <thead>
+    {{-- 📋 Activity Logs Table --}}
+<table class="table table-striped custom-table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>User/Admin ID</th>
+            <th>Name</th>
+            <th>Action</th>
+            <th>Description</th>
+            <th>Date/Time</th>
+        </tr>
+    </thead>
+    <tbody>
+        @forelse ($activityLogs as $log)
             <tr>
-                <th>ID</th>
-                <th>Student/Employee ID</th>
-                <th>RFID Tag</th>
-                <th>Name</th>
-                <th>Status</th>
-                <th>Scanned At</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($activityLogs as $log)
-                <tr>
-                    <td>{{ $log->id }}</td>
-                    <td>{{ $log->user->student_id ?? $log->user->employee_id }}</td>
-                    <td>{{ $log->rfid_tag }}</td>
-                    <td>{{ $log->user->lastname }}, {{ $log->user->firstname }}</td>
-                    <td>{{ $log->status }}</td>
-                    <td>{{ $log->created_at->format('Y-m-d H:i:s') }}</td>
-                </tr>
-            @empty
-                <tr>
-                    <td colspan="6" class="text-center">No activity logs found.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+                <td>{{ $log->id }}</td>
+                
+                {{-- Show ID depending on actor type --}}
+<td>{{ $log->actor_type === 'admin' ? $log->admin->username ?? '—' : $log->user->student_id ?? $log->user->employee_id ?? '—' }}</td>
 
-    {{-- Pagination --}}
+                {{-- Show Name depending on actor type --}}
+<td>{{ $log->actor_type === 'admin' ? $log->admin->lastname . ', ' . $log->admin->firstname : $log->user->lastname . ', ' . $log->user->firstname }}</td>
+
+                <td><span class="badge bg-primary">{{ ucfirst($log->action) }}</span></td>
+                <td>{{ $log->details }}</td>
+                <td>{{ $log->created_at->format('Y-m-d H:i:s') }}</td>
+            </tr>
+        @empty
+            <tr>
+                <td colspan="6" class="text-center">No activity logs found.</td>
+            </tr>
+        @endforelse
+    </tbody>
+</table>
+
+
+    {{-- 📌 Pagination --}}
     {{ $activityLogs->links('pagination::bootstrap-5') }}
 </div>

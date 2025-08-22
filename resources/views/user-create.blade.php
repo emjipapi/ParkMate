@@ -352,71 +352,71 @@
                 <button class="btn active">Users</button>
             </a>
         </div>
-            <div class="btn-wrapper">
-                <a href="{{ url('/sticker-generator') }}" style="text-decoration: none;">
-                    <button class="btn">Sticker Generator</button>
-                </a>
+        <div class="btn-wrapper">
+            <a href="{{ url('/sticker-generator') }}" style="text-decoration: none;">
+                <button class="btn">Sticker Generator</button>
+            </a>
+        </div>
+        <div class="btn-wrapper">
+            <a href="{{ url('/activity-log') }}" href="users.php" style="text-decoration: none;">
+                <button class="btn">Activity Log</button>
+            </a>
+        </div>
+        <div class="btn-wrapper"><button class="btn">Settings</button></div>
+        <div class="mt-auto p-3">
+            <form action="{{ route('admin.logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger w-100">Logout</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="top-bar">
+        <div id="clock" style="font-size: 1rem;"></div>
+        <span style="flex: 1;"></span>
+        <div class="live-btn-bar">
+            <a href="{{ url('/dashboard/live-attendance-mode') }}" style="text-decoration: none;">
+                <button class="live-btn">
+                    Live Attendance Mode
+                </button>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="content">
+        <div class="d-flex align-items-baseline justify-content-between mb-3">
+            <div class="d-flex align-items-baseline">
+                <h3 class="mb-0 me-3">Create</h3>
+                <h6 class="mb-0">User</h6>
             </div>
-            <div class="btn-wrapper">
-                <a href="{{ url('/activity-log') }}" href="users.php" style="text-decoration: none;">
-                    <button class="btn">Activity Log</button>
-                </a>
-            </div>
-            <div class="btn-wrapper"><button class="btn">Settings</button></div>
-            <div class="mt-auto p-3">
-                <form action="{{ route('logout') }}" method="POST">
-                    @csrf
-                    <button type="submit" class="btn btn-danger w-100">Logout</button>
-                </form>
-            </div>
+            <span class="text-muted">Home > Users > Create</span>
         </div>
 
-        <div class="top-bar">
-            <div id="clock" style="font-size: 1rem;"></div>
-            <span style="flex: 1;"></span>
-            <div class="live-btn-bar">
-                <a href="{{ url('/dashboard/live-attendance-mode') }}" style="text-decoration: none;">
-                    <button class="live-btn">
-                        Live Attendance Mode
-                    </button>
-                </a>
-            </div>
-        </div>
+        @livewire('user-form')
+    </div>
+    <!-- Bottom Bar -->
+    <div class="bottom-bar">
+        <span>Copyright © 2025 - 2025 All rights reserved</span>
+        <span>ParkMate</span>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <livewire:scripts />
 
-        <!-- Main Content -->
-        <div class="content">
-            <div class="d-flex align-items-baseline justify-content-between mb-3">
-                <div class="d-flex align-items-baseline">
-                    <h3 class="mb-0 me-3">Create</h3>
-                    <h6 class="mb-0">User</h6>
-                </div>
-                <span class="text-muted">Home > Users > Create</span>
-            </div>
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
 
-            @livewire('user-form')
-        </div>
-        <!-- Bottom Bar -->
-        <div class="bottom-bar">
-            <span>Copyright © 2025 - 2025 All rights reserved</span>
-            <span>ParkMate</span>
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <livewire:scripts />
+            document.getElementById('clock').textContent =
+                `${hours}:${minutes}:${seconds}`;
+        }
 
-        <script>
-            function updateClock() {
-                const now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
-                const minutes = String(now.getMinutes()).padStart(2, '0');
-                const seconds = String(now.getSeconds()).padStart(2, '0');
-
-                document.getElementById('clock').textContent =
-                    `${hours}:${minutes}:${seconds}`;
-            }
-
-            setInterval(updateClock, 1000);
-            updateClock(); // run once immediately
-        </script>
+        setInterval(updateClock, 1000);
+        updateClock(); // run once immediately
+    </script>
 
 </body>
 

@@ -79,20 +79,23 @@
       </div>
     @endif
 
-      <form action="{{ url('/login') }}" method="POST">
-        @csrf
-        <div class="mb-3">
-          <input type="text" name="username" class="form-control" placeholder="Username" required />
-        </div>
-        <div class="input-group mb-3">
-          <input type="password" name="password" class="form-control" placeholder="Password" required />
-          <span class="input-group-text bg-white border-start-0">
+<form method="POST" action="{{ route('login') }}">
+    @csrf
+    <div class="mb-3">
+<input type="text" name="username" class="form-control"
+    placeholder="Username" required />
+
+    </div>
+    <div class="input-group mb-3">
+        <input type="password" name="password" class="form-control" placeholder="Password" required />
+        <span class="input-group-text bg-white border-start-0">
             <i class="fas fa-lock text-secondary"></i>
-          </span>
-        </div>
-        <div class="d-flex justify-content-end mt-3">
-          <button type="submit" class="btn-signin">Sign In</button>
-        </div>
-      </form>
+        </span>
+    </div>
+    <div class="d-flex justify-content-end mt-3">
+        <button type="submit" class="btn-signin">Sign In</button>
+    </div>
+</form>
     </div>
   </div>
+</body>

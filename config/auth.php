@@ -35,17 +35,17 @@ return [
     |
     */
 
-    'guards' => [
-        'web' => [
-            'driver' => 'session',
-            'provider' => 'users',
-        ],
-
-        'admin' => [
-            'driver' => 'session',
-            'provider' => 'admins',
-        ],
+'guards' => [
+    'web' => [ // for students & employees
+        'driver' => 'session',
+        'provider' => 'users',
     ],
+
+    'admin' => [ // for admins
+        'driver' => 'session',
+        'provider' => 'admins',
+    ],
+],
 
     /*
     |--------------------------------------------------------------------------
@@ -64,21 +64,18 @@ return [
     |
     */
 
-    'providers' => [
-        'users' => [
+'providers' => [
+    'users' => [
         'driver' => 'eloquent',
         'model' => App\Models\User::class,
     ],
+
     'admins' => [
         'driver' => 'eloquent',
         'model' => App\Models\Admin::class,
     ],
+],
 
-        // 'users' => [
-        //     'driver' => 'database',
-        //     'table' => 'users',
-        // ],
-    ],
 
     /*
     |--------------------------------------------------------------------------

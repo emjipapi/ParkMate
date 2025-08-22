@@ -12,29 +12,23 @@ class ActivityLogComponent extends Component
 {
     use WithPagination;
 
-    // If you prefer to use {{ $activityLogs->links() }} without specifying a view:
-    // protected $paginationTheme = 'bootstrap';
-
     public $search = '';
-    public $statusFilter = '';   // '', 'IN', 'OUT'  (⚠ your enum permits only IN/OUT)
+    public $actionFilter = '';   // Example: login, logout, update, etc.
     public $userType = '';       // '', 'student', 'employee'
     public $startDate = null;    // 'YYYY-MM-DD'
     public $endDate = null;      // 'YYYY-MM-DD'
 
-    // Optional: keep filters in URL
     protected $queryString = [
         'search'       => ['except' => ''],
-        'statusFilter' => ['except' => ''],
+        'actionFilter' => ['except' => ''],
         'userType'     => ['except' => ''],
         'startDate'    => ['except' => null],
         'endDate'      => ['except' => null]
-        
     ];
 
-    // Reset pagination whenever a filter/search changes
     public function updating($name, $value)
     {
-        if (in_array($name, ['search','statusFilter','userType','startDate','endDate'])) {
+        if (in_array($name, ['search','actionFilter','userType','startDate','endDate'])) {
             $this->resetPage();
         }
     }
@@ -44,11 +38,12 @@ class ActivityLogComponent extends Component
         $logs = ActivityLog::with(['user' => function ($q) {
                 $q->select('id','firstname','lastname','student_id','employee_id','profile_picture','department','program');
             }])
-            // SEARCH (rfid + user name + student/employee id)
+            // 🔍 SEARCH (action_type + description + user name/id)
             ->when($this->search !== '', function (Builder $q) {
                 $s = trim($this->search);
                 $q->where(function (Builder $sub) use ($s) {
-                    $sub->where('rfid_tag', 'like', "%{$s}%")
+                    $sub->where('action_type', 'like', "%{$s}%")
+                        ->orWhere('description', 'like', "%{$s}%")
                         ->orWhereHas('user', function (Builder $u) use ($s) {
                             $u->where('firstname', 'like', "%{$s}%")
                               ->orWhere('lastname', 'like', "%{$s}%")
@@ -57,18 +52,18 @@ class ActivityLogComponent extends Component
                         });
                 });
             })
-            // STATUS filter
-            ->when($this->statusFilter !== '', fn (Builder $q) =>
-                $q->where('status', $this->statusFilter)
+            // 🎯 ACTION filter (login/logout/update/etc.)
+            ->when($this->actionFilter !== '', fn (Builder $q) =>
+                $q->where('action_type', $this->actionFilter)
             )
-            // USER TYPE filter
+            // 👤 USER TYPE filter
             ->when($this->userType === 'student', fn (Builder $q) =>
                 $q->whereHas('user', fn ($u) => $u->whereNotNull('student_id'))
             )
             ->when($this->userType === 'employee', fn (Builder $q) =>
                 $q->whereHas('user', fn ($u) => $u->whereNotNull('employee_id'))
             )
-            // DATE RANGE filter
+            // 📅 DATE RANGE filter
             ->when($this->startDate, fn (Builder $q) =>
                 $q->where('created_at', '>=', Carbon::parse($this->startDate)->startOfDay())
             )
@@ -83,7 +78,6 @@ class ActivityLogComponent extends Component
         ]);
     }
 
-    // Optional: keep your manual Refresh button working if you still show it
     public function refreshLogs()
     {
         $this->resetPage();
