@@ -15,12 +15,9 @@ class AnalyticsChartComponent extends Component
 
     public function mount()
     {
-       $this->dates = collect(range(0,6))
-    ->map(fn($i) => Carbon::today()->subDays($i)->toDateString())
-    ->toArray();
-
-$this->selectedDate = $this->dates[0];
-
+        $this->dates = collect(range(0,6))
+            ->map(fn($i) => Carbon::today()->subDays($i)->toDateString())
+            ->toArray();
 
         $this->selectedDate = $this->dates[0];
         $this->loadData();
@@ -28,7 +25,21 @@ $this->selectedDate = $this->dates[0];
 
     public function updatedSelectedDate()
     {
+        \Log::info('Selected date changed to: ' . $this->selectedDate); // Debug log
         $this->loadData();
+        
+        // Use only the custom event method that's working
+        $eventData = [
+            'labels' => $this->labels,
+            'data' => $this->data
+        ];
+        
+        // JavaScript custom event - this one is working
+        $this->js("
+            document.dispatchEvent(new CustomEvent('chartDataUpdated', { 
+                detail: " . json_encode($eventData) . " 
+            }));
+        ");
     }
 
     public function loadData()
