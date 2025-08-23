@@ -8,10 +8,11 @@ use App\Models\ActivityLog;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 
+
 class ActivityLogComponent extends Component
 {
     use WithPagination;
-
+protected string $paginationTheme = 'bootstrap';
     public $search = '';
     public $actionFilter = '';   // Example: login, logout, update, etc.
     public $userType = '';       // '', 'student', 'employee'

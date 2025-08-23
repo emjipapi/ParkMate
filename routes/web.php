@@ -17,7 +17,8 @@ Route::post('/login', [UserAuthController::class, 'login']);
 Route::post('/logout', [UserAuthController::class, 'logout']);
 
 // Admin login page
-Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login.form');
+                //dapat '/admin/login' to
+Route::get('/', [AdminAuthController::class, 'showLoginForm'])->name('admin.login.form');
 Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('login');
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
@@ -53,6 +54,8 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
         ->name('profile.picture');
 });
+Route::get('/analytics', [App\Http\Controllers\AnalyticsController::class, 'index']);
+
 
 /*
 |--------------------------------------------------------------------------

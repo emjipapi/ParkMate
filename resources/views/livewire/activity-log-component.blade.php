@@ -98,5 +98,8 @@
 
 
     {{-- 📌 Pagination --}}
-    {{ $activityLogs->links('pagination::bootstrap-5') }}
+    <div wire:key="activity-logs-pagination">
+    {{ $activityLogs->links() }}
+</div>
+
 </div>
