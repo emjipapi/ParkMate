@@ -10,8 +10,9 @@
     <div style="width: 700px; height: 400px; margin: auto;">
         <canvas id="pageViewsChart"></canvas>
     </div>
+    <livewire:page-views-chart />
 
-    <script>
+    {{-- <script>
         const ctx = document.getElementById('pageViewsChart').getContext('2d');
 
         new Chart(ctx, {
@@ -49,6 +50,6 @@
                 }
             }
         });
-    </script>
+    </script> --}}
 </body>
 </html>

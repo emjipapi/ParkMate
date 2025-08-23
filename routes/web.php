@@ -5,6 +5,8 @@ use App\Http\Controllers\Auth\UserAuthController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfilePictureController;
 use \App\Http\Livewire\UserForm;
+use App\Http\Controllers\AnalyticsController;
+use App\Charts\PageViewsChart;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,12 +51,19 @@ Route::middleware(['admin'])->group(function () {
     Route::view('/sticker-generator', 'sticker-generator');
     Route::view('/violation-tracking', 'violation-tracking');
     Route::view('/activity-log', 'activity-log');
+    // routes/web.php
+Route::get('/dashboard/analytics-dashboard', function () {
+    $chart = new PageViewsChart;
+    return view('analytics-dashboard', compact('chart'));
+});
+
 
     // Profile pictures
     Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
         ->name('profile.picture');
 });
-Route::get('/analytics', [App\Http\Controllers\AnalyticsController::class, 'index']);
+// Route::get('/analytics', [AnalyticsController::class, 'index']);
+
 
 
 /*

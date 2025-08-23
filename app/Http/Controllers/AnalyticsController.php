@@ -11,6 +11,6 @@ class AnalyticsController extends Controller
     {
         $chart = new PageViewsChart;
 
-        return view('admin.index', compact('chart'));
+        return view('analytics-dashboard', compact('chart'));
     }
 }

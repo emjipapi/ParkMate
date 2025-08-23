@@ -96,7 +96,6 @@
     </tbody>
 </table>
 
-
     {{-- 📌 Pagination --}}
     <div wire:key="activity-logs-pagination">
     {{ $activityLogs->links() }}
