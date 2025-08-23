@@ -6,7 +6,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfilePictureController;
 use \App\Http\Livewire\UserForm;
 use App\Http\Controllers\AnalyticsController;
-use App\Charts\PageViewsChart;
+use App\Charts\AnalyticsChart;
 
 /*
 |--------------------------------------------------------------------------
@@ -53,7 +53,7 @@ Route::middleware(['admin'])->group(function () {
     Route::view('/activity-log', 'activity-log');
     // routes/web.php
 Route::get('/dashboard/analytics-dashboard', function () {
-    $chart = new PageViewsChart;
+    $chart = new AnalyticsChart;
     return view('analytics-dashboard', compact('chart'));
 });
 

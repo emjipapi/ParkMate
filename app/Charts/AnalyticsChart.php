@@ -5,7 +5,7 @@ use ConsoleTVs\Charts\Classes\Chartjs\Chart;
 use App\Models\PageView;
 use Illuminate\Support\Facades\DB;
 
-class PageViewsChart extends Chart
+class AnalyticsChart extends Chart
 {
     public function __construct()
     {

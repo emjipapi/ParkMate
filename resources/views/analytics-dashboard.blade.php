@@ -389,9 +389,10 @@
             <span class="text-muted">Home > Dashboard > Analytics Dashboard</span>
         </div>
 
-        {{-- <div class="square-box">
-        </div> --}}
-@livewire('page-views-chart')
+
+<div class="square-box">
+<livewire:analytics-chart-component />
+    </div>
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
