@@ -52,25 +52,24 @@ class LiveAttendanceComponent extends Component
     public function loadLatestScans()
     {
 $this->scans = ActivityLog::with('user')
+    ->where('actor_type', 'user')          // only regular users
+    ->whereIn('action', ['entry', 'exit']) // only entries/exits
     ->latest()
     ->take(3)
     ->get()
     ->map(function ($log) {
         $user = $log->user;
 
-        // Extract status from details
-        preg_match('/Status:\s*(IN|OUT)/i', $log->details, $matches);
-        $status = $matches[1] ?? 'OUT';
-
         return [
             'name' => "{$user->lastname}, {$user->firstname}",
-            'status' => $status,
+            'status' => $log->action === 'entry' ? 'IN' : 'OUT',
             'picture' => $user->profile_picture
                 ? route('profile.picture', ['filename' => $user->profile_picture])
                 : asset('images/placeholder.jpg'),
         ];
     })
     ->toArray();
+
     }
 
     public function render()
