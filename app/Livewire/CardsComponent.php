@@ -5,7 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 
-class FirstComponent extends Component
+class CardsComponent extends Component
 {
     public function render()
     {
@@ -13,16 +13,22 @@ class FirstComponent extends Component
         $totalUsers = DB::table('users')->count();
         $totalStatus1 = DB::table('parking_slots')->where('status', 1)->count();
 
-        return view('livewire.first-component', [
+        // Fetch latest 3 activity logs
+        $recentActivities = DB::table('activity_logs')
+            ->latest()
+            ->take(4)
+            ->get();
+
+        return view('livewire.cards-component', [
             'totalSlots' => $totalSlots,
             'totalUsers' => $totalUsers,
             'totalStatus1' => $totalStatus1,
+            'recentActivities' => $recentActivities,
         ]);
     }
+
     public function goTo($page)
     {
         return redirect()->to($page);
     }
 }
-
-

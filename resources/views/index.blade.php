@@ -134,12 +134,6 @@
             background-color: #1b5c7d;
         }
 
-
-
-        .content .cards-container {
-            margin-top: auto;
-        }
-
         h1 {
             font-weight: 600;
         }
@@ -153,7 +147,7 @@
         }
 
         .bottom-bar {
-            position: fixed;
+            position: relative;
             bottom: 0;
             left: 250px;
             width: calc(100% - 250px);
@@ -166,12 +160,31 @@
             padding: 0 20px;
             font-weight: 500;
         }
-
+        .content .cards-container {
+            margin-top: auto;
+            
+        }
+        
         .card {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
+.cards-container {
+    display: flex;
+    flex-wrap: wrap;         /* allow stacking */
+    gap: 1rem;
+    align-items: flex-end;   /* bottom align */
+    justify-content: space-between;
+}
+
+.cards-container .card {
+    flex: 1 1 calc(25% - 0.75rem); /* 4 cards per row minus gaps */
+    min-width: 200px;              /* optional: prevent too narrow */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
 
         .card-footer {
             padding: 0;
@@ -205,6 +218,48 @@
             color: white;
             height: 200px;
         }
+.card-4 {
+    border: 0;
+    border-radius: 0;
+    background-color: white;
+    color: black;
+    height: 400px;
+    flex: 0 0 100px; /* fixed width */
+    overflow-y: auto; /* allow scrolling if content exceeds height */
+    padding: 1rem;
+}
+
+.card-4 h5 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5rem;
+}
+
+.recent-activity-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.recent-activity-item:last-child {
+    border-bottom: none;
+}
+
+.recent-activity-status {
+    font-weight: bold;
+    color: #007BFF; /* can adjust color per action type if needed */
+}
+
+        @media (max-width: 768px) {
+    .cards-container {
+        flex-direction: column;  /* stack vertically */
+        align-items: stretch;    /* make them full-width */
+    }
+
+    .cards-container .card {
+        width: 100%; /* take full width of container */
+    }
+}
     </style>
 </head>
 
@@ -279,7 +334,7 @@
             <span class="text-white">Home > Dashboard</span>
         </div>
 
-        <livewire:first-component />
+        <livewire:cards-component />
         
     </div>
     <!-- Bottom Bar -->

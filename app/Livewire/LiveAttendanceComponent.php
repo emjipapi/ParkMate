@@ -71,7 +71,6 @@ $this->scans = ActivityLog::with('user')
         ];
     })
     ->toArray();
-
     }
 
     public function render()
