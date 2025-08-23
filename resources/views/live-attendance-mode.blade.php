@@ -172,8 +172,8 @@
         </div>
 
         <div class="btn-wrapper mt-3">
-            <a href="{{ url('/') }}" style="text-decoration: none;">
-                <button class="btn active">Dashboard</button>
+            <a href="{{ url('/dashboard') }}" style="text-decoration: none;">
+                <button class="btn">Dashboard</button>
             </a>
         </div>
         <div class="btn-wrapper">

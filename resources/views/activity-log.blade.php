@@ -151,7 +151,7 @@
         }
 
         .bottom-bar {
-            position: fixed;
+            position: relative;
             bottom: 0;
             left: 250px;
             width: calc(100% - 250px);

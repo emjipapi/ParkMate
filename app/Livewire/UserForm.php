@@ -6,6 +6,8 @@ use Livewire\WithFileUploads;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
 
 class UserForm extends Component
 {
@@ -23,6 +25,7 @@ class UserForm extends Component
     public $department;
     public $license_number;
     public $profile_picture;
+    protected $middleware = ['auth:admin'];
 
     // Hardcoded example departments & programs
     public $departments = ['CCS'];
@@ -78,7 +81,23 @@ public function save()
         $data['profile_picture'] = $filename;
     }
 
-    User::create($data);
+    // Create user
+    $user = User::create($data);
+
+    // Log admin action
+$adminId = Auth::guard('admin')->id();
+
+if (!$adminId) {
+    abort(403, 'Admin not authenticated'); // fail safely
+}
+
+ActivityLog::create([
+    'actor_type' => 'admin',
+    'actor_id'   => $adminId,
+    'action'     => 'create',
+    'details'    => "Admin ".Auth::guard('admin')->user()->firstname." ".Auth::guard('admin')->user()->lastname." created user {$user->firstname} {$user->lastname}.",
+]);
+
 
     session()->flash('success', 'User created successfully!');
 

@@ -7,17 +7,22 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminAuthController extends Controller
 {
+
+   
 public function login(Request $request)
 {
     $credentials = $request->only('username', 'password');
 
-    if (Auth::guard('admin')->attempt($credentials)) {
-        // ❌ This is wrong: activity_log('admin', 'admin', 'login', 'Admin logged in');
-        // ✅ Correct:
-        activity_log('admin', Auth::guard('admin')->id(), 'login', 'Admin logged in');
+if (Auth::guard('admin')->attempt($credentials)) {
 
-        return redirect()->intended('/dashboard');
-    }
+    $adminId = Auth::guard('admin')->id(); // get logged-in admin ID
+    activity_log('admin', $adminId, 'login', 'Admin logged in');
+
+    session(['admin_id' => $adminId]); // store admin ID in session for Livewire
+
+    return redirect()->intended('/dashboard');
+}
+
 
     return back()->withErrors(['error' => 'Invalid credentials']);
 }

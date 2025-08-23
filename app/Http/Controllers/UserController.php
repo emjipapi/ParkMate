@@ -19,8 +19,8 @@ public function create()
 public function store(Request $request)
 {
     $data = $request->validate([
-    'student_id' => 'nullable',
-    'employee_id' => 'nullable',
+        'student_id' => 'nullable',
+        'employee_id' => 'nullable',
         'email' => 'required|email|unique:users,email',
         'password' => 'required|string|min:6',
         'rfid_tag' => 'required|string|unique:users,rfid_tag|max:10',
@@ -32,31 +32,40 @@ public function store(Request $request)
         'license_number' => 'nullable|string|max:11',
         'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
     ]);
-if (empty($request->student_id) && empty($request->employee_id)) {
-    return back()->withErrors(['id' => 'Please provide either Student ID or Employee ID.'])->withInput();
-}
 
-if (!empty($request->student_id) && !empty($request->employee_id)) {
-    return back()->withErrors(['id' => 'Please provide only one: Student ID or Employee ID, not both.'])->withInput();
-}
+    if (empty($request->student_id) && empty($request->employee_id)) {
+        return back()->withErrors(['id' => 'Please provide either Student ID or Employee ID.'])->withInput();
+    }
+
+    if (!empty($request->student_id) && !empty($request->employee_id)) {
+        return back()->withErrors(['id' => 'Please provide only one: Student ID or Employee ID, not both.'])->withInput();
+    }
+
     $data['password'] = Hash::make($data['password']);
 
     if ($request->hasFile('profile_picture')) {
         $data['profile_picture'] = $request->file('profile_picture')->store('profiles', 'public');
     }
 
-     $user = User::create($data);
+    // Create the user
+    $user = User::create($data);
 
-        ActivityLog::create([
+    // Log admin action
+$admin = auth('admin')->user();
+
+
+    ActivityLog::create([
         'actor_type' => 'admin',
-        'actor_id'   => auth()->id(), // currently logged-in admin
+        'actor_id'   => $admin->id,
         'action'     => 'create',
-        'details'    => "Admin " . auth()->user()->firstname . " " . auth()->user()->lastname .
-                        " created user {$user->firstname} {$user->lastname}",
+        'details'    => "Admin {$admin->firstname} {$admin->lastname} created user {$user->firstname} {$user->lastname}.",
         'created_at' => now(),
     ]);
+
     return redirect()->route('users')->with('success', 'User created successfully!');
 }
+
+
 
 
 

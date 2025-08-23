@@ -154,7 +154,7 @@
         }
 
         .bottom-bar {
-            position: fixed;
+            position: relative;
             bottom: 0;
             left: 250px;
             width: calc(100% - 250px);
@@ -327,7 +327,7 @@
             <h4>Admin</h4>
         </div>
         <div class="btn-wrapper mt-3">
-            <a href="{{ url('/') }}" style="text-decoration: none;">
+            <a href="{{ url('/dashboard') }}" style="text-decoration: none;">
                 <button class="btn">Dashboard</button>
             </a>
         </div>
