@@ -1,12 +1,16 @@
-<div wire:poll.100ms="pollEpc" 
+<div wire:poll.500ms="pollEpc" 
      class="d-flex flex-column justify-content-center align-items-center w-100 h-100 gap-4 p-4 overflow-auto">
 
     @foreach ($scans as $index => $scan)
+        @php
+            $status = $scan['status'] ?? 'OUT';
+            $colorClass = $status === 'IN' ? 'text-success' : ($status === 'OUT' ? 'text-danger' : 'text-secondary');
+        @endphp
+
         <div class="d-flex align-items-center border rounded shadow-sm bg-white" 
-             style="font-size: {{ $loop->first ? '1.8rem' : ($loop->iteration <= 3 ? '1.3rem' : '1rem') }};
+             style="font-size: {{ $loop->first ? '1.8rem' : '1.3rem' }}; 
                     width: 100%; max-width: {{ $loop->first ? '1200px' : '900px' }};
                     padding: {{ $loop->first ? '2.5rem' : '1rem' }};
-                    transform: {{ $loop->first ? 'scale(1)' : 'scale(1)' }};
                     transition: transform 0.3s ease;">
 
             <!-- Picture -->
@@ -23,13 +27,11 @@
                      style="font-size: {{ $loop->first ? '2.2rem' : '1.5rem' }};">
                     {{ $scan['name'] ?? 'Name, EPC' }}
                 </div>
-                <div style="font-size: {{ $loop->first ? '2rem' : '1.2rem' }};
-                            font-weight: bold;
-                            color: {{ $scan['status'] === 'IN' ? 'green' : ($scan['status'] === 'OUT' ? 'red' : 'gray') }};">
-                    {{ $scan['status'] ?? 'Status' }}
+                <div class="fw-bold {{ $colorClass }}" 
+                     style="font-size: {{ $loop->first ? '2rem' : '1.2rem' }};">
+                    {{ $status }}
                 </div>
             </div>
         </div>
     @endforeach
-
 </div>

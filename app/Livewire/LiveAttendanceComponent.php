@@ -3,79 +3,75 @@ namespace App\Livewire;
 
 use App\Models\ActivityLog;
 use Livewire\Component;
+use Illuminate\Support\Facades\Cache;
+use Carbon\Carbon;
 
 class LiveAttendanceComponent extends Component
 {
-    public $profilePicture;
-    public $latestEpc = null;
-    public $status = null;
     public $scans = [];
-
-    // Cooldown in seconds to prevent duplicate logs
     private $cooldownSeconds = 5;
 
     public function mount()
     {
-        $this->profilePicture = asset('images/placeholder.jpg');
         $this->loadLatestScans();
     }
 
     public function pollEpc()
     {
-        $scannedTags = \Illuminate\Support\Facades\Cache::pull('epc_list', []);
+        $scannedTags = Cache::pull('epc_list', []);
         $now = now();
 
         foreach ($scannedTags as $epc) {
             $user = \App\Models\User::where('rfid_tag', $epc)->first();
             if (!$user) continue;
 
-            // Check last scan for cooldown
-            $lastScan = ActivityLog::where('rfid_tag', $epc)
-                ->latest()
-                ->first();
+            // Get last scan for this EPC
+            $lastScan = ActivityLog::where('rfid_tag', $epc)->latest()->first();
 
+            // Skip if within cooldown
             if ($lastScan && $lastScan->created_at->diffInSeconds($now) < $this->cooldownSeconds) {
-                continue; // skip if last scan was too recent
+                continue;
             }
 
-            // Toggle status
-            $newStatus = $user->in_out === 'IN' ? 'OUT' : 'IN';
-            $user->in_out = $newStatus;
-            $user->save();
+            // Determine new status based on last scan
+            $newStatus = $lastScan && $lastScan->status === 'IN' ? 'OUT' : 'IN';
 
-            // Log activity
+            // Create new activity log
             ActivityLog::create([
                 'user_id' => $user->id,
                 'rfid_tag' => $epc,
                 'status' => $newStatus,
+                'details' => "User {$user->firstname} {$user->lastname} scanned {$newStatus}",
             ]);
         }
 
-        // Reload latest scans for the frontend
+        // Update frontend
         $this->loadLatestScans();
     }
 
     public function loadLatestScans()
     {
-        $this->scans = ActivityLog::latest()
-            ->take(3)
-            ->get()
-            ->map(function ($log) {
-                return [
-                    'name' => "{$log->user->lastname}, {$log->user->firstname}",
-                    'status' => $log->status,
-                    'picture' => $log->user->profile_picture
-                        ? route('profile.picture', ['filename' => $log->user->profile_picture])
-                        : asset('images/placeholder.jpg'),
-                ];
-            })
-            ->toArray();
+$this->scans = ActivityLog::with('user')
+    ->latest()
+    ->take(3)
+    ->get()
+    ->map(function ($log) {
+        $user = $log->user;
 
-        if (!empty($this->scans)) {
-            $this->latestEpc = $this->scans[0]['name'];
-            $this->status = $this->scans[0]['status'];
-            $this->profilePicture = $this->scans[0]['picture'];
-        }
+        // Extract status from details
+        preg_match('/Status:\s*(IN|OUT)/i', $log->details, $matches);
+        $status = $matches[1] ?? 'OUT';
+
+        return [
+            'name' => "{$user->lastname}, {$user->firstname}",
+            'status' => $status,
+            'picture' => $user->profile_picture
+                ? route('profile.picture', ['filename' => $user->profile_picture])
+                : asset('images/placeholder.jpg'),
+        ];
+    })
+    ->toArray();
+
     }
 
     public function render()

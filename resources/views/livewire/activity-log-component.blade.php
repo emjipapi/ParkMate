@@ -71,7 +71,20 @@
                 {{-- Show Name depending on actor type --}}
 <td>{{ $log->actor_type === 'admin' ? $log->admin->lastname . ', ' . $log->admin->firstname : $log->user->lastname . ', ' . $log->user->firstname }}</td>
 
-                <td><span class="badge bg-primary">{{ ucfirst($log->action) }}</span></td>
+                <td>
+    @php
+        switch($log->action) {
+            case 'entry': $color = 'success'; break;
+            case 'exit': $color = 'danger'; break;
+            case 'create': $color = 'primary'; break;
+            case 'update': $color = 'warning'; break;
+            case 'login': $color = 'info'; break;
+            case 'logout': $color = 'secondary'; break;
+            default: $color = 'dark'; break;
+        }
+    @endphp
+    <span class="badge bg-{{ $color }}">{{ ucfirst($log->action) }}</span>
+</td>
                 <td>{{ $log->details }}</td>
                 <td>{{ $log->created_at->format('Y-m-d H:i:s') }}</td>
             </tr>

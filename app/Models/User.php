@@ -55,4 +55,18 @@ public $timestamps = false;
             'password' => 'hashed',
         ];
     }
+    // App\Models\User.php
+
+public function latestScan()
+{
+    return $this->hasOne(\App\Models\ActivityLog::class)
+                ->latestOfMany();
+}
+
+public function currentStatus()
+{
+    $lastScan = $this->latestScan;
+    return $lastScan ? $lastScan->status : 'OUT'; // default to OUT if no scan
+}
+
 }
