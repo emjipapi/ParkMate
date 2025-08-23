@@ -30,8 +30,6 @@ if (Auth::guard('admin')->attempt($credentials)) {
 public function logout()
 {
     if (Auth::guard('admin')->check()) {
-        // ❌ Wrong: activity_log('admin', 'admin', 'logout', 'Admin logged out');
-        // ✅ Correct:
         activity_log('admin', Auth::guard('admin')->id(), 'logout', 'Admin logged out');
 
         Auth::guard('admin')->logout();

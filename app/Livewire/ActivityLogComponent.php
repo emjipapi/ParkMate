@@ -39,24 +39,26 @@ class ActivityLogComponent extends Component
                 $q->select('id','firstname','lastname','student_id','employee_id','profile_picture','department','program');
             }])
             // 🔍 SEARCH (action_type + description + user name/id)
-            ->when($this->search !== '', function (Builder $q) {
-                $s = trim($this->search);
-                $q->where(function (Builder $sub) use ($s) {
-                    $sub->where('action_type', 'like', "%{$s}%")
-                        ->orWhere('description', 'like', "%{$s}%")
-                        ->orWhereHas('user', function (Builder $u) use ($s) {
-                            $u->where('firstname', 'like', "%{$s}%")
-                              ->orWhere('lastname', 'like', "%{$s}%")
-                              ->orWhere('student_id', 'like', "%{$s}%")
-                              ->orWhere('employee_id', 'like', "%{$s}%");
-                        });
-                });
-            })
-            // 🎯 ACTION filter (login/logout/update/etc.)
-            ->when($this->actionFilter !== '', fn (Builder $q) =>
-                $q->where('action_type', $this->actionFilter)
-            )
-            // 👤 USER TYPE filter
+// SEARCH
+->when($this->search !== '', function (Builder $q) {
+    $s = trim($this->search);
+    $q->where(function (Builder $sub) use ($s) {
+        $sub->where('action', 'like', "%{$s}%")
+            ->orWhere('details', 'like', "%{$s}%")
+            ->orWhereHas('user', function (Builder $u) use ($s) {
+                $u->where('firstname', 'like', "%{$s}%")
+                  ->orWhere('lastname', 'like', "%{$s}%")
+                  ->orWhere('student_id', 'like', "%{$s}%")
+                  ->orWhere('employee_id', 'like', "%{$s}%");
+            });
+    });
+})
+
+// ACTION FILTER
+->when($this->actionFilter !== '', fn (Builder $q) =>
+    $q->where('action', $this->actionFilter)
+)
+          
             ->when($this->userType === 'student', fn (Builder $q) =>
                 $q->whereHas('user', fn ($u) => $u->whereNotNull('student_id'))
             )

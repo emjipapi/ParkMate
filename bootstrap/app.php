@@ -5,6 +5,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 
 use App\Http\Middleware\AdminMiddleware;
+use \App\Http\Middleware\Authenticate;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Aliases for route middleware
         $middleware->alias([
             'admin' => AdminMiddleware::class,
-            'auth'  => \App\Http\Middleware\Authenticate::class,
+            'auth'  => Authenticate::class,
         ]);
 
         // Optional: default web middleware group
