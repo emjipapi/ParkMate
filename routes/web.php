@@ -18,10 +18,14 @@ use App\Charts\AnalyticsChart;
 Route::post('/login', [UserAuthController::class, 'login']);
 Route::post('/logout', [UserAuthController::class, 'logout']);
 
-// Admin login page
-                //dapat '/admin/login' to
-Route::get('/', [AdminAuthController::class, 'showLoginForm'])->name('admin.login.form');
-Route::post('/admin/login', [AdminAuthController::class, 'login'])->name('login');
+// Show admin login form
+Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])
+    ->name('admin.login.form');
+
+// Handle login POST
+Route::post('/admin/login', [AdminAuthController::class, 'login'])
+    ->name('admin.login.submit');
+
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
 // Public pages (e.g., parking-slots) that anyone can see

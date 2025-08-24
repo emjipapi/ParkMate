@@ -80,7 +80,7 @@
       </div>
     @endif
 
-<form method="POST" action="{{ route('login') }}">
+<form method="POST" action="{{ route('admin.login.submit') }}">
     @csrf
     <div class="mb-3">
 <input type="text" name="username" class="form-control"

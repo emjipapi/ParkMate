@@ -28,7 +28,9 @@
             More Info ➜
         </div>
     </div>
+    
 <div class="card card-4">
+    <a href="{{ url('/activity-log') }}" style="text-decoration: none; color: black;">
     <div class="card-body">
         <h5>Recent Activity</h5>
 
@@ -40,7 +42,10 @@
             <p>No recent activity.</p>
         @endforelse
     </div>
+    </a>
 </div>
+
+
 
 
 
