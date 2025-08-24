@@ -16,7 +16,7 @@ class CardsComponent extends Component
         // Fetch latest 3 activity logs
         $recentActivities = DB::table('activity_logs')
             ->latest()
-            ->take(10)
+            ->take(6)
             ->get();
 
         return view('livewire.cards-component', [

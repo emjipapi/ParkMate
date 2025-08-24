@@ -170,21 +170,7 @@
             flex-direction: column;
             justify-content: space-between;
         }
-.cards-container {
-    display: flex;
-    flex-wrap: wrap;         /* allow stacking */
-    gap: 1rem;
-    align-items: flex-end;   /* bottom align */
-    justify-content: space-between;
-}
 
-.cards-container .card {
-    flex: 1 1 calc(25% - 0.75rem); /* 4 cards per row minus gaps */
-    min-width: 200px;              /* optional: prevent too narrow */
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
 
         .card-footer {
             padding: 0;
@@ -218,15 +204,37 @@
             color: white;
             height: 200px;
         }
+.cards-container {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+/* Place cards exactly */
+.card-5 { grid-column: 4; grid-row: 1; height: 200px; border: 0; border-radius: 0; background: #6c63ff; color: #fff; }
+
+.card-1 { grid-column: 1; grid-row: 2; height: 200px; }
+.card-2 { grid-column: 2; grid-row: 2; height: 200px; }
+.card-3 { grid-column: 3; grid-row: 2; height: 200px; }
+
 .card-4 {
-    border: 0;
-    border-radius: 0;
-    background-color: white;
-    color: black;
-    height: 650px;
-    flex: 0 0 100px; /* fixed width */
-    overflow-y: auto; /* allow scrolling if content exceeds height */
-    padding: 1rem;
+    grid-column: 4; grid-row: 2;
+    border: 0; border-radius: 0; background: #fff; color: #000;
+    height: 450px; overflow-y: auto; padding: 1rem;
+}
+
+/* Keep cards as flex boxes for internal layout (OK with grid) */
+.cards-container .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Remove leftover flex styles for cards inside grid */
+.cards-container .card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
 .card-4 h5 {
