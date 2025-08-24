@@ -13,14 +13,14 @@
 
   <!-- Bootstrap 5 CDN -->
   <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-  <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
   <!-- Inter font -->
   <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
     
     @livewireStyles
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+
     <style>
         :root {
             --sidebar-bg: #182125;
@@ -400,6 +400,7 @@
         <span>ParkMate</span>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     
     <script>
         function updateClock() {
@@ -416,6 +417,7 @@
         updateClock(); // run once immediately
     </script>
     @livewireScripts
+    <script src="{{ asset('js/chart.js') }}"></script>
 </body>
 
 </html>
