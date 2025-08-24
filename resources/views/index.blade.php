@@ -223,7 +223,7 @@
     border-radius: 0;
     background-color: white;
     color: black;
-    height: 400px;
+    height: 650px;
     flex: 0 0 100px; /* fixed width */
     overflow-y: auto; /* allow scrolling if content exceeds height */
     padding: 1rem;
