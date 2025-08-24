@@ -5,30 +5,48 @@ use Illuminate\Support\Facades\Route;
 use App\Models\ParkingSlot;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\RfidController;
+use App\Models\CarSlot;
 
-Route::get('parking-slots', function () {
-    return ParkingSlot::all();
+Route::get('car-slots', function () {
+    return CarSlot::all();
 });
 
-Route::get('parking-slots/update', function (Request $request) {
-    $slotId = $request->query('slot');
-    $status = $request->query('status');
+Route::get('car-slots/update', function (Request $request) {
+    $label = $request->query('slot');       // C1, C2, etc.
+    $occupied = $request->query('occupied');
 
-    if (!$slotId || !is_numeric($status)) {
+    if (!$label || !is_numeric($occupied)) {
         return response()->json(['error' => 'Invalid input'], 400);
     }
 
-    $slot = ParkingSlot::find($slotId);
+    $slot = CarSlot::where('label', $label)->first();
 
     if (!$slot) {
         return response()->json(['error' => 'Slot not found'], 404);
     }
 
-    $slot->status = $status;
+    $slot->occupied = $occupied;
     $slot->save();
 
     return response()->json(['message' => 'Slot updated', 'slot' => $slot]);
 });
+
+Route::get('area-status', function (Request $request) {
+    $areaId = $request->query('area_id');
+
+    $carAvailable = CarSlot::where('area_id', $areaId)
+        ->where('occupied', 0)
+        ->count();
+
+    $motoAvailable = DB::table('motorcycle_counts')
+        ->where('area_id', $areaId)
+        ->value('available');
+
+    return response()->json([
+        'full' => ($carAvailable === 0 && $motoAvailable === 0)
+    ]);
+});
+
 
 Route::post('/rfid', [RfidController::class, 'logScan']);
 
