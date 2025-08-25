@@ -9,13 +9,19 @@ class ActivityLog extends Model
 {
     use HasFactory;
   public $timestamps = false; // Add this line
- protected $fillable = [
-        'actor_type', // 'admin' or 'user'
-        'actor_id',
-        'action',
-        'details',
-        'created_at',
-    ];
+protected $fillable = [
+    'actor_type',
+    'actor_id',
+    'action',
+    'details',
+    'area_id',    // <-- add this
+    'created_at',
+];
+public function area() {
+    return $this->belongsTo(ParkingArea::class, 'area_id');
+}
+
+
     protected $casts = [
         'created_at' => 'datetime',
     ];

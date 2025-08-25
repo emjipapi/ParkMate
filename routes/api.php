@@ -47,8 +47,12 @@ Route::get('area-status', function (Request $request) {
     ]);
 });
 
-
+//main gate
 Route::post('/rfid', [RfidController::class, 'logScan']);
+Route::post('/rfid-area', [RfidController::class, 'logScanArea']);
+
+//other areas
+// Route::post('/rfid-area', [RfidController::class, 'logAreaScan']);
 
 // Route::post('/rfid', function (Request $request) {
 //     $epc = $request->input('epc');

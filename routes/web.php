@@ -22,6 +22,8 @@ Route::post('/logout', [UserAuthController::class, 'logout']);
 Route::get('/admin/login', [AdminAuthController::class, 'showLoginForm'])
     ->name('admin.login.form');
 
+    Route::get('/', [AdminAuthController::class, 'showLoginForm'])
+    ->name('admin.login.form');
 // Handle login POST
 Route::post('/admin/login', [AdminAuthController::class, 'login'])
     ->name('admin.login.submit');
