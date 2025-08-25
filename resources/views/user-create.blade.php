@@ -392,8 +392,9 @@
             </div>
             <span class="text-muted">Home > Users > Create</span>
         </div>
-
+       
         @livewire('user-form')
+        
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
