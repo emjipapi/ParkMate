@@ -26,7 +26,7 @@
                             @if(isset($area['car_slots']) && count($area['car_slots']) > 0)
                                 🚗 {{ $area['car_available'] }}/{{ $area['car_total'] }} cars &nbsp;•&nbsp;
                             @endif
-                            🛵 {{ $area['moto_available'] }}/{{ $area['moto_total'] }} motorcycles
+                            🛵 {{ $area['moto_available_count'] }}/{{ $area['moto_total'] }} motorcycles
                         </small>
                     </button>
                 </h2>
@@ -41,7 +41,7 @@
                             <div class="d-flex align-items-center gap-3">
                                 <span class="fw-semibold">🛵 Motorcycles</span>
                                 <span class="badge bg-secondary">
-                                    {{ $area['moto_available'] }} / {{ $area['moto_total'] }}
+                                    {{ $area['moto_available_count'] }} / {{ $area['moto_total'] }}
                                 </span>
                             </div>
                             <div class="btn-group btn-group-sm" role="group" aria-label="Adjust motorcycle count">

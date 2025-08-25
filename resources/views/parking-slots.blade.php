@@ -416,7 +416,7 @@
         <span>ParkMate</span>
     </div>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    <script>
+    {{-- <script>
         document.addEventListener('DOMContentLoaded', function () {
             loadParkingSlots();
 
@@ -455,7 +455,7 @@
                     .catch(error => console.error('Error fetching parking slots:', error));
             }
         });
-    </script>
+    </script> --}}
     <script>
         function updateClock() {
             const now = new Date();
