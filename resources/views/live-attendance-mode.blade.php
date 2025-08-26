@@ -176,30 +176,30 @@
                 <button class="btn active">Dashboard</button>
             </a>
         </div>
-        <div class="btn-wrapper">
-            <a href="{{ url('/parking-slots') }}" style="text-decoration: none;">
+        <div href='/parking-slots' wire:navigate class="btn-wrapper">
+           
                 <button class="btn">Parking Slots</button>
-            </a>
+           
         </div>
-                <div class="btn-wrapper">
-            <a href="{{ url('/violation-tracking') }}"  style="text-decoration: none;">
+               <div href='/violation-tracking' wire:navigate class="btn-wrapper">
+           
                 <button class="btn">Violation Tracking</button>
-            </a>
+           
         </div>
-        <div class="btn-wrapper">
-            <a href="{{ url('/users') }}" style="text-decoration: none;">
+        <div href='/users' wire:navigate class="btn-wrapper">
+            
                 <button class="btn">Users</button>
-            </a>
+           
         </div>
-                <div class="btn-wrapper">
-            <a href="{{ url('/sticker-generator') }}"  style="text-decoration: none;">
+                <div href='/sticker-generator' wire:navigate class="btn-wrapper">
+           
                 <button class="btn">Sticker Generator</button>
-            </a>
+            
         </div>
-                <div class="btn-wrapper">
-            <a href="{{ url('/activity-log') }}" href="users.php" style="text-decoration: none;">
+                <div href='/activity-log' wire:navigate class="btn-wrapper">
+           
                 <button class="btn">Activity Log</button>
-            </a>
+            
         </div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">

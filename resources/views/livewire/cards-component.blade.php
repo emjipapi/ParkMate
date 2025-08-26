@@ -1,7 +1,7 @@
 <div wire:poll.5s class="cards-container align-items-end">
 
     {{-- Car Slots --}}
-    <div wire:click="goTo('/parking-slots')" class="card card-1" style="cursor:pointer;">
+    <div onclick="window.location='{{ url('/parking-slots') }}'" class="card card-1" style="cursor:pointer;">
         <div class="card-body">
             <h1 class="card-title">{{ $totalCarSlots }}</h1>
             <p class="card-text">Total Car Slots</p>
@@ -11,7 +11,7 @@
     </div>
 
     {{-- Motorcycle Slots --}}
-    <div class="card card-2" style="cursor:pointer;">
+    <div onclick="window.location='{{ url('/parking-slots') }}'" class="card card-2" style="cursor:pointer;">
         <div class="card-body">
             <h1 class="card-title">{{ $totalMotoSlots }}</h1>
             <p class="card-text">Total Motorcycle Slots</p>
@@ -22,7 +22,7 @@
     </div>
 
     {{-- Users --}}
-    <div wire:click="goTo('/users')" class="card card-3" style="cursor:pointer;">
+    <div onclick="window.location='{{ url('/users') }}'" class="card card-3" style="cursor:pointer;">
         <div class="card-body">
             <h1 class="card-title">{{ $totalUsers }}</h1>
             <p class="card-text">Total Users</p>
