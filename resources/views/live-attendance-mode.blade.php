@@ -187,7 +187,7 @@
             </a>
         </div>
         <div class="btn-wrapper">
-            <a href="{{ url('/users') }}" href="users.php" style="text-decoration: none;">
+            <a href="{{ url('/users') }}" style="text-decoration: none;">
                 <button class="btn">Users</button>
             </a>
         </div>
@@ -232,7 +232,7 @@
             <h3 class="mb-0 me-3">Dashboard</h3>
             <h6 class="mb-0">Live Attendance</h6>
         </div>
-        <span class="text-black">Home > Dashboard > Live Attendance Mode</span>
+        <span class="text-muted">Home > Dashboard > Live Attendance Mode</span>
     </div>
 
     <!-- Centering only this section -->

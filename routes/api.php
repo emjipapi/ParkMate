@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\ParkingSlot;
 use Illuminate\Support\Facades\Cache;
 use App\Http\Controllers\RfidController;
+use App\Http\Controllers\DeviceController;
 use App\Models\CarSlot;
 
 Route::get('car-slots', function () {
@@ -50,25 +51,7 @@ Route::get('area-status', function (Request $request) {
 //main gate
 Route::post('/rfid', [RfidController::class, 'logScan']);
 Route::post('/rfid-area', [RfidController::class, 'logScanArea']);
+Route::get('heartbeat', [DeviceController::class, 'heartbeat']);
 
-//other areas
-// Route::post('/rfid-area', [RfidController::class, 'logAreaScan']);
 
-// Route::post('/rfid', function (Request $request) {
-//     $epc = $request->input('epc');
-
-//     // Fetch existing EPCs, or empty array
-//     $epcList = Cache::get('epc_list', []);
-
-//     // Append new EPC to the list (even if duplicate for now)
-//     $epcList[] = $epc;
-
-//     // Optional: Keep only the last 50 entries
-//     $epcList = array_slice($epcList, -50);
-
-//     // Save updated list back to cache
-//     Cache::put('epc_list', $epcList, 60); // 60 seconds expiration
-
-//     return response()->json(['status' => 'ok']);
-// });
 

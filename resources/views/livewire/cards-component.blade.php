@@ -1,39 +1,46 @@
-{{-- cards-component.blade.php --}}
 <div wire:poll.5s class="cards-container align-items-end">
+
+    {{-- Car Slots --}}
     <div wire:click="goTo('/parking-slots')" class="card card-1" style="cursor:pointer;">
         <div class="card-body">
-            <h1 class="card-title">{{ $totalSlots }}</h1>
-            <p class="card-text">Total Parking Slots.</p>
+            <h1 class="card-title">{{ $totalCarSlots }}</h1>
+            <p class="card-text">Total Car Slots</p>
+            <small>{{ $totalCarOccupied }} Occupied</small>
         </div>
         <div class="card-footer">More Info ➜</div>
     </div>
 
-    <div wire:click="goTo('/users')" class="card card-2" style="cursor:pointer;">
+    {{-- Motorcycle Slots --}}
+    <div class="card card-2" style="cursor:pointer;">
+        <div class="card-body">
+            <h1 class="card-title">{{ $totalMotoSlots }}</h1>
+            <p class="card-text">Total Motorcycle Slots</p>
+            <small>{{ $totalMotoOccupied }} Occupied</small>
+            
+        </div>
+        <div class="card-footer">More Info ➜</div>
+    </div>
+
+    {{-- Users --}}
+    <div wire:click="goTo('/users')" class="card card-3" style="cursor:pointer;">
         <div class="card-body">
             <h1 class="card-title">{{ $totalUsers }}</h1>
-            <p class="card-text">Total Users.</p>
+            <p class="card-text">Total Users</p>
         </div>
         <div class="card-footer">More Info ➜</div>
     </div>
 
-    <div class="card card-3" style="cursor:pointer;">
-        <div class="card-body">
-            <h1 class="card-title">{{ $totalStatus1 }}</h1>
-            <p class="card-text">Total Parking (Occupied).</p>
-        </div>
-        <div class="card-footer">More Info ➜</div>
-    </div>
-
-    {{-- Card 5: above Card 4, same column --}}
+    {{-- Analytics Dashboard --}}
     <div class="card card-5" style="cursor:pointer;">
         <a href="{{ url('/dashboard/analytics-dashboard') }}" style="text-decoration: none; color: white;">
         <div class="card-body">
             <h1 class="card-title">Analytics Dashboard</h1>
             <p class="card-text">Wala pang design.</p>
         </div>
-    </a?>
+    </a>
     </div>
 
+    {{-- Activity Logs --}}
     <div class="card card-4">
         <a href="{{ url('/activity-log') }}" style="text-decoration: none; color: black;">
             <div class="card-body">

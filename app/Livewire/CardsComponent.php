@@ -7,28 +7,34 @@ use Illuminate\Support\Facades\DB;
 
 class CardsComponent extends Component
 {
-    public function render()
-    {
-        $totalSlots = DB::table('parking_slots')->count();
-        $totalUsers = DB::table('users')->count();
-        $totalStatus1 = DB::table('parking_slots')->where('status', 1)->count();
+  public function render()
+{
+    // Car slots (sensor-based)
+    $totalCarSlots = DB::table('car_slots')->count();
+    $totalCarOccupied = DB::table('car_slots')->where('occupied', 1)->count();
 
-        // Fetch latest 3 activity logs
-        $recentActivities = DB::table('activity_logs')
-            ->latest()
-            ->take(6)
-            ->get();
+    // Motorcycle slots (counter-based, aggregated from all areas)
+    $totalMotoSlots = DB::table('motorcycle_counts')->sum('total_available');
+    $totalMotoAvailable = DB::table('motorcycle_counts')->sum('available_count');
+    $totalMotoOccupied = $totalMotoSlots - $totalMotoAvailable;
 
-        return view('livewire.cards-component', [
-            'totalSlots' => $totalSlots,
-            'totalUsers' => $totalUsers,
-            'totalStatus1' => $totalStatus1,
-            'recentActivities' => $recentActivities,
-        ]);
-    }
+    // Users
+    $totalUsers = DB::table('users')->count();
 
-    public function goTo($page)
-    {
-        return redirect()->to($page);
-    }
+    // Activity Logs
+    $recentActivities = DB::table('activity_logs')
+        ->latest()
+        ->take(4)
+        ->get();
+
+    return view('livewire.cards-component', [
+        'totalCarSlots' => $totalCarSlots,
+        'totalCarOccupied' => $totalCarOccupied,
+        'totalMotoSlots' => $totalMotoSlots,
+        'totalMotoOccupied' => $totalMotoOccupied,
+        'totalUsers' => $totalUsers,
+        'recentActivities' => $recentActivities,
+    ]);
+}
+
 }
