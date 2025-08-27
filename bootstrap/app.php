@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Console\Scheduling\Schedule;
 
 use App\Http\Middleware\AdminMiddleware;
 use \App\Http\Middleware\Authenticate;
@@ -19,7 +20,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => AdminMiddleware::class,
             'auth'  => Authenticate::class,
-            
         ]);
 
         // Optional: default web middleware group
@@ -32,6 +32,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\TrackPageView::class,
         ]);
+    })
+    ->withSchedule(function (Schedule $schedule): void {
+        // Check for offline slots every 10 seconds
+        $schedule->command('slots:check-offline')->everyTenSeconds();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
