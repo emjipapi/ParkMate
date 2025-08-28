@@ -389,7 +389,7 @@
         </div>
 
         <div class="square-box">
-            @livewire('users-table')
+            <livewire:admin.users />
         </div>
 
     </div>

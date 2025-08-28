@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -154,6 +154,6 @@ class UserForm extends Component
 
     public function render()
     {
-        return view('livewire.user-form');
+        return view('livewire.admin.user-form');
     }
 }

@@ -8,17 +8,19 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ParkMate - Create Users</title>
+    <title>ParkMate - Analytics Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap 5 CDN -->
-    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    <!-- Inter font -->
-    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
-    <livewire:styles />
+  <!-- Bootstrap 5 CDN -->
+  <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+  <!-- Inter font -->
+  <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    
+    @livewireStyles
+    
+
     <style>
         :root {
             --sidebar-bg: #182125;
@@ -32,7 +34,6 @@
             margin: 0;
             overflow-x: hidden;
             font-family: 'Inter', sans-serif;
-
         }
 
         .sidebar {
@@ -167,8 +168,8 @@
             align-items: center;
             padding: 0 20px;
             font-weight: 500;
-
         }
+
 
         .btn-add-slot {
             display: inline-block;
@@ -315,11 +316,6 @@
             opacity: 1;
             pointer-events: auto;
         }
-
-        form {
-            width: 1000px;
-            max-width: 50%;
-        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -334,7 +330,7 @@
         </div>
         <div class="btn-wrapper mt-3">
             <a href="{{ url('/dashboard') }}" style="text-decoration: none;">
-                <button class="btn">Dashboard</button>
+                <button class="btn active">Dashboard</button>
             </a>
         </div>
         <div href='/parking-slots' wire:navigate class="btn-wrapper">
@@ -342,29 +338,29 @@
                 <button class="btn">Parking Slots</button>
             
         </div>
-        <div href='/violation-tracking' wire:navigate class="btn-wrapper">
+                <div href='/violation-tracking' wire:navigate class="btn-wrapper">
             
                 <button class="btn">Violation Tracking</button>
             
         </div>
-        <div href='/users' wire:navigate class="btn-wrapper">
-           
-                <button class="btn active">Users</button>
-           
+                <div href='/users' wire:navigate class="btn-wrapper">
+            
+                <button class="btn">Users</button>
+            
         </div>
-        <div href='/sticker-generator' wire:navigate class="btn-wrapper">
-           
+                <div href='/sticker-generator' wire:navigate class="btn-wrapper">
+            
                 <button class="btn">Sticker Generator</button>
             
         </div>
-        <div href='/activity-log' wire:navigate class="btn-wrapper">
-            
+                <div href='/activity-log' wire:navigate class="btn-wrapper">
+          
                 <button class="btn">Activity Log</button>
             
         </div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
-            <form action="{{ route('admin.logout') }}" method="POST">
+           <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn btn-danger w-100">Logout</button>
             </form>
@@ -385,14 +381,16 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Create</h3>
-                <h6 class="mb-0">User</h6>
+                <h3 class="mb-0 me-3">Manage</h3>
+                <h6 class="mb-0">Statistcs</h6>
             </div>
-            <span class="text-muted">Home > Users > Create</span>
+            <span class="text-muted">Home > Dashboard > Analytics Dashboard</span>
         </div>
-       
-        @livewire('user-form')
-        
+
+
+<div class="square-box">
+<livewire:admin.analytics-chart-component />
+    </div>
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
@@ -400,8 +398,8 @@
         <span>ParkMate</span>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <livewire:scripts />
-
+    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+    
     <script>
         function updateClock() {
             const now = new Date();
@@ -416,7 +414,8 @@
         setInterval(updateClock, 1000);
         updateClock(); // run once immediately
     </script>
-
+    @livewireScripts
+    <script src="{{ asset('js/chart.js') }}"></script>
 </body>
 
 </html>

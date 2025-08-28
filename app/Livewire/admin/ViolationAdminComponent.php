@@ -1,5 +1,5 @@
 <?php
-namespace App\Livewire;
+namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use App\Models\Violation;
@@ -24,7 +24,7 @@ class ViolationAdminComponent extends Component
 
     public function render()
     {
-        return view('livewire.violation-admin-component', [
+        return view('livewire.admin.violation-admin-component', [
             'violations' => $this->violations
         ]);
     }

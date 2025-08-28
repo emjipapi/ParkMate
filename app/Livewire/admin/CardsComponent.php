@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +17,6 @@ class CardsComponent extends Component
     $totalMotoSlots = DB::table('motorcycle_counts')->sum('total_available');
     $totalMotoAvailable = DB::table('motorcycle_counts')->sum('available_count');
     $totalMotoOccupied = $totalMotoSlots - $totalMotoAvailable;
-
     // Users
     $totalUsers = DB::table('users')->count();
 
@@ -27,7 +26,7 @@ class CardsComponent extends Component
         ->take(4)
         ->get();
 
-    return view('livewire.cards-component', [
+    return view('livewire.admin.cards-component', [
         'totalCarSlots' => $totalCarSlots,
         'totalCarOccupied' => $totalCarOccupied,
         'totalMotoSlots' => $totalMotoSlots,

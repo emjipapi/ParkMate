@@ -1,17 +1,14 @@
 <?php
 
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>ParkMate - Violation Tracking</title>
+    <title>ParkMate - Activity Log</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap 5 CDN -->
   <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
   <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
   <!-- Inter font -->
@@ -27,11 +24,11 @@
             --admin-bg: #2E739F;
             --admin-text: #ffffff;
         }
-
         body {
             margin: 0;
             overflow-x: hidden;
             font-family: 'Inter', sans-serif;
+            
         }
 
         .sidebar {
@@ -154,7 +151,7 @@
         }
 
         .bottom-bar {
-            position: fixed;
+            position: relative;
             bottom: 0;
             left: 250px;
             width: calc(100% - 250px);
@@ -326,6 +323,7 @@
         <div class="admin-header">
             <h4>Admin</h4>
         </div>
+
         <div class="btn-wrapper mt-3">
             <a href="{{ url('/dashboard') }}" style="text-decoration: none;">
                 <button class="btn">Dashboard</button>
@@ -336,30 +334,30 @@
                 <button class="btn">Parking Slots</button>
             
         </div>
-        
-        <div class="btn-wrapper"><button class="btn active">Violation Tracking</button></div>
-                <div href='/users' wire:navigate class="btn-wrapper">
+        <div href='/violation-tracking' wire:navigate class="btn-wrapper">
+            
+                <button class="btn">Violation Tracking</button>
+            
+        </div>
+        <div href='/users' wire:navigate class="btn-wrapper">
             
                 <button class="btn">Users</button>
-           
+            
         </div>
-                <div href='/sticker-generator' wire:navigate class="btn-wrapper">
+                        <div href='/sticker-generator' wire:navigate class="btn-wrapper">
             
                 <button class="btn">Sticker Generator</button>
-          
-        </div>
-                <div href='/activity-log' wire:navigate class="btn-wrapper">
-           
-                <button class="btn">Activity Log</button>
             
         </div>
+        <div class="btn-wrapper"><button class="btn active">Activity Log</button></div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
-            <form action="{{ route('admin.logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-danger w-100">Logout</button>
-            </form>
-        </div>
+    <form action="{{ route('admin.logout') }}" method="POST">
+        @csrf
+        <button type="submit" class="btn btn-danger w-100">Logout</button>
+    </form>
+</div>
+
     </div>
 
     <div class="top-bar">
@@ -376,25 +374,20 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Ano ilalagay ko</h3>
-                <h6 class="mb-0">otid</h6>
+                <h3 class="mb-0 me-3">Manage</h3>
+                <h6 class="mb-0">Activity Log</h6>
             </div>
-            <span class="text-muted">Home > Violation Tracking</span>
+            <span class="text-muted">Home > Activity Log</span>
         </div>
-
-
         <div class="square-box">
-            <livewire:violation-admin-component />
-
+            <livewire:admin.activity-log-component />
         </div>
-
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
         <span>Copyright © 2025 - 2025 All rights reserved</span>
         <span>ParkMate</span>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <livewire:scripts />
 
     <script>
@@ -411,6 +404,10 @@
         setInterval(updateClock, 1000);
         updateClock(); // run once immediately
     </script>
+    <script>
+    flatpickr("#startDate", { dateFormat: "Y-m-d" });
+    flatpickr("#endDate", { dateFormat: "Y-m-d" });
+</script>
 </body>
 
 </html>

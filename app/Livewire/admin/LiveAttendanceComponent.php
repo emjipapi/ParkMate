@@ -1,5 +1,5 @@
 <?php
-namespace App\Livewire;
+namespace App\Livewire\Admin;
 
 use App\Models\ActivityLog;
 use Livewire\Component;
@@ -74,6 +74,6 @@ $this->scans = ActivityLog::with('user')
 
     public function render()
     {
-        return view('livewire.live-attendance-component');
+        return view('livewire.admin.live-attendance-component');
     }
 }

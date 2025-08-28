@@ -237,7 +237,7 @@
 
     <!-- Centering only this section -->
     <div class="flex-grow-1 d-flex justify-content-center align-items-center">
-        <livewire:live-attendance-component />
+        <livewire:admin.live-attendance-component />
     </div>
 </div>
 

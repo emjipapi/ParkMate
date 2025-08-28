@@ -1,17 +1,24 @@
+<?php
+
+?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>ParkMate - Parking Slots</title>
+    <title>ParkMate - Sticker Generator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap 5 CDN -->
-    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-    <!-- Inter font -->
-    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+  <!-- Bootstrap 5 CDN -->
+  <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+  <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+  <!-- Inter font -->
+  <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    <livewire:styles />
     <style>
         :root {
             --sidebar-bg: #182125;
@@ -307,28 +314,9 @@
             opacity: 1;
             pointer-events: auto;
         }
-        <style>
-    .slot-tile {
-        border-radius: .5rem;
-        height: 56px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
-        transition: transform .08s ease, box-shadow .12s ease;
-    }
-
-    .slot-tile:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
-    }
-
-    .slot-label {
-        letter-spacing: .5px;
-    }
-</style>
     </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
 </head>
 
 <body>
@@ -338,31 +326,32 @@
         <div class="admin-header">
             <h4>Admin</h4>
         </div>
-
         <div class="btn-wrapper mt-3">
             <a href="{{ url('/dashboard') }}" style="text-decoration: none;">
                 <button class="btn">Dashboard</button>
             </a>
         </div>
-        <div class="btn-wrapper">
-            <button class="btn active">Parking Slots</button>
-        </div>
-        <div href='/violation-tracking' wire:navigate class="btn-wrapper">
+        <div href='/parking-slots' wire:navigate class="btn-wrapper">
             
+                <button class="btn">Parking Slots</button>
+            
+        </div>
+                <div href='/violation-tracking' wire:navigate class="btn-wrapper">
+           
                 <button class="btn">Violation Tracking</button>
             
         </div>
-        <div href='/users' wire:navigate class="btn-wrapper">
+                        <div href='/users' wire:navigate class="btn-wrapper">
            
                 <button class="btn">Users</button>
             
         </div>
-        <div href='/sticker-generator' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Sticker Generator</button>
+                <div class="btn-wrapper">
+           
+                <button class="btn active">Sticker Generator</button>
             
         </div>
-        <div href='/activity-log' wire:navigate class="btn-wrapper">
+                <div href='/activity-log' wire:navigate class="btn-wrapper">
            
                 <button class="btn">Activity Log</button>
             
@@ -390,70 +379,26 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Manage</h3>
-                <h6 class="mb-0">Slots</h6>
+                <h3 class="mb-0 me-3">Generate</h3>
+                <h6 class="mb-0">Sticker</h6>
             </div>
-            <span class="text-muted">Home > Slots</span>
+            <span class="text-muted">Home > Sticker Generator</span>
         </div>
-        <button type="button" class="btn-add-slot btn btn-primary" data-bs-toggle="modal"
-            data-bs-target="#addSlotModal">
-            Add Slot
-        </button>
-
 
 
         <div class="square-box">
-            <livewire:parking-slots-component />
+            <livewire:admin.generator-component />
         </div>
 
     </div>
-
     <!-- Bottom Bar -->
     <div class="bottom-bar">
         <span>Copyright © 2025 - 2025 All rights reserved</span>
         <span>ParkMate</span>
     </div>
-    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    {{-- <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            loadParkingSlots();
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <livewire:scripts />
 
-            setInterval(loadParkingSlots, 3000);  // Every 3 seconds (good balance)
-
-            function loadParkingSlots() {
-                fetch('http://127.0.0.1:8000/api/parking-slots')
-                    .then(response => response.json())
-                    .then(data => {
-                        let tableBody = document.getElementById('parking-slots-body');
-                        let totalEntries = data.length;
-                        let output = '';
-
-                        data.forEach(function (slot) {
-                            let statusBadge = (slot.status == 1)
-                                ? '<span class="badge bg-success">Occupied</span>'
-                                : '<span class="badge bg-secondary">Vacant</span>';
-
-                            output += `
-                        <tr>
-                            <td>Slot ${slot.slot_number}</td>
-                            <td>${slot.area_name}</td>
-                            <td>${statusBadge}</td>
-                            <td>
-                                <button class="btn btn-sm btn-primary">Edit</button>
-                                <button class="btn btn-sm btn-danger">Delete</button>
-                            </td>
-                        </tr>
-                    `;
-                        });
-
-                        tableBody.innerHTML = output;
-                        document.getElementById('table-summary').innerText =
-                            `Showing 1 to ${totalEntries} of ${totalEntries} entries`;
-                    })
-                    .catch(error => console.error('Error fetching parking slots:', error));
-            }
-        });
-    </script> --}}
     <script>
         function updateClock() {
             const now = new Date();
@@ -468,9 +413,6 @@
         setInterval(updateClock, 1000);
         updateClock(); // run once immediately
     </script>
-
-
-
 </body>
 
 </html>

@@ -1,5 +1,5 @@
 <?php
-namespace App\Livewire;
+namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -57,7 +57,7 @@ if ($this->search !== '') {
         }
         $programs = $programsQuery->select('program')->distinct()->orderBy('program')->pluck('program');
 
-        return view('livewire.users-table', [
+        return view('livewire.admin.users-table', [
             'users' => $users,
             'departments' => $departments,
             'programs' => $programs,

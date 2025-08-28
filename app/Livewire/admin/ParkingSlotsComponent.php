@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
@@ -122,6 +122,6 @@ class ParkingSlotsComponent extends Component
 
     public function render()
     {
-        return view('livewire.parking-slots-component');
+        return view('livewire.admin.parking-slots-component');
     }
 }

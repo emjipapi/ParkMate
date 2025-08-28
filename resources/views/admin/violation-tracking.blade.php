@@ -8,7 +8,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ParkMate - Sticker Generator</title>
+    <title>ParkMate - Violation Tracking</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap 5 CDN -->
@@ -336,20 +336,17 @@
                 <button class="btn">Parking Slots</button>
             
         </div>
-                <div href='/violation-tracking' wire:navigate class="btn-wrapper">
-           
-                <button class="btn">Violation Tracking</button>
+        
+        <div class="btn-wrapper"><button class="btn active">Violation Tracking</button></div>
+                <div href='/users' wire:navigate class="btn-wrapper">
             
-        </div>
-                        <div href='/users' wire:navigate class="btn-wrapper">
-           
                 <button class="btn">Users</button>
-            
-        </div>
-                <div class="btn-wrapper">
            
-                <button class="btn active">Sticker Generator</button>
+        </div>
+                <div href='/sticker-generator' wire:navigate class="btn-wrapper">
             
+                <button class="btn">Sticker Generator</button>
+          
         </div>
                 <div href='/activity-log' wire:navigate class="btn-wrapper">
            
@@ -379,15 +376,16 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Generate</h3>
-                <h6 class="mb-0">Sticker</h6>
+                <h3 class="mb-0 me-3">Ano ilalagay ko</h3>
+                <h6 class="mb-0">otid</h6>
             </div>
-            <span class="text-muted">Home > Sticker Generator</span>
+            <span class="text-muted">Home > Violation Tracking</span>
         </div>
 
 
         <div class="square-box">
-            @livewire('generator-component')
+            <livewire:admin.violation-admin-component />
+
         </div>
 
     </div>

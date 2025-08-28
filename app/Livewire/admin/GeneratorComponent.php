@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Admin;
 
 use Livewire\Component;
 
@@ -8,6 +8,6 @@ class GeneratorComponent extends Component
 {
     public function render()
     {
-        return view('livewire.generator-component');
+        return view('livewire.admin.generator-component');
     }
 }

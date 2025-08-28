@@ -31,7 +31,7 @@ Route::post('/admin/login', [AdminAuthController::class, 'login'])
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
 
 // Public pages (e.g., parking-slots) that anyone can see
-Route::view('/parking-slots', 'parking-slots')->name('parking.slots');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -41,26 +41,27 @@ Route::view('/parking-slots', 'parking-slots')->name('parking.slots');
 Route::middleware(['admin'])->group(function () {
     // Dashboard
     Route::get('/dashboard', function () {
-        return view('index'); // admin dashboard
+        return view('admin.index'); // admin dashboard
     })->name('admin.dashboard');
 
     // User management
-    Route::view('/users', 'users')->name('users');
+    Route::view('/users', 'admin.users')->name('users');
         Route::get('/users/create', function () {
-        return view('user-create'); // Blade containing <livewire:user-form />
+        return view('admin.user-create'); // Blade containing <livewire:user-form />
     })->name('users.create');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
 
     // Other admin pages
-    Route::view('/sample', 'sample');
-    Route::view('/dashboard/live-attendance-mode', 'live-attendance-mode');
-    Route::view('/sticker-generator', 'sticker-generator');
-    Route::view('/violation-tracking', 'violation-tracking');
-    Route::view('/activity-log', 'activity-log');
+    // Route::view('/sample', 'sample');
+    Route::view('/dashboard/live-attendance-mode', 'admin.live-attendance-mode');
+    Route::view('/sticker-generator', 'admin.sticker-generator');
+    Route::view('/violation-tracking', 'admin.violation-tracking');
+    Route::view('/activity-log', 'admin.activity-log');
+    Route::view('/parking-slots', 'admin.parking-slots')->name('parking.slots');
     // routes/web.php
 Route::get('/dashboard/analytics-dashboard', function () {
     $chart = new AnalyticsChart;
-    return view('analytics-dashboard', compact('chart'));
+    return view('admin.analytics-dashboard', compact('chart'));
 });
 
 

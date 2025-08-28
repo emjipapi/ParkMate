@@ -41,6 +41,6 @@ public function logout()
 
     public function showLoginForm()
     {
-        return view('login'); // make sure you have resources/views/admin/login.blade.php
+        return view('admin.login'); // make sure you have resources/views/admin/login.blade.php
     }
 }

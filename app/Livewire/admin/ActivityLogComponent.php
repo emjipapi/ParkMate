@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -76,7 +76,7 @@ protected string $paginationTheme = 'bootstrap';
             ->latest()
             ->paginate(10);
 
-        return view('livewire.activity-log-component', [
+        return view('livewire.admin.activity-log-component', [
             'activityLogs' => $logs,
         ]);
     }
