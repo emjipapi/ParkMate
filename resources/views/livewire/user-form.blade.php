@@ -45,7 +45,7 @@
     </div>
 
     <!-- Vehicles Section -->
-    <h5>Vehicles</h5>
+    <h4>Vehicles</h4>
     <div class="vehicle-rows">
         @foreach($vehicles as $index => $vehicle)
             <div class="row mb-2 align-items-end">
