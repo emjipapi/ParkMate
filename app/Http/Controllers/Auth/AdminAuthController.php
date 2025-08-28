@@ -7,22 +7,23 @@ use Illuminate\Support\Facades\Auth;
 
 class AdminAuthController extends Controller
 {
-
    
 public function login(Request $request)
 {
     $credentials = $request->only('username', 'password');
 
-if (Auth::guard('admin')->attempt($credentials)) {
+    if (Auth::guard('admin')->attempt($credentials)) {
+        // Regenerate session to prevent fixation attacks
+        $request->session()->regenerate();
+        
+        $adminId = Auth::guard('admin')->id();
+        activity_log('admin', $adminId, 'login', 'Admin logged in');
 
-    $adminId = Auth::guard('admin')->id(); // get logged-in admin ID
-    activity_log('admin', $adminId, 'login', 'Admin logged in');
+        // Store admin ID in session
+        session(['admin_id' => $adminId]);
 
-    session(['admin_id' => $adminId]); // store admin ID in session for Livewire
-
-    return redirect()->intended('/dashboard');
-}
-
+        return redirect()->intended('/admin-dashboard');
+    }
 
     return back()->withErrors(['error' => 'Invalid credentials']);
 }
@@ -31,16 +32,18 @@ public function logout()
 {
     if (Auth::guard('admin')->check()) {
         activity_log('admin', Auth::guard('admin')->id(), 'logout', 'Admin logged out');
-
         Auth::guard('admin')->logout();
+        
+        // Clear the session
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
     }
 
-    return redirect()->route('admin.login.form');
+    return redirect()->route('login.selection');
 }
 
-
-    public function showLoginForm()
-    {
-        return view('admin.login'); // make sure you have resources/views/admin/login.blade.php
-    }
+public function showLoginForm()
+{
+    return view('auth.admin-login');
+}
 }

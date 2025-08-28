@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ParkMate - Dashboard</title>
+    <title>ParkMate - Admin Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap 5 CDN -->
@@ -377,7 +377,7 @@
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div class="live-btn-bar">
-            <a href="{{ url('/dashboard/live-attendance-mode') }}" style="text-decoration: none;">
+            <a href="{{ url('/admin-dashboard/live-attendance-mode') }}" style="text-decoration: none;">
             <button class="live-btn">
                 Live Attendance Mode
             </button>

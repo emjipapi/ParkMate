@@ -325,7 +325,7 @@
         </div>
 
         <div class="btn-wrapper mt-3">
-            <a href="{{ url('/dashboard') }}" style="text-decoration: none;">
+            <a href="{{ url('/admin-dashboard') }}" style="text-decoration: none;">
                 <button class="btn">Dashboard</button>
             </a>
         </div>
@@ -363,7 +363,7 @@
     <div class="top-bar">
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
-        <div href='/dashboard/live-attendance-mode' wire:navigate class="live-btn-bar">
+        <div href='/admin-dashboard/live-attendance-mode' wire:navigate class="live-btn-bar">
                 <button class="live-btn">
                     Live Attendance Mode
                 </button>   

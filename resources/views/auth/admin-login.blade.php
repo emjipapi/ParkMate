@@ -24,9 +24,9 @@
     }
 
     .center-box {
-      max-width: 440px;
+      min-width: 350px;
       /* keeps original width on desktop */
-      x;
+      
       min-height: 240px;
       background-color: #ffffff;
       padding: 20px;

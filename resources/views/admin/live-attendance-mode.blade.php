@@ -172,7 +172,7 @@
         </div>
 
         <div class="btn-wrapper mt-3">
-            <a href="{{ url('/dashboard') }}" style="text-decoration: none;">
+            <a href="{{ url('/admin-dashboard') }}" style="text-decoration: none;">
                 <button class="btn active">Dashboard</button>
             </a>
         </div>
