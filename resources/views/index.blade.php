@@ -395,7 +395,7 @@
             <span class="text-white">Home > Dashboard</span>
         </div>
 
-        <livewire:cards-component />
+        <livewire:violation-admin-component />
         
     </div>
     <!-- Bottom Bar -->
