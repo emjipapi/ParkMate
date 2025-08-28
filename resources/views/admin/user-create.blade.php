@@ -391,7 +391,7 @@
             <span class="text-muted">Home > Users > Create</span>
         </div>
        
-        <livewire:admin.user-create />
+        <livewire:admin.user-form />
         
     </div>
     <!-- Bottom Bar -->

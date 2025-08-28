@@ -6,13 +6,13 @@
     <title>ParkMate - User Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap 5 CDN -->
-  <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-  <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-  <!-- Inter font -->
-  <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    <!-- Bootstrap 5 CDN -->
+    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+    <!-- Inter font -->
+    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
     <style>
         :root {
             --sidebar-bg: #182125;
@@ -94,13 +94,8 @@
             padding: 20px;
             padding-bottom: 60px;
             min-height: calc(100vh - 96px);
-            display: flex;
-            flex-direction: column;
-            background-image: url('{{ asset('images/image1.png') }}');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            box-shadow: inset 0 60px 30px -20px rgba(0, 0, 0, 0.5);
+
+            background-color: #EAEEF4;
         }
 
         .live-btn-bar {
@@ -139,11 +134,11 @@
         }
 
         .content h3 {
-            color: white;
+            color: black;
         }
 
         .content h6 {
-            color: white;
+            color: black;
         }
 
         .bottom-bar {
@@ -160,11 +155,12 @@
             padding: 0 20px;
             font-weight: 500;
         }
+
         .content .cards-container {
             margin-top: auto;
-            
+
         }
-        
+
         .card {
             display: flex;
             flex-direction: column;
@@ -204,120 +200,168 @@
             color: white;
             height: 200px;
         }
-.cards-container {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1rem;
-}
 
-/* Place cards exactly */
-.card-5 { grid-column: 4; grid-row: 1; height: 200px; border: 0; border-radius: 0; background: #6c63ff; color: #fff; }
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+        }
 
-.card-1 { grid-column: 1; grid-row: 2; height: 200px; }
-.card-2 { grid-column: 2; grid-row: 2; height: 200px; }
-.card-3 { grid-column: 3; grid-row: 2; height: 200px; }
+        /* Place cards exactly */
+        .card-5 {
+            grid-column: 4;
+            grid-row: 1;
+            height: 200px;
+            border: 0;
+            border-radius: 0;
+            background: #6c63ff;
+            color: #fff;
+        }
 
-.card-4 {
-    grid-column: 4; grid-row: 2;
-    border: 0; border-radius: 0; background: #fff; color: #000;
-    height: 450px; overflow-y: auto; padding: 1rem;
-}
+        .card-1 {
+            grid-column: 1;
+            grid-row: 2;
+            height: 200px;
+        }
 
-/* Keep cards as flex boxes for internal layout (OK with grid) */
-.cards-container .card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
+        .card-2 {
+            grid-column: 2;
+            grid-row: 2;
+            height: 200px;
+        }
 
-/* Remove leftover flex styles for cards inside grid */
-.cards-container .card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
+        .card-3 {
+            grid-column: 3;
+            grid-row: 2;
+            height: 200px;
+        }
 
-.card-4 h5 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 0.5rem;
-}
+        .card-4 {
+            grid-column: 4;
+            grid-row: 2;
+            border: 0;
+            border-radius: 0;
+            background: #fff;
+            color: #000;
+            height: 450px;
+            overflow-y: auto;
+            padding: 1rem;
+        }
 
-.recent-activity-item {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #eee;
-}
+        /* Keep cards as flex boxes for internal layout (OK with grid) */
+        .cards-container .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
 
-.recent-activity-item:last-child {
-    border-bottom: none;
-}
+        /* Remove leftover flex styles for cards inside grid */
+        .cards-container .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
 
-.recent-activity-status {
-    font-weight: bold;
-    color: #007BFF; /* can adjust color per action type if needed */
-}
-.mobile-menu-btn {
-    display: none; /* hidden on desktop */
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: white;
-    margin-right: 10px;
-}
+        .card-4 h5 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 0.5rem;
+        }
 
-@media (max-width: 768px) {
-    .cards-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem; /* spacing between cards */
-    }
+        .recent-activity-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
 
-    .cards-container .card {
-        width: 100%;
-    }
+        .recent-activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .recent-activity-status {
+            font-weight: bold;
+            color: #007BFF;
+            /* can adjust color per action type if needed */
+        }
+
         .mobile-menu-btn {
-        display: inline-block;
-    }
-        .sidebar {
-        transform: translateX(-100%); /* hidden */
-        z-index: 1000;
-        transition: transform 0.3s ease-in-out;
-        
-    }
-    .sidebar .mt-auto {
-        margin-top: 0 !important;
-    }
+            display: none;
+            /* hidden on desktop */
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            margin-right: 10px;
+        }
 
-    .sidebar.open {
-        transform: translateX(0); /* slide in */
-    }
+        @media (max-width: 768px) {
+            .cards-container {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                /* spacing between cards */
+            }
 
-    .content, .top-bar, .bottom-bar {
-        margin-left: 0; /* full width on mobile */
-    }
-    .bottom-bar {
-        left: 0;
-        width: 100%;
-        position: relative; /* or fixed if you want it always at bottom */
-        padding: 0 10px; /* optional: less padding for mobile */
-        flex-direction: column; /* optional: stack items vertically if needed */
-        gap: 5px;
-    }
-        .d-flex.align-items-baseline h3 {
-        font-size: 1.2rem; /* smaller heading on mobile */
-    }
+            .cards-container .card {
+                width: 100%;
+            }
 
-    .d-flex.align-items-baseline h6 {
-        font-size: 0.9rem; /* smaller subheading */
-    }
+            .mobile-menu-btn {
+                display: inline-block;
+            }
 
-    .d-flex.align-items-baseline span,
-    .d-flex.align-items-baseline .text-white {
-        font-size: 0.8rem; /* smaller breadcrumb text */
-    }
-}
+            .sidebar {
+                transform: translateX(-100%);
+                /* hidden */
+                z-index: 1000;
+                transition: transform 0.3s ease-in-out;
 
+            }
+
+            .sidebar .mt-auto {
+                margin-top: 0 !important;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                /* slide in */
+            }
+
+            .content,
+            .top-bar,
+            .bottom-bar {
+                margin-left: 0;
+                /* full width on mobile */
+            }
+
+            .bottom-bar {
+                left: 0;
+                width: 100%;
+                position: relative;
+                /* or fixed if you want it always at bottom */
+                padding: 0 10px;
+                /* optional: less padding for mobile */
+                flex-direction: column;
+                /* optional: stack items vertically if needed */
+                gap: 5px;
+            }
+
+            .d-flex.align-items-baseline h3 {
+                font-size: 1.2rem;
+                /* smaller heading on mobile */
+            }
+
+            .d-flex.align-items-baseline h6 {
+                font-size: 0.9rem;
+                /* smaller subheading */
+            }
+
+            .d-flex.align-items-baseline span,
+            .d-flex.align-items-baseline .text-white {
+                font-size: 0.8rem;
+                /* smaller breadcrumb text */
+            }
+        }
     </style>
 </head>
 
@@ -325,9 +369,9 @@
 
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column">
-        
+
         <div class="admin-header">
-            <h4>Admin</h4>
+            <h4>User</h4>
         </div>
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
 
@@ -337,38 +381,23 @@
                 <button class="btn">Parking Slots</button>
             </a>
         </div>
-                <div class="btn-wrapper">
-            <a href="{{ url('/violation-tracking') }}"  style="text-decoration: none;">
+        <div class="btn-wrapper">
+            <a href="{{ url('/violation-tracking') }}" style="text-decoration: none;">
                 <button class="btn">Violation Tracking</button>
             </a>
         </div>
         <div class="btn-wrapper">
-            <a href="{{ url('/users') }}"  style="text-decoration: none;">
-                <button class="btn">Users</button>
-            </a>
-        </div>
-                <div class="btn-wrapper">
-            <a href="{{ url('/sticker-generator') }}"  style="text-decoration: none;">
-                <button class="btn">Sticker Generator</button>
-            </a>
-        </div>
-        <div class="btn-wrapper">
-            <a href="{{ url('/activity-log') }}" style="text-decoration: none;">
-                <button class="btn">Activity Log</button>
-            </a>
-        </div>
-                        <div class="btn-wrapper">
-            <a href=""  style="text-decoration: none;">
+            <a href="" style="text-decoration: none;">
                 <button class="btn">Settings</button>
             </a>
         </div>
-        
+
         <div class="mt-auto p-3">
-    <form action="{{ route('user.logout') }}" method="POST">
-        @csrf
-        <button type="submit" class="btn btn-danger w-100">Logout</button>
-    </form>
-</div>
+            <form action="{{ route('user.logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger w-100">Logout</button>
+            </form>
+        </div>
 
     </div>
 
@@ -376,13 +405,7 @@
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
-        <div class="live-btn-bar">
-            <a href="{{ url('/dashboard/live-attendance-mode') }}" style="text-decoration: none;">
-            <button class="live-btn">
-                Live Attendance Mode
-            </button>
-            </a>
-        </div>
+
     </div>
 
     <!-- Main Content -->
@@ -390,43 +413,43 @@
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
                 <h3 class="mb-0 me-3">Dashboard</h3>
-                <h6 class="mb-0">Control Panel</h6>
+                <h6 class="mb-0">My Account</h6>
             </div>
-            <span class="text-white">Home > Dashboard</span>
+            <span class="text-muted">Home > Dashboard</span>
         </div>
 
-        
-        
+
+
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
         <span>Copyright © 2025 - 2025 All rights reserved</span>
         <span>ParkMate</span>
     </div>
-<script>
+    <script>
 
-    function updateClock() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
 
-        document.getElementById('clock').textContent =
-            `${hours}:${minutes}:${seconds}`;
-    }
-    setInterval(updateClock, 1000);
-    updateClock(); // run once immediately
-</script>
-<script>
-function openSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('open');
-}
-function closeSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('open');
-}
-</script>
+            document.getElementById('clock').textContent =
+                `${hours}:${minutes}:${seconds}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock(); // run once immediately
+    </script>
+    <script>
+        function openSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+        function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+    </script>
 
 </body>
 
