@@ -376,13 +376,13 @@
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
 
         <div class="btn-wrapper mt-3"><button class="btn active">Dashboard</button></div>
-        <div class="btn-wrapper" href='/parking-slots' wire:navigate>
+        <div class="btn-wrapper" href='/user-parking-slots' wire:navigate>
                 <button class="btn">Parking Slots</button>
         </div>
-        <div class="btn-wrapper">
-                <button class="btn">Violation Tracking</button>
+        <div class="btn-wrapper" href='/user-violation-tracking' wire:navigate>
+            <button class="btn">Violation Tracking</button>
         </div>
-        <div class="btn-wrapper">        
+        <div class="btn-wrapper" href='/user-settings' wire:navigate>  
                 <button class="btn">Settings</button>
         </div>
 

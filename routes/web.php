@@ -71,11 +71,11 @@ Route::middleware(['admin'])->group(function () {
     })->name('admin.dashboard');
 
     // User management
-    
+
     Route::get('/users/create', function () {
         return view('admin.user-create'); // Blade containing <livewire:user-form />
     })->name('users.create');
-    
+
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
 
     // Other admin pages
@@ -109,6 +109,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user-dashboard', function () {
         return view('user.dashboard'); // normal user dashboard
     })->name('user.dashboard');
-    Route::view('/parking-slots', 'user.parking-slots')->name('parking.slots');
-    Route::view('/violation-tracking', 'user.violation-tracking')->name('parking.slots');
+    Route::view('/user-parking-slots', 'user.parking-slots')->name('parking.slots');
+    Route::view('/user-violation-tracking', 'user.violation-tracking')->name('violation.tracking');
+    Route::view('/user-settings', 'user.settings')->name('user.settings');
 });

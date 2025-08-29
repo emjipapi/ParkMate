@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ParkMate - Parking Slots</title>
+    <title>ParkMate - Violation Tracking</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap 5 CDN -->
@@ -375,12 +375,14 @@
         </div>
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
 
-        <div class="btn-wrapper mt-3" href='/user-dashboard' wire:navigate><button class="btn">Dashboard</button></div>
-        <div class="btn-wrapper">
-            <button class="btn active">Parking Slots</button>
+        <div class="btn-wrapper mt-3" href='/user-dashboard' wire:navigate>
+            <button class="btn">Dashboard</button>
         </div>
-        <div class="btn-wrapper" href='/user-violation-tracking' wire:navigate>
-            <button class="btn">Violation Tracking</button>
+        <div class="btn-wrapper" href='/user-parking-slots' wire:navigate>
+            <button class="btn">Parking Slots</button>
+        </div>
+        <div class="btn-wrapper" href='/user-settings' wire:navigate>
+            <button class="btn active">Violation Tracking</button>
         </div>
         <div class="btn-wrapper" href='/user-settings' wire:navigate>
             <button class="btn">Settings</button>
@@ -406,10 +408,10 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">View</h3>
-                <h6 class="mb-0">All Slots</h6>
+                <h3 class="mb-0 me-3">Ano ilalagay</h3>
+                <h6 class="mb-0">ko otid</h6>
             </div>
-            <span class="text-muted">Home > Parking Slots</span>
+            <span class="text-muted">Home > Violation Tracking</span>
         </div>
 
     </div>

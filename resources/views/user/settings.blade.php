@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ParkMate - Parking Slots</title>
+    <title>ParkMate - User Settings</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap 5 CDN -->
@@ -375,15 +375,17 @@
         </div>
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
 
-        <div class="btn-wrapper mt-3" href='/user-dashboard' wire:navigate><button class="btn">Dashboard</button></div>
-        <div class="btn-wrapper">
-            <button class="btn active">Parking Slots</button>
+        <div class="btn-wrapper mt-3" href='/user-dashboard' wire:navigate>
+            <button class="btn">Dashboard</button>
+        </div>
+        <div class="btn-wrapper" href='/user-parking-slots' wire:navigate>
+            <button class="btn">Parking Slots</button>
         </div>
         <div class="btn-wrapper" href='/user-violation-tracking' wire:navigate>
             <button class="btn">Violation Tracking</button>
         </div>
-        <div class="btn-wrapper" href='/user-settings' wire:navigate>
-            <button class="btn">Settings</button>
+        <div class="btn-wrapper">
+            <button class="btn active">Settings</button>
         </div>
 
         <div class="mt-auto p-3">
@@ -406,10 +408,10 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">View</h3>
-                <h6 class="mb-0">All Slots</h6>
+                <h3 class="mb-0 me-3">Manage</h3>
+                <h6 class="mb-0">Settings</h6>
             </div>
-            <span class="text-muted">Home > Parking Slots</span>
+            <span class="text-muted">Home > Settings</span>
         </div>
 
     </div>
