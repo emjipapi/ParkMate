@@ -376,14 +376,14 @@
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
 
         <div class="btn-wrapper mt-3" href='/user-dashboard' wire:navigate><button class="btn">Dashboard</button></div>
-        <div class="btn-wrapper" >
+        <div class="btn-wrapper">
             <button class="btn active">Parking Slots</button>
         </div>
-        <div class="btn-wrapper">
-                <button class="btn">Violation Tracking</button>
+        <div class="btn-wrapper" href='/violation-tracking' wire:navigate>
+            <button class="btn">Violation Tracking</button>
         </div>
-        <div class="btn-wrapper">        
-                <button class="btn">Settings</button>
+        <div class="btn-wrapper">
+            <button class="btn">Settings</button>
         </div>
 
         <div class="mt-auto p-3">
