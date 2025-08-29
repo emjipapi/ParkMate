@@ -375,9 +375,9 @@
         </div>
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
 
-        <div class="btn-wrapper mt-3"><button class="btn active">Dashboard</button></div>
-        <div class="btn-wrapper" href='/parking-slots' wire:navigate>
-                <button class="btn">Parking Slots</button>
+        <div class="btn-wrapper mt-3" href='/user-dashboard' wire:navigate><button class="btn">Dashboard</button></div>
+        <div class="btn-wrapper" >
+            <button class="btn active">Parking Slots</button>
         </div>
         <div class="btn-wrapper">
                 <button class="btn">Violation Tracking</button>

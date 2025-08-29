@@ -57,6 +57,7 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/users/create', function () {
         return view('admin.user-create'); // Blade containing <livewire:user-form />
     })->name('users.create');
+    
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
 
     // Other admin pages
@@ -72,7 +73,6 @@ Route::middleware(['admin'])->group(function () {
         $chart = new AnalyticsChart;
         return view('admin.analytics-dashboard', compact('chart'));
     });
-
 
     // Profile pictures
     Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
@@ -91,4 +91,5 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user-dashboard', function () {
         return view('user.dashboard'); // normal user dashboard
     })->name('user.dashboard');
+    Route::view('/parking-slots', 'user.parking-slots')->name('parking.slots');
 });
