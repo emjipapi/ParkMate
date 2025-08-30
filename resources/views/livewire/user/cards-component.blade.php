@@ -20,17 +20,22 @@
         </div>
         <div class="card-footer">More Info ➜</div>
     </div>
-
-    {{-- Users --}}
-    <div onclick="window.location='{{ url('/users') }}'" class="card card-3" style="cursor:pointer;">
-        <div class="card-body">
-            <h1 class="card-title">{{ $totalUsers }}</h1>
-            <p class="card-text">Total Users</p>
-        </div>
-        <div class="card-footer">More Info ➜</div>
+{{-- Violations & Pending Reports --}}
+<div onclick="window.location='{{ url('/user-violation-tracking') }}'" class="card card-3" style="cursor:pointer;">
+    <div class="card-body">
+        <h1 class="card-title">{{ $myViolationsCount }}</h1>
+        <p class="card-text">Violations</p>
+        <small>{{ $myPendingReports }} Reports Pending</small>
     </div>
+    <div class="card-footer">More Info ➜</div>
+</div>
 
-
+<div onclick="window.location='{{ url('/user-violation-tracking') }}'" class="card card-5 text-center" style="cursor:pointer;">
+    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+        <i class="fas fa-plus-circle" style="font-size: 4rem; color: white;"></i>
+        <p class="card-text mt-2 mb-1 fw-bold">Make Report</p>
+    </div>
+</div>
 
     {{-- Activity Logs --}}
     <div class="card card-4">

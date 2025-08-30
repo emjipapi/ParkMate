@@ -13,8 +13,10 @@ class Violation extends Model
 
     protected $fillable = [
         'reporter_id',
+        'violator_id',      // new
         'area_id',
         'description',
+        'license_plate',    // new
         'evidence',
         'status',
         'action_taken',
@@ -24,6 +26,12 @@ class Violation extends Model
     public function reporter()
     {
         return $this->belongsTo(User::class, 'reporter_id');
+    }
+
+    // Violator relationship (optional)
+    public function violator()
+    {
+        return $this->belongsTo(User::class, 'violator_id');
     }
 
     // Area relationship

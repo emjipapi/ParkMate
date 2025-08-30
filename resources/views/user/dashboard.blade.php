@@ -89,16 +89,17 @@
             line-height: 36px;
         }
 
-        .content {
-            margin-left: 250px;
-            padding: 20px;
-            padding-bottom: 60px;
-            min-height: calc(100vh - 96px);
-
-            background-color: #EAEEF4;
-                display: flex;
+.content {
+    display: flex;
     flex-direction: column;
-        }
+    margin-left: 250px;
+    padding: 20px;
+    padding-bottom: 60px;
+    min-height: calc(100vh - 96px);
+    background-color: #EAEEF4;
+
+    /* new: make the content a flex container */
+}
 
         .live-btn-bar {
             display: flex;
@@ -158,7 +159,7 @@
             font-weight: 500;
         }
 
-        .content .cards-container {
+       .content .cards-container {
             margin-top: auto;
             
         }
@@ -204,21 +205,44 @@
         }
 .cards-container {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 1rem;
-        align-items: end; /* glue items to bottom of grid container */
-    height: 100%; /* ensure container fills parent */
+    align-items: end; /* sticks all rows to the bottom */
+    height: 100%; /* make sure the container has full height */
 }
+        .card-5 {
+            border: 0px;
+            border-radius: 0px;
+            background-color: #03ca6aff;
+            color: white;
+            height: 200px;
+        }
 
 /* Place cards exactly */
-.card-5 { grid-column: 4; grid-row: 1; height: 200px; border: 0; border-radius: 0; background: #6c63ff; color: #fff; }
 
-.card-1 { grid-column: 1; grid-row: 2; height: 200px; }
-.card-2 { grid-column: 2; grid-row: 2; height: 200px; }
-.card-3 { grid-column: 3; grid-row: 2; height: 200px; }
+
+.card-1 { grid-column: 1; grid-row: 1; height: 200px; }
+.card-2 { grid-column: 2; grid-row: 1; height: 200px; }
+/* card-5 stacked on top of card-3 */
+.card-3 {
+    grid-column: 3;
+    grid-row: 1; /* base row */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    height: 200px;
+}
+
+.card-5 {
+    grid-column: 3; 
+    grid-row: 1; /* same row as card-3 */
+    align-self: start; /* stick to top of this cell */
+    z-index: 1; /* sit above card-3 */
+    height: 200px;
+}
 
 .card-4 {
-    grid-column: 4; grid-row: 2;
+    grid-column: 4; grid-row: 1;
     border: 0; border-radius: 0; background: #fff; color: #000;
     height: 450px; overflow-y: auto; padding: 1rem;
 }
@@ -243,20 +267,20 @@
     border-bottom: 1px solid #ddd;
     padding-bottom: 0.5rem;
 }
+        .recent-activity-item {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
 
-.recent-activity-item {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #eee;
-}
+        .recent-activity-item:last-child {
+            border-bottom: none;
+        }
 
-.recent-activity-item:last-child {
-    border-bottom: none;
-}
-
-.recent-activity-status {
-    font-weight: bold;
-    color: #007BFF; /* can adjust color per action type if needed */
-}
+        .recent-activity-status {
+            font-weight: bold;
+            color: #007BFF;
+            /* can adjust color per action type if needed */
+        }
 
         .mobile-menu-btn {
             display: none;
@@ -335,6 +359,9 @@
                 font-size: 0.8rem;
                 /* smaller breadcrumb text */
             }
+                .cards-container .card-5 {
+        order: -1; /* first on mobile */
+    }
         }
     </style>
 </head>
@@ -385,7 +412,7 @@
             </div>
             <span class="text-muted">Home > Dashboard</span>
         </div>
-        <livewire:user.cards-component />
+        <livewire:user.cards-component>
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">

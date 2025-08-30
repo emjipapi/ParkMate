@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\StudentEmployee;
+use App\Models\User;
 
 class UserAuthController extends Controller
 {
@@ -18,7 +18,7 @@ class UserAuthController extends Controller
         $login = $request->login;
         $password = $request->password;
 
-        $user = StudentEmployee::where('student_id', $login)
+        $user = User::where('student_id', $login)
             ->orWhere('employee_id', $login)
             ->orWhere('email', $login)
             ->first();
