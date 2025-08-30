@@ -411,7 +411,9 @@
             </div>
             <span class="text-muted">Home > Parking Slots</span>
         </div>
-
+        <div class="square-box">
+            <livewire:user.parking-slots-component />
+        </div>
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
