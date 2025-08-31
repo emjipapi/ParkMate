@@ -53,7 +53,7 @@
     <thead>
         <tr>
             <th>ID</th>
-            <th>User/Admin ID</th>
+            <th>User Identifier</th>
             <th>Name</th>
             <th>Action</th>
             <th>Description</th>

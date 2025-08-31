@@ -72,9 +72,13 @@ Route::middleware(['admin'])->group(function () {
 
     // User management
 
-    Route::get('/users/create', function () {
+    Route::get('/users/create-user', function () {
         return view('admin.user-create'); // Blade containing <livewire:user-form />
     })->name('users.create');
+
+        Route::get('/users/create-admin', function () {
+        return view('admin.admin-create'); // Blade containing <livewire:user-form />
+    })->name('admins.create');
 
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
 
