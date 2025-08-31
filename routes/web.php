@@ -7,7 +7,7 @@ use App\Http\Controllers\ProfilePictureController;
 use App\Charts\AnalyticsChart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use App\Http\Controllers\EvidenceController;
 /*
 |--------------------------------------------------------------------------
 | Public / Login Routes
@@ -114,6 +114,8 @@ Route::middleware(['auth'])->group(function () {
         return view('user.dashboard'); // normal user dashboard
     })->name('user.dashboard');
     Route::view('/user-parking-slots', 'user.parking-slots')->name('parking.slots');
-    Route::view('/user-violation-tracking', 'user.violation-tracking')->name('violation.tracking');
+    Route::view('/user-violation-tracking', 'user.violation-tracking')
+    ->name('user.violation.tracking');
     Route::view('/user-settings', 'user.settings')->name('user.settings');
+    Route::post('/evidence/upload', [EvidenceController::class, 'store'])->name('evidence.upload');
 });

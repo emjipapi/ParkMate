@@ -293,6 +293,15 @@
             color: white;
             margin-right: 10px;
         }
+                .square-box {
+            background-color: white;
+            width: 100%;
+            min-height: 100px;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
 
         @media (max-width: 768px) {
             .cards-container {

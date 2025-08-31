@@ -59,6 +59,31 @@ class RfidController extends Controller
             $newAction = 'exit';
         }
 
+        $pendingViolations = DB::table('violations')
+    ->where('violator_id', $user->id)  // <-- links to the student/employee
+    ->where('status', 'Approved')
+    ->whereNull('action_taken')       // still unresolved
+    ->count();
+
+$violationThreshold = 3;
+
+if ($pendingViolations >= $violationThreshold) {
+    // Deny entry and log it
+    ActivityLog::create([
+        'actor_type' => 'system',
+        'actor_id' => $user->id,
+        'area_id' => null,
+        'action' => 'denied_entry',
+        'details' => "User {$user->firstname} {$user->lastname} denied entry due to {$pendingViolations} unresolved approved violations.",
+        'created_at' => now(),
+    ]);
+
+    return response()->json([
+        'message' => "Access denied: {$pendingViolations} unresolved violations",
+    ], 403);
+}
+
+
         // 3. If exiting main gate, automatically exit all currently active areas
         if ($newAction === 'exit') {
             // Find all areas where user has entries but no corresponding exits

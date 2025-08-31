@@ -293,6 +293,15 @@
             color: white;
             margin-right: 10px;
         }
+                .square-box {
+            background-color: white;
+            width: 100%;
+            min-height: 100px;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
 
         @media (max-width: 768px) {
             .cards-container {
@@ -364,9 +373,7 @@
         }
     </style>
 </head>
-
 <body>
-
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column">
 
@@ -403,7 +410,6 @@
         <span style="flex: 1;"></span>
 
     </div>
-
     <!-- Main Content -->
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
@@ -413,7 +419,9 @@
             </div>
             <span class="text-muted">Home > Violation Tracking</span>
         </div>
-
+        
+            <livewire:user.create-violation-component />
+        
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
@@ -422,7 +430,6 @@
     </div>
     @livewireScripts
     <script>
-
         function updateClock() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');
@@ -442,10 +449,9 @@
         }
         function closeSidebar() {
             const sidebar = document.querySelector('.sidebar');
-            sidebar.classList.toggle('open');
+            sidebar.classList.toggle('close');
         }
     </script>
 
 </body>
-
 </html>
