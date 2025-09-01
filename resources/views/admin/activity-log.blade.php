@@ -10,7 +10,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-  <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
   <!-- Inter font -->
   <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
   <!-- Font Awesome -->
@@ -389,7 +388,7 @@
         <span>ParkMate</span>
     </div>
     <livewire:scripts />
-
+    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     <script>
         function updateClock() {
             const now = new Date();

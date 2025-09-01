@@ -8,7 +8,6 @@
 
   <!-- Bootstrap 5 CDN -->
   <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-  <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
   <!-- Inter font -->
   <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
   <!-- Font Awesome -->
@@ -248,7 +247,7 @@
         <span>ParkMate</span>
     </div>
 
-
+<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 <script>
     function updateClock() {
         const now = new Date();

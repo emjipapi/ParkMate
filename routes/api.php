@@ -41,7 +41,7 @@ Route::get('area-status', function (Request $request) {
 
     $motoAvailable = DB::table('motorcycle_counts')
         ->where('area_id', $areaId)
-        ->value('available');
+        ->value('available_count');
 
     return response()->json([
         'full' => ($carAvailable === 0 && $motoAvailable === 0)
