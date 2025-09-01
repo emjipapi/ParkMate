@@ -30,7 +30,7 @@ class CreateViolationComponent extends Component
         $this->validate([
             'description' => 'required|string',
             'area_id' => 'required|exists:parking_areas,id',
-            'evidence' => 'nullable|file|mimes:jpg,jpeg,png,mp4|max:2048', // 10MB max
+            'evidence' => 'nullable|file|mimes:jpg,jpeg,png|max:6144', // 6MB
             'license_plate' => 'nullable|string|max:255',
             'violator' => 'nullable|string|max:255',
         ]);
@@ -57,7 +57,7 @@ class CreateViolationComponent extends Component
             'area_id'       => $this->area_id,   // now just the selected ID
             'license_plate' => $this->license_plate,
             'violator'      => $this->violator,
-            'status'        => 'Pending',
+            'status'        => 'pending',
         ]);
 
         session()->flash('success', 'Report submitted successfully!');
