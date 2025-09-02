@@ -1,27 +1,22 @@
 <div>
-    <input
-        type="text"
-        class="form-control mb-3"
-        placeholder="Search users..."
-        wire:model.live.debounce.300ms="search"
-        style="width: 400px"
-    />
+    <input type="text" class="form-control mb-3" placeholder="Search users..." wire:model.live.debounce.300ms="search"
+        style="width: 400px" />
 
-<div class="d-flex justify-content gap-2 mb-3">
-    <select class="form-select form-select-sm w-auto" wire:model.live="filterDepartment">
-        <option value="">All Departments</option>
-        @foreach($departments as $dept)
-            <option value="{{ $dept }}">{{ $dept }}</option>
-        @endforeach
-    </select>
+    <div class="d-flex justify-content gap-2 mb-3">
+        <select class="form-select form-select-sm w-auto" wire:model.live="filterDepartment">
+            <option value="">All Departments</option>
+            @foreach($departments as $dept)
+                <option value="{{ $dept }}">{{ $dept }}</option>
+            @endforeach
+        </select>
 
-    <select class="form-select form-select-sm w-auto" wire:model.live="filterProgram">
-        <option value="">All Programs</option>
-        @foreach($programs as $prog)
-            <option value="{{ $prog }}">{{ $prog }}</option>
-        @endforeach
-    </select>
-</div>
+        <select class="form-select form-select-sm w-auto" wire:model.live="filterProgram">
+            <option value="">All Programs</option>
+            @foreach($programs as $prog)
+                <option value="{{ $prog }}">{{ $prog }}</option>
+            @endforeach
+        </select>
+    </div>
 
     <table class="table table-striped custom-table">
         <thead>
@@ -41,8 +36,8 @@
                 <tr>
                     <td>{{ $user->id }}</td>
                     <td>
-                    {{ $user->student_id ?? $user->employee_id }}
-                </td>
+                        {{ $user->student_id ?? $user->employee_id }}
+                    </td>
                     <td>{{ $user->firstname }}</td>
                     <td>{{ $user->middlename }}</td>
                     <td>{{ $user->lastname }}</td>
@@ -60,9 +55,6 @@
             @endforelse
         </tbody>
     </table>
-        <div class="mb-2 small text-muted">
-        Showing {{ $users->count() }} of {{ $users->total() }} users
-    </div>
 
     {{ $users->links('pagination::bootstrap-5') }}
 </div>
