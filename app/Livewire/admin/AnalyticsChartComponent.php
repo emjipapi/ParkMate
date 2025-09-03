@@ -16,11 +16,17 @@ class AnalyticsChartComponent extends Component
 
     public function mount()
     {
-        $this->dates = collect(range(0,6))
-            ->map(fn($i) => Carbon::today()->subDays($i)->toDateString())
+        // Get all unique dates from the activity_logs table
+        $this->dates = DB::table('activity_logs')
+            ->selectRaw('DATE(created_at) as date')
+            ->where('actor_type', 'user') // Only get dates where users had activity
+            ->distinct()
+            ->orderBy('date', 'desc') // Most recent first
+            ->pluck('date')
             ->toArray();
 
-        $this->selectedDate = $this->dates[0];
+        // Set default selected date to the most recent date if available
+        $this->selectedDate = !empty($this->dates) ? $this->dates[0] : Carbon::today()->toDateString();
         $this->loadData();
     }
 
