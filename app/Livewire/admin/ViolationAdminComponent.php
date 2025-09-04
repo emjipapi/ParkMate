@@ -74,35 +74,29 @@ class ViolationAdminComponent extends Component
      * Find violator information by license plate
      * Returns user info if plate exists, null if not found
      */
-    public function findViolatorByPlate($licensePlate)
-    {
-        if (empty($licensePlate)) {
-            return null;
-        }
-        
-        // Search for exact match first, then partial match
-        $vehicle = Vehicle::where('license_plate', trim($licensePlate))
-                         ->with('user')
-                         ->first();
-        
-        // If no exact match, try partial match
-        if (!$vehicle) {
-            $vehicle = Vehicle::where('license_plate', 'LIKE', '%' . trim($licensePlate) . '%')
-                             ->with('user')
-                             ->first();
-        }
-        
-        if ($vehicle && $vehicle->user) {
-            return [
-                'user_id' => (string) $vehicle->user->id, // Convert to string for consistency
-                'owner_name' => trim($vehicle->user->firstname . ' ' . $vehicle->user->lastname),
-                'license_plate' => $vehicle->license_plate,
-                'vehicle_id' => $vehicle->id
-            ];
-        }
-        
+public function findViolatorByPlate($licensePlate)
+{
+    if (empty($licensePlate)) {
         return null;
     }
+
+    // Only exact match
+    $vehicle = Vehicle::where('license_plate', trim($licensePlate))
+                     ->with('user')
+                     ->first();
+
+    if ($vehicle && $vehicle->user) {
+        return [
+            'user_id'      => (string) $vehicle->user->id,
+            'owner_name'   => trim($vehicle->user->firstname . ' ' . $vehicle->user->lastname),
+            'license_plate'=> $vehicle->license_plate,
+            'vehicle_id'   => $vehicle->id
+        ];
+    }
+
+    return null;
+}
+
 
     /**
      * Find license plates by violator ID or name

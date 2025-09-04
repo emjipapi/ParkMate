@@ -4,6 +4,7 @@ namespace App\Livewire\User;
 use App\Models\Violation;
 use Livewire\Component;
 use App\Models\ParkingArea;
+use App\Models\ActivityLog;
 use Livewire\WithFileUploads;
 
 class CreateViolationComponent extends Component
@@ -59,6 +60,24 @@ class CreateViolationComponent extends Component
             'violator'      => $this->violator,
             'status'        => 'pending',
         ]);
+
+    // Build details string
+    $userName = auth()->user()->firstname . ' ' . auth()->user()->lastname;
+    $details = "User {$userName} submitted a violation report";
+    if (!empty($this->license_plate)) {
+        $details .= " for plate {$this->license_plate}";
+    }
+    $details .= ".";
+
+    // Log the activity
+    ActivityLog::create([
+        'actor_type' => 'user',
+        'actor_id'   => auth()->id(),
+        'area_id'    => $this->area_id,
+        'action'     => 'report',
+        'details'    => $details,
+        'created_at' => now(),
+    ]);
 
         session()->flash('success', 'Report submitted successfully!');
         return redirect()->route('user.violation.tracking');
