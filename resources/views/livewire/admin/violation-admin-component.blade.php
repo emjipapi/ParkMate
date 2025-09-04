@@ -1,4 +1,26 @@
 <div class="container mt-4">
+
+        {{-- Search Bar --}}
+<div class="mb-3 position-relative" style="max-width: 300px;">
+    <input type="text" 
+           class="form-control" 
+           placeholder="User_ID / License_Plate Finder..." 
+           wire:model.live.debounce.300ms="searchTerm">
+
+    {{-- Dynamic Dropdown --}}
+    @if(!empty($searchResults))
+        <ul class="list-group position-absolute" 
+            style="max-height: 200px; overflow-y: auto; z-index: 50; width: 100%;">
+            @foreach($searchResults as $result)
+                <li class="list-group-item list-group-item-action" 
+                    wire:click="selectResult({{ $result->id }})">
+                    {{ $result->user_id }} — {{ $result->license_plate }}
+                </li>
+            @endforeach
+        </ul>
+    @endif
+</div>
+
     {{-- Tabs --}}
     <ul class="nav nav-tabs border-b mb-4 flex space-x-2">
         <li>

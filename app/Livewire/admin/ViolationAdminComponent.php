@@ -21,6 +21,7 @@ class ViolationAdminComponent extends Component
     // Limits
     protected $vehicleLimit = 3;
     protected $userLimit = 3;
+    
 
     public function mount()
     {
@@ -53,6 +54,30 @@ class ViolationAdminComponent extends Component
                 ];
             });
     }
+    public $searchTerm = '';
+public $searchResults = [];
+
+public function updatedSearchTerm()
+{
+    if (strlen($this->searchTerm) >= 2) { // start searching after 2 characters
+        $this->searchResults = Vehicle::where('user_id', 'like', '%'.$this->searchTerm.'%')
+                                ->orWhere('license_plate', 'like', '%'.$this->searchTerm.'%')
+                                ->limit(10)
+                                ->get();
+    } else {
+        $this->searchResults = [];
+    }
+}
+
+public function selectResult($vehicleId)
+{
+    $vehicle = Vehicle::find($vehicleId);
+
+    // Do something when selecting a result
+    // For example, filter your violations table by this vehicle
+    $this->searchResults = [];
+    $this->searchTerm = $vehicle->license_plate; // show selected
+}
 
     public function setActiveTab($tab)
     {
@@ -325,7 +350,8 @@ private function refreshViolations()
         return view('livewire.admin.violation-admin-component', [
             'violations' => $this->violations,
             'vehicles' => $this->vehicles,
-            'users' => $this->users
+            'users' => $this->users,
+            'searchResults' => $this->searchResults,
         ]);
     }
 }
