@@ -9,6 +9,7 @@ use App\Models\User;
 class ViolationAdminComponent extends Component
 {
     public $violations;
+ public $violationsActionTaken = [];
     public $activeTab = 'pending';
     public $vehicles = [];
     public $users = [];
@@ -290,6 +291,29 @@ private function refreshViolations()
             });
 
         return $searchResults;
+    }
+        public function markResolved($violationId)
+    {
+        $violation = Violation::find($violationId);
+
+        if (!$violation) return;
+
+        // Save action taken from dropdown if selected
+        $actionTaken = $this->violationsActionTaken[$violationId] ?? null;
+
+        if ($actionTaken) {
+            $violation->action_taken = $actionTaken;
+        }
+
+        $violation->status = 'resolved';
+        $violation->save();
+
+        // Update local property so table refreshes
+        $this->violations = Violation::where('status', 'approved')
+                                     ->orWhere('status', 'resolved')
+                                     ->get();
+
+        session()->flash('message', 'Violation marked as resolved.');
     }
 
     public function render()

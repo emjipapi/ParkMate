@@ -356,58 +356,65 @@
 
             {{-- Approved Reports --}}
         @elseif ($activeTab === 'approved')
-            <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Reporter</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Area</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Description</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Evidence</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Status</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Actions</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach ($violations->where('status', 'approved') as $violation)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2 text-sm text-gray-800">
-                                {{ $violation->reporter->firstname }} {{ $violation->reporter->lastname }}
-                            </td>
-                            <td class="px-4 py-2 text-sm text-gray-800">{{ $violation->area->name ?? 'N/A' }}</td>
-                            <td class="px-4 py-2 text-sm text-gray-800">{{ $violation->description }}</td>
-                            <td class="px-4 py-2 text-sm text-blue-600">
-                                @if($violation->evidence)
-                                    <a href="{{ asset('storage/' . $violation->evidence) }}" target="_blank"
-                                        class="underline hover:text-blue-800">View</a>
-                                @else
-                                    N/A
-                                @endif
-                            </td>
-                            <td class="px-4 py-2 text-sm font-semibold">
-                                <span class="px-2 py-1 rounded-full text-xs bg-green-100 text-green-800">
-                                    Approved
-                                </span>
-                            </td>
-                            <td class="px-4 py-2 space-x-2">
-                                @if($violation->status === 'resolved')
-                                    <button class="px-3 py-1 bg-blue-600 text-white font-semibold rounded text-xs cursor-default">
-                                        ✓ Resolved
-                                    </button>
-                                @else
-                                    <button wire:click="updateStatus({{ $violation->id }}, 'resolved')"
-                                        class="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-xs">
-                                        Mark as Resolved
-                                    </button>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+            <table class="table table-striped custom-table">
+    <thead>
+        <tr>
+            <th>Reporter</th>
+            <th>Area</th>
+            <th>Description</th>
+            <th>Evidence</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach($violations as $violation)
+            <tr>
+                <td>{{ $violation->reporter->firstname }} {{ $violation->reporter->lastname }}</td>
+                <td>{{ $violation->area->name ?? 'N/A' }}</td>
+                <td>{{ Str::limit($violation->description, 50) }}</td>
+                <td>
+                    @if($violation->evidence)
+                        <a href="{{ asset('storage/' . $violation->evidence) }}" target="_blank" class="text-decoration-underline">View</a>
+                    @else
+                        N/A
+                    @endif
+                </td>
+                <td>
+                    <span class="badge {{ $violation->status === 'resolved' ? 'bg-secondary' : 'bg-success' }}">
+                        {{ ucfirst($violation->status) }}
+                    </span>
+                </td>
+<td>
+    <div class="d-flex flex-column gap-1">
+        {{-- Dropdown --}}
+        <select class="form-select form-select-sm mb-1"
+                wire:model="violationsActionTaken.{{ $violation->id }}"
+                @if($violation->status === 'resolved') disabled @endif>
+            <option value="">Select action</option>
+            <option value="Warning Issued">Warning Issued</option>
+            <option value="Fine Imposed">Fine Imposed</option>
+            <option value="Suspended">Suspended</option>
+        </select>
+
+        {{-- Mark as Resolved --}}
+        @if($violation->status === 'resolved')
+            <button class="btn btn-sm btn-secondary" disabled>✓ Resolved</button>
+        @else
+            <button wire:click="markResolved({{ $violation->id }})" class="btn btn-sm btn-primary">
+                Mark as Resolved
+            </button>
+        @endif
+    </div>
+</td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>
 
             {{-- Resolved Reports --}}
         @elseif ($activeTab === 'resolved')
-            <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+            <table class="table table-striped custom-table">
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Reporter</th>
