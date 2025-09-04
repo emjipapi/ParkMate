@@ -313,6 +313,9 @@
             opacity: 1;
             pointer-events: auto;
         }
+        .nav-link {
+  cursor: pointer !important;
+}
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -394,6 +397,7 @@
         <span>ParkMate</span>
     </div>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+    {{-- <script src="{{ asset('js/alpine.min.js') }}"></script> --}}
     <livewire:scripts />
 
     <script>
@@ -410,6 +414,7 @@
         setInterval(updateClock, 1000);
         updateClock(); // run once immediately
     </script>
+
 </body>
 
 </html>
