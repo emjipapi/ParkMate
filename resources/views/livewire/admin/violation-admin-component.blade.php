@@ -26,7 +26,7 @@
     <div>
         {{-- Pending Reports --}}
         @if ($activeTab === 'pending')
-            <table class="min-w-full border border-gray-200 rounded-lg overflow-hidden">
+            <table class="table table-striped custom-table">
                 <thead class="bg-gray-100">
                     <tr>
                         <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Reporter ID & Name</th>
@@ -41,143 +41,136 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @foreach ($violations as $violation)
-                            <tr class="hover:bg-gray-50" x-data="violationRow_{{ $violation->id }}()" x-init="init()">
+                        <tr class="hover:bg-gray-50" x-data="violationRow_{{ $violation->id }}()" x-init="init()">
 
-                                {{-- Reporter ID & Name --}}
-                                <td class="px-4 py-2 text-sm text-gray-800">
-                                    <div class="font-medium">#{{ $violation->reporter->id ?? 'N/A' }}</div>
-                                    <div class="text-gray-600">{{ $violation->reporter->firstname ?? '' }}
-                                        {{ $violation->reporter->lastname ?? '' }}</div>
-                                </td>
+                            {{-- Reporter ID & Name --}}
+                            <td class="px-4 py-2 text-sm text-gray-800">
+                                <div class="font-medium">#{{ $violation->reporter->id ?? 'N/A' }}</div>
+                                <div class="text-gray-600">{{ $violation->reporter->firstname ?? '' }}
+                                    {{ $violation->reporter->lastname ?? '' }}
+                                </div>
+                            </td>
 
-                                {{-- Area --}}
-                                <td class="px-4 py-2 text-sm text-gray-800">
-                                    {{ $violation->area->name ?? 'N/A' }}
-                                </td>
+                            {{-- Area --}}
+                            <td class="px-4 py-2 text-sm text-gray-800">
+                                {{ $violation->area->name ?? 'N/A' }}
+                            </td>
 
-                                {{-- License Plate Input --}}
-                                <td class="px-4 py-2 text-sm">
-                                    <div class="space-y-1">
-                                        <input type="text" x-model="licensePlate" @blur="findViolatorByPlate()"
-                                            @keydown.enter.prevent="findViolatorByPlate()" placeholder="Enter license plate"
-                                            :disabled="'{{ $violation->status }}' === 'approved'"
-                                            class="w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                                            :class="plateStatus === 'found' ? 'border-green-500 focus:ring-green-500' : 
-                          plateStatus === 'not_found' ? 'border-red-300 focus:ring-red-300' : 
-                          'border-gray-300 focus:ring-blue-500'">
+                            {{-- License Plate Input --}}
+                            <td class="px-2 py-2 text-sm">
+                                <div class="d-flex flex-column">
+                                    <input type="text" x-model="licensePlate" @blur="findViolatorByPlate()"
+                                        @keydown.enter.prevent="findViolatorByPlate()" placeholder="Enter license plate"
+                                        :disabled="'{{ $violation->status }}' === 'approved'"
+                                        class="form-control form-control-sm" style="max-width: 150px;">
 
-                                        {{-- Status indicator --}}
-                                        <div class="text-xs" x-show="plateStatus">
-                                            <span x-show="plateStatus === 'found'" class="text-green-600 font-medium">
-                                                ✓ <span x-text="foundOwnerName"></span>
-                                            </span>
-                                            <span x-show="plateStatus === 'not_found'" class="text-red-500">
-                                                ✗ Plate not found
-                                            </span>
-                                            <span x-show="plateStatus === 'loading'" class="text-blue-500">
-                                                Searching...
-                                            </span>
-                                        </div>
+                                    <div class="text-xs mt-1">
+                                        <span x-show="plateStatus === 'found'" class="text-success font-weight-medium">
+                                            ✓ <span x-text="foundOwnerName"></span>
+                                        </span>
+                                        <span x-show="plateStatus === 'not_found'" class="text-danger">
+                                            ✗ Plate not found
+                                        </span>
+                                        <span x-show="plateStatus === 'loading'" class="text-primary">
+                                            Searching...
+                                        </span>
                                     </div>
-                                </td>
+                                </div>
+                            </td>
 
-                                {{-- Violator Input --}}
-                                <td class="px-4 py-2 text-sm">
-                                    <div class="space-y-1">
-                                        <input type="text" x-model="violatorId" @blur="findPlateByViolator()"
-                                            @keydown.enter.prevent="findPlateByViolator()" placeholder="Enter User ID"
-                                            :disabled="'{{ $violation->status }}' === 'approved'"
-                                            class="w-full px-2 py-1 text-xs border rounded focus:outline-none focus:ring-1 transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
-                                            :class="violatorStatus === 'found' ? 'border-green-500 focus:ring-green-500' : 
-                          violatorStatus === 'not_found' ? 'border-red-300 focus:ring-red-300' : 
-                          'border-gray-300 focus:ring-blue-500'">
+                            {{-- Violator Input --}}
+                            <td class="px-2 py-2 text-sm">
+                                <div class="d-flex flex-column">
+                                    <input type="text" x-model="violatorId" @blur="findPlateByViolator()"
+                                        @keydown.enter.prevent="findPlateByViolator()" placeholder="Enter User ID"
+                                        :disabled="'{{ $violation->status }}' === 'approved'"
+                                        class="form-control form-control-sm" style="max-width: 150px;">
 
-                                        {{-- Status indicator --}}
-                                        <div class="text-xs" x-show="violatorStatus">
-                                            <span x-show="violatorStatus === 'found'" class="text-green-600 font-medium">
-                                                ✓ <span x-text="foundViolatorName"></span>
-                                            </span>
-                                            <span x-show="violatorStatus === 'not_found'" class="text-red-500">
-                                                ✗ User not found
-                                            </span>
-                                            <span x-show="violatorStatus === 'loading'" class="text-blue-500">
-                                                Searching...
-                                            </span>
-                                        </div>
+                                    <div class="text-xs mt-1">
+                                        <span x-show="violatorStatus === 'found'" class="text-success font-weight-medium">
+                                            ✓ <span x-text="foundViolatorName"></span>
+                                        </span>
+                                        <span x-show="violatorStatus === 'not_found'" class="text-danger">
+                                            ✗ User not found
+                                        </span>
+                                        <span x-show="violatorStatus === 'loading'" class="text-primary">
+                                            Searching...
+                                        </span>
                                     </div>
-                                </td>
+                                </div>
+                            </td>
 
-                                {{-- Description --}}
-                                <td class="px-4 py-2 text-sm text-gray-800">
-                                    <div class="max-w-xs">
-                                        <div class="truncate" title="{{ $violation->description }}">
-                                            {{ Str::limit($violation->description, 50) }}
-                                        </div>
+
+                            {{-- Description --}}
+                            <td class="px-4 py-2 text-sm text-gray-800">
+                                <div class="max-w-xs">
+                                    <div class="truncate" title="{{ $violation->description }}">
+                                        {{ Str::limit($violation->description, 50) }}
                                     </div>
-                                </td>
+                                </div>
+                            </td>
 
-                                {{-- Evidence --}}
-                                <td class="px-4 py-2 text-sm">
-                                    @if ($violation->evidence)
-                                        <a href="{{ asset('storage/' . $violation->evidence) }}" target="_blank"
-                                            class="text-blue-600 hover:text-blue-800 underline text-xs">
-                                            View Evidence
-                                        </a>
+                            {{-- Evidence --}}
+                            <td class="px-4 py-2 text-sm">
+                                @if ($violation->evidence)
+                                    <a href="{{ asset('storage/' . $violation->evidence) }}" target="_blank"
+                                        class="text-blue-600 hover:text-blue-800 underline text-xs">
+                                        View Evidence
+                                    </a>
+                                @else
+                                    <span class="text-gray-500 text-xs">No evidence</span>
+                                @endif
+                            </td>
+
+                            {{-- Status --}}
+                            <td class="px-4 py-2 text-sm">
+                                @php
+                                    $statusColors = [
+                                        'pending' => 'bg-yellow-100 text-yellow-800',
+                                        'approved' => 'bg-green-100 text-green-800',
+                                        'rejected' => 'bg-red-100 text-red-800',
+                                        'resolved' => 'bg-blue-100 text-blue-800',
+                                    ];
+                                @endphp
+                                <span
+                                    class="px-2 py-1 rounded-full text-xs font-medium {{ $statusColors[$violation->status] ?? 'bg-gray-100 text-gray-800' }}">
+                                    {{ ucfirst($violation->status) }}
+                                </span>
+                            </td>
+
+                            {{-- Actions --}}
+                            <td class="px-4 py-2 align-middle">
+                                <div class="d-flex flex-column gap-1">
+                                    @if ($violation->status === 'approved')
+                                        {{-- Locked Approved --}}
+                                        <span class="badge bg-success d-inline-block w-100 text-center py-2">
+                                            ✓ Approved
+                                        </span>
+                                    @elseif ($violation->status === 'rejected')
+                                        {{-- Rejected but can still be approved later --}}
+                                        <button wire:click="updateStatus({{ $violation->id }}, 'approved')"
+                                            class="btn btn-sm btn-success w-100">
+                                            Approve
+                                        </button>
+                                        <span class="badge bg-danger d-inline-block w-100 text-center py-2">
+                                            ✓ Rejected
+                                        </span>
                                     @else
-                                        <span class="text-gray-500 text-xs">No evidence</span>
+                                        {{-- Pending --}}
+                                        <button wire:click="updateStatus({{ $violation->id }}, 'approved')"
+                                            class="btn btn-sm btn-success w-100">
+                                            Approve
+                                        </button>
+                                        <button wire:click="updateStatus({{ $violation->id }}, 'rejected')"
+                                            class="btn btn-sm btn-danger w-100">
+                                            Reject
+                                        </button>
                                     @endif
-                                </td>
+                                </div>
+                            </td>
 
-                                {{-- Status --}}
-                                <td class="px-4 py-2 text-sm">
-                                    @php
-                                        $statusColors = [
-                                            'pending' => 'bg-yellow-100 text-yellow-800',
-                                            'approved' => 'bg-green-100 text-green-800',
-                                            'rejected' => 'bg-red-100 text-red-800',
-                                            'resolved' => 'bg-blue-100 text-blue-800',
-                                        ];
-                                    @endphp
-                                    <span
-                                        class="px-2 py-1 rounded-full text-xs font-medium {{ $statusColors[$violation->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                        {{ ucfirst($violation->status) }}
-                                    </span>
-                                </td>
 
-{{-- Actions --}}
-<td class="px-4 py-2">
-    <div class="flex space-x-1">
-        @if ($violation->status === 'approved')
-            {{-- Locked Approved --}}
-            <button
-                class="px-2 py-1 bg-green-600 text-white font-medium rounded text-xs cursor-default">
-                ✓ Approved
-            </button>
-        @elseif ($violation->status === 'rejected')
-            {{-- Rejected but can still be approved later --}}
-            <button wire:click="updateStatus({{ $violation->id }}, 'approved')"
-                class="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs transition-colors">
-                Approve
-            </button>
-            <button
-                class="px-2 py-1 bg-red-600 text-white font-medium rounded text-xs cursor-default">
-                ✓ Rejected
-            </button>
-        @else
-            {{-- Pending --}}
-            <button wire:click="updateStatus({{ $violation->id }}, 'approved')"
-                class="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-xs transition-colors">
-                Approve
-            </button>
-            <button wire:click="updateStatus({{ $violation->id }}, 'rejected')"
-                class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-xs transition-colors">
-                Reject
-            </button>
-        @endif
-    </div>
-</td>
-
-                            </tr>
+                        </tr>
                     @endforeach
                 </tbody>
             </table>
