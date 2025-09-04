@@ -58,7 +58,7 @@
         {{-- License Plate --}}
         <div class="mb-3 mb-md-4">
             <label class="form-label fw-bold">License Plate <small class="text-muted">(optional)</small></label>
-            <input type="text" wire:model="license_plate" class="form-control mt-1 mt-md-2" placeholder="ABC-1234" />
+            <input type="text" wire:model="license_plate" class="form-control mt-1 mt-md-2" placeholder="123ABC" />
         </div>
 
 

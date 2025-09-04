@@ -210,16 +210,36 @@ class ViolationAdminComponent extends Component
     }
 
     // Helper method to refresh violations with proper relationships
-    private function refreshViolations()
-    {
-        $this->violations = Violation::with(['reporter', 'area', 'violator'])->get()->map(function($violation) {
-            // Add violator_name property for easier access in the view
-            $violation->violator_name = $violation->violator ? 
-                trim($violation->violator->firstname . ' ' . $violation->violator->lastname) : 
-                'Unknown';
-            return $violation;
-        });
-    }
+private function refreshViolations()
+{
+    $this->violations = Violation::with(['reporter', 'area', 'violator'])->get()->map(function($violation) {
+        // Populate missing violator_id from license_plate
+        if (empty($violation->violator_id) && !empty($violation->license_plate)) {
+            $match = $this->findViolatorByPlate($violation->license_plate);
+            if ($match) {
+                $violation->violator_id = $match['user_id'];
+                $violation->save(); // only save real fields
+            }
+        }
+
+        // Populate missing license_plate from violator_id
+        if (!empty($violation->violator_id) && empty($violation->license_plate)) {
+            $match = $this->findPlatesByViolator($violation->violator_id);
+            if ($match && !empty($match['plates'])) {
+                $violation->license_plate = $match['plates'][0];
+                $violation->save(); // only save real fields
+            }
+        }
+
+        // Add virtual property for the view
+        $violation->violator_name = $violation->violator 
+            ? trim($violation->violator->firstname . ' ' . $violation->violator->lastname) 
+            : 'Unknown';
+
+        return $violation;
+    });
+}
+
 
     // Legacy methods (keep for backward compatibility)
     public function searchVehicles($search)

@@ -11,12 +11,12 @@
     <title>ParkMate - Violation Tracking</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap 5 CDN -->
-  <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-  <!-- Inter font -->
-  <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    <!-- Bootstrap 5 CDN -->
+    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Inter font -->
+    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
     <livewire:styles />
     <style>
         :root {
@@ -313,9 +313,10 @@
             opacity: 1;
             pointer-events: auto;
         }
+
         .nav-link {
-  cursor: pointer !important;
-}
+            cursor: pointer !important;
+        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -334,26 +335,26 @@
             </a>
         </div>
         <div href='/parking-slots' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Parking Slots</button>
-            
+
+            <button class="btn">Parking Slots</button>
+
         </div>
-        
+
         <div class="btn-wrapper"><button class="btn active">Violation Tracking</button></div>
-                <div href='/users' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Users</button>
-           
+        <div href='/users' wire:navigate class="btn-wrapper">
+
+            <button class="btn">Users</button>
+
         </div>
-                <div href='/sticker-generator' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Sticker Generator</button>
-          
+        <div href='/sticker-generator' wire:navigate class="btn-wrapper">
+
+            <button class="btn">Sticker Generator</button>
+
         </div>
-                <div href='/activity-log' wire:navigate class="btn-wrapper">
-           
-                <button class="btn">Activity Log</button>
-            
+        <div href='/activity-log' wire:navigate class="btn-wrapper">
+
+            <button class="btn">Activity Log</button>
+
         </div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
@@ -368,9 +369,9 @@
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div href='/admin-dashboard/live-attendance-mode' wire:navigate class="live-btn-bar">
-                <button class="live-btn">
-                    Live Attendance Mode
-                </button>   
+            <button class="live-btn">
+                Live Attendance Mode
+            </button>
         </div>
     </div>
 
@@ -397,7 +398,8 @@
         <span>ParkMate</span>
     </div>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    {{-- <script src="{{ asset('js/alpine.min.js') }}"></script> --}}
+    {{--
+    <script src="{{ asset('js/alpine.min.js') }}"></script> --}}
     <livewire:scripts />
 
     <script>
