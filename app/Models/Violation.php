@@ -39,4 +39,7 @@ class Violation extends Model
     {
         return $this->belongsTo(ParkingArea::class, 'area_id');
     }
+    
+
+    
 }

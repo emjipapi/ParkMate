@@ -69,4 +69,19 @@ public function currentStatus()
     return $lastScan ? $lastScan->status : 'OUT'; // default to OUT if no scan
 }
 
+public function vehicles()
+{
+    return $this->hasMany(Vehicle::class);
+}
+
+public function reportedViolations()
+{
+    return $this->hasMany(Violation::class, 'reporter_id');
+}
+
+public function violations()
+{
+    return $this->hasMany(Violation::class, 'violator_id');
+}
+
 }

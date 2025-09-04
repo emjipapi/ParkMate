@@ -44,4 +44,5 @@ class Vehicle extends Model
     {
         return $query->where('rfid_tag', $rfidTag);
     }
+    
 }
