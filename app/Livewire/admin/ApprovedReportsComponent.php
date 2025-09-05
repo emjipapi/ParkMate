@@ -3,21 +3,21 @@
 namespace App\Livewire\Admin;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Models\Violation;
 use App\Models\Vehicle;
 use App\Models\User;
 
 class ApprovedReportsComponent extends Component
 {
-    public $violations;
+    use WithPagination;
+
     public $violationsActionTaken = [];
     public $vehicles = [];
-
+    protected $paginationTheme = 'bootstrap';
 
     public function mount()
     {
-        $this->refreshViolations();
-
         // Load initial vehicles
         $this->vehicles = Vehicle::with('user')
             ->latest()
@@ -32,6 +32,7 @@ class ApprovedReportsComponent extends Component
                 ];
             });
     }
+
     public function findViolatorByPlate($licensePlate)
     {
         if (empty($licensePlate)) {
@@ -55,13 +56,14 @@ class ApprovedReportsComponent extends Component
         return null;
     }
 
+    public function render()
+    {
+        $violations = Violation::with(['reporter', 'area', 'violator'])
+            ->where('status', 'approved') // ✅ only approved
+            ->paginate(2); // 10 items per page
 
-    private function refreshViolations()
-{
-    $this->violations = Violation::with(['reporter', 'area', 'violator'])
-        ->where('status', 'approved') // ✅ only approved
-        ->get()
-        ->map(function ($violation) {
+        // Process violations for display
+        $violations->getCollection()->transform(function ($violation) {
             // Populate missing violator_id from license_plate
             if (empty($violation->violator_id) && !empty($violation->license_plate)) {
                 $match = $this->findViolatorByPlate($violation->license_plate);
@@ -87,27 +89,37 @@ class ApprovedReportsComponent extends Component
 
             return $violation;
         });
-}
 
-public function markResolved($violationId)
-{
-    $violation = Violation::find($violationId);
-
-    if (!$violation) return;
-
-    // Save action taken if provided
-    $actionTaken = $this->violationsActionTaken[$violationId] ?? null;
-    if ($actionTaken) {
-        $violation->action_taken = $actionTaken;
+        return view('livewire.admin.approved-reports-component', [
+            'violations' => $violations
+        ]);
     }
 
-    $violation->status = 'resolved';
-    $violation->save();
+    public function markResolved($violationId)
+    {
+        $violation = Violation::find($violationId);
 
-    // ✅ Refresh only approved ones again (this one disappears from list)
-    $this->refreshViolations();
+        if (!$violation) return;
 
-    session()->flash('message', 'Violation marked as resolved.');
-}
+        // Save action taken if provided
+        $actionTaken = $this->violationsActionTaken[$violationId] ?? null;
+        if ($actionTaken) {
+            $violation->action_taken = $actionTaken;
+        }
 
+        $violation->status = 'resolved';
+        $violation->save();
+
+        // Reset pagination to first page after update
+        $this->resetPage();
+
+        session()->flash('message', 'Violation marked as resolved.');
+    }
+
+    // Add method if it doesn't exist
+    private function findPlatesByViolator($violatorId)
+    {
+        $vehicles = Vehicle::where('user_id', $violatorId)->pluck('license_plate')->toArray();
+        return $vehicles ? ['plates' => $vehicles] : null;
+    }
 }
