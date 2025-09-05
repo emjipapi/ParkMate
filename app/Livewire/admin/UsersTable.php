@@ -8,6 +8,7 @@ use App\Models\User;
 class UsersTable extends Component
 {
     use WithPagination;
+    protected string $paginationTheme = 'bootstrap';
 
     public $search = '';
     public $filterDepartment = '';
@@ -30,14 +31,14 @@ class UsersTable extends Component
     {
         $query = User::query();
 
-if ($this->search !== '') {
-    $s = $this->search;
-    $query->where(function ($q) use ($s) {
-        $q->whereRaw("CONCAT_WS(' ', firstname, middlename, lastname) LIKE ?", ["%$s%"])
-          ->orWhere('student_id', 'like', "%$s%")   // for students
-          ->orWhere('employee_id', 'like', "%$s%"); // for employees
-    });
-}
+        if ($this->search !== '') {
+            $s = $this->search;
+            $query->where(function ($q) use ($s) {
+                $q->whereRaw("CONCAT_WS(' ', firstname, middlename, lastname) LIKE ?", ["%$s%"])
+                    ->orWhere('student_id', 'like', "%$s%")   // for students
+                    ->orWhere('employee_id', 'like', "%$s%"); // for employees
+            });
+        }
 
         if ($this->filterDepartment !== '') {
             $query->where('department', $this->filterDepartment);
@@ -63,4 +64,19 @@ if ($this->search !== '') {
             'programs' => $programs,
         ]);
     }
+    public function deleteSelected($ids)
+{
+    if (empty($ids)) {
+        return; // nothing to delete
+    }
+
+    // Delete the users
+    User::whereIn('id', $ids)->delete();
+
+    // Optional: reset pagination if current page is now empty
+    $this->resetPage();
+
+    // Flash success message (optional)
+    session()->flash('message', count($ids) . ' user(s) deleted successfully.');
+}
 }

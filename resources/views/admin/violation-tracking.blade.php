@@ -398,8 +398,8 @@
         <span>ParkMate</span>
     </div>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    {{--
-    <script src="{{ asset('js/alpine.min.js') }}"></script> --}}
+    
+    {{-- <script src="{{ asset('js/alpine.min.js') }}"></script> --}}
     <livewire:scripts />
 
     <script>
