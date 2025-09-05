@@ -3,17 +3,20 @@
 namespace App\Livewire\Admin;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Models\Violation;
 use App\Models\Vehicle;
 use App\Models\User;
 
 class ResolvedReportsComponent extends Component
 {
-    public $violations;
+    use WithPagination;
+
     public $violationsActionTaken = [];
     public $activeTab = 'pending';
     public $vehicles = [];
     public $users = [];
+    protected $paginationTheme = 'bootstrap';
 
     // Search properties for dynamic loading
     public $vehicleSearch = '';
@@ -23,11 +26,11 @@ class ResolvedReportsComponent extends Component
     protected $vehicleLimit = 3;
     protected $userLimit = 3;
 
+    public $searchTerm = '';
+    public $searchResults = [];
 
     public function mount()
     {
-        $this->refreshViolations();
-
         // Load initial vehicles
         $this->vehicles = Vehicle::with('user')
             ->latest()
@@ -55,8 +58,6 @@ class ResolvedReportsComponent extends Component
                 ];
             });
     }
-    public $searchTerm = '';
-    public $searchResults = [];
 
     public function updatedSearchTerm()
     {
@@ -69,12 +70,6 @@ class ResolvedReportsComponent extends Component
             $this->searchResults = [];
         }
     }
-
-
-
-
-
-
 
     /**
      * Find violator information by license plate
@@ -103,17 +98,29 @@ class ResolvedReportsComponent extends Component
         return null;
     }
 
-
-    // Helper method to refresh violations with proper relationships
-    private function refreshViolations()
+    /**
+     * Find license plates by violator ID
+     */
+    private function findPlatesByViolator($violatorId)
     {
-        $this->violations = Violation::with(['reporter', 'area', 'violator'])->get()->map(function ($violation) {
+        $vehicles = Vehicle::where('user_id', $violatorId)->pluck('license_plate')->toArray();
+        return $vehicles ? ['plates' => $vehicles] : null;
+    }
+
+    public function render()
+    {
+        $violations = Violation::with(['reporter', 'area', 'violator'])
+            ->where('status', 'resolved')
+            ->paginate(2);
+
+        // Process violations for display
+        $violations->getCollection()->transform(function ($violation) {
             // Populate missing violator_id from license_plate
             if (empty($violation->violator_id) && !empty($violation->license_plate)) {
                 $match = $this->findViolatorByPlate($violation->license_plate);
                 if ($match) {
                     $violation->violator_id = $match['user_id'];
-                    $violation->save(); // only save real fields
+                    $violation->save();
                 }
             }
 
@@ -122,7 +129,7 @@ class ResolvedReportsComponent extends Component
                 $match = $this->findPlatesByViolator($violation->violator_id);
                 if ($match && !empty($match['plates'])) {
                     $violation->license_plate = $match['plates'][0];
-                    $violation->save(); // only save real fields
+                    $violation->save();
                 }
             }
 
@@ -133,16 +140,9 @@ class ResolvedReportsComponent extends Component
 
             return $violation;
         });
-    }
-
-    public function render()
-    {
-        if (!$this->violations) {
-            $this->violations = collect([]);
-        }
 
         return view('livewire.admin.resolved-reports-component', [
-            'violations' => $this->violations,
+            'violations' => $violations,
             'vehicles' => $this->vehicles,
             'users' => $this->users
         ]);

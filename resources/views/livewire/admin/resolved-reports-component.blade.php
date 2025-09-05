@@ -1,35 +1,52 @@
-<table class="table table-striped custom-table">
-                <thead class="bg-gray-100">
-                    <tr>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Reporter</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Area</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Description</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Evidence</th>
-                        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Status</th>
+<div>
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table table-striped custom-table">
+            <thead class="table-light">
+                <tr>
+                    <th class="px-4 py-3 text-start text-sm fw-semibold text-muted">Reporter</th>
+                    <th class="px-4 py-3 text-start text-sm fw-semibold text-muted">Area</th>
+                    <th class="px-4 py-3 text-start text-sm fw-semibold text-muted">Description</th>
+                    <th class="px-4 py-3 text-start text-sm fw-semibold text-muted">Evidence</th>
+                    <th class="px-4 py-3 text-start text-sm fw-semibold text-muted">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($violations as $violation)
+                    <tr class="table-hover-row">
+                        <td class="px-4 py-3 text-sm">
+                            {{ $violation->reporter->firstname }} {{ $violation->reporter->lastname }}
+                        </td>
+                        <td class="px-4 py-3 text-sm">{{ $violation->area->name ?? 'N/A' }}</td>
+                        <td class="px-4 py-3 text-sm">{{ Str::limit($violation->description, 100) }}</td>
+                        <td class="px-4 py-3 text-sm">
+                            @if($violation->evidence)
+                                <a href="{{ asset('storage/' . $violation->evidence) }}" target="_blank"
+                                    class="text-decoration-underline text-primary">View</a>
+                            @else
+                                <span class="text-muted">N/A</span>
+                            @endif
+                        </td>
+                        <td class="px-4 py-3 text-sm">
+                            <span class="badge bg-success rounded-pill">
+                                Resolved
+                            </span>
+                        </td>
                     </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @foreach ($violations->where('status', 'resolved') as $violation)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2 text-sm text-gray-800">
-                                {{ $violation->reporter->firstname }} {{ $violation->reporter->lastname }}
-                            </td>
-                            <td class="px-4 py-2 text-sm text-gray-800">{{ $violation->area->name ?? 'N/A' }}</td>
-                            <td class="px-4 py-2 text-sm text-gray-800">{{ $violation->description }}</td>
-                            <td class="px-4 py-2 text-sm text-blue-600">
-                                @if($violation->evidence)
-                                    <a href="{{ asset('storage/' . $violation->evidence) }}" target="_blank"
-                                        class="underline hover:text-blue-800">View</a>
-                                @else
-                                    N/A
-                                @endif
-                            </td>
-                            <td class="px-4 py-2 text-sm font-semibold">
-                                <span class="px-2 py-1 rounded-full text-xs bg-blue-100 text-blue-800">
-                                    Resolved
-                                </span>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                @empty
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-5">
+                            <div class="d-flex flex-column align-items-center">
+                                <i class="bi bi-inbox fs-1 mb-2 text-muted"></i>
+                                <h6>No Resolved Reports</h6>
+                                <p class="mb-0">There are currently no resolved violation reports to display.</p>
+                            </div>
+                        </td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    {{ $violations->links() }}
+</div>
+
