@@ -37,15 +37,15 @@ class CreateViolationComponent extends Component
         ]);
 
         // Process the evidence file AFTER validation
-        $evidencePath = null;
-        if ($this->evidence) {
-            $ext = $this->evidence->getClientOriginalExtension();
-            $hash = substr(md5(uniqid(rand(), true)), 0, 8);
-            $filename = 'evidence_' . auth()->id() . '_' . $hash . '.' . $ext;
+$evidencePath = null;
+if ($this->evidence) {
+    $ext = $this->evidence->getClientOriginalExtension();
+    $hash = substr(md5(uniqid(rand(), true)), 0, 8);
+    $filename = 'evidence_' . auth()->id() . '_' . $hash . '.' . $ext;
 
-            // Store the file and get the path
-            $evidencePath = $this->evidence->storeAs('evidence', $filename, 'private');
-        }
+    // Store the file and get the path in public storage
+    $evidencePath = $this->evidence->storeAs('evidence', $filename, 'public');
+}
 
         // Get the correct description
         $desc = $this->description === "Other" ? $this->otherDescription : $this->description;
