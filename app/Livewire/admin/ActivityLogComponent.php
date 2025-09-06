@@ -18,13 +18,15 @@ protected string $paginationTheme = 'bootstrap';
     public $userType = '';       // '', 'student', 'employee'
     public $startDate = null;    // 'YYYY-MM-DD'
     public $endDate = null;      // 'YYYY-MM-DD'
+    public $sortOrder = 'desc'; // default: newest first
 
     protected $queryString = [
         'search'       => ['except' => ''],
         'actionFilter' => ['except' => ''],
         'userType'     => ['except' => ''],
         'startDate'    => ['except' => null],
-        'endDate'      => ['except' => null]
+        'endDate'      => ['except' => null],
+        'sortOrder'    => ['except' => 'desc'],
     ];
 
     public function updating($name, $value)
@@ -73,7 +75,7 @@ protected string $paginationTheme = 'bootstrap';
             ->when($this->endDate, fn (Builder $q) =>
                 $q->where('created_at', '<=', Carbon::parse($this->endDate)->endOfDay())
             )
-            ->latest()
+            ->orderBy('created_at', $this->sortOrder)
             ->paginate(10);
 
         return view('livewire.admin.activity-log-component', [

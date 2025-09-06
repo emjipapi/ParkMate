@@ -38,6 +38,18 @@
             wire:model.live="endDate"
             onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
     </div>
+<div class="btn-group btn-group-sm" role="group" x-data="{ sortOrder: @entangle('sortOrder') }">
+    <button type="button" class="btn"
+        :class="sortOrder === 'desc' ? 'btn-primary' : 'btn-outline-primary'"
+        wire:click="$set('sortOrder', 'desc')">
+        Newest
+    </button>
+    <button type="button" class="btn"
+        :class="sortOrder === 'asc' ? 'btn-primary' : 'btn-outline-primary'"
+        wire:click="$set('sortOrder', 'asc')">
+        Oldest
+    </button>
+</div>
 
 </div>
 
