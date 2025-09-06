@@ -140,9 +140,10 @@
                         <td>{{ $user->program }}</td>
                         <td>{{ $user->department }}</td>
                         <td>
-                            <a href="#" class="text-primary" wire:click.prevent="edit({{ $user->id }})">
-                                <i class="bi bi-pencil-square text-secondary"></i>
-                            </a>
+                            <a href="{{ route('users.edit', $user->id) }}" class="text-primary">
+    <i class="bi bi-pencil-square text-secondary"></i>
+</a>
+
                         </td>
                     </tr>
                 @empty

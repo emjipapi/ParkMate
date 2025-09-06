@@ -79,6 +79,10 @@ Route::middleware(['admin'])->group(function () {
         Route::get('/users/create-admin', function () {
         return view('admin.admin-create'); // Blade containing <livewire:user-form />
     })->name('admins.create');
+    Route::get('/users/edit/{id}', [UserController::class, 'edit'])->name('users.edit');
+    // In your routes file
+
+
 
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
 
@@ -99,6 +103,7 @@ Route::middleware(['admin'])->group(function () {
     // Profile pictures
     Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
         ->name('profile.picture');
+        
 });
 // Route::get('/analytics', [AnalyticsController::class, 'index']);
 
@@ -117,5 +122,5 @@ Route::middleware(['auth'])->group(function () {
     Route::view('/user-violation-tracking', 'user.violation-tracking')
     ->name('user.violation.tracking');
     Route::view('/user-settings', 'user.settings')->name('user.settings');
-    Route::post('/evidence/upload', [EvidenceController::class, 'store'])->name('evidence.upload');
+    // Route::post('/evidence/upload', [EvidenceController::class, 'store'])->name('evidence.upload');
 });

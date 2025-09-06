@@ -12,7 +12,7 @@ public function create()
     $departments = User::select('department')->distinct()->pluck('department');
     $programs = User::select('program')->distinct()->pluck('program');
 
-    return view('user-create', compact('departments', 'programs'));
+    return view('admin.user-create', compact('departments', 'programs'));
 }
 
 
@@ -65,6 +65,11 @@ $admin = auth('admin')->user();
     return redirect()->route('users')->with('success', 'User created successfully!');
 }
 
+public function edit($id)
+{
+    // You can pass the id to the view
+    return view('admin.user-edit', ['id' => $id]);
+}
 
 
 

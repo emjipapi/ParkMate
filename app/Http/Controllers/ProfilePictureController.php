@@ -15,4 +15,5 @@ class ProfilePictureController extends Controller
 
         return response()->file($path); // or response()->download($path);
     }
+    
 }
