@@ -1,39 +1,49 @@
 <div>
     {{-- 🔍 Search Box --}}
     <input type="text" class="form-control mb-3" placeholder="Search by name, ID, or action..."
-        wire:model.live.debounce.300ms="search" style="width: 400px">
+        wire:model.live.debounce.300ms="search" style="max-width: 400px">
 
-    {{-- 🎛 Filter Bar --}}
-    <div class="d-flex justify-content-start gap-2 mb-3">
+{{-- 🎛 Filter Bar --}}
+<div class="d-flex flex-wrap justify-content-start gap-2 mb-3">
 
-        {{-- Action Filter --}}
-        <select class="form-select form-select-sm w-auto" wire:model.live="actionFilter">
-            <option value="">All Actions</option>
-            <option value="login">Login</option>
-            <option value="logout">Logout</option>
-            <option value="entry">Entry</option>
-            <option value="exit">Exit</option>
-            <option value="update">Update</option>
-            <option value="create">Create</option>
-            <option value="delete">Delete</option>
-        </select>
-        {{-- User Type Filter --}}
-        <select class="form-select form-select-sm w-auto" wire:model.live="userType">
-            <option value="">All Users</option>
-            <option value="student">Students</option>
-            <option value="employee">Employees</option>
-            <option value="admin">Admins</option>
-        </select>
+    {{-- Action Filter --}}
+    <select class="form-select form-select-sm w-auto" wire:model.live="actionFilter">
+        <option value="">All Actions</option>
+        <option value="login">Login</option>
+        <option value="logout">Logout</option>
+        <option value="entry">Entry</option>
+        <option value="exit">Exit</option>
+        <option value="update">Update</option>
+        <option value="create">Create</option>
+        <option value="delete">Delete</option>
+    </select>
 
-        {{-- Date Range --}}
-        <input type="date" class="form-control form-control-sm w-auto d-inline" wire:model.live="startDate"
+    {{-- User Type Filter --}}
+    <select class="form-select form-select-sm w-auto" wire:model.live="userType">
+        <option value="">All Users</option>
+        <option value="student">Students</option>
+        <option value="employee">Employees</option>
+        <option value="admin">Admins</option>
+    </select>
+
+    {{-- 📅 Date Range (kept together) --}}
+    <div class="d-flex align-items-center flex-nowrap">
+        <input type="date" class="form-control form-control-sm w-auto"
+            wire:model.live="startDate"
             onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
+
         <span class="mx-1">-</span>
-        <input type="date" class="form-control form-control-sm w-auto d-inline" wire:model.live="endDate"
+
+        <input type="date" class="form-control form-control-sm w-auto"
+            wire:model.live="endDate"
             onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
     </div>
 
+</div>
+
+
     {{-- 📋 Activity Logs Table --}}
+    <div class="table-responsive">
     <table class="table table-striped custom-table">
         <thead>
             <tr>
@@ -96,6 +106,7 @@
             @endforelse
         </tbody>
     </table>
+    </div>
     {{-- 📌 Pagination --}}
     <div wire:key="activity-logs-pagination">
         {{ $activityLogs->links() }}

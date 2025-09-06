@@ -196,7 +196,7 @@
             width: 100%;
             border-collapse: collapse;
             text-align: center;
-            table-layout: fixed;
+            
         }
 
         .custom-table th,
@@ -310,6 +310,66 @@
             opacity: 1;
             pointer-events: auto;
         }
+        .mobile-menu-btn {
+    display: none; /* hidden on desktop */
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: white;
+    margin-right: 10px;
+}
+
+@media (max-width: 768px) {
+    .cards-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem; /* spacing between cards */
+    }
+
+    .cards-container .card {
+        width: 100%;
+    }
+        .mobile-menu-btn {
+        display: inline-block;
+    }
+        .sidebar {
+        transform: translateX(-100%); /* hidden */
+        z-index: 1000;
+        transition: transform 0.3s ease-in-out;
+        
+    }
+    .sidebar .mt-auto {
+        margin-top: 0 !important;
+    }
+
+    .sidebar.open {
+        transform: translateX(0); /* slide in */
+    }
+
+    .content, .top-bar, .bottom-bar {
+        margin-left: 0; /* full width on mobile */
+    }
+    .bottom-bar {
+        left: 0;
+        width: 100%;
+        position: relative; /* or fixed if you want it always at bottom */
+        padding: 0 10px; /* optional: less padding for mobile */
+        flex-direction: column; /* optional: stack items vertically if needed */
+        gap: 5px;
+    }
+        .d-flex.align-items-baseline h3 {
+        font-size: 1.2rem; /* smaller heading on mobile */
+    }
+
+    .d-flex.align-items-baseline h6 {
+        font-size: 0.9rem; /* smaller subheading */
+    }
+
+    .d-flex.align-items-baseline span,
+    .d-flex.align-items-baseline .text-white {
+        font-size: 0.8rem; /* smaller breadcrumb text */
+    }
+}
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -322,6 +382,7 @@
         <div class="admin-header">
             <h4>Admin</h4>
         </div>
+        <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
 
         <div class="btn-wrapper mt-3">
             <a href="{{ url('/admin-dashboard') }}" style="text-decoration: none;">
@@ -360,6 +421,7 @@
     </div>
 
     <div class="top-bar">
+        <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div href='/admin-dashboard/live-attendance-mode' wire:navigate class="live-btn-bar">
@@ -406,6 +468,12 @@
     <script>
     flatpickr("#startDate", { dateFormat: "Y-m-d" });
     flatpickr("#endDate", { dateFormat: "Y-m-d" });
+</script>
+<script>
+function openSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('open');
+}
 </script>
 </body>
 
