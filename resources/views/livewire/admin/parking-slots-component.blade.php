@@ -15,19 +15,26 @@
         @foreach($areas as $area)
             <div class="accordion-item mb-4" wire:ignore.self>
                 <h2 class="accordion-header" id="heading-{{ $area['id'] }}">
-                    <button class="accordion-button collapsed" 
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#collapse-{{ $area['id'] }}"
-                        aria-expanded="false"
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#collapse-{{ $area['id'] }}" aria-expanded="false"
                         aria-controls="collapse-{{ $area['id'] }}">
-                        <span class="fw-semibold me-3">{{ $area['name'] }}</span>
-                        <small class="text-muted">
-                            @if(isset($area['car_slots']) && count($area['car_slots']) > 0)
-                                🚗 {{ $area['car_available'] }}/{{ $area['car_total'] }} cars &nbsp;•&nbsp;
-                            @endif
-                            🛵 {{ $area['moto_available_count'] }}/{{ $area['moto_total'] }} motorcycles
-                        </small>
+
+                        <div class="d-flex w-100">
+                            <!-- Left column: Area Name -->
+                            <div class="flex-shrink-0 me-3">
+                                <span class="fw-semibold">{{ $area['name'] }}</span>
+                            </div>
+
+                            <!-- Right column: car & motorcycle info stacked -->
+                            <div class="d-flex flex-column">
+                                @if(isset($area['car_slots']) && count($area['car_slots']) > 0)
+                                    <span class="text-muted">🚗 {{ $area['car_available'] }}/{{ $area['car_total'] }}
+                                        cars</span>
+                                @endif
+                                <span class="text-muted">🛵 {{ $area['moto_available_count'] }}/{{ $area['moto_total'] }}
+                                    motorcycles</span>
+                            </div>
+                        </div>
                     </button>
                 </h2>
 
