@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 
-class UserForm extends Component
+class UserFormCreate extends Component
 {
     use WithFileUploads;
 
@@ -154,6 +154,6 @@ class UserForm extends Component
 
     public function render()
     {
-        return view('livewire.admin.user-form');
+        return view('livewire.admin.user-form-create');
     }
 }
