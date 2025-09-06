@@ -17,27 +17,29 @@
         @endif
     </div>
 
-    {{-- Tabs --}}
-    <ul class="nav nav-tabs border-b mb-4 flex space-x-2">
-        <li>
-            <a class="nav-link px-4 py-2 cursor-pointer no-underline text-black {{ $activeTab === 'pending' ? 'active font-semibold border-b-2 border-blue-500 text-black' : 'text-gray-600' }}"
+{{-- Tabs with horizontal scroll on mobile --}}
+<div class="tabs-container mb-4">
+    <ul class="nav nav-tabs border-b flex space-x-2">
+        <li class="flex-shrink-0">
+            <a class="nav-link px-4 py-2 cursor-pointer no-underline text-black whitespace-nowrap {{ $activeTab === 'pending' ? 'active font-semibold border-b-2 border-blue-500 text-black' : 'text-gray-600' }}"
                 wire:click="setActiveTab('pending')">
                 Pending Reports
             </a>
         </li>
-        <li>
-            <a class="nav-link px-4 py-2 cursor-pointer no-underline text-black {{ $activeTab === 'approved' ? 'active font-semibold border-b-2 border-blue-500 text-black' : 'text-gray-600' }}"
+        <li class="flex-shrink-0">
+            <a class="nav-link px-4 py-2 cursor-pointer no-underline text-black whitespace-nowrap {{ $activeTab === 'approved' ? 'active font-semibold border-b-2 border-blue-500 text-black' : 'text-gray-600' }}"
                 wire:click="setActiveTab('approved')">
                 Approved Reports
             </a>
         </li>
-        <li>
-            <a class="nav-link px-4 py-2 cursor-pointer no-underline text-black {{ $activeTab === 'resolved' ? 'active font-semibold border-b-2 border-blue-500 text-black' : 'text-gray-600' }}"
+        <li class="flex-shrink-0">
+            <a class="nav-link px-4 py-2 cursor-pointer no-underline text-black whitespace-nowrap {{ $activeTab === 'resolved' ? 'active font-semibold border-b-2 border-blue-500 text-black' : 'text-gray-600' }}"
                 wire:click="setActiveTab('resolved')">
                 Resolved Reports
             </a>
         </li>
     </ul>
+</div>
 
     {{-- Tab Content --}}
     <div>

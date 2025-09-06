@@ -1,4 +1,5 @@
 <div>
+    <div class="table-responsive">
     <table class="table table-striped custom-table">
         <thead class="bg-gray-100">
             <tr>
@@ -161,6 +162,7 @@
             @endforeach
         </tbody>
     </table>
+    </div>
 
     {{-- Empty state --}}
     @if($violations->isEmpty())
