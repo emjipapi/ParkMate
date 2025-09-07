@@ -351,13 +351,14 @@
     flex-wrap: nowrap;
     display: flex;
 }
-
+.nav-tabs .nav-link {
+    cursor: pointer;
+}
 /* Hide table scrollbars too */
 .table-responsive {
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
-    /* Hide scrollbars */
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE/Edge */
 }
