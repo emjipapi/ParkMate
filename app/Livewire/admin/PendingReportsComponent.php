@@ -7,6 +7,10 @@ use App\Models\Violation;
 use App\Models\Vehicle;
 use App\Models\User;
 use Livewire\WithPagination;
+use App\Mail\ViolationThresholdReached;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PendingReportsComponent extends Component
 {
@@ -104,14 +108,86 @@ class PendingReportsComponent extends Component
         }
     }
     
-    public function updateStatus($violationId, $newStatus)
-    {
-        $violation = Violation::find($violationId);
-        if ($violation) {
-            $violation->status = $newStatus;
-            $violation->save();
+public function updateStatus($violationId, $newStatus)
+{
+    \Log::info("=== updateStatus CALLED ===", [
+        'violation_id' => $violationId,
+        'new_status' => $newStatus,
+        'timestamp' => now()
+    ]);
+    
+    $violation = Violation::find($violationId);
+    if ($violation) {
+        \Log::info("Violation found", [
+            'violation_id' => $violationId,
+            'current_status' => $violation->status,
+            'violator_id' => $violation->violator_id,
+            'has_violator_id' => !empty($violation->violator_id)
+        ]);
+        
+        $violation->status = $newStatus;
+        $violation->save();
+        
+        \Log::info("Violation status updated", [
+            'violation_id' => $violationId,
+            'new_status' => $newStatus,
+            'will_check_email' => ($newStatus === 'approved' && $violation->violator_id)
+        ]);
+        
+        // Send email if violation was approved and user now has 3+ violations
+        if ($newStatus === 'approved' && $violation->violator_id) {
+            \Log::info("Calling checkAndSendThresholdEmail", ['violator_id' => $violation->violator_id]);
+            $this->checkAndSendThresholdEmail($violation->violator_id);
+        } else {
+            \Log::info("Email check skipped", [
+                'reason' => $newStatus !== 'approved' ? 'not approved' : 'no violator_id',
+                'status' => $newStatus,
+                'violator_id' => $violation->violator_id
+            ]);
         }
-        $this->resetPage();
+    } else {
+        \Log::warning("Violation not found", ['violation_id' => $violationId]);
+    }
+    
+    $this->resetPage();
+}
+    
+private function checkAndSendThresholdEmail($violatorId)
+    {
+        try {
+            $user = User::find($violatorId);
+            if (!$user) {
+                Log::warning("User not found for violator_id: {$violatorId}");
+                return;
+            }
+            
+            $approvedCount = DB::table('violations')
+                ->where('violator_id', $user->id)
+                ->where('status', 'approved')
+                ->count();
+            
+            // Debug logging
+            Log::info("Checking violation threshold for user {$user->id}", [
+                'user_email' => $user->email,
+                'approved_count' => $approvedCount,
+                'will_send_email' => $approvedCount === 3
+            ]);
+            
+            // Send email if they just hit exactly 3 violations
+            if ($approvedCount === 3) {
+                Mail::to($user->email)
+                    ->send(new ViolationThresholdReached($user));
+                
+                // Log that we sent the email
+                Log::info("Sent violation threshold email to user {$user->id} ({$user->email})");
+            }
+            
+        } catch (\Exception $e) {
+            Log::error("Failed to send violation threshold email: " . $e->getMessage(), [
+                'violator_id' => $violatorId,
+                'trace' => $e->getTraceAsString()
+            ]);
+        }
     }
     
     public function findViolatorByPlate($licensePlate)
@@ -190,7 +266,7 @@ class PendingReportsComponent extends Component
             $violation = Violation::find($violationId);
             
             if (!$violation) {
-                \Log::warning("Violation not found: {$violationId}");
+                Log::warning("Violation not found: {$violationId}");
                 return false;
             }
             
@@ -211,13 +287,13 @@ class PendingReportsComponent extends Component
             
             if ($updated) {
                 $violation->save();
-                \Log::info("Updated violation {$violationId}: plate={$violation->license_plate}, violator_id={$violation->violator_id}");
+                Log::info("Updated violation {$violationId}: plate={$violation->license_plate}, violator_id={$violation->violator_id}");
             }
             
             return true;
             
         } catch (\Exception $e) {
-            \Log::error("Error updating violation {$violationId}: " . $e->getMessage());
+            Log::error("Error updating violation {$violationId}: " . $e->getMessage());
             return false;
         }
     }

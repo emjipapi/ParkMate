@@ -55,7 +55,21 @@ Route::post('/admin/login', [AdminAuthController::class, 'login'])
     ->name('admin.login.submit');
 
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
-
+Route::get('/test-email/{userId}', function($userId) {
+    try {
+        $user = \App\Models\User::find($userId);
+        if (!$user) {
+            return "User not found";
+        }
+        
+        \Illuminate\Support\Facades\Mail::to($user->email)
+            ->send(new \App\Mail\ViolationThresholdReached($user));
+            
+        return "Email sent to {$user->email}";
+    } catch (\Exception $e) {
+        return "Error: " . $e->getMessage();
+    }
+});
 // Public pages (e.g., parking-slots) that anyone can see
 
 
