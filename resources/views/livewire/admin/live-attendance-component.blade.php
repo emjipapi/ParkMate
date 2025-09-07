@@ -4,19 +4,34 @@
     @foreach ($scans as $index => $scan)
         @php
             $status = $scan['status'] ?? 'OUT';
-            $colorClass = $status === 'IN' ? 'text-success' : ($status === 'OUT' ? 'text-danger' : 'text-secondary');
+            
+            // Set color class based on status
+            if ($status === 'IN') {
+                $colorClass = 'text-success';
+                $bgClass = 'border-success';
+            } elseif ($status === 'OUT') {
+                $colorClass = 'text-danger';
+                $bgClass = 'border-danger';
+            } elseif ($status === 'DENIED') {
+                $colorClass = 'text-warning';
+                $bgClass = 'border-warning';
+            } else {
+                $colorClass = 'text-secondary';
+                $bgClass = 'border-secondary';
+            }
         @endphp
 
-        <div class="d-flex align-items-center border rounded shadow-sm bg-white" 
+        <div class="d-flex align-items-center border rounded shadow-sm bg-white {{ $bgClass }}" 
              style="font-size: {{ $loop->first ? '1.8rem' : '1.3rem' }}; 
                     width: 100%; max-width: {{ $loop->first ? '1200px' : '900px' }};
                     padding: {{ $loop->first ? '2.5rem' : '1rem' }};
-                    transition: transform 0.3s ease;">
+                    transition: transform 0.3s ease;
+                    {{ $status === 'DENIED' ? 'background: linear-gradient(135deg, #fff3cd 0%, #ffffff 100%);' : '' }}">
 
             <!-- Picture -->
             <img src="{{ $scan['picture'] }}" 
                  alt="Profile" 
-                 class="rounded-circle me-4"
+                 class="rounded-circle me-4 {{ $status === 'DENIED' ? 'opacity-75' : '' }}"
                  style="width: {{ $loop->first ? '220px' : '100px' }};
                         height: {{ $loop->first ? '220px' : '100px' }};
                         object-fit: cover;">
@@ -30,6 +45,11 @@
                 <div class="fw-bold {{ $colorClass }}" 
                      style="font-size: {{ $loop->first ? '2rem' : '1.2rem' }};">
                     {{ $status }}
+                    @if ($status === 'DENIED')
+                        <small class="d-block text-muted" style="font-size: 0.7em; font-weight: normal;">
+                            Entry denied due to violations
+                        </small>
+                    @endif
                 </div>
             </div>
         </div>

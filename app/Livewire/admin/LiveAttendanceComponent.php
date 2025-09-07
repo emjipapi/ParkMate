@@ -49,27 +49,42 @@ class LiveAttendanceComponent extends Component
         $this->loadLatestScans();
     }
 
-    public function loadLatestScans()
+   public function loadLatestScans()
     {
-$this->scans = ActivityLog::with('user')
-    ->where('actor_type', 'user')          // only regular users
-    ->whereIn('action', ['entry', 'exit']) // only entries/exits
-    ->latest()
-    ->take(3)
-    ->get()
-    ->map(function ($log) {
-        $user = $log->user;
+        $this->scans = ActivityLog::with('user')
+            ->where(function($query) {
+                $query->where('actor_type', 'user')                           // regular user scans
+                      ->whereIn('action', ['entry', 'exit'])
+                      ->orWhere(function($subQuery) {
+                          $subQuery->where('actor_type', 'system')             // system denied entries
+                                   ->where('action', 'denied_entry');
+                      });
+            })
+            ->latest()
+            ->take(3)
+            ->get()
+            ->map(function ($log) {
+                // Now we can use the user relationship for all types since actor_id contains the user ID
+                $user = $log->user;
 
-        return [
-            'name' => "{$user->lastname}, {$user->firstname}",
-            'status' => $log->action === 'entry' ? 'IN' : 'OUT',
-            'picture' => $user->profile_picture
-                ? route('profile.picture', ['filename' => $user->profile_picture])
-                : asset('images/placeholder.jpg'),
-        ];
-    })
-    ->toArray();
+                // Determine status based on action
+                if ($log->action === 'denied_entry') {
+                    $status = 'DENIED';
+                } elseif ($log->action === 'entry') {
+                    $status = 'IN';
+                } else {
+                    $status = 'OUT';
+                }
 
+                return [
+                    'name' => "{$user->lastname}, {$user->firstname}",
+                    'status' => $status,
+                    'picture' => $user->profile_picture
+                        ? route('profile.picture', ['filename' => $user->profile_picture])
+                        : asset('images/placeholder.jpg'),
+                ];
+            })
+            ->toArray();
     }
 
     public function render()
