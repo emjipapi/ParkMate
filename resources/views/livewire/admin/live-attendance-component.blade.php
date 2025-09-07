@@ -26,7 +26,7 @@
                     width: 100%; max-width: {{ $loop->first ? '1200px' : '900px' }};
                     padding: {{ $loop->first ? '2.5rem' : '1rem' }};
                     transition: transform 0.3s ease;
-                    {{ $status === 'DENIED' ? 'background: linear-gradient(135deg, #fff3cd 0%, #ffffff 100%);' : '' }}">
+                    {{ $status === 'DENIED' ? 'background: linear-gradient(135deg, #ffffffff 0%, #fff3cd 100%);' : '' }}">
 
             <!-- Picture -->
             <img src="{{ $scan['picture'] }}" 
