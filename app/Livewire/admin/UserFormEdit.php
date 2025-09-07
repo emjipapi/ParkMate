@@ -121,15 +121,21 @@ class UserFormEdit extends Component
             unset($data['password']);
         }
 
-        // Handle profile picture update
-        if ($this->profile_picture) {
-            $ext = $this->profile_picture->getClientOriginalExtension();
-            $hash = substr(md5(uniqid(rand(), true)), 0, 8);
-            $prefix = $this->student_id ?: $this->employee_id;
-            $filename = $prefix . '.' . $hash . '.' . $ext;
-            $this->profile_picture->storeAs('profile_pics', $filename);
-            $data['profile_picture'] = $filename;
-        }
+    // Handle profile picture update
+    if ($this->profile_picture) {
+        $ext = $this->profile_picture->getClientOriginalExtension();
+        $hash = substr(md5(uniqid(rand(), true)), 0, 8);
+        $prefix = $this->student_id ?: $this->employee_id;
+        $filename = $prefix . '.' . $hash . '.' . $ext;
+        $this->profile_picture->storeAs('profile_pics', $filename);
+        $data['profile_picture'] = $filename;
+
+        // update currentProfilePicture so frontend shows new image
+        $this->currentProfilePicture = $filename;
+    } else {
+        // ✅ keep existing picture
+        $data['profile_picture'] = $this->currentProfilePicture;
+    }
 
         // Update user
         $user->update($data);
