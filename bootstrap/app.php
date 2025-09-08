@@ -10,16 +10,16 @@ use \App\Http\Middleware\Authenticate;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
-        api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
+        web: __DIR__ . '/../routes/web.php',
+        api: __DIR__ . '/../routes/api.php',
+        commands: __DIR__ . '/../routes/console.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Aliases for route middleware
         $middleware->alias([
             'admin' => AdminMiddleware::class,
-            'auth'  => Authenticate::class,
+            'auth' => Authenticate::class,
         ]);
 
         // Optional: default web middleware group
@@ -36,6 +36,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule): void {
         // Check for offline slots every 10 seconds
         $schedule->command('slots:check-offline')->everyTenSeconds();
+        $schedule->command('violations:send-reminders')
+            ->weekly()
+            ->mondays()
+            ->at('08:00');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
