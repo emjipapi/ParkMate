@@ -52,13 +52,13 @@
             {{-- Action Buttons --}}
             <div class="flex space-x-3">
                 <button wire:click="generateStickers"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition duration-200"
+                    class="btn btn-primary"
                     @if(!$selectedTemplateId) disabled @endif>
                     Generate Stickers
                 </button>
 
                 <button wire:click="togglePreview"
-                    class="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-md transition duration-200"
+                    class="btn btn-primary"
                     @if(!$selectedTemplateId) disabled @endif>
                     {{ $preview ? 'Hide Preview' : 'Show Preview' }}
                 </button>
@@ -175,7 +175,7 @@
                         <p class="text-sm text-green-600">Your stickers are ready for download.</p>
                     </div>
                     <button wire:click="downloadStickers"
-                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm">
+                        class="btn btn-primary px-4 py-2 rounded-md text-sm">
                         Download ZIP
                     </button>
                 </div>
@@ -184,7 +184,7 @@
 
         {{-- Update the generate button to show loading state --}}
         <button wire:click="generateStickers"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md transition duration-200 disabled:opacity-50"
+            class="btn btn-primary px-6 py-2 rounded-md transition duration-200 disabled:opacity-50"
             @if(!$selectedTemplateId || $isGenerating) disabled @endif>
             @if($isGenerating)
                 <span class="flex items-center">

@@ -478,7 +478,7 @@
         </div>
 <div class="d-flex gap-2">
     <div href='/users/create-user' wire:navigate>
-        <button type="button" class="btn-add-slot btn btn-primary">
+        <button type="button" class=" btn btn-primary">
             Create User
         </button>
     </div>

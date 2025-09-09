@@ -17,6 +17,7 @@
   <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+  <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
     <livewire:styles />
     <style>
         :root {
@@ -503,6 +504,7 @@ div[style*="left:"][style*="top:"] {
         <span>ParkMate</span>
     </div>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+    
     <livewire:scripts />
 
     <script>

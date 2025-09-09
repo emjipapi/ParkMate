@@ -35,7 +35,7 @@
                 </div>
 
                 <button wire:click="uploadNewTemplate" 
-                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md text-sm transition duration-200"
+                        class="btn btn-primary"
                         wire:loading.attr="disabled">
                     <span wire:loading.remove>Upload Template</span>
                     <span wire:loading>Uploading...</span>
@@ -55,13 +55,14 @@
                                     {{ ucfirst($template->status) }}
                                 </span>
                             </div>
-                            <button wire:click.stop="deleteTemplate({{ $template->id }})" 
-                                    class="text-red-500 hover:text-red-700 p-1"
-                                    onclick="return confirm('Are you sure you want to delete this template?')">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                                </svg>
-                            </button>
+                            <button type="button"
+        class="btn btn-sm btn-danger px-2"         {{-- no w-100, small padding --}}
+        onclick="event.stopPropagation(); if (!confirm('Are you sure you want to delete this template? This cannot be undone.')) return; Livewire.emit('confirmDeleteTemplate', {{ $template->id }});"
+        wire:loading.attr="disabled"
+        aria-label="Delete template {{ $template->name }}">
+    <i class="bi bi-trash-fill" aria-hidden="true"></i>
+</button>
+
                         </div>
                     </div>
                 @empty
