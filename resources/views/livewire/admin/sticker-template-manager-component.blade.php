@@ -102,148 +102,178 @@
                         </div>
                     </div>
 
-{{-- WORKING Template Preview with JavaScript-based positioning --}}
+{{-- WORKING Template Preview (always rendered on page load) --}}
 <div class="bg-gray-50 rounded-lg p-4">
     <div class="flex justify-between items-center mb-3">
         <h4 class="font-medium text-gray-700">Template Preview</h4>
-        <button wire:click="togglePreview" 
-                class="text-sm px-3 py-1 rounded {{ $showPreview ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700' }}">
-            {{ $showPreview ? 'Hide Text Overlay' : 'Show Text Overlay' }}
-        </button>
-    </div>
-    
-    <div class="flex justify-center">
-        <div style="position: relative; display: inline-block; border: 2px solid #d1d5db; border-radius: 0.375rem; overflow: visible;">
-            <img src="{{ $selectedTemplate->file_url }}" 
-                 alt="{{ $selectedTemplate->name }}" 
-                 id="template-image-{{ $selectedTemplate->id }}"
-                 style="display: block; max-height: 400px; width: auto;"
-                 onload="updateTextPositions{{ $selectedTemplate->id }}()">
-            
-            {{-- Text overlays using viewport positioning initially, then repositioned by JS --}}
-            @if($showPreview)
-                @foreach($elementConfig as $element => $config)
-                    @php
-                        $xPercent = $config['x_percent'] ?? 10;
-                        $yPercent = $config['y_percent'] ?? 10;
-                        $textAlign = $xPercent <= 20 ? 'left' : ($xPercent >= 80 ? 'right' : 'center');
-                    @endphp
-                    
-                    <div class="text-element-{{ $selectedTemplate->id }}" 
-                         data-element="{{ $element }}"
-                         data-x="{{ $xPercent }}" 
-                         data-y="{{ $yPercent }}"
-                         style="position: absolute; 
-                                font-size: {{ max(8, $config['font_size'] ?? 16) }}px;
-                                color: {{ $config['color'] ?? '#000000' }};
-                                font-weight: bold;
-                                text-shadow: 2px 2px 4px rgba(255,255,255,0.9), -1px -1px 2px rgba(0,0,0,0.7);
-                                text-align: {{ $textAlign }};
-                                z-index: 10;
-                                white-space: nowrap;
-                                pointer-events: none;
-                                user-select: none;">
-                        {{ $previewData[$element] ?? strtoupper(str_replace('_', ' ', $element)) }}
-                    </div>
-                @endforeach
-            @endif
-            
-            {{-- Position indicators --}}
-            @if($isEditing || $showPreview)
-                @foreach($elementConfig as $element => $config)
-                    <div class="position-dot-{{ $selectedTemplate->id }}" 
-                         data-element="{{ $element }}"
-                         data-x="{{ $config['x_percent'] ?? 10 }}" 
-                         data-y="{{ $config['y_percent'] ?? 10 }}"
-                         style="position: absolute;
-                                width: 8px; 
-                                height: 8px;
-                                background-color: #ef4444;
-                                border: 2px solid white;
-                                border-radius: 50%;
-                                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-                                z-index: 20;
-                                cursor: crosshair;"
-                         title="{{ ucwords(str_replace('_', ' ', $element)) }}">
-                    </div>
-                @endforeach
-            @endif
-        </div>
+        {{-- preview toggle removed for debugging --}}
     </div>
 
+    <div class="flex justify-center">
+        {{-- Percent-based overlays — simple & robust --}}
+<div id="template-wrapper-{{ $selectedTemplate->id }}"
+     style="position: relative; display: inline-block; border: 2px solid #d1d5db; border-radius: .375rem; overflow: visible; padding: 0;">
+    <img src="{{ $selectedTemplate->file_url }}"
+         id="template-image-{{ $selectedTemplate->id }}"
+         alt="{{ $selectedTemplate->name }}"
+         style="display:block; width:100%; height:auto; max-height:500px;">
+
+    {{-- ALWAYS render overlays, but position using percent CSS --}}
+    @foreach($elementConfig as $element => $config)
+        @php
+            $x = $config['x_percent'] ?? 10;
+            $y = $config['y_percent'] ?? 10;
+            $fontSize = max(8, $config['font_size'] ?? 16);
+            $color = $config['color'] ?? '#000';
+            $align = $x <= 20 ? 'left' : ($x >= 80 ? 'right' : 'center');
+            // transform for alignment: left => translateY(-50%), center => translate(-50%,-50%), right => translateX(-100%) translateY(-50%)
+            $transform = $x <= 20 ? 'translateY(-50%)' : ($x >= 80 ? 'translateX(-100%) translateY(-50%)' : 'translate(-50%,-50%)');
+        @endphp
+
+        <div class="text-element-{{ $selectedTemplate->id }}"
+             data-element="{{ $element }}"
+             style="position:absolute;
+                    left: {{ $x }}%;
+                    top: {{ $y }}%;
+                    transform: {{ $transform }};
+                    transform-origin: center center;
+                    font-size: {{ $fontSize }}px;
+                    color: {{ $color }};
+                    font-weight: 700;
+                    white-space: nowrap;
+                    pointer-events: none;
+                    user-select: none;
+                    z-index: 10;">
+            {{ $previewData[$element] ?? strtoupper(str_replace('_',' ',$element)) }}
+        </div>
+    @endforeach
+
+    {{-- dots also positioned by percent --}}
+    @foreach($elementConfig as $element => $config)
+        <div class="position-dot-{{ $selectedTemplate->id }}"
+             data-element="{{ $element }}"
+             style="position:absolute;
+                    left: {{ $config['x_percent'] ?? 10 }}%;
+                    top: {{ $config['y_percent'] ?? 10 }}%;
+                    transform: translate(-50%,-50%);
+                    width:10px;height:10px;
+                    background:#ef4444;border:2px solid #fff;border-radius:50%;z-index:20;"></div>
+    @endforeach
+</div>
+
+    </div>
+
+    {{-- Positioning script (single robust module) --}}
     <script>
-        function updateTextPositions{{ $selectedTemplate->id }}() {
-            const img = document.getElementById('template-image-{{ $selectedTemplate->id }}');
-            if (!img) return;
-            
-            // Wait for image to load
-            if (!img.complete) {
-                img.onload = () => updateTextPositions{{ $selectedTemplate->id }}();
+    (function () {
+        // avoid redeclaring on multiple Livewire patches
+        if (!window.__stickerTemplateInit) window.__stickerTemplateInit = { inited: true };
+        let __stickerTimer = null;
+
+        function initAllImages() {
+            document.querySelectorAll('img[id^="template-image-"]').forEach(img => {
+                const idMatch = img.id.match(/^template-image-(.+)$/);
+                if (!idMatch) return;
+                const templateId = idMatch[1];
+                attachHandlers(img, templateId);
+            });
+        }
+
+        function attachHandlers(img, templateId) {
+            if (img.dataset.stickerInit === '1') {
+                // still run once to update positions
+                positionElements(img, templateId);
                 return;
             }
-            
+            img.dataset.stickerInit = '1';
+
+            img.addEventListener('load', () => positionElements(img, templateId));
+            if (img.complete) setTimeout(() => positionElements(img, templateId), 30);
+        }
+
+        function positionElements(img, templateId) {
+            if (!img || !document.body.contains(img)) return;
+
+            // natural dims might not be ready immediately
+            if (!img.naturalWidth || !img.naturalHeight) {
+                setTimeout(() => positionElements(img, templateId), 60);
+                return;
+            }
+
+            const container = img.parentElement;
+            if (!container) return;
+
             const imgRect = img.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
             const imgWidth = img.offsetWidth;
             const imgHeight = img.offsetHeight;
-            
-            // Position text elements
-            document.querySelectorAll('.text-element-{{ $selectedTemplate->id }}').forEach(el => {
-                const xPercent = parseFloat(el.dataset.x);
-                const yPercent = parseFloat(el.dataset.y);
-                
-                const x = (xPercent / 100) * imgWidth;
-                const y = (yPercent / 100) * imgHeight;
-                
-                // Apply positioning relative to image
-                el.style.left = x + 'px';
-                el.style.top = y + 'px';
-                
-                // Apply transform for alignment
+
+            const offsetX = imgRect.left - containerRect.left;
+            const offsetY = imgRect.top - containerRect.top;
+
+            // Emit intrinsic dims to Livewire (component will receive them)
+            if (window.Livewire && typeof Livewire.emit === 'function') {
+                Livewire.emit('setPreviewDimensions', img.naturalWidth, img.naturalHeight);
+            }
+
+            // Position text overlays
+            document.querySelectorAll('.text-element-' + templateId).forEach(el => {
+                const xPercent = parseFloat(el.dataset.x) || 0;
+                const yPercent = parseFloat(el.dataset.y) || 0;
+
+                const x = offsetX + (xPercent / 100) * imgWidth;
+                const y = offsetY + (yPercent / 100) * imgHeight;
+
+                el.style.left = Math.round(x) + 'px';
+                el.style.top = Math.round(y) + 'px';
+
                 if (xPercent <= 20) {
                     el.style.transform = 'translateY(-50%)';
+                    el.style.transformOrigin = 'left center';
                 } else if (xPercent >= 80) {
                     el.style.transform = 'translateX(-100%) translateY(-50%)';
+                    el.style.transformOrigin = 'right center';
                 } else {
                     el.style.transform = 'translateX(-50%) translateY(-50%)';
+                    el.style.transformOrigin = 'center center';
                 }
             });
-            
-            // Position indicator dots
-            document.querySelectorAll('.position-dot-{{ $selectedTemplate->id }}').forEach(el => {
-                const xPercent = parseFloat(el.dataset.x);
-                const yPercent = parseFloat(el.dataset.y);
-                
-                const x = (xPercent / 100) * imgWidth;
-                const y = (yPercent / 100) * imgHeight;
-                
-                el.style.left = x + 'px';
-                el.style.top = y + 'px';
+
+            // Position dots
+            document.querySelectorAll('.position-dot-' + templateId).forEach(el => {
+                const xPercent = parseFloat(el.dataset.x) || 0;
+                const yPercent = parseFloat(el.dataset.y) || 0;
+
+                const x = offsetX + (xPercent / 100) * imgWidth;
+                const y = offsetY + (yPercent / 100) * imgHeight;
+
+                el.style.left = Math.round(x) + 'px';
+                el.style.top = Math.round(y) + 'px';
                 el.style.transform = 'translateX(-50%) translateY(-50%)';
             });
         }
-        
-        // Update positions on window resize
-        window.addEventListener('resize', () => {
-            setTimeout(() => updateTextPositions{{ $selectedTemplate->id }}(), 100);
-        });
-        
-        // Initial positioning
-        document.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => updateTextPositions{{ $selectedTemplate->id }}(), 100);
-        });
-        
-        // Update when Livewire updates
-        document.addEventListener('livewire:navigated', () => {
-            setTimeout(() => updateTextPositions{{ $selectedTemplate->id }}(), 100);
-        });
-        
-        // For Livewire v3
+
+        // Initial run
+        document.addEventListener('DOMContentLoaded', () => setTimeout(initAllImages, 30));
+
+        // Re-run after Livewire patches
         document.addEventListener('livewire:update', () => {
-            setTimeout(() => updateTextPositions{{ $selectedTemplate->id }}(), 100);
+            clearTimeout(__stickerTimer);
+            __stickerTimer = setTimeout(initAllImages, 80);
         });
+        document.addEventListener('livewire:navigated', () => {
+            clearTimeout(__stickerTimer);
+            __stickerTimer = setTimeout(initAllImages, 80);
+        });
+
+        // Window resize -> reposition
+        window.addEventListener('resize', () => {
+            clearTimeout(__stickerTimer);
+            __stickerTimer = setTimeout(initAllImages, 140);
+        });
+    })();
     </script>
-    
-    {{-- Guidelines --}}
+
     @if($isEditing)
         <div class="mt-3 text-xs text-gray-600 text-center space-y-1">
             <p><strong>Positioning Guide:</strong> Red dots show exact text positions</p>
@@ -251,6 +281,7 @@
         </div>
     @endif
 </div>
+
 
                     {{-- Element Configuration --}}
                     <div class="bg-white border rounded-lg p-4">

@@ -18,35 +18,42 @@ class StickerTemplateManagerComponent extends Component
     public $templateName;
     public $isEditing = false;
     
-    // Element positioning properties with live preview
+    // Element positioning properties with better default spacing
     public $elementConfig = [
         'user_id' => ['x_percent' => 10, 'y_percent' => 15, 'font_size' => 18, 'color' => '#000000'],
-        'name' => ['x_percent' => 10, 'y_percent' => 30, 'font_size' => 16, 'color' => '#000000'],
-        'department' => ['x_percent' => 10, 'y_percent' => 50, 'font_size' => 14, 'color' => '#666666'],
-        'expiry' => ['x_percent' => 10, 'y_percent' => 70, 'font_size' => 12, 'color' => '#999999'],
+        'name' => ['x_percent' => 10, 'y_percent' => 35, 'font_size' => 16, 'color' => '#000000'],
+        'department' => ['x_percent' => 10, 'y_percent' => 55, 'font_size' => 14, 'color' => '#666666'],
+        'expiry' => ['x_percent' => 10, 'y_percent' => 75, 'font_size' => 12, 'color' => '#999999'],
     ];
+    // add inside class StickerTemplateManagerComponent
+protected $listeners = [
+    'setPreviewDimensions' => 'setPreviewDimensions'
+];
+
     
     // Preview sample data
     public $previewData = [
         'user_id' => 'EMP001',
         'name' => 'John Doe',
         'department' => 'IT Department',
-        'expiry' => '2025-12-31'
+        'expiry' => 'Dec 31, 2025'
     ];
     
     public $showPreview = false;
-    public $previewImageDimensions = ['width' => 0, 'height' => 0]; // Track actual preview dimensions
+    public $previewImageDimensions = ['width' => 0, 'height' => 0];
 
     protected $rules = [
-        'templateFile' => 'nullable|image|max:2048', // 2MB Max
+        'templateFile' => 'nullable|image|max:2048',
         'templateName' => 'required|string|max:255',
     ];
 
     public function mount()
     {
         $firstTemplate = StickerTemplate::first();
-        $this->selectedTemplateId = $firstTemplate?->id;
-        $this->loadElementConfig();
+        if ($firstTemplate) {
+            $this->selectedTemplateId = $firstTemplate->id;
+            $this->loadElementConfig();
+        }
     }
 
     public function selectTemplate($templateId)
@@ -54,6 +61,7 @@ class StickerTemplateManagerComponent extends Component
         $this->selectedTemplateId = $templateId;
         $this->isEditing = false;
         $this->loadElementConfig();
+        $this->showPreview = true; // Show preview when selecting template
         $this->updatePreviewDimensions();
     }
 
@@ -61,13 +69,20 @@ class StickerTemplateManagerComponent extends Component
     {
         $template = StickerTemplate::find($this->selectedTemplateId);
         if ($template && $template->element_config) {
-            $this->elementConfig = array_merge($this->elementConfig, $template->element_config);
+            // Merge with defaults to ensure all elements exist
+            $defaultConfig = [
+                'user_id' => ['x_percent' => 10, 'y_percent' => 15, 'font_size' => 18, 'color' => '#000000'],
+                'name' => ['x_percent' => 10, 'y_percent' => 35, 'font_size' => 16, 'color' => '#000000'],
+                'department' => ['x_percent' => 10, 'y_percent' => 55, 'font_size' => 14, 'color' => '#666666'],
+                'expiry' => ['x_percent' => 10, 'y_percent' => 75, 'font_size' => 12, 'color' => '#999999'],
+            ];
+            
+            $this->elementConfig = array_merge($defaultConfig, $template->element_config);
         }
     }
 
     public function updatePreviewDimensions()
     {
-        // This will be called from JavaScript to update the actual preview image dimensions
         $this->dispatch('updatePreviewDimensions');
     }
 
@@ -82,6 +97,7 @@ class StickerTemplateManagerComponent extends Component
         if ($template) {
             $this->templateName = $template->name;
             $this->isEditing = true;
+            $this->showPreview = true; // Show preview when editing
         }
     }
 
@@ -102,24 +118,113 @@ class StickerTemplateManagerComponent extends Component
         }
     }
 
-    // Quick position presets with better alignment
+    // Enhanced quick position presets with better spacing
     public function setQuickPosition($element, $preset)
     {
         $presets = [
-            'top_left' => ['x_percent' => 5, 'y_percent' => 10],
-            'top_right' => ['x_percent' => 95, 'y_percent' => 10],
-            'top_center' => ['x_percent' => 50, 'y_percent' => 10],
-            'center_left' => ['x_percent' => 5, 'y_percent' => 50],
+            'top_left' => ['x_percent' => 8, 'y_percent' => 12],
+            'top_right' => ['x_percent' => 92, 'y_percent' => 12],
+            'top_center' => ['x_percent' => 50, 'y_percent' => 12],
+            'center_left' => ['x_percent' => 8, 'y_percent' => 50],
             'center' => ['x_percent' => 50, 'y_percent' => 50],
-            'center_right' => ['x_percent' => 95, 'y_percent' => 50],
-            'bottom_left' => ['x_percent' => 5, 'y_percent' => 90],
-            'bottom_center' => ['x_percent' => 50, 'y_percent' => 90],
-            'bottom_right' => ['x_percent' => 95, 'y_percent' => 90],
+            'center_right' => ['x_percent' => 92, 'y_percent' => 50],
+            'bottom_left' => ['x_percent' => 8, 'y_percent' => 88],
+            'bottom_center' => ['x_percent' => 50, 'y_percent' => 88],
+            'bottom_right' => ['x_percent' => 92, 'y_percent' => 88],
         ];
 
-        if (isset($presets[$preset])) {
+        if (isset($presets[$preset]) && isset($this->elementConfig[$element])) {
             $this->elementConfig[$element]['x_percent'] = $presets[$preset]['x_percent'];
             $this->elementConfig[$element]['y_percent'] = $presets[$preset]['y_percent'];
+        }
+    }
+
+    // Improved layout presets with proper spacing to avoid cramping
+    public function applyLayoutPreset($preset)
+    {
+        $layouts = [
+            'vertical_left' => [
+                'user_id' => ['x_percent' => 8, 'y_percent' => 15],
+                'name' => ['x_percent' => 8, 'y_percent' => 35], 
+                'department' => ['x_percent' => 8, 'y_percent' => 55],
+                'expiry' => ['x_percent' => 8, 'y_percent' => 75]
+            ],
+            'vertical_right' => [
+                'user_id' => ['x_percent' => 92, 'y_percent' => 15],
+                'name' => ['x_percent' => 92, 'y_percent' => 35],
+                'department' => ['x_percent' => 92, 'y_percent' => 55],
+                'expiry' => ['x_percent' => 92, 'y_percent' => 75]
+            ],
+            'centered' => [
+                'user_id' => ['x_percent' => 50, 'y_percent' => 20],
+                'name' => ['x_percent' => 50, 'y_percent' => 40],
+                'department' => ['x_percent' => 50, 'y_percent' => 60],
+                'expiry' => ['x_percent' => 50, 'y_percent' => 80]
+            ],
+            'four_corners' => [
+                'user_id' => ['x_percent' => 15, 'y_percent' => 15],
+                'name' => ['x_percent' => 85, 'y_percent' => 15],
+                'department' => ['x_percent' => 15, 'y_percent' => 85],
+                'expiry' => ['x_percent' => 85, 'y_percent' => 85]
+            ],
+            'horizontal_top' => [
+                'user_id' => ['x_percent' => 25, 'y_percent' => 12],
+                'name' => ['x_percent' => 75, 'y_percent' => 12],
+                'department' => ['x_percent' => 25, 'y_percent' => 88],
+                'expiry' => ['x_percent' => 75, 'y_percent' => 88]
+            ],
+            'stacked_center' => [
+                'user_id' => ['x_percent' => 50, 'y_percent' => 18],
+                'name' => ['x_percent' => 50, 'y_percent' => 34],
+                'department' => ['x_percent' => 50, 'y_percent' => 66],
+                'expiry' => ['x_percent' => 50, 'y_percent' => 82]
+            ]
+        ];
+
+        if (isset($layouts[$preset])) {
+            foreach ($layouts[$preset] as $element => $position) {
+                if (isset($this->elementConfig[$element])) {
+                    $this->elementConfig[$element]['x_percent'] = $position['x_percent'];
+                    $this->elementConfig[$element]['y_percent'] = $position['y_percent'];
+                }
+            }
+        }
+    }
+
+    // Method to distribute elements evenly with proper spacing
+    public function distributeVertically()
+    {
+        $elements = array_keys($this->elementConfig);
+        $count = count($elements);
+        
+        if ($count <= 1) return;
+        
+        // Use more space with proper margins
+        $topMargin = 15;
+        $bottomMargin = 15;
+        $availableSpace = 100 - $topMargin - $bottomMargin;
+        $spacing = $availableSpace / ($count - 1);
+        
+        foreach ($elements as $index => $element) {
+            $this->elementConfig[$element]['y_percent'] = $topMargin + ($spacing * $index);
+        }
+    }
+
+    public function distributeHorizontally()
+    {
+        $elements = array_keys($this->elementConfig);
+        $count = count($elements);
+        
+        if ($count <= 1) return;
+        
+        // Use more space with proper margins
+        $leftMargin = 15;
+        $rightMargin = 15;
+        $availableSpace = 100 - $leftMargin - $rightMargin;
+        $spacing = $availableSpace / ($count - 1);
+        
+        foreach ($elements as $index => $element) {
+            $this->elementConfig[$element]['x_percent'] = $leftMargin + ($spacing * $index);
         }
     }
 
@@ -128,30 +233,37 @@ class StickerTemplateManagerComponent extends Component
         $this->validate();
 
         if ($this->templateFile) {
-            // Process the uploaded image
             $image = Image::read($this->templateFile->getRealPath());
             $width = $image->width();
             $height = $image->height();
             $aspectRatio = round($width / $height, 4);
 
-            // Generate filename
             $filename = 'template_' . time() . '.' . $this->templateFile->getClientOriginalExtension();
             $path = 'sticker-templates/' . $filename;
 
-            // Save the file
+            // Ensure directory exists
+            $templateDir = storage_path('app/public/sticker-templates');
+            if (!file_exists($templateDir)) {
+                mkdir($templateDir, 0755, true);
+            }
+
             $image->save(storage_path('app/public/' . $path));
 
-            // Create database record
-            StickerTemplate::create([
+            $template = StickerTemplate::create([
                 'name' => $this->templateName,
                 'file_path' => $path,
                 'width' => $width,
                 'height' => $height,
                 'aspect_ratio' => $aspectRatio,
-                'status' => 'active'
+                'status' => 'active',
+                'element_config' => $this->getDefaultElementConfig()
             ]);
 
-            // Reset form
+            // Select the newly created template
+            $this->selectedTemplateId = $template->id;
+            $this->loadElementConfig();
+            $this->showPreview = true;
+
             $this->reset(['templateFile', 'templateName']);
             session()->flash('success', 'Template uploaded successfully!');
         }
@@ -163,7 +275,10 @@ class StickerTemplateManagerComponent extends Component
 
         $template = StickerTemplate::find($this->selectedTemplateId);
         if ($template) {
-            $template->update(['name' => $this->templateName]);
+            $template->update([
+                'name' => $this->templateName,
+                'element_config' => $this->elementConfig
+            ]);
             $this->isEditing = false;
             session()->flash('success', 'Template updated successfully!');
         }
@@ -173,20 +288,31 @@ class StickerTemplateManagerComponent extends Component
     {
         $template = StickerTemplate::find($templateId);
         if ($template) {
-            // Delete the file
             Storage::disk('public')->delete($template->file_path);
-            
-            // Delete the record
             $template->delete();
             
-            // Reset selection if deleted template was selected
             if ($this->selectedTemplateId == $templateId) {
-                $this->selectedTemplateId = StickerTemplate::first()?->id;
-                $this->loadElementConfig();
+                $firstTemplate = StickerTemplate::first();
+                $this->selectedTemplateId = $firstTemplate?->id;
+                if ($firstTemplate) {
+                    $this->loadElementConfig();
+                } else {
+                    $this->elementConfig = $this->getDefaultElementConfig();
+                }
             }
             
             session()->flash('success', 'Template deleted successfully!');
         }
+    }
+
+    private function getDefaultElementConfig()
+    {
+        return [
+            'user_id' => ['x_percent' => 10, 'y_percent' => 15, 'font_size' => 18, 'color' => '#000000'],
+            'name' => ['x_percent' => 10, 'y_percent' => 35, 'font_size' => 16, 'color' => '#000000'],
+            'department' => ['x_percent' => 10, 'y_percent' => 55, 'font_size' => 14, 'color' => '#666666'],
+            'expiry' => ['x_percent' => 10, 'y_percent' => 75, 'font_size' => 12, 'color' => '#999999'],
+        ];
     }
 
     public function render()

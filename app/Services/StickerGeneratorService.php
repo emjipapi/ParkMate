@@ -22,38 +22,46 @@ class StickerGeneratorService
         $height = $template->height;
 
         // Calculate responsive font sizes based on image size
-        $baseFontSize = max(12, $width / 40);
-        $smallFontSize = max(10, $width / 50);
+        $baseFontSize = max(16, $width / 30);
+        $smallFontSize = max(12, $width / 40);
 
         // Get element configuration or use defaults
         $config = $template->element_config ?: $this->getDefaultElementConfig();
 
-        // Add text elements with precise positioning
+        // Add text elements with proper positioning
         $this->addTextElement($image, $user->employee_id ?? $user->student_id ?? $user->id, 
-                             $config['user_id'] ?? [], $baseFontSize, $width, $height);
+                             $config['user_id'] ?? ['x_percent' => 10, 'y_percent' => 20], 
+                             $config['user_id']['font_size'] ?? $baseFontSize, $width, $height);
 
         $this->addTextElement($image, $user->name, 
-                             $config['name'] ?? ['x_percent' => 10, 'y_percent' => 30], 
-                             $baseFontSize, $width, $height);
+                             $config['name'] ?? ['x_percent' => 10, 'y_percent' => 40], 
+                             $config['name']['font_size'] ?? $baseFontSize, $width, $height);
 
         $this->addTextElement($image, $user->department ?? 'General', 
-                             $config['department'] ?? ['x_percent' => 10, 'y_percent' => 50], 
-                             $smallFontSize, $width, $height);
+                             $config['department'] ?? ['x_percent' => 10, 'y_percent' => 60], 
+                             $config['department']['font_size'] ?? $smallFontSize, $width, $height);
 
         $this->addTextElement($image, $this->formatExpiryDate($user->parking_permit_expiry ?? now()->addYear()), 
-                             $config['expiry'] ?? ['x_percent' => 10, 'y_percent' => 70], 
-                             $smallFontSize, $width, $height);
+                             $config['expiry'] ?? ['x_percent' => 10, 'y_percent' => 80], 
+                             $config['expiry']['font_size'] ?? $smallFontSize, $width, $height);
 
         // Add custom data if provided
         foreach ($customData as $key => $value) {
             if (isset($config[$key])) {
-                $this->addTextElement($image, $value, $config[$key], $smallFontSize, $width, $height);
+                $this->addTextElement($image, $value, $config[$key], 
+                                    $config[$key]['font_size'] ?? $smallFontSize, $width, $height);
             }
         }
 
         // Generate filename
         $filename = 'sticker_' . ($user->employee_id ?? $user->student_id ?? $user->id) . '_' . time() . '.png';
         $outputPath = 'generated-stickers/' . $filename;
+
+        // Ensure directory exists
+        $outputDir = storage_path('app/public/generated-stickers');
+        if (!file_exists($outputDir)) {
+            mkdir($outputDir, 0755, true);
+        }
 
         // Save the generated sticker
         $image->save(storage_path('app/public/' . $outputPath));
@@ -118,45 +126,64 @@ class StickerGeneratorService
 
     private function addTextElement($image, $text, array $config, $fontSize, $templateWidth, $templateHeight)
     {
-        // Calculate position based on percentages with proper alignment
+        // Get configuration with defaults
         $xPercent = $config['x_percent'] ?? 10;
         $yPercent = $config['y_percent'] ?? 10;
+        $size = $config['font_size'] ?? $fontSize;
+        $color = $config['color'] ?? '#000000';
         
         // Convert percentages to actual pixel positions
         $x = ($xPercent * $templateWidth) / 100;
         $y = ($yPercent * $templateHeight) / 100;
 
-        // Use custom font size if specified
-        $size = $config['font_size'] ?? $fontSize;
-        $color = $config['color'] ?? '#000000';
-        $fontFile = $config['font_file'] ?? null;
-
-        // Determine text alignment based on x position
+        // Determine text alignment based on X position (matches frontend preview)
         $align = 'left';
-        if ($xPercent >= 80) {
+        if ($xPercent >= 75) {
             $align = 'right';
-        } elseif ($xPercent >= 40 && $xPercent <= 60) {
+        } elseif ($xPercent >= 25 && $xPercent <= 74) {
             $align = 'center';
         }
 
-        $image->text($text, (int)$x, (int)$y, function($font) use ($size, $color, $fontFile, $align) {
-            $font->size($size);
+        // Apply text with proper positioning
+        $image->text($text, (int)$x, (int)$y, function($font) use ($size, $color, $align) {
+            $font->size((int)$size);
             $font->color($color);
-            $font->align($align); // Set text alignment
-            $font->valign('middle'); // Vertical alignment
-            if ($fontFile && file_exists($fontFile)) {
-                $font->file($fontFile);
-            }
+            $font->align($align);
+            $font->valign('middle');
+            
+            // Use default font or specify a font file path if needed
+            // $font->file(public_path('fonts/arial.ttf'));
         });
     }
 
     private function getDefaultElementConfig()
     {
+        // Default configuration with proper spacing to avoid overlapping
         return [
-            'user_id' => ['x_percent' => 10, 'y_percent' => 15, 'font_size' => null, 'color' => '#000000'],
-            'name' => ['x_percent' => 10, 'y_percent' => 30, 'font_size' => null, 'color' => '#000000'],
-            'department' => ['x_percent' => 10, 'y_percent' => 50, 'font_size' => null, 'color' => '#666666'],
-            'expiry' => ['x_percent' => 10, 'y_percent' => 70, 'font_size' => null, 'color' => '#999999'],
+            'user_id' => [
+                'x_percent' => 10, 
+                'y_percent' => 20, 
+                'font_size' => 18, 
+                'color' => '#000000'
+            ],
+            'name' => [
+                'x_percent' => 10, 
+                'y_percent' => 40, 
+                'font_size' => 16, 
+                'color' => '#000000'
+            ],
+            'department' => [
+                'x_percent' => 10, 
+                'y_percent' => 60, 
+                'font_size' => 14, 
+                'color' => '#666666'
+            ],
+            'expiry' => [
+                'x_percent' => 10, 
+                'y_percent' => 80, 
+                'font_size' => 12, 
+                'color' => '#999999'
+            ],
         ];
     }
 
@@ -184,7 +211,7 @@ class StickerGeneratorService
         }
         
         try {
-            return date('Y-m-d', strtotime($date));
+            return date('M d, Y', strtotime($date));
         } catch (\Exception $e) {
             return 'Invalid Date';
         }
