@@ -33,10 +33,10 @@ protected $listeners = [
     
     // Preview sample data
     public $previewData = [
-        'user_id' => 'EMP001',
+        'user_id' => 'SN:S1011',
         'name' => 'John Doe',
-        'department' => 'IT Department',
-        'expiry' => 'Dec 31, 2025'
+        'department' => 'CCS',
+        'expiry' => 'Expiry Date?'
     ];
     
     public $showPreview = false;
