@@ -20,12 +20,15 @@
   <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
     <livewire:styles />
     <style>
-        :root {
-            --sidebar-bg: #182125;
-            --sidebar-btn-bg: #182125;
-            --sidebar-btn-hover: #6c757d;
-            --admin-bg: #2E739F;
-            --admin-text: #ffffff;
+:root {
+            --bg1: #56ca8b;
+            --bg2: #3bc480;
+            --bg3: #38b174;
+            --bg4: #ffffffff;
+            --bg5: #def2ff;
+            --text1: #ffffff;
+            --text2: #4b6fc0;
+            --text3: #8b8d8e;
         }
 
         body {
@@ -40,12 +43,12 @@
             left: 0;
             top: 0;
             width: 250px;
-            background-color: var(--sidebar-bg);
+            background-color: var(--bg4);
         }
 
         .admin-header {
-            background-color: var(--admin-bg);
-            color: var(--admin-text);
+            background-color: var(--bg1);
+            color: var(--text1);
             text-align: center;
         }
 
@@ -63,28 +66,29 @@
         .sidebar button {
             width: 100%;
             text-align: left;
-            color: #fff;
-            background-color: var(--sidebar-btn-bg);
+            color: var(--text3);
+            background-color: var(--bg4);
             border: none;
             padding: 10px;
-            border-radius: 8px;
+            
         }
 
         .sidebar button:hover {
-            background-color: rgb(36, 46, 50);
-            color: white;
+            background-color: var(--bg5);
+            color: var(--text3);
         }
 
         .sidebar button.active {
-            background-color: #2C363B;
-            border-left: 4px solid var(--admin-bg);
+            background-color: #ddf3ff;
+            border-left: 4px solid var(--bg1);
             padding-left: 14px;
-            color: #fff;
+            color: var(--text2);
+            font-weight: 600;
         }
 
         .top-bar {
-            background-color: #3481B4;
-            color: var(--admin-text);
+            background-color: var(--bg2);
+            color: var(--text1);
             display: flex;
             align-items: center;
             padding: 0 20px;
@@ -95,16 +99,7 @@
             line-height: 36px;
         }
 
-        .content {
-            margin-left: 250px;
-            padding: 20px;
-            padding-bottom: 60px;
-            min-height: calc(100vh - 96px);
-
-            background-color: #EAEEF4;
-        }
-
-        .live-btn-bar {
+                .live-btn-bar {
             display: flex;
             align-items: center;
             background-color: white;
@@ -122,7 +117,7 @@
         }
 
         .live-btn {
-            background-color: #256a99;
+            background-color: var(--bg3);
             color: white;
             border: none;
             padding: 0 12px;
@@ -132,8 +127,18 @@
         }
 
         .live-btn:hover {
-            background-color: #1b5c7d;
+            background-color: var(--bg1);
         }
+
+        .content {
+            margin-left: 250px;
+            padding: 20px;
+            padding-bottom: 60px;
+            min-height: calc(100vh - 96px);
+
+            background-color: #EAEEF4;
+        }
+
 
 
 
