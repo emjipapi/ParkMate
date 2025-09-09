@@ -64,7 +64,7 @@
 
         {{-- Submit --}}
         <div class="mt-3 mt-md-4">
-            <button type="submit" class="btn btn-primary px-3 px-md-4 py-2">
+            <button type="submit" class="btn-add px-3 px-md-4 py-2">
                 Submit Report
             </button>
         </div>

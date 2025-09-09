@@ -14,12 +14,15 @@
     <!-- Font Awesome -->
     <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
     <style>
-        :root {
-            --sidebar-bg: #182125;
-            --sidebar-btn-bg: #182125;
-            --sidebar-btn-hover: #6c757d;
-            --admin-bg: #2E739F;
-            --admin-text: #ffffff;
+              :root {
+            --bg1: #56ca8b;
+            --bg2: #3bc480;
+            --bg3: #38b174;
+            --bg4: #ffffffff;
+            --bg5: #def2ff;
+            --text1: #ffffff;
+            --text2: #4b6fc0;
+            --text3: #8b8d8e;
         }
 
         body {
@@ -34,12 +37,12 @@
             left: 0;
             top: 0;
             width: 250px;
-            background-color: var(--sidebar-bg);
+            background-color: var(--bg4);
         }
 
         .admin-header {
-            background-color: var(--admin-bg);
-            color: var(--admin-text);
+            background-color: var(--bg1);
+            color: var(--text1);
             text-align: center;
         }
 
@@ -57,28 +60,29 @@
         .sidebar button {
             width: 100%;
             text-align: left;
-            color: #fff;
-            background-color: var(--sidebar-btn-bg);
+            color: var(--text3);
+            background-color: var(--bg4);
             border: none;
             padding: 10px;
-            border-radius: 8px;
+            
         }
 
         .sidebar button:hover {
-            background-color: rgb(36, 46, 50);
-            color: white;
+            background-color: var(--bg5);
+            color: var(--text3);
         }
 
         .sidebar button.active {
-            background-color: #2C363B;
-            border-left: 4px solid var(--admin-bg);
+            background-color: #ddf3ff;
+            border-left: 4px solid var(--bg1);
             padding-left: 14px;
-            color: #fff;
+            color: var(--text2);
+            font-weight: 600;
         }
 
         .top-bar {
-            background-color: #3481B4;
-            color: var(--admin-text);
+            background-color: var(--bg2);
+            color: var(--text1);
             display: flex;
             align-items: center;
             padding: 0 20px;
@@ -98,35 +102,21 @@
             background-color: #EAEEF4;
         }
 
-        .live-btn-bar {
-            display: flex;
-            align-items: center;
-            background-color: white;
-            border-radius: 4px;
-            overflow: hidden;
-            height: 30px;
-        }
-
-        .live-btn-bar input[type="text"] {
-            border: none;
-            padding: 4px 10px;
-            font-size: 0.9rem;
-            outline: none;
-            width: 180px;
-        }
-
-        .live-btn {
-            background-color: #256a99;
+               .btn-add {
+            display: inline-block;
+            width: auto;
+            background-color: var(--bg1);
             color: white;
             border: none;
-            padding: 0 12px;
-            font-size: 0.9rem;
+            padding: 6px 16px;
             cursor: pointer;
-            height: 100%;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
         }
 
-        .live-btn:hover {
-            background-color: #1b5c7d;
+        .btn-add:hover {
+            background-color: var(--bg3);
         }
 
         h1 {
