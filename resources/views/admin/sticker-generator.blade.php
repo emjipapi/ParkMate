@@ -153,7 +153,7 @@
         }
 
         .bottom-bar {
-            position: fixed;
+            position: relative;
             bottom: 0;
             left: 250px;
             width: calc(100% - 250px);
@@ -313,6 +313,113 @@
             opacity: 1;
             pointer-events: auto;
         }
+        .nav-tabs .nav-link {
+    cursor: pointer;
+}
+.template-preview-container {
+    position: relative !important;
+    display: inline-block;
+}
+
+.template-preview-container img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.text-overlay {
+    position: absolute !important;
+    pointer-events: none;
+    user-select: none;
+    z-index: 10;
+}
+
+.position-indicator {
+    position: absolute !important;
+    z-index: 20;
+    transition: all 0.2s ease;
+}
+
+.position-indicator:hover {
+    transform: translateX(-50%) translateY(-50%) scale(1.3) !important;
+}
+
+/* Ensure text stays within image bounds */
+.text-overlay {
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+/* Add this to your existing CSS to fix text positioning */
+
+/* Force container positioning */
+.template-preview-container {
+    position: relative !important;
+    display: inline-block !important;
+    overflow: hidden !important;
+    max-width: 100% !important;
+}
+
+.template-preview-container img {
+    display: block !important;
+    max-width: 100% !important;
+    height: auto !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+/* Force text overlay positioning within container */
+.template-preview-container .text-overlay {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    pointer-events: none !important;
+    user-select: none !important;
+    z-index: 10 !important;
+    overflow: hidden !important;
+}
+
+/* Force position indicators within container */
+.template-preview-container .position-indicator {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    z-index: 20 !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Ensure text elements are positioned relative to image */
+.template-preview-container .text-overlay > div,
+.template-preview-container .position-indicator > div {
+    position: absolute !important;
+}
+
+/* Override any global positioning styles */
+div[style*="left:"][style*="top:"] {
+    position: absolute !important;
+}
+
+/* Specific override for Livewire generated elements */
+[wire\:loading], [wire\:target] {
+    position: relative !important;
+}
+
+/* Debug helper - remove after fixing */
+.template-preview-container {
+    border: 2px solid red !important;
+}
+
+.template-preview-container .text-overlay {
+    border: 1px solid blue !important;
+}
+
+.template-preview-container .position-indicator {
+    border: 1px solid green !important;
+}
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -386,7 +493,7 @@
 
 
         <div class="square-box">
-            <livewire:admin.generator-component />
+            <livewire:admin.sticker-generator-component />
         </div>
 
     </div>
