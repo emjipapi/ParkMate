@@ -40,7 +40,7 @@
     }
 
 .btn {
-  background-color: #3481B4;
+  background-color: #56ca8b;
   color: white;
   border: none;
   padding: 8px 24px;
@@ -49,7 +49,7 @@
 }
 
     .btn:hover {
-      background-color: rgb(110, 172, 213);
+      background-color: #38b174;
       color: white;
     }
     .text-error {
@@ -67,8 +67,9 @@
     <div href='/user/login' wire:navigate>
     <button class="btn btn-primary mb-2" style="width: 150px;">Student</button>
     </div>
-    <div>
+    <div href='/user/login' wire:navigate>
     <button class="btn btn-primary mb-2" style="width: 150px;">Employee</button>
+    </div>
     <div href='/admin/login' wire:navigate>
     <button class="btn btn-primary" style="width: 150px;">Admin</button>
     </div>

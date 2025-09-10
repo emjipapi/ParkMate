@@ -41,7 +41,7 @@
     }
 
     .btn-signin {
-      background-color: #3481B4;
+      background-color: #56ca8b;
       color: white;
       border: none;
       padding: 8px 24px;
@@ -50,7 +50,7 @@
     }
 
     .btn-signin:hover {
-      background-color: rgb(110, 172, 213);
+      background-color: #38b174;
     }
 
     .text-error {
@@ -84,7 +84,7 @@
     @csrf
     <div class="mb-3">
 <input type="text" name="login" class="form-control"
-    placeholder="Student ID / Email" required />
+    placeholder="User ID / Email" required />
 
     </div>
     <div class="input-group mb-3">

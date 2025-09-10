@@ -42,6 +42,6 @@ class UserAuthController extends Controller
     }
         public function showLoginForm()
     {
-        return view('auth.student-login'); // make sure you have resources/views/admin/login.blade.php
+        return view('auth.user-login'); // make sure you have resources/views/admin/login.blade.php
     }
 }
