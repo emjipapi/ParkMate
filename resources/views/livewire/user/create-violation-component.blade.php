@@ -7,25 +7,22 @@
             <label class="form-label fw-bold">Description <span class="text-danger">*</span></label>
             <div class="d-flex flex-column gap-1 gap-md-2 mt-1 mt-md-2">
 
-                <label class="d-block">
-                    <input type="radio" wire:model.live="description" value="Motorcycle parked in car slot" required>
-                    Motorcycle parked in car slot
-                </label>
-
-                <label class="d-block">
-                    <input type="radio" wire:model.live="description" value="Vehicle blocking entrance" required>
-                    Vehicle blocking entrance
-                </label>
-
-                <label class="d-block">
-                    <input type="radio" wire:model.live="description" value="Reckless Driving" required>
-                    Reckless Driving
-                </label>
-
-                <label class="d-block">
-                    <input type="radio" wire:model.live="description" value="Other" required>
-                    Other:
-                </label>
+                <select wire:model.live="description" class="form-select" required>
+                    <option value="">-- Select a violation --</option>
+                    <option value="Motorcycle parked in car slot">Motorcycle parked in car slot</option>
+                    <option value="Vehicle blocking entrance">Vehicle blocking entrance</option>
+                    <option value="Reckless Driving">Reckless Driving</option>
+                    <option value="Illegal Parking">Illegal Parking</option>
+                    <option value="Obstruction of Traffic">Obstruction of Traffic</option>
+                    <option value="Double Parking">Double Parking</option>
+                    <option value="Parking in Reserved Area">Parking in Reserved Area</option>
+                    <option value="Unauthorized Vehicle Entry">Unauthorized Vehicle Entry</option>
+                    <option value="No Parking Sticker Displayed">No Parking Sticker Displayed</option>
+                    <option value="Improper Parking (outside lines)">Improper Parking (outside lines)</option>
+                    <option value="Vehicle Blocking Fire Exit">Vehicle Blocking Fire Exit</option>
+                    <option value="Unregistered Vehicle on Campus">Unregistered Vehicle on Campus</option>
+                    <option value="Other">Other</option>
+                </select>
 
                 @if($description === 'Other')
                     <input type="text" wire:model="otherDescription" placeholder="Enter details"
@@ -35,9 +32,11 @@
             @error('description') <span class="text-danger">{{ $message }}</span> @enderror
         </div>
 
+
         {{-- Evidence --}}
         <div class="mb-3 mb-md-4">
-            <label class="form-label fw-bold">Evidence <small class="text-muted">(optional but encouraged)</small></label>
+            <label class="form-label fw-bold">Evidence <small class="text-muted">(optional but
+                    encouraged)</small></label>
             <input type="file" wire:model="evidence" class="form-control mt-1 mt-md-2" accept="image/*,video/*" />
             @error('evidence') <span class="text-danger">{{ $message }}</span> @enderror
         </div>
