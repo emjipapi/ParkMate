@@ -51,15 +51,11 @@
 
             {{-- Action Buttons --}}
             <div class="flex space-x-3">
-                <button wire:click="generateStickers"
-                    class="btn btn-primary"
-                    @if(!$selectedTemplateId) disabled @endif>
+                <button wire:click="generateStickers" class="btn btn-primary" @if(!$selectedTemplateId) disabled @endif>
                     Generate Stickers
                 </button>
 
-                <button wire:click="togglePreview"
-                    class="btn btn-primary"
-                    @if(!$selectedTemplateId) disabled @endif>
+                <button wire:click="togglePreview" class="btn btn-primary" @if(!$selectedTemplateId) disabled @endif>
                     {{ $preview ? 'Hide Preview' : 'Show Preview' }}
                 </button>
             </div>
@@ -67,11 +63,10 @@
 
         {{-- Preview Panel --}}
         <div class="bg-white rounded border p-4 text-center">
-    <div style="position: relative; display: inline-block; max-width: 100%;">
-        <img src="{{ $selectedTemplate->file_url }}"
-             alt="{{ $selectedTemplate->name }}"
-             style="display: block; max-height: 500px; width: auto; max-width: 100%;"
-             class="mx-auto rounded shadow-sm">
+            <div style="position: relative; display: inline-block; max-width: 100%;">
+                <img src="{{ $selectedTemplate->file_url }}" alt="{{ $selectedTemplate->name }}"
+                    style="display: block; max-height: 500px; width: auto; max-width: 100%;"
+                    class="mx-auto rounded shadow-sm">
 
                 {{-- Read element_config (safe decode) --}}
                 @php
@@ -93,43 +88,47 @@
                 @endphp
 
                 {{-- Percent-positioned overlays (explicitly inside the positioned wrapper) --}}
-                @foreach($elements as $elementKey => $cfg)
-                    @php
-                        $x = $cfg['x_percent'] ?? ($cfg['x'] ?? 10);
-                        $y = $cfg['y_percent'] ?? ($cfg['y'] ?? 10);
-                        $fontSize = $cfg['font_size'] ?? 14;
-                        $color = $cfg['color'] ?? '#000';
-                        $transform = $x <= 20
-                            ? 'translateY(-50%)'
-                            : ($x >= 80 ? 'translateX(-100%) translateY(-50%)' : 'translateX(-50%) translateY(-50%)');
-                        $text = $previewData[$elementKey] ?? ($cfg['sample_text'] ?? strtoupper(str_replace('_', ' ', $elementKey)));
-                    @endphp
 
-                    <div style="
-                        position: absolute;
-                        left: {{ $x }}%;
-                        top: {{ $y }}%;
-                        transform: {{ $transform }};
-                        font-size: {{ $fontSize }}px;
-                        color: {{ $color }};
-                        font-weight: 700;
-                        white-space: nowrap;
-                        pointer-events: none;
-                        z-index: 50;
-                        /* debug visuals - remove once confirmed */
-                        background: rgba(255,255,0,0.12);
-                        padding: 2px 6px;
-                        border-radius: 3px;
-                    ">
-                        {{ $text }}
-                    </div>
+                @foreach($elements as $elementKey => $cfg)
+                    @if(!empty($cfg['enabled']))
+                                @php
+                                    $x = $cfg['x_percent'] ?? ($cfg['x'] ?? 10);
+                                    $y = $cfg['y_percent'] ?? ($cfg['y'] ?? 10);
+                                    $fontSize = $cfg['font_size'] ?? 14;
+                                    $color = $cfg['color'] ?? '#000';
+                                    $transform = $x <= 20
+                                        ? 'translateY(-50%)'
+                                        : ($x >= 80 ? 'translateX(-100%) translateY(-50%)' : 'translateX(-50%) translateY(-50%)');
+                                    $text = $previewData[$elementKey] ?? ($cfg['sample_text'] ?? strtoupper(str_replace('_', ' ', $elementKey)));
+                                @endphp
+
+                                <div style="
+                            position: absolute;
+                            left: {{ $x }}%;
+                            top: {{ $y }}%;
+                            transform: {{ $transform }};
+                            font-size: {{ $fontSize }}px;
+                            color: {{ $color }};
+                            font-weight: 700;
+                            white-space: nowrap;
+                            pointer-events: none;
+                            z-index: 50;
+                            /* debug visuals - remove once confirmed */
+                            background: rgba(255,255,0,0.12);
+                            padding: 2px 6px;
+                            border-radius: 3px;
+                        ">
+                                    {{ $text }}
+                                </div>
+                    @endif
                 @endforeach
+
             </div>
 
             <div class="mt-3 text-sm text-gray-600">
-        <p>Dimensions: {{ $selectedTemplate->width }} x {{ $selectedTemplate->height }}px</p>
-        <p>Aspect Ratio: {{ $selectedTemplate->aspect_ratio }}</p>
-    </div>
+                <p>Dimensions: {{ $selectedTemplate->width }} x {{ $selectedTemplate->height }}px</p>
+                <p>Aspect Ratio: {{ $selectedTemplate->aspect_ratio }}</p>
+            </div>
         </div>
 
 
@@ -174,8 +173,7 @@
                         <h4 class="font-medium text-green-800">Stickers Generated!</h4>
                         <p class="text-sm text-green-600">Your stickers are ready for download.</p>
                     </div>
-                    <button wire:click="downloadStickers"
-                        class="btn btn-primary px-4 py-2 rounded-md text-sm">
+                    <button wire:click="downloadStickers" class="btn btn-primary px-4 py-2 rounded-md text-sm">
                         Download ZIP
                     </button>
                 </div>

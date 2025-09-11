@@ -20,11 +20,12 @@ class StickerTemplateManagerComponent extends Component
     
     // Element positioning properties with better default spacing
     public $elementConfig = [
-        'user_id' => ['x_percent' => 10, 'y_percent' => 15, 'font_size' => 18, 'color' => '#000000'],
-        'name' => ['x_percent' => 10, 'y_percent' => 35, 'font_size' => 16, 'color' => '#000000'],
-        'department' => ['x_percent' => 10, 'y_percent' => 55, 'font_size' => 14, 'color' => '#666666'],
-        'expiry' => ['x_percent' => 10, 'y_percent' => 75, 'font_size' => 12, 'color' => '#999999'],
-    ];
+    'user_id' => ['x_percent' => 10, 'y_percent' => 15, 'font_size' => 18, 'color' => '#000000', 'enabled' => true],
+    'name' => ['x_percent' => 10, 'y_percent' => 35, 'font_size' => 16, 'color' => '#000000', 'enabled' => true],
+    'department' => ['x_percent' => 10, 'y_percent' => 55, 'font_size' => 14, 'color' => '#666666', 'enabled' => true],
+    'expiry' => ['x_percent' => 10, 'y_percent' => 75, 'font_size' => 12, 'color' => '#999999', 'enabled' => true],
+];
+
     // add inside class StickerTemplateManagerComponent
 protected $listeners = [
     'setPreviewDimensions' => 'setPreviewDimensions'
