@@ -2,19 +2,23 @@
 namespace App\Livewire\Admin;
 
 use Livewire\Component;
+use Livewire\WithPagination;
 use App\Models\Violation;
 use App\Models\Vehicle;
 use App\Models\User;
 
+
 class ActivityLogComponent extends Component
 {
+    use WithPagination;
     public $activeTab = 'system';
-
+    protected $queryString = [];
     public function setActiveTab($tab)
     {
         $this->activeTab = $tab;
 
         // 🔔 tell child components to reset filters
+        $this->resetPage();
         $this->dispatch('resetFilters');
     }
 
