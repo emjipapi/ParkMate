@@ -70,9 +70,10 @@ Route::get('/test-email/{userId}', function($userId) {
         return "Error: " . $e->getMessage();
     }
 });
-// Public pages (e.g., parking-slots) that anyone can see
-
-
+Route::view('/live-attendance', 'live-attendance-mode');
+    // Profile pictures
+    Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
+        ->name('profile.picture');
 /*
 |--------------------------------------------------------------------------
 | Protected Admin Routes (all pages require admin login)
@@ -114,9 +115,7 @@ Route::middleware(['admin'])->group(function () {
         return view('admin.analytics-dashboard', compact('chart'));
     });
 
-    // Profile pictures
-    Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
-        ->name('profile.picture');
+
         
 });
 // Route::get('/analytics', [AnalyticsController::class, 'index']);
