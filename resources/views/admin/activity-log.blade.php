@@ -322,6 +322,9 @@
     color: white;
     margin-right: 10px;
 }
+.nav-tabs .nav-link {
+    cursor: pointer;
+}
 
 @media (max-width: 768px) {
     .cards-container {
