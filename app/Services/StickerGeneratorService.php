@@ -11,91 +11,60 @@ use ZipArchive;
 
 class StickerGeneratorService
 {
-    public function generateSticker(StickerTemplate $template, User $user, array $customData = [])
-    {
-        // Load the template
-        $templatePath = storage_path('app/public/' . $template->file_path);
-        $image = Image::read($templatePath);
+public function generateStickerFromNumber(StickerTemplate $template, int $number)
+{
+    $templatePath = storage_path('app/public/' . $template->file_path);
+    $image = Image::read($templatePath);
 
-        // Get template dimensions
-        $width = $template->width;
-        $height = $template->height;
+    $width = $template->width;
+    $height = $template->height;
 
-        // Calculate responsive font sizes based on image size
-        $baseFontSize = max(16, $width / 30);
-        $smallFontSize = max(12, $width / 40);
+    $config = $template->element_config ?: $this->getDefaultElementConfig();
 
-        // Get element configuration or use defaults
-        $config = $template->element_config ?: $this->getDefaultElementConfig();
+    // Just put the number where user_id normally is
+    $this->addTextElement($image, str_pad($number, 4, '0', STR_PAD_LEFT),
+        $config['user_id'] ?? ['x_percent' => 10, 'y_percent' => 20],
+        $config['user_id']['font_size'] ?? 18,
+        $width,
+        $height
+    );
 
-        // Add text elements with proper positioning
-        $this->addTextElement($image, $user->employee_id ?? $user->student_id ?? $user->id, 
-                             $config['user_id'] ?? ['x_percent' => 10, 'y_percent' => 20], 
-                             $config['user_id']['font_size'] ?? $baseFontSize, $width, $height);
+    $filename = 'sticker_' . $number . '_' . time() . '.png';
+    $outputPath = 'generated-stickers/' . $filename;
 
-        $this->addTextElement($image, $user->name, 
-                             $config['name'] ?? ['x_percent' => 10, 'y_percent' => 40], 
-                             $config['name']['font_size'] ?? $baseFontSize, $width, $height);
-
-        $this->addTextElement($image, $user->department ?? 'General', 
-                             $config['department'] ?? ['x_percent' => 10, 'y_percent' => 60], 
-                             $config['department']['font_size'] ?? $smallFontSize, $width, $height);
-
-        $this->addTextElement($image, $this->formatExpiryDate($user->parking_permit_expiry ?? now()->addYear()), 
-                             $config['expiry'] ?? ['x_percent' => 10, 'y_percent' => 80], 
-                             $config['expiry']['font_size'] ?? $smallFontSize, $width, $height);
-
-        // Add custom data if provided
-        foreach ($customData as $key => $value) {
-            if (isset($config[$key])) {
-                $this->addTextElement($image, $value, $config[$key], 
-                                    $config[$key]['font_size'] ?? $smallFontSize, $width, $height);
-            }
-        }
-
-        // Generate filename
-        $filename = 'sticker_' . ($user->employee_id ?? $user->student_id ?? $user->id) . '_' . time() . '.png';
-        $outputPath = 'generated-stickers/' . $filename;
-
-        // Ensure directory exists
-        $outputDir = storage_path('app/public/generated-stickers');
-        if (!file_exists($outputDir)) {
-            mkdir($outputDir, 0755, true);
-        }
-
-        // Save the generated sticker
-        $image->save(storage_path('app/public/' . $outputPath));
-
-        return $outputPath;
+    $outputDir = storage_path('app/public/generated-stickers');
+    if (!file_exists($outputDir)) {
+        mkdir($outputDir, 0755, true);
     }
 
-    public function generateBatchStickers(StickerTemplate $template, array $userIds, string $userType = 'all')
-    {
-        $generatedStickers = [];
-        $users = $this->getUsersForBatch($userIds, $userType);
+    $image->save(storage_path('app/public/' . $outputPath));
 
-        foreach ($users as $user) {
-            try {
-                $stickerPath = $this->generateSticker($template, $user);
-                $generatedStickers[] = [
-                    'user_id' => $user->id,
-                    'user_name' => $user->name,
-                    'file_path' => $stickerPath,
-                    'status' => 'success'
-                ];
-            } catch (\Exception $e) {
-                $generatedStickers[] = [
-                    'user_id' => $user->id,
-                    'user_name' => $user->name,
-                    'file_path' => null,
-                    'status' => 'error',
-                    'error_message' => $e->getMessage()
-                ];
-            }
+    return $outputPath;
+}
+
+public function generateBatchFromNumbers(StickerTemplate $template, array $numbers)
+{
+    $generated = [];
+    foreach ($numbers as $num) {
+        try {
+            $path = $this->generateStickerFromNumber($template, $num);
+            $generated[] = [
+                'number' => $num,
+                'file_path' => $path,
+                'status' => 'success'
+            ];
+        } catch (\Exception $e) {
+            $generated[] = [
+                'number' => $num,
+                'file_path' => null,
+                'status' => 'error',
+                'error_message' => $e->getMessage()
+            ];
         }
-
-        return $generatedStickers;
     }
+    return $generated;
+}
+
 
     public function createStickerZip(array $stickerPaths, string $zipName = null)
     {

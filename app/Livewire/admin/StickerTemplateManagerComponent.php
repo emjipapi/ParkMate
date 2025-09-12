@@ -20,10 +20,13 @@ class StickerTemplateManagerComponent extends Component
     
     // Element positioning properties with better default spacing
     public $elementConfig = [
-    'user_id' => ['x_percent' => 10, 'y_percent' => 15, 'font_size' => 18, 'color' => '#000000', 'enabled' => true],
-    'name' => ['x_percent' => 10, 'y_percent' => 35, 'font_size' => 16, 'color' => '#000000', 'enabled' => true],
-    'department' => ['x_percent' => 10, 'y_percent' => 55, 'font_size' => 14, 'color' => '#666666', 'enabled' => true],
-    'expiry' => ['x_percent' => 10, 'y_percent' => 75, 'font_size' => 12, 'color' => '#999999', 'enabled' => true],
+    'int' => [
+        'x_percent' => 10,
+        'y_percent' => 15,
+        'font_size' => 18,
+        'color' => '#000000',
+        'enabled' => true
+    ],
 ];
 
     // add inside class StickerTemplateManagerComponent
@@ -33,12 +36,10 @@ protected $listeners = [
 
     
     // Preview sample data
-    public $previewData = [
-        'user_id' => 'SN:S1011',
-        'name' => 'John Doe',
-        'department' => 'CCS',
-        'expiry' => 'Expiry Date?'
-    ];
+public $previewData = [
+    'int' => '123456',
+];
+
     
     public $showPreview = false;
     public $previewImageDimensions = ['width' => 0, 'height' => 0];
@@ -66,21 +67,14 @@ protected $listeners = [
         $this->updatePreviewDimensions();
     }
 
-    public function loadElementConfig()
-    {
-        $template = StickerTemplate::find($this->selectedTemplateId);
-        if ($template && $template->element_config) {
-            // Merge with defaults to ensure all elements exist
-            $defaultConfig = [
-                'user_id' => ['x_percent' => 10, 'y_percent' => 15, 'font_size' => 18, 'color' => '#000000'],
-                'name' => ['x_percent' => 10, 'y_percent' => 35, 'font_size' => 16, 'color' => '#000000'],
-                'department' => ['x_percent' => 10, 'y_percent' => 55, 'font_size' => 14, 'color' => '#666666'],
-                'expiry' => ['x_percent' => 10, 'y_percent' => 75, 'font_size' => 12, 'color' => '#999999'],
-            ];
-            
-            $this->elementConfig = array_merge($defaultConfig, $template->element_config);
-        }
+public function loadElementConfig()
+{
+    $template = StickerTemplate::find($this->selectedTemplateId);
+    if ($template && $template->element_config) {
+        $defaultConfig = $this->getDefaultElementConfig();
+        $this->elementConfig = array_merge($defaultConfig, $template->element_config);
     }
+}
 
     public function updatePreviewDimensions()
     {
@@ -306,15 +300,19 @@ protected $listeners = [
         }
     }
 
-    private function getDefaultElementConfig()
-    {
-        return [
-            'user_id' => ['x_percent' => 10, 'y_percent' => 15, 'font_size' => 18, 'color' => '#000000'],
-            'name' => ['x_percent' => 10, 'y_percent' => 35, 'font_size' => 16, 'color' => '#000000'],
-            'department' => ['x_percent' => 10, 'y_percent' => 55, 'font_size' => 14, 'color' => '#666666'],
-            'expiry' => ['x_percent' => 10, 'y_percent' => 75, 'font_size' => 12, 'color' => '#999999'],
-        ];
-    }
+private function getDefaultElementConfig()
+{
+    return [
+        'int' => [
+            'x_percent' => 10,
+            'y_percent' => 15,
+            'font_size' => 18,
+            'color' => '#000000',
+            'enabled' => true
+        ],
+    ];
+}
+
 
     public function render()
     {

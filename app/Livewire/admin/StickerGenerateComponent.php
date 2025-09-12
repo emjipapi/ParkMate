@@ -19,7 +19,7 @@ class StickerGenerateComponent extends Component
     public $generationMode = 'quantity'; // 'quantity' or 'users'
     public $isGenerating = false;
     public $lastGeneratedZip = null;
-
+public $numberRange = ''; // e.g. "1,2,5-10"
     protected $stickerService;
 
     public function boot(StickerGeneratorService $stickerService)
@@ -33,52 +33,61 @@ class StickerGenerateComponent extends Component
         $this->selectedTemplateId = $firstTemplate?->id;
     }
 
-    public function generateStickers()
-    {
-        $this->validate([
-            'selectedTemplateId' => 'required|exists:sticker_templates,id',
-            'quantity' => 'required_if:generationMode,quantity|integer|min:1|max:1000',
-        ]);
+public function generateStickers()
+{
+    $this->validate([
+        'selectedTemplateId' => 'required|exists:sticker_templates,id',
+        'numberRange' => 'required|string'
+    ]);
 
-        $this->isGenerating = true;
+    $this->isGenerating = true;
 
-        try {
-            $template = StickerTemplate::find($this->selectedTemplateId);
-            
-            // Get users based on generation mode
-            $users = $this->getUsersForGeneration();
-            
-            if ($users->isEmpty()) {
-                session()->flash('error', 'No users found matching your criteria.');
-                $this->isGenerating = false;
-                return;
-            }
+    try {
+        $template = StickerTemplate::find($this->selectedTemplateId);
 
-            // Generate stickers
-            $results = $this->stickerService->generateBatchStickers(
-                $template, 
-                $users->pluck('id')->toArray(), 
-                $this->userType
-            );
+        // Parse numbers from input
+        $numbers = $this->parseNumberRange($this->numberRange);
 
-            // Create downloadable zip
-            $zipPath = $this->stickerService->createStickerZip($results);
-            $this->lastGeneratedZip = $zipPath;
-
-            $successCount = collect($results)->where('status', 'success')->count();
-            $errorCount = collect($results)->where('status', 'error')->count();
-
-            session()->flash('success', 
-                "Generated {$successCount} stickers successfully!" . 
-                ($errorCount > 0 ? " ({$errorCount} failed)" : "")
-            );
-
-        } catch (\Exception $e) {
-            session()->flash('error', 'Error generating stickers: ' . $e->getMessage());
+        if (empty($numbers)) {
+            session()->flash('error', 'No valid numbers found.');
+            $this->isGenerating = false;
+            return;
         }
 
-        $this->isGenerating = false;
+        // Generate stickers (no user model now)
+        $results = $this->stickerService->generateBatchFromNumbers($template, $numbers);
+
+        $zipPath = $this->stickerService->createStickerZip($results);
+        $this->lastGeneratedZip = $zipPath;
+
+        session()->flash('success', "Generated " . count($results) . " stickers successfully!");
+    } catch (\Exception $e) {
+        session()->flash('error', 'Error generating stickers: ' . $e->getMessage());
     }
+
+    $this->isGenerating = false;
+}
+
+private function parseNumberRange($input)
+{
+    $numbers = [];
+
+    foreach (explode(',', $input) as $part) {
+        $part = trim($part);
+        if (preg_match('/^(\d+)-(\d+)$/', $part, $matches)) {
+            $start = (int)$matches[1];
+            $end = (int)$matches[2];
+            if ($start <= $end) {
+                $numbers = array_merge($numbers, range($start, $end));
+            }
+        } elseif (is_numeric($part)) {
+            $numbers[] = (int)$part;
+        }
+    }
+
+    return array_unique($numbers);
+}
+
 
     public function downloadStickers()
     {
