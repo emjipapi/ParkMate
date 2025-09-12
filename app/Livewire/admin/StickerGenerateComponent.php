@@ -27,11 +27,13 @@ public $numberRange = ''; // e.g. "1,2,5-10"
         $this->stickerService = $stickerService;
     }
 
-    public function mount()
-    {
-        $firstTemplate = StickerTemplate::active()->first();
-        $this->selectedTemplateId = $firstTemplate?->id;
-    }
+public function mount()
+{
+    $firstTemplate = StickerTemplate::orderBy('created_at', 'asc')->first();
+    $this->selectedTemplateId = $firstTemplate?->id;
+    $this->templates = StickerTemplate::all();
+}
+
 
 public function generateStickers()
 {
@@ -126,7 +128,7 @@ private function parseNumberRange($input)
 
     public function render()
     {
-        $templates = StickerTemplate::active()->get();
+         $templates = StickerTemplate::all();
         $selectedTemplate = $this->selectedTemplateId 
             ? StickerTemplate::find($this->selectedTemplateId) 
             : null;

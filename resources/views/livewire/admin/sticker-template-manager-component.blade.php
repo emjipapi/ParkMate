@@ -64,7 +64,7 @@
             <div class="card-footer bg-transparent border-0 p-2">
                 <button type="button"
                         class="btn btn-sm btn-outline-danger w-100"
-                        wire:click.stop="deleteTemplate({{ $template->id }})"
+                        onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete this template? This cannot be undone.')) { @this.deleteTemplate({{ $template->id }}) }"
                         wire:loading.attr="disabled"
                         aria-label="Delete template {{ $template->name }}">
                     <i class="bi bi-trash-fill"></i>
@@ -78,6 +78,7 @@
         </div>
     @endforelse
 </div>
+
 
 
         </div>

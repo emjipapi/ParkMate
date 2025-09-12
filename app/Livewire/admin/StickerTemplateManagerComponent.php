@@ -320,16 +320,17 @@ private function getDefaultElementConfig()
 }
 
 
-    public function render()
-    {
-        $templates = StickerTemplate::orderBy('created_at', 'desc')->get();
-        $selectedTemplate = $this->selectedTemplateId 
-            ? StickerTemplate::find($this->selectedTemplateId) 
-            : null;
+public function render()
+{
+    $templates = StickerTemplate::orderBy('created_at', 'asc')->get(); // oldest first
+    $selectedTemplate = $this->selectedTemplateId 
+        ? StickerTemplate::find($this->selectedTemplateId) 
+        : null;
 
-        return view('livewire.admin.sticker-template-manager-component', [
-            'templates' => $templates,
-            'selectedTemplate' => $selectedTemplate
-        ]);
-    }
+    return view('livewire.admin.sticker-template-manager-component', [
+        'templates' => $templates,
+        'selectedTemplate' => $selectedTemplate
+    ]);
+}
+
 }
