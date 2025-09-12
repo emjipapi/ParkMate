@@ -58,14 +58,20 @@ public $previewData = [
         }
     }
 
-    public function selectTemplate($templateId)
-    {
-        $this->selectedTemplateId = $templateId;
-        $this->isEditing = false;
-        $this->loadElementConfig();
-        $this->showPreview = true; // Show preview when selecting template
-        $this->updatePreviewDimensions();
-    }
+public function selectTemplate($templateId)
+{
+    // Update state for UI
+    $this->selectedTemplateId = $templateId;
+    $this->isEditing = false;
+    $this->loadElementConfig();
+    $this->showPreview = true; // Show preview when selecting template
+    $this->updatePreviewDimensions();
+
+    // Ensure only one active template
+    StickerTemplate::query()->update(['status' => 'inactive']);
+    StickerTemplate::where('id', $templateId)->update(['status' => 'active']);
+}
+
 
 public function loadElementConfig()
 {
@@ -135,56 +141,56 @@ public function loadElementConfig()
     }
 
     // Improved layout presets with proper spacing to avoid cramping
-    public function applyLayoutPreset($preset)
-    {
-        $layouts = [
-            'vertical_left' => [
-                'user_id' => ['x_percent' => 8, 'y_percent' => 15],
-                'name' => ['x_percent' => 8, 'y_percent' => 35], 
-                'department' => ['x_percent' => 8, 'y_percent' => 55],
-                'expiry' => ['x_percent' => 8, 'y_percent' => 75]
-            ],
-            'vertical_right' => [
-                'user_id' => ['x_percent' => 92, 'y_percent' => 15],
-                'name' => ['x_percent' => 92, 'y_percent' => 35],
-                'department' => ['x_percent' => 92, 'y_percent' => 55],
-                'expiry' => ['x_percent' => 92, 'y_percent' => 75]
-            ],
-            'centered' => [
-                'user_id' => ['x_percent' => 50, 'y_percent' => 20],
-                'name' => ['x_percent' => 50, 'y_percent' => 40],
-                'department' => ['x_percent' => 50, 'y_percent' => 60],
-                'expiry' => ['x_percent' => 50, 'y_percent' => 80]
-            ],
-            'four_corners' => [
-                'user_id' => ['x_percent' => 15, 'y_percent' => 15],
-                'name' => ['x_percent' => 85, 'y_percent' => 15],
-                'department' => ['x_percent' => 15, 'y_percent' => 85],
-                'expiry' => ['x_percent' => 85, 'y_percent' => 85]
-            ],
-            'horizontal_top' => [
-                'user_id' => ['x_percent' => 25, 'y_percent' => 12],
-                'name' => ['x_percent' => 75, 'y_percent' => 12],
-                'department' => ['x_percent' => 25, 'y_percent' => 88],
-                'expiry' => ['x_percent' => 75, 'y_percent' => 88]
-            ],
-            'stacked_center' => [
-                'user_id' => ['x_percent' => 50, 'y_percent' => 18],
-                'name' => ['x_percent' => 50, 'y_percent' => 34],
-                'department' => ['x_percent' => 50, 'y_percent' => 66],
-                'expiry' => ['x_percent' => 50, 'y_percent' => 82]
-            ]
-        ];
+    // public function applyLayoutPreset($preset)
+    // {
+    //     $layouts = [
+    //         'vertical_left' => [
+    //             'user_id' => ['x_percent' => 8, 'y_percent' => 15],
+    //             'name' => ['x_percent' => 8, 'y_percent' => 35], 
+    //             'department' => ['x_percent' => 8, 'y_percent' => 55],
+    //             'expiry' => ['x_percent' => 8, 'y_percent' => 75]
+    //         ],
+    //         'vertical_right' => [
+    //             'user_id' => ['x_percent' => 92, 'y_percent' => 15],
+    //             'name' => ['x_percent' => 92, 'y_percent' => 35],
+    //             'department' => ['x_percent' => 92, 'y_percent' => 55],
+    //             'expiry' => ['x_percent' => 92, 'y_percent' => 75]
+    //         ],
+    //         'centered' => [
+    //             'user_id' => ['x_percent' => 50, 'y_percent' => 20],
+    //             'name' => ['x_percent' => 50, 'y_percent' => 40],
+    //             'department' => ['x_percent' => 50, 'y_percent' => 60],
+    //             'expiry' => ['x_percent' => 50, 'y_percent' => 80]
+    //         ],
+    //         'four_corners' => [
+    //             'user_id' => ['x_percent' => 15, 'y_percent' => 15],
+    //             'name' => ['x_percent' => 85, 'y_percent' => 15],
+    //             'department' => ['x_percent' => 15, 'y_percent' => 85],
+    //             'expiry' => ['x_percent' => 85, 'y_percent' => 85]
+    //         ],
+    //         'horizontal_top' => [
+    //             'user_id' => ['x_percent' => 25, 'y_percent' => 12],
+    //             'name' => ['x_percent' => 75, 'y_percent' => 12],
+    //             'department' => ['x_percent' => 25, 'y_percent' => 88],
+    //             'expiry' => ['x_percent' => 75, 'y_percent' => 88]
+    //         ],
+    //         'stacked_center' => [
+    //             'user_id' => ['x_percent' => 50, 'y_percent' => 18],
+    //             'name' => ['x_percent' => 50, 'y_percent' => 34],
+    //             'department' => ['x_percent' => 50, 'y_percent' => 66],
+    //             'expiry' => ['x_percent' => 50, 'y_percent' => 82]
+    //         ]
+    //     ];
 
-        if (isset($layouts[$preset])) {
-            foreach ($layouts[$preset] as $element => $position) {
-                if (isset($this->elementConfig[$element])) {
-                    $this->elementConfig[$element]['x_percent'] = $position['x_percent'];
-                    $this->elementConfig[$element]['y_percent'] = $position['y_percent'];
-                }
-            }
-        }
-    }
+    //     if (isset($layouts[$preset])) {
+    //         foreach ($layouts[$preset] as $element => $position) {
+    //             if (isset($this->elementConfig[$element])) {
+    //                 $this->elementConfig[$element]['x_percent'] = $position['x_percent'];
+    //                 $this->elementConfig[$element]['y_percent'] = $position['y_percent'];
+    //             }
+    //         }
+    //     }
+    // }
 
     // Method to distribute elements evenly with proper spacing
     public function distributeVertically()

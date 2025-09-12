@@ -46,35 +46,40 @@
             
             <h3 class="text-lg font-medium text-gray-800">Existing Templates</h3>
 
-            {{-- Template List --}}
-            <div class="space-y-2 max-h-96 overflow-y-auto">
-                @forelse($templates as $template)
-                    <div class="border rounded-lg p-3 cursor-pointer transition-colors {{ $selectedTemplateId == $template->id ? 'bg-blue-50 border-blue-300' : 'hover:bg-gray-50' }}"
-                        wire:click="selectTemplate({{ $template->id }})">
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <h5 class="font-medium text-gray-800 text-sm">{{ $template->name }}</h5>
-                                <p class="text-xs text-gray-500">{{ $template->width }}x{{ $template->height }}px</p>
-                                <span
-                                    class="inline-block px-2 py-1 text-xs rounded {{ $template->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800' }}">
-                                    {{ ucfirst($template->status) }}
-                                </span>
-                            </div>
-                            <button type="button" class="btn btn-sm btn-danger px-2" {{-- no w-100, small padding --}}
-                                onclick="event.stopPropagation(); if (!confirm('Are you sure you want to delete this template? This cannot be undone.')) return; Livewire.emit('confirmDeleteTemplate', {{ $template->id }});"
-                                wire:loading.attr="disabled" aria-label="Delete template {{ $template->name }}">
-                                <i class="bi bi-trash-fill" aria-hidden="true"></i>
-                            </button>
+{{-- Template List --}}
+<div class="d-flex flex-wrap gap-3 mb-5">
+    @forelse($templates as $index => $template)
+        <div class="card text-center shadow-sm {{ $selectedTemplateId == $template->id ? 'border-primary' : '' }}"
+             style="width: 180px; cursor: pointer; transition: all 0.2s;"
+             wire:click="selectTemplate({{ $template->id }})">
 
-                        </div>
-                    </div>
-                @empty
-                    <div class="text-center py-8 text-gray-500">
-                        <p>No templates found</p>
-                        <p class="text-sm">Upload your first template above</p>
-                    </div>
-                @endforelse
+            <div class="card-body p-2">
+                <h6 class="card-title mb-1 text-truncate">{{ $template->name }}</h6>
+                <small class="text-muted d-block mb-1">{{ $template->width }}x{{ $template->height }}px</small>
+                <span class="badge {{ $selectedTemplateId == $template->id ? 'bg-success' : 'bg-secondary' }}">
+                    {{ $selectedTemplateId == $template->id ? 'Active' : 'Inactive' }}
+                </span>
             </div>
+
+            <div class="card-footer bg-transparent border-0 p-2">
+                <button type="button"
+                        class="btn btn-sm btn-outline-danger w-100"
+                        wire:click.stop="deleteTemplate({{ $template->id }})"
+                        wire:loading.attr="disabled"
+                        aria-label="Delete template {{ $template->name }}">
+                    <i class="bi bi-trash-fill"></i>
+                </button>
+            </div>
+        </div>
+    @empty
+        <div class="text-center py-4 text-muted w-100">
+            <p class="mb-0">No templates found</p>
+            <small>Upload your first template above</small>
+        </div>
+    @endforelse
+</div>
+
+
         </div>
 
         {{-- Template Editor --}}
