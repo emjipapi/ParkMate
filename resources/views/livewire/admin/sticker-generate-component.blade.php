@@ -41,15 +41,14 @@
             </div>
 
             {{-- Number Range --}}
-<div>
-    <label for="number-range" class="block text-sm font-medium text-gray-700 mb-2">
-        Sticker Numbers (e.g. 1,2,5-10,20)
-    </label>
-    <input type="text" wire:model.live="numberRange" id="number-range"
-        placeholder="Example: 1,2,5-10,20"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-    <p class="text-xs text-gray-500 mt-1">Enter comma-separated numbers or ranges.</p>
-</div>
+            <div>
+                <label for="number-range" class="block text-sm font-medium text-gray-700 mb-2">
+                    Sticker Numbers (e.g. 1,2,5-10,20)
+                </label>
+                <input type="text" wire:model.live="numberRange" id="number-range" placeholder="Example: 1,2,5-10,20"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <p class="text-xs text-gray-500 mt-1">Enter comma-separated numbers or ranges.</p>
+            </div>
 
 
             {{-- Action Buttons --}}
@@ -74,19 +73,19 @@
 
                     {{-- element config parsing --}}
                     @php
-    $elements = [];
-    $raw = $selectedTemplate->element_config ?? ($selectedTemplate->elementConfig ?? null);
-    if (is_array($raw)) {
-        $elements = $raw;
-    } elseif ($raw) {
-        $elements = json_decode($raw, true) ?: [];
-    }
+                        $elements = [];
+                        $raw = $selectedTemplate->element_config ?? ($selectedTemplate->elementConfig ?? null);
+                        if (is_array($raw)) {
+                            $elements = $raw;
+                        } elseif ($raw) {
+                            $elements = json_decode($raw, true) ?: [];
+                        }
 
-    // Match your elementConfig keys
-    $previewData = [
-        'int' => '123456', // sample sticker number
-    ];
-@endphp
+                        // Match your elementConfig keys
+                        $previewData = [
+                            'int' => '123456', // sample sticker number
+                        ];
+                    @endphp
 
 
                     {{-- Percent-positioned overlays (explicitly inside the positioned wrapper) --}}
@@ -97,6 +96,12 @@
                                 $x = $cfg['x_percent'] ?? ($cfg['x'] ?? 10);
                                 $y = $cfg['y_percent'] ?? ($cfg['y'] ?? 10);
                                 $fontSize = $cfg['font_size'] ?? 14;
+
+            // Apply the same conversion as in StickerGeneratorService
+            $previewFontSize = round($fontSize * 0.57);
+            // Ensure minimum readable size
+            $previewFontSize = max(6, $previewFontSize);
+
                                 $color = $cfg['color'] ?? '#000';
                                 $transform = $x <= 20
                                     ? 'translateY(-50%)'
@@ -106,21 +111,21 @@
                             @endphp
 
                             <div style="
-                                                position: absolute;
-                                                left: {{ $x }}%;
-                                                top: {{ $y }}%;
-                                                transform: {{ $transform }};
-                                                font-size: {{ $fontSize }}px;
-                                                color: {{ $color }};
-                                                font-weight: 700;
-                                                white-space: nowrap;
-                                                pointer-events: none;
-                                                z-index: 50;
-                                                /* debug visuals - remove once confirmed */
-                                                background: rgba(255,255,0,0.12);
-                                                padding: 2px 6px;
-                                                border-radius: 3px;
-                                            ">
+                                                            position: absolute;
+                                                            left: {{ $x }}%;
+                                                            top: {{ $y }}%;
+                                                            transform: {{ $transform }};
+                                                            font-size: {{ $previewFontSize }}px;
+                                                            color: {{ $color }};
+                                                            
+                                                            white-space: nowrap;
+                                                            pointer-events: none;
+                                                            z-index: 50;
+                                                            /* debug visuals - remove once confirmed */
+                                                            background: rgba(255,255,0,0.12);
+                                                            padding: 2px 6px;
+                                                            border-radius: 3px;
+                                                        ">
                                 {{ $text }}
                             </div>
                         @endif
@@ -131,15 +136,15 @@
             </div>
 
             @if($selectedTemplate)
-    <div class="mt-3 text-sm text-gray-600">
-        <p>Dimensions: {{ $selectedTemplate->width }} x {{ $selectedTemplate->height }}px</p>
-        <p>Aspect Ratio: {{ $selectedTemplate->aspect_ratio }}</p>
-    </div>
-@else
-    <div class="mt-3 text-sm text-gray-500 italic">
-        No template selected.
-    </div>
-@endif
+                <div class="mt-3 text-sm text-gray-600">
+                    <p>Dimensions: {{ $selectedTemplate->width }} x {{ $selectedTemplate->height }}px</p>
+                    <p>Aspect Ratio: {{ $selectedTemplate->aspect_ratio }}</p>
+                </div>
+            @else
+                <div class="mt-3 text-sm text-gray-500 italic">
+                    No template selected.
+                </div>
+            @endif
 
         </div>
 
@@ -157,9 +162,12 @@
                     <input type="radio" wire:model.live="generationMode" value="users" class="mr-2">
                     <span class="text-sm">Select Users</span>
                 </label>
+                <form method="POST" action="{{ route('webfonts.add') }}">
+                    @csrf
+                    <button type="submit">Add Font</button>
+                </form>
             </div>
         </div>
-
         @if($generationMode === 'users')
             {{-- User Selection --}}
             <div>

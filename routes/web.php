@@ -8,6 +8,7 @@ use App\Charts\AnalyticsChart;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\EvidenceController;
+use App\Http\Controllers\WebfontController;
 /*
 |--------------------------------------------------------------------------
 | Public / Login Routes
@@ -55,25 +56,38 @@ Route::post('/admin/login', [AdminAuthController::class, 'login'])
     ->name('admin.login.submit');
 
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
-Route::get('/test-email/{userId}', function($userId) {
+Route::get('/test-email/{userId}', function ($userId) {
     try {
         $user = \App\Models\User::find($userId);
         if (!$user) {
             return "User not found";
         }
-        
+
         \Illuminate\Support\Facades\Mail::to($user->email)
             ->send(new \App\Mail\ViolationThresholdReached($user));
-            
+
         return "Email sent to {$user->email}";
     } catch (\Exception $e) {
         return "Error: " . $e->getMessage();
     }
 });
 Route::view('/live-attendance', 'live-attendance-mode');
-    // Profile pictures
-    Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
-        ->name('profile.picture');
+// Profile pictures
+Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
+    ->name('profile.picture');
+
+Route::post('/webfonts/add', [WebfontController::class, 'add'])->name('webfonts.add');
+
+
+
+
+
+
+
+
+
+
+
 /*
 |--------------------------------------------------------------------------
 | Protected Admin Routes (all pages require admin login)
@@ -91,7 +105,7 @@ Route::middleware(['admin'])->group(function () {
         return view('admin.user-create'); // Blade containing <livewire:user-form />
     })->name('users.create');
 
-        Route::get('/users/create-admin', function () {
+    Route::get('/users/create-admin', function () {
         return view('admin.admin-create'); // Blade containing <livewire:user-form />
     })->name('admins.create');
     Route::get('/users/edit/{id}', [UserController::class, 'edit'])->name('users.edit');
@@ -116,7 +130,7 @@ Route::middleware(['admin'])->group(function () {
     });
 
 
-        
+
 });
 // Route::get('/analytics', [AnalyticsController::class, 'index']);
 
@@ -133,7 +147,7 @@ Route::middleware(['auth'])->group(function () {
     })->name('user.dashboard');
     Route::view('/user-parking-slots', 'user.parking-slots')->name('parking.slots');
     Route::view('/user-violation-tracking', 'user.violation-tracking')
-    ->name('user.violation.tracking');
+        ->name('user.violation.tracking');
     Route::view('/user-settings', 'user.settings')->name('user.settings');
     // Route::post('/evidence/upload', [EvidenceController::class, 'store'])->name('evidence.upload');
 });

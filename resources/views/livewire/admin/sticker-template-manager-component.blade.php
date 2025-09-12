@@ -119,41 +119,48 @@
 
                                 {{-- ALWAYS render overlays, but position using percent CSS --}}
                                 @foreach($elementConfig as $element => $config)
-                                    @if(!empty($config['enabled']))
-                                        @php
-                                            $x = $config['x_percent'] ?? 10;
-                                            $y = $config['y_percent'] ?? 10;
-                                            $fontSize = max(8, $config['font_size'] ?? 16);
-                                            $color = $config['color'] ?? '#000';
-                                            $align = $x <= 20 ? 'left' : ($x >= 80 ? 'right' : 'center');
-                                            $transform = $x <= 20 ? 'translateY(-50%)' : ($x >= 80 ? 'translateX(-100%) translateY(-50%)' : 'translate(-50%,-50%)');
-                                        @endphp
+    @if(!empty($config['enabled']))
+        @php
+            $x = $config['x_percent'] ?? 10;
+            $y = $config['y_percent'] ?? 10;
+            $fontSize = max(8, $config['font_size'] ?? 16);
+            
+            // Apply the same conversion as in StickerGeneratorService
+            $previewFontSize = round($fontSize * 0.58);
+            // Ensure minimum readable size
+            $previewFontSize = max(6, $previewFontSize);
+            
+            $color = $config['color'] ?? '#000';
+            $align = $x <= 20 ? 'left' : ($x >= 80 ? 'right' : 'center');
+            $transform = $x <= 20 ? 'translateY(-50%)' : ($x >= 80 ? 'translateX(-100%) translateY(-50%)' : 'translate(-50%,-50%)');
+        @endphp
 
-                                        <div class="text-element-{{ $selectedTemplate->id }}" data-element="{{ $element }}" style="position:absolute;
-                                                    left: {{ $x }}%;
-                                                    top: {{ $y }}%;
-                                                    transform: {{ $transform }};
-                                                    font-size: {{ $fontSize }}px;
-                                                    color: {{ $color }};
-                                                    font-weight: 700;
-                                                    white-space: nowrap;
-                                                    z-index: 10;">
-                                            {{ $previewData[$element] ?? $element }}
+        <div class="text-element-{{ $selectedTemplate->id }}" data-element="{{ $element }}" style="position:absolute;
+                        left: {{ $x }}%;
+                        top: {{ $y }}%;
+                        transform: {{ $transform }};
+                        font-size: {{ $previewFontSize }}px;
+                        color: {{ $color }};
+                        
+                        white-space: nowrap;
+                        z-index: 10;">
+            {{ $previewData[$element] ?? $element }}
 
-                                        </div>
-                                    @endif
-                                @endforeach
+        </div>
+    @endif
+@endforeach
 
 
                                 {{-- dots also positioned by percent --}}
                                 @foreach($elementConfig as $element => $config)
                                     @if(!empty($config['enabled']))
-                                        <div class="position-dot-{{ $selectedTemplate->id }}" data-element="{{ $element }}" style="position:absolute;
-                                                    left: {{ $config['x_percent'] ?? 10 }}%;
-                                                    top: {{ $config['y_percent'] ?? 10 }}%;
-                                                    transform: translate(-50%,-50%);
-                                                    width:10px;height:10px;
-                                                    background:#ef4444;border:2px solid #fff;border-radius:50%;z-index:20;"></div>
+                                        <div class="position-dot-{{ $selectedTemplate->id }}" data-element="{{ $element }}"
+                                            style="position:absolute;
+                                                                left: {{ $config['x_percent'] ?? 10 }}%;
+                                                                top: {{ $config['y_percent'] ?? 10 }}%;
+                                                                transform: translate(-50%,-50%);
+                                                                width:10px;height:10px;
+                                                                background:#ef4444;border:2px solid #fff;border-radius:50%;z-index:20;"></div>
                                     @endif
                                 @endforeach
 
@@ -161,116 +168,7 @@
 
                         </div>
 
-                        {{-- Positioning script (single robust module) --}}
-                        <script>
-                            (function () {
-                                // avoid redeclaring on multiple Livewire patches
-                                if (!window.__stickerTemplateInit) window.__stickerTemplateInit = { inited: true };
-                                let __stickerTimer = null;
 
-                                function initAllImages() {
-                                    document.querySelectorAll('img[id^="template-image-"]').forEach(img => {
-                                        const idMatch = img.id.match(/^template-image-(.+)$/);
-                                        if (!idMatch) return;
-                                        const templateId = idMatch[1];
-                                        attachHandlers(img, templateId);
-                                    });
-                                }
-
-                                function attachHandlers(img, templateId) {
-                                    if (img.dataset.stickerInit === '1') {
-                                        // still run once to update positions
-                                        positionElements(img, templateId);
-                                        return;
-                                    }
-                                    img.dataset.stickerInit = '1';
-
-                                    img.addEventListener('load', () => positionElements(img, templateId));
-                                    if (img.complete) setTimeout(() => positionElements(img, templateId), 30);
-                                }
-
-                                function positionElements(img, templateId) {
-                                    if (!img || !document.body.contains(img)) return;
-
-                                    // natural dims might not be ready immediately
-                                    if (!img.naturalWidth || !img.naturalHeight) {
-                                        setTimeout(() => positionElements(img, templateId), 60);
-                                        return;
-                                    }
-
-                                    const container = img.parentElement;
-                                    if (!container) return;
-
-                                    const imgRect = img.getBoundingClientRect();
-                                    const containerRect = container.getBoundingClientRect();
-                                    const imgWidth = img.offsetWidth;
-                                    const imgHeight = img.offsetHeight;
-
-                                    const offsetX = imgRect.left - containerRect.left;
-                                    const offsetY = imgRect.top - containerRect.top;
-
-                                    // Emit intrinsic dims to Livewire (component will receive them)
-                                    if (window.Livewire && typeof Livewire.emit === 'function') {
-                                        Livewire.emit('setPreviewDimensions', img.naturalWidth, img.naturalHeight);
-                                    }
-
-                                    // Position text overlays
-                                    document.querySelectorAll('.text-element-' + templateId).forEach(el => {
-                                        const xPercent = parseFloat(el.dataset.x) || 0;
-                                        const yPercent = parseFloat(el.dataset.y) || 0;
-
-                                        const x = offsetX + (xPercent / 100) * imgWidth;
-                                        const y = offsetY + (yPercent / 100) * imgHeight;
-
-                                        el.style.left = Math.round(x) + 'px';
-                                        el.style.top = Math.round(y) + 'px';
-
-                                        if (xPercent <= 20) {
-                                            el.style.transform = 'translateY(-50%)';
-                                            el.style.transformOrigin = 'left center';
-                                        } else if (xPercent >= 80) {
-                                            el.style.transform = 'translateX(-100%) translateY(-50%)';
-                                            el.style.transformOrigin = 'right center';
-                                        } else {
-                                            el.style.transform = 'translateX(-50%) translateY(-50%)';
-                                            el.style.transformOrigin = 'center center';
-                                        }
-                                    });
-
-                                    // Position dots
-                                    document.querySelectorAll('.position-dot-' + templateId).forEach(el => {
-                                        const xPercent = parseFloat(el.dataset.x) || 0;
-                                        const yPercent = parseFloat(el.dataset.y) || 0;
-
-                                        const x = offsetX + (xPercent / 100) * imgWidth;
-                                        const y = offsetY + (yPercent / 100) * imgHeight;
-
-                                        el.style.left = Math.round(x) + 'px';
-                                        el.style.top = Math.round(y) + 'px';
-                                        el.style.transform = 'translateX(-50%) translateY(-50%)';
-                                    });
-                                }
-
-                                // Initial run
-                                document.addEventListener('DOMContentLoaded', () => setTimeout(initAllImages, 30));
-
-                                // Re-run after Livewire patches
-                                document.addEventListener('livewire:update', () => {
-                                    clearTimeout(__stickerTimer);
-                                    __stickerTimer = setTimeout(initAllImages, 80);
-                                });
-                                document.addEventListener('livewire:navigated', () => {
-                                    clearTimeout(__stickerTimer);
-                                    __stickerTimer = setTimeout(initAllImages, 80);
-                                });
-
-                                // Window resize -> reposition
-                                window.addEventListener('resize', () => {
-                                    clearTimeout(__stickerTimer);
-                                    __stickerTimer = setTimeout(initAllImages, 140);
-                                });
-                            })();
-                        </script>
 
                         @if($isEditing)
                             <div class="mt-3 text-xs text-gray-600 text-center space-y-1">
@@ -311,104 +209,112 @@
                             @foreach($elementConfig as $element => $config)
                                 <div class="border rounded p-3 ">
                                     <div class="flex items-center mb-2">
-                                        <input type="checkbox" wire:model="elementConfig.{{ $element }}.enabled" class="mr-2" wire:click="saveElementPositions">
+                                        <input type="checkbox" wire:model="elementConfig.{{ $element }}.enabled" class="mr-2"
+                                            wire:click="saveElementPositions">
                                         <label class="text-sm text-gray-700">Enable this element</label>
                                     </div>
                                     <div class="{{ empty($config['enabled']) ? 'opacity-50 pointer-events-none' : '' }}">
-                                    <h5 class="font-medium text-gray-700 mb-2 capitalize">
-                                        {{ str_replace('_', ' ', $element) }} Settings
-                                    </h5>
+                                        <h5 class="font-medium text-gray-700 mb-2 capitalize">
+                                            {{ str_replace('_', ' ', $element) }} Settings
+                                        </h5>
 
-                                    <div class="space-y-3">
-                                        {{-- Position --}}
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <label class="block text-xs font-medium text-gray-600">X Position (%)</label>
-                                                <input type="number" wire:model.live="elementConfig.{{ $element }}.x_percent"
-                                                    min="0" max="100" step="0.1"
-                                                    class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
-                                                <small class="text-gray-500 text-xs">
-                                                    @if($config['x_percent'] <= 15) Left aligned
-                                                    @elseif($config['x_percent'] >= 85) Right aligned
-                                                    @else Center aligned @endif
-                                                </small>
+                                        <div class="space-y-3">
+                                            {{-- Position --}}
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-600">X Position
+                                                        (%)</label>
+                                                    <input type="number"
+                                                        wire:model.live="elementConfig.{{ $element }}.x_percent" min="0"
+                                                        max="100" step="0.1"
+                                                        class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
+                                                    <small class="text-gray-500 text-xs">
+                                                        @if($config['x_percent'] <= 15) Left aligned
+                                                        @elseif($config['x_percent'] >= 85) Right aligned
+                                                        @else Center aligned @endif
+                                                    </small>
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-600">Y Position
+                                                        (%)</label>
+                                                    <input type="number"
+                                                        wire:model.live="elementConfig.{{ $element }}.y_percent" min="0"
+                                                        max="100" step="0.1"
+                                                        class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label class="block text-xs font-medium text-gray-600">Y Position (%)</label>
-                                                <input type="number" wire:model.live="elementConfig.{{ $element }}.y_percent"
-                                                    min="0" max="100" step="0.1"
-                                                    class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
-                                            </div>
-                                        </div>
 
-                                        {{-- Font Size and Color --}}
-                                        <div class="grid grid-cols-2 gap-2">
-                                            <div>
-                                                <label class="block text-xs font-medium text-gray-600">Font Size (px)</label>
-                                                <input type="number" wire:model.live="elementConfig.{{ $element }}.font_size"
-                                                    min="8" max="72" step="1"
-                                                    class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
+                                            {{-- Font Size and Color --}}
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-600">Font Size
+                                                        (px)</label>
+                                                    <input type="number"
+                                                        wire:model.live="elementConfig.{{ $element }}.font_size" min="8"
+                                                        max="72" step="1"
+                                                        class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-xs font-medium text-gray-600">Text Color</label>
+                                                    <input type="color" wire:model.live="elementConfig.{{ $element }}.color"
+                                                        class="w-full h-8 border rounded cursor-pointer">
+                                                </div>
                                             </div>
-                                            <div>
-                                                <label class="block text-xs font-medium text-gray-600">Text Color</label>
-                                                <input type="color" wire:model.live="elementConfig.{{ $element }}.color"
-                                                    class="w-full h-8 border rounded cursor-pointer">
-                                            </div>
-                                        </div>
 
-                                        {{-- Quick Position Buttons --}}
-                                        <div class="mt-2">
-                                            <label class="block text-xs font-medium text-gray-600 mb-1">Quick Positions</label>
-                                            <div class="grid grid-cols-3 gap-1 text-xs">
-                                                <button wire:click="setQuickPosition('{{ $element }}', 'top_left')"
-                                                    class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
-                                                    type="button">
-                                                    ↖ Top Left
-                                                </button>
-                                                <button wire:click="setQuickPosition('{{ $element }}', 'top_center')"
-                                                    class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
-                                                    type="button">
-                                                    ↑ Top Center
-                                                </button>
-                                                <button wire:click="setQuickPosition('{{ $element }}', 'top_right')"
-                                                    class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
-                                                    type="button">
-                                                    ↗ Top Right
-                                                </button>
-                                                <button wire:click="setQuickPosition('{{ $element }}', 'center_left')"
-                                                    class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
-                                                    type="button">
-                                                    ← Left
-                                                </button>
-                                                <button wire:click="setQuickPosition('{{ $element }}', 'center')"
-                                                    class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
-                                                    type="button">
-                                                    ⊙ Center
-                                                </button>
-                                                <button wire:click="setQuickPosition('{{ $element }}', 'center_right')"
-                                                    class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
-                                                    type="button">
-                                                    → Right
-                                                </button>
-                                                <button wire:click="setQuickPosition('{{ $element }}', 'bottom_left')"
-                                                    class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
-                                                    type="button">
-                                                    ↙ Bottom Left
-                                                </button>
-                                                <button wire:click="setQuickPosition('{{ $element }}', 'bottom_center')"
-                                                    class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
-                                                    type="button">
-                                                    ↓ Bottom Center
-                                                </button>
-                                                <button wire:click="setQuickPosition('{{ $element }}', 'bottom_right')"
-                                                    class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
-                                                    type="button">
-                                                    ↘ Bottom Right
-                                                </button>
+                                            {{-- Quick Position Buttons --}}
+                                            <div class="mt-2">
+                                                <label class="block text-xs font-medium text-gray-600 mb-1">Quick
+                                                    Positions</label>
+                                                <div class="grid grid-cols-3 gap-1 text-xs">
+                                                    <button wire:click="setQuickPosition('{{ $element }}', 'top_left')"
+                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
+                                                        type="button">
+                                                        ↖ Top Left
+                                                    </button>
+                                                    <button wire:click="setQuickPosition('{{ $element }}', 'top_center')"
+                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
+                                                        type="button">
+                                                        ↑ Top Center
+                                                    </button>
+                                                    <button wire:click="setQuickPosition('{{ $element }}', 'top_right')"
+                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
+                                                        type="button">
+                                                        ↗ Top Right
+                                                    </button>
+                                                    <button wire:click="setQuickPosition('{{ $element }}', 'center_left')"
+                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
+                                                        type="button">
+                                                        ← Left
+                                                    </button>
+                                                    <button wire:click="setQuickPosition('{{ $element }}', 'center')"
+                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
+                                                        type="button">
+                                                        ⊙ Center
+                                                    </button>
+                                                    <button wire:click="setQuickPosition('{{ $element }}', 'center_right')"
+                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
+                                                        type="button">
+                                                        → Right
+                                                    </button>
+                                                    <button wire:click="setQuickPosition('{{ $element }}', 'bottom_left')"
+                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
+                                                        type="button">
+                                                        ↙ Bottom Left
+                                                    </button>
+                                                    <button wire:click="setQuickPosition('{{ $element }}', 'bottom_center')"
+                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
+                                                        type="button">
+                                                        ↓ Bottom Center
+                                                    </button>
+                                                    <button wire:click="setQuickPosition('{{ $element }}', 'bottom_right')"
+                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
+                                                        type="button">
+                                                        ↘ Bottom Right
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
                                 </div>
                             @endforeach
                         </div>
@@ -451,10 +357,120 @@
                 </div>
             @else
                 <div class="text-center py-16 text-gray-500">
-                    
+
                     <p class="mt-2">Select a template to edit</p>
                 </div>
             @endif
         </div>
     </div>
 </div>
+{{-- Positioning script (single robust module) --}}
+<script>
+    (function () {
+        // avoid redeclaring on multiple Livewire patches
+        if (!window.__stickerTemplateInit) window.__stickerTemplateInit = { inited: true };
+        let __stickerTimer = null;
+
+        function initAllImages() {
+            document.querySelectorAll('img[id^="template-image-"]').forEach(img => {
+                const idMatch = img.id.match(/^template-image-(.+)$/);
+                if (!idMatch) return;
+                const templateId = idMatch[1];
+                attachHandlers(img, templateId);
+            });
+        }
+
+        function attachHandlers(img, templateId) {
+            if (img.dataset.stickerInit === '1') {
+                // still run once to update positions
+                positionElements(img, templateId);
+                return;
+            }
+            img.dataset.stickerInit = '1';
+
+            img.addEventListener('load', () => positionElements(img, templateId));
+            if (img.complete) setTimeout(() => positionElements(img, templateId), 30);
+        }
+
+        function positionElements(img, templateId) {
+            if (!img || !document.body.contains(img)) return;
+
+            // natural dims might not be ready immediately
+            if (!img.naturalWidth || !img.naturalHeight) {
+                setTimeout(() => positionElements(img, templateId), 60);
+                return;
+            }
+
+            const container = img.parentElement;
+            if (!container) return;
+
+            const imgRect = img.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const imgWidth = img.offsetWidth;
+            const imgHeight = img.offsetHeight;
+
+            const offsetX = imgRect.left - containerRect.left;
+            const offsetY = imgRect.top - containerRect.top;
+
+            // Emit intrinsic dims to Livewire (component will receive them)
+            if (window.Livewire && typeof Livewire.emit === 'function') {
+                Livewire.emit('setPreviewDimensions', img.naturalWidth, img.naturalHeight);
+            }
+
+            // Position text overlays
+            document.querySelectorAll('.text-element-' + templateId).forEach(el => {
+                const xPercent = parseFloat(el.dataset.x) || 0;
+                const yPercent = parseFloat(el.dataset.y) || 0;
+
+                const x = offsetX + (xPercent / 100) * imgWidth;
+                const y = offsetY + (yPercent / 100) * imgHeight;
+
+                el.style.left = Math.round(x) + 'px';
+                el.style.top = Math.round(y) + 'px';
+
+                if (xPercent <= 20) {
+                    el.style.transform = 'translateY(-50%)';
+                    el.style.transformOrigin = 'left center';
+                } else if (xPercent >= 80) {
+                    el.style.transform = 'translateX(-100%) translateY(-50%)';
+                    el.style.transformOrigin = 'right center';
+                } else {
+                    el.style.transform = 'translateX(-50%) translateY(-50%)';
+                    el.style.transformOrigin = 'center center';
+                }
+            });
+
+            // Position dots
+            document.querySelectorAll('.position-dot-' + templateId).forEach(el => {
+                const xPercent = parseFloat(el.dataset.x) || 0;
+                const yPercent = parseFloat(el.dataset.y) || 0;
+
+                const x = offsetX + (xPercent / 100) * imgWidth;
+                const y = offsetY + (yPercent / 100) * imgHeight;
+
+                el.style.left = Math.round(x) + 'px';
+                el.style.top = Math.round(y) + 'px';
+                el.style.transform = 'translateX(-50%) translateY(-50%)';
+            });
+        }
+
+        // Initial run
+        document.addEventListener('DOMContentLoaded', () => setTimeout(initAllImages, 30));
+
+        // Re-run after Livewire patches
+        document.addEventListener('livewire:update', () => {
+            clearTimeout(__stickerTimer);
+            __stickerTimer = setTimeout(initAllImages, 80);
+        });
+        document.addEventListener('livewire:navigated', () => {
+            clearTimeout(__stickerTimer);
+            __stickerTimer = setTimeout(initAllImages, 80);
+        });
+
+        // Window resize -> reposition
+        window.addEventListener('resize', () => {
+            clearTimeout(__stickerTimer);
+            __stickerTimer = setTimeout(initAllImages, 140);
+        });
+    })();
+</script>

@@ -11,8 +11,10 @@ use ZipArchive;
 
 class StickerGeneratorService
 {
+    
 public function generateStickerFromNumber(StickerTemplate $template, int $number)
 {
+    $template->refresh();
     $templatePath = storage_path('app/public/' . $template->file_path);
     $image = Image::read($templatePath);
 
@@ -22,12 +24,14 @@ public function generateStickerFromNumber(StickerTemplate $template, int $number
     $config = $template->element_config ?: $this->getDefaultElementConfig();
 
     // Just put the number where user_id normally is
-    $this->addTextElement($image, str_pad($number, 4, '0', STR_PAD_LEFT),
-        $config['user_id'] ?? ['x_percent' => 10, 'y_percent' => 20],
-        $config['user_id']['font_size'] ?? 18,
-        $width,
-        $height
-    );
+$this->addTextElement(
+    $image, 
+    str_pad($number, 4, '0', STR_PAD_LEFT),
+    $config['int'] ?? ['x_percent' => 10, 'y_percent' => 20],
+    $config['int']['font_size'] ?? 18,
+    $width,
+    $height
+);
 
     $filename = 'sticker_' . $number . '_' . time() . '.png';
     $outputPath = 'generated-stickers/' . $filename;
@@ -65,7 +69,6 @@ public function generateBatchFromNumbers(StickerTemplate $template, array $numbe
     return $generated;
 }
 
-
     public function createStickerZip(array $stickerPaths, string $zipName = null)
     {
         $zipName = $zipName ?: 'parking_stickers_' . date('Y-m-d_H-i-s') . '.zip';
@@ -93,37 +96,42 @@ public function generateBatchFromNumbers(StickerTemplate $template, array $numbe
         throw new \Exception('Could not create zip file');
     }
 
-    private function addTextElement($image, $text, array $config, $fontSize, $templateWidth, $templateHeight)
-    {
-        // Get configuration with defaults
-        $xPercent = $config['x_percent'] ?? 10;
-        $yPercent = $config['y_percent'] ?? 10;
-        $size = $config['font_size'] ?? $fontSize;
-        $color = $config['color'] ?? '#000000';
-        
-        // Convert percentages to actual pixel positions
-        $x = ($xPercent * $templateWidth) / 100;
-        $y = ($yPercent * $templateHeight) / 100;
+// In your StickerGeneratorService.php, update the addTextElement method:
 
-        // Determine text alignment based on X position (matches frontend preview)
-        $align = 'left';
-        if ($xPercent >= 75) {
-            $align = 'right';
-        } elseif ($xPercent >= 25 && $xPercent <= 74) {
-            $align = 'center';
-        }
+private function addTextElement($image, $text, array $config, $fontSize, $templateWidth, $templateHeight)
+{
+    // Get configuration with defaults
+    $xPercent = $config['x_percent'] ?? 10;
+    $yPercent = $config['y_percent'] ?? 10;
+    $size = $config['font_size'] ?? $fontSize;
+    $color = $config['color'] ?? '#000000';
+    
+    // Convert percentages to actual pixel positions
+    $x = ($xPercent * $templateWidth) / 100;
+    $y = ($yPercent * $templateHeight) / 100;
 
-        // Apply text with proper positioning
-        $image->text($text, (int)$x, (int)$y, function($font) use ($size, $color, $align) {
-            $font->size((int)$size);
-            $font->color($color);
-            $font->align($align);
-            $font->valign('middle');
-            
-            // Use default font or specify a font file path if needed
-            // $font->file(public_path('fonts/arial.ttf'));
-        });
+    // Determine text alignment based on X position (matches frontend preview)
+    $align = 'left';
+    if ($xPercent >= 75) {
+        $align = 'right';
+    } elseif ($xPercent >= 25 && $xPercent <= 74) {
+        $align = 'center';
     }
+
+    // Apply text with proper positioning
+    $image->text($text, (int)$x, (int)$y, function($font) use ($size, $color, $align) {
+        $gdFontSize = round($size * 1.333); // enlarge for GD
+        $font->file(public_path('fonts/Inter-Regular.ttf'));
+        
+        // REMOVE THIS LINE: $font->size(round((int)$size * 0.75));
+        // REPLACE WITH:
+        $font->size($gdFontSize);
+        
+        $font->color($color);
+        $font->align($align);
+        $font->valign('middle');
+    });
+}
 
     private function getDefaultElementConfig()
     {
