@@ -165,8 +165,6 @@
             padding: 0 20px;
             font-weight: 500;
         }
-
-
         .btn-add-slot {
             display: inline-block;
             width: auto;

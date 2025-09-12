@@ -1,8 +1,6 @@
 <?php
 
 ?>
-
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -20,7 +18,6 @@
     
     @livewireStyles
     
-
     <style>
 :root {
             --bg1: #56ca8b;
@@ -161,7 +158,7 @@
         }
 
         .bottom-bar {
-            position: relative;
+            position: fixed;
             bottom: 0;
             left: 250px;
             width: calc(100% - 250px);
@@ -174,7 +171,6 @@
             padding: 0 20px;
             font-weight: 500;
         }
-
 
         .btn-add-slot {
             display: inline-block;
