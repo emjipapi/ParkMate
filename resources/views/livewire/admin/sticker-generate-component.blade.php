@@ -111,6 +111,7 @@
                 @endphp
 
                 {{-- MATCHED positioning logic from template manager --}}
+                @if($preview)
                 @foreach($elements as $elementKey => $cfg)
                     @if(!empty($cfg['enabled']))
                         @php
@@ -147,6 +148,7 @@
                         </div>
                     @endif
                 @endforeach
+                @endif
             </div>
         @else
             <p class="text-gray-500 italic">No template selected or available. Please upload one.</p>
