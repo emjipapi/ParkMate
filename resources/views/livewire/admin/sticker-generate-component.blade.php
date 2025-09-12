@@ -1,8 +1,6 @@
 {{-- resources/views/livewire/admin/sticker-generate-component.blade.php --}}
 
 <div class="bg-white rounded-lg shadow-md p-6">
-    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Generate Parking Stickers</h2>
-
     {{-- Flash Messages --}}
     @if (session()->has('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">

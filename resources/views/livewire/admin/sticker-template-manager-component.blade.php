@@ -1,8 +1,6 @@
 {{-- resources/views/livewire/admin/sticker-template-manager-component.blade.php --}}
 
 <div class="bg-white rounded-lg shadow-md p-6">
-    <h2 class="text-2xl font-semibold text-gray-800 mb-4">Manage Sticker Templates</h2>
-
     {{-- Flash Messages --}}
     @if (session()->has('success'))
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -13,32 +11,40 @@
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {{-- Template List --}}
         <div class="xl:col-span-1 space-y-4">
-            <h3 class="text-lg font-medium text-gray-800">Existing Templates</h3>
-
-            {{-- Upload New Template --}}
-            <div class="bg-gray-50 rounded-lg p-4 space-y-3">
-                <h4 class="font-medium text-gray-700">Upload New Template</h4>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Template Name</label>
-                    <input type="text" wire:model="templateName"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Enter template name">
-                    @error('templateName') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+            <!-- Upload New Template -->
+            <div class="mb-4 mt-4">
+                <div class="text-black">
+                    <h5 class="mb-0">Upload New Template</h5>
                 </div>
+                <div class="card-body">
+                    <div class="mb-3 mt-3">
+                        <label class="form-label">Template Name</label>
+                        <input type="text" wire:model="templateName" class="form-control"
+                            placeholder="Enter template name">
+                        @error('templateName')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Template Image</label>
-                    <input type="file" wire:model="templateFile" accept="image/*"
-                        class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                    @error('templateFile') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    <div class="mb-3">
+                        <label class="form-label">Template Image</label>
+                        <input type="file" wire:model="templateFile" accept="image/*" class="form-control">
+                        @error('templateFile')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="d-grid">
+                        <button wire:click="uploadNewTemplate" class="btn-add-slot btn btn-primary"
+                            wire:loading.attr="disabled">
+                            <span wire:loading.remove>Upload Template</span>
+                            <span wire:loading>Uploading...</span>
+                        </button>
+                    </div>
                 </div>
-
-                <button wire:click="uploadNewTemplate" class="btn btn-primary" wire:loading.attr="disabled">
-                    <span wire:loading.remove>Upload Template</span>
-                    <span wire:loading>Uploading...</span>
-                </button>
             </div>
+            
+            <h3 class="text-lg font-medium text-gray-800">Existing Templates</h3>
 
             {{-- Template List --}}
             <div class="space-y-2 max-h-96 overflow-y-auto">
@@ -83,23 +89,22 @@
                                 {{ $selectedTemplate->height }}px ({{ $selectedTemplate->aspect_ratio }} ratio)
                             </p>
                         </div>
-                        <div class="flex space-x-2">
+                        {{-- <div class="flex space-x-2">
                             @if($isEditing)
-                                <button wire:click="updateTemplate"
-                                    class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm">
-                                    Save Changes
-                                </button>
-                                <button wire:click="$set('isEditing', false)"
-                                    class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm">
-                                    Cancel
-                                </button>
+                            <button wire:click="updateTemplate"
+                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm">
+                                Save Changes
+                            </button>
+                            <button wire:click="$set('isEditing', false)"
+                                class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm">
+                                Cancel
+                            </button>
                             @else
-                                <button wire:click="startEditing"
-                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm">
-                                    Edit Template
-                                </button>
+                            <button wire:click="startEditing" class="btn-add-slot btn btn-primary">
+                                Edit Template
+                            </button>
                             @endif
-                        </div>
+                        </div> --}}
                     </div>
 
                     {{-- WORKING Template Preview (always rendered on page load) --}}
@@ -119,36 +124,36 @@
 
                                 {{-- ALWAYS render overlays, but position using percent CSS --}}
                                 @foreach($elementConfig as $element => $config)
-    @if(!empty($config['enabled']))
-        @php
-            $x = $config['x_percent'] ?? 10;
-            $y = $config['y_percent'] ?? 10;
-            $fontSize = max(8, $config['font_size'] ?? 16);
-            
-            // Apply the same conversion as in StickerGeneratorService
-            $previewFontSize = round($fontSize * 0.58);
-            // Ensure minimum readable size
-            $previewFontSize = max(6, $previewFontSize);
-            
-            $color = $config['color'] ?? '#000';
-            $align = $x <= 20 ? 'left' : ($x >= 80 ? 'right' : 'center');
-            $transform = $x <= 20 ? 'translateY(-50%)' : ($x >= 80 ? 'translateX(-100%) translateY(-50%)' : 'translate(-50%,-50%)');
-        @endphp
+                                    @if(!empty($config['enabled']))
+                                        @php
+                                            $x = $config['x_percent'] ?? 10;
+                                            $y = $config['y_percent'] ?? 10;
+                                            $fontSize = max(8, $config['font_size'] ?? 16);
 
-        <div class="text-element-{{ $selectedTemplate->id }}" data-element="{{ $element }}" style="position:absolute;
-                        left: {{ $x }}%;
-                        top: {{ $y }}%;
-                        transform: {{ $transform }};
-                        font-size: {{ $previewFontSize }}px;
-                        color: {{ $color }};
-                        
-                        white-space: nowrap;
-                        z-index: 10;">
-            {{ $previewData[$element] ?? $element }}
+                                            // Apply the same conversion as in StickerGeneratorService
+                                            $previewFontSize = round($fontSize * 0.58);
+                                            // Ensure minimum readable size
+                                            $previewFontSize = max(6, $previewFontSize);
 
-        </div>
-    @endif
-@endforeach
+                                            $color = $config['color'] ?? '#000';
+                                            $align = $x <= 20 ? 'left' : ($x >= 80 ? 'right' : 'center');
+                                            $transform = $x <= 20 ? 'translateY(-50%)' : ($x >= 80 ? 'translateX(-100%) translateY(-50%)' : 'translate(-50%,-50%)');
+                                        @endphp
+
+                                        <div class="text-element-{{ $selectedTemplate->id }}" data-element="{{ $element }}" style="position:absolute;
+                                                    left: {{ $x }}%;
+                                                    top: {{ $y }}%;
+                                                    transform: {{ $transform }};
+                                                    font-size: {{ $previewFontSize }}px;
+                                                    color: {{ $color }};
+
+                                                    white-space: nowrap;
+                                                    z-index: 10;">
+                                            {{ $previewData[$element] ?? $element }}
+
+                                        </div>
+                                    @endif
+                                @endforeach
 
 
                                 {{-- dots also positioned by percent --}}
@@ -156,20 +161,17 @@
                                     @if(!empty($config['enabled']))
                                         <div class="position-dot-{{ $selectedTemplate->id }}" data-element="{{ $element }}"
                                             style="position:absolute;
-                                                                left: {{ $config['x_percent'] ?? 10 }}%;
-                                                                top: {{ $config['y_percent'] ?? 10 }}%;
-                                                                transform: translate(-50%,-50%);
-                                                                width:10px;height:10px;
-                                                                background:#ef4444;border:2px solid #fff;border-radius:50%;z-index:20;"></div>
+                                                                                        left: {{ $config['x_percent'] ?? 10 }}%;
+                                                                                        top: {{ $config['y_percent'] ?? 10 }}%;
+                                                                                        transform: translate(-50%,-50%);
+                                                                                        width:10px;height:10px;
+                                                                                        background:#ef4444;border:2px solid #fff;border-radius:50%;z-index:20;"></div>
                                     @endif
                                 @endforeach
 
                             </div>
 
                         </div>
-
-
-
                         @if($isEditing)
                             <div class="mt-3 text-xs text-gray-600 text-center space-y-1">
                                 <p><strong>Positioning Guide:</strong> Red dots show exact text positions</p>
@@ -183,14 +185,13 @@
                     <div class="bg-white border rounded-lg p-4">
                         <div class="flex justify-between items-center mb-3">
                             <h4 class="font-medium text-gray-700">Text Elements Configuration</h4>
-                            <button wire:click="saveElementPositions"
-                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm">
+                            <button wire:click="saveElementPositions" class="btn-add-slot btn btn-primary">
                                 Save Positions
                             </button>
                         </div>
 
                         {{-- Preview Sample Data --}}
-                        <div class="mb-4 p-3 bg-gray-50 rounded">
+                        {{-- <div class="mb-4 p-3 bg-gray-50 rounded">
                             <h5 class="text-sm font-medium text-gray-700 mb-2">Sample Preview Data</h5>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                 <input type="text" wire:model.live="previewData.user_id" placeholder="User ID"
@@ -202,7 +203,7 @@
                                 <input type="text" wire:model.live="previewData.expiry" placeholder="Expiry Date"
                                     class="px-2 py-1 border rounded text-sm">
                             </div>
-                        </div>
+                        </div> --}}
 
                         {{-- Position and Style Controls --}}
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">

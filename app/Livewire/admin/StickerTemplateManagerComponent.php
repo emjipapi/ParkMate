@@ -45,7 +45,7 @@ public $previewData = [
     public $previewImageDimensions = ['width' => 0, 'height' => 0];
 
     protected $rules = [
-        'templateFile' => 'nullable|image|max:2048',
+        'templateFile' => 'nullable|image|max:10240', // 10 MB max
         'templateName' => 'required|string|max:255',
     ];
 
