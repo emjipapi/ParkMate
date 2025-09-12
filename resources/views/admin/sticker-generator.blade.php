@@ -15,6 +15,7 @@
   <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
   <!-- Inter font -->
   <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+  <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
   <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
@@ -177,7 +178,7 @@
         .btn-add-slot {
             display: inline-block;
             width: auto;
-            background-color: #3481B4;
+            background-color: var(--bg1);
             color: white;
             border: none;
             padding: 6px 16px;
@@ -188,7 +189,7 @@
         }
 
         .btn-add-slot:hover {
-            background-color: rgb(110, 172, 213);
+            background-color: var(--bg3);
         }
 
         .square-box {
