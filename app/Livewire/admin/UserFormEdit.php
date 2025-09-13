@@ -107,19 +107,38 @@ class UserFormEdit extends Component
         $this->vehicles = array_values($this->vehicles);
     }
 
-    public function update()
-    {
-        $this->rules['email'] = 'required|email|unique:users,email,' . $this->userId;
-        $data = $this->validate();
+public function update()
+{
+    // Profile picture size check
+    if ($this->profile_picture && $this->profile_picture->getSize() > 5 * 1024 * 1024) {
+        $this->addError('profile_picture', 'Profile picture must be less than 5 MB.');
+        return;
+    }
 
-        $user = User::findOrFail($this->userId);
+    // Custom ID validation (same as save)
+    if (empty($this->student_id) && empty($this->employee_id)) {
+        $this->addError('id', 'Please provide either Student ID or Employee ID.');
+        return;
+    }
 
-        // Only hash if provided
-        if (!empty($this->password)) {
-            $data['password'] = Hash::make($this->password);
-        } else {
-            unset($data['password']);
-        }
+    if (!empty($this->student_id) && !empty($this->employee_id)) {
+        $this->addError('id', 'Please provide only one: Student ID or Employee ID, not both.');
+        return;
+    }
+
+    // Adjust email rule for uniqueness
+    $this->rules['email'] = 'required|email|unique:users,email,' . $this->userId;
+
+    $data = $this->validate();
+
+    $user = User::findOrFail($this->userId);
+
+    // Only hash if provided
+    if (!empty($this->password)) {
+        $data['password'] = Hash::make($this->password);
+    } else {
+        unset($data['password']);
+    }
 
     // Handle profile picture update
     if ($this->profile_picture) {
@@ -130,40 +149,39 @@ class UserFormEdit extends Component
         $this->profile_picture->storeAs('profile_pics', $filename);
         $data['profile_picture'] = $filename;
 
-        // update currentProfilePicture so frontend shows new image
         $this->currentProfilePicture = $filename;
     } else {
-        // ✅ keep existing picture
         $data['profile_picture'] = $this->currentProfilePicture;
     }
 
-        // Update user
-        $user->update($data);
+    // Update user
+    $user->update($data);
 
-        // Replace vehicles
-        $user->vehicles()->delete();
-        foreach ($this->vehicles as $vehicle) {
-            Vehicle::create([
-                'user_id' => $user->id,
-                'type' => $vehicle['type'],
-                'rfid_tag' => $vehicle['rfid_tag'],
-                'license_plate' => $vehicle['license_plate'] ?? null,
-            ]);
-        }
-
-        // Log admin action
-        $adminId = Auth::guard('admin')->id();
-        if (!$adminId) abort(403, 'Admin not authenticated');
-
-        ActivityLog::create([
-            'actor_type' => 'admin',
-            'actor_id'   => $adminId,
-            'action'     => 'update',
-            'details'    => "Admin " . Auth::guard('admin')->user()->firstname . " " . Auth::guard('admin')->user()->lastname . " updated user {$user->firstname} {$user->lastname}.",
+    // Replace vehicles
+    $user->vehicles()->delete();
+    foreach ($this->vehicles as $vehicle) {
+        Vehicle::create([
+            'user_id' => $user->id,
+            'type' => $vehicle['type'],
+            'rfid_tag' => $vehicle['rfid_tag'],
+            'license_plate' => $vehicle['license_plate'] ?? null,
         ]);
-
-        session()->flash('success', 'User and vehicles updated successfully!');
     }
+
+    // Log admin action
+    $adminId = Auth::guard('admin')->id();
+    if (!$adminId) abort(403, 'Admin not authenticated');
+
+    ActivityLog::create([
+        'actor_type' => 'admin',
+        'actor_id'   => $adminId,
+        'action'     => 'update',
+        'details'    => "Admin " . Auth::guard('admin')->user()->firstname . " " . Auth::guard('admin')->user()->lastname . " updated user {$user->firstname} {$user->lastname}.",
+    ]);
+
+    session()->flash('success', 'User and vehicles updated successfully!');
+}
+
 
     public function render()
     {
