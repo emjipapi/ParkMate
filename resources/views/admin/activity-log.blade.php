@@ -327,15 +327,7 @@
 }
 
 @media (max-width: 768px) {
-    .cards-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem; /* spacing between cards */
-    }
 
-    .cards-container .card {
-        width: 100%;
-    }
         .mobile-menu-btn {
         display: inline-block;
     }
@@ -375,6 +367,20 @@
     .d-flex.align-items-baseline span,
     .d-flex.align-items-baseline .text-white {
         font-size: 0.8rem; /* smaller breadcrumb text */
+    }
+        .tabs-container {
+        margin: 0 -20px; /* extend to screen edges */
+        padding: 0 20px; /* add padding back inside */
+        touch-action: pan-x; /* enable horizontal touch scrolling */
+    }
+    
+    .nav-link {
+        font-size: 0.9rem; /* slightly smaller text on mobile */
+        padding: 8px 16px !important; /* adjust padding */
+    }
+    
+    .table-responsive {
+        touch-action: pan-x; /* enable horizontal touch scrolling for table */
     }
 }
     </style>

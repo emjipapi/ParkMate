@@ -372,15 +372,7 @@
 
 
 @media (max-width: 768px) {
-    .cards-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem; /* spacing between cards */
-    }
 
-    .cards-container .card {
-        width: 100%;
-    }
         .mobile-menu-btn {
         display: inline-block;
     }
