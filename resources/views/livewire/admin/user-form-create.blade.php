@@ -3,53 +3,108 @@
         @csrf
 
         <!-- User Info Fields -->
-        <div class="row mb-3">
-            <div class="col-md"><label>Student ID</label><input type="text" wire:model="student_id"
-                    class="form-control"></div>
-            <div class="col-md"><label>Employee ID</label><input type="text" wire:model="employee_id"
-                    class="form-control"></div>
-        </div>
-        <div class="mb-3"><label>Email</label><input type="email" wire:model="email" class="form-control" required>
-        </div>
-        <div class="mb-3"><label>Password</label><input type="password" wire:model="password" class="form-control"
-                required></div>
+<div class="row mb-3">
+    <div class="col-md">
+        <label>Student ID</label>
+        <input type="text" wire:model="student_id" class="form-control">
+    </div>
+    <div class="col-md">
+        <label>Employee ID</label>
+        <input type="text" wire:model="employee_id" class="form-control">
+    </div>
+    <div class="col-md">
+        <label>Serial Number <span class="text-muted" style="font-size: 0.75rem;">(Number only)</span></label>
+        <input type="text" wire:model="serial_number" class="form-control"  placeholder="123">
+    </div>
+</div>
 
-        <div class="row mb-3">
-            <div class="col-md"><label>First Name</label><input type="text" wire:model="firstname" class="form-control"
-                    required></div>
-            <div class="col-md"><label>Middle Name</label><input type="text" wire:model="middlename"
-                    class="form-control"></div>
-            <div class="col-md"><label>Last Name</label><input type="text" wire:model="lastname" class="form-control"
-                    required></div>
-        </div>
+<div class="mb-3">
+    <label>Email</label>
+    <input type="email" wire:model="email" class="form-control" required>
+</div>
+<div class="mb-3">
+    <label>Password</label>
+    <input type="password" wire:model="password" class="form-control" required>
+</div>
 
-        <div class="row mb-3">
-            <div class="col-md">
-                <label>Department</label>
-                <select wire:model="department" class="form-control" required>
-                    <option value="">Select Department</option>
-                    @foreach($departments as $dept)
-                        <option value="{{ $dept }}">{{ $dept }}</option>
-                    @endforeach
-                </select>
-            </div>
+<div class="row mb-3">
+    <div class="col-md">
+        <label>First Name</label>
+        <input type="text" wire:model="firstname" class="form-control" required>
+    </div>
+    <div class="col-md">
+        <label>Middle Name</label>
+        <input type="text" wire:model="middlename" class="form-control">
+    </div>
+    <div class="col-md">
+        <label>Last Name</label>
+        <input type="text" wire:model="lastname" class="form-control" required>
+    </div>
+</div>
 
-            <div class="col-md">
-                <label>Program</label>
-                <select wire:model="program" class="form-control" required>
-                    <option value="">Select Program</option>
-                    @foreach($programs as $prog)
-                        <option value="{{ $prog }}">{{ $prog }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
+<div class="row mb-3">
+    <div class="col-md">
+        <label>Department</label>
+        <select wire:model="department" class="form-control" required>
+            <option value="">Select Department</option>
+            @foreach($departments as $dept)
+                <option value="{{ $dept }}">{{ $dept }}</option>
+            @endforeach
+        </select>
+    </div>
 
+    <div class="col-md">
+        <label>Program</label>
+        <select wire:model="program" class="form-control" required>
+            <option value="">Select Program</option>
+            @foreach($programs as $prog)
+                <option value="{{ $prog }}">{{ $prog }}</option>
+            @endforeach
+        </select>
+    </div>
 
-        <div class="mb-3">
-            <label>Profile Picture <small class="text-muted">(optional)</small></label>
-            <input type="file" wire:model="profile_picture" class="form-control">
-        </div>
+    <div class="col-md">
+        <label>Year & Section</label>
+        <input type="text" wire:model="year_section" class="form-control" maxlength="2" placeholder="1A">
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md">
+        <label>Address</label>
+        <input type="text" wire:model="address" class="form-control">
+    </div>
+    <div class="col-md">
+        <label>Contact Number</label>
+        <input type="text" wire:model="contact_number" class="form-control">
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md">
+        <label>License Number</label>
+        <input type="text" wire:model="license_number" class="form-control">
+    </div>
+<div class="col-md">
+    <label>Expiration Date</label>
+    <input type="date"
+           wire:model="expiration_date"
+           class="form-control @error('expiration_date') is-invalid @enderror"
+           onfocus="this.showPicker();"
+           onmousedown="event.preventDefault(); this.showPicker();">
+
+    @error('expiration_date')
+        <div class="invalid-feedback">{{ $message }}</div>
+    @enderror
+</div>
+
+</div>
+
+<div class="mb-3">
+    <label>Profile Picture <small class="text-muted">(optional)</small></label>
+    <input type="file" wire:model="profile_picture" class="form-control">
+</div>
+
 
         <!-- Vehicles Section -->
         <h4>Vehicles</h4>

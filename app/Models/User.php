@@ -30,6 +30,13 @@ class User extends Authenticatable
         'department',
         'license_number',
         'profile_picture',
+        
+        // newly added fields
+        'serial_number',
+        'year_section',
+        'address',
+        'contact_number',
+        'expiration_date',
     ];
 public $timestamps = false;
 

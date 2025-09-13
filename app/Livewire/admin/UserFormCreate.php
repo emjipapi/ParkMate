@@ -17,6 +17,7 @@ class UserFormCreate extends Component
     // User fields
     public $student_id;
     public $employee_id;
+    public $serial_number;   // ✅ add this
     public $email;
     public $password;
     public $firstname;
@@ -24,12 +25,16 @@ class UserFormCreate extends Component
     public $lastname;
     public $program;
     public $department;
+    public $year_section;    // ✅ add this
+    public $address;         // ✅ add this
+    public $contact_number;  // ✅ add this
     public $license_number;
+    public $expiration_date; // ✅ add this
     public $profile_picture;
 
     // Vehicles - start with one empty vehicle row
     public $vehicles = [
-        ['type' => 'car', 'rfid_tag' => '', 'license_plate' => '']
+        ['type' => 'motorcycle', 'rfid_tag' => '', 'license_plate' => '']
     ];
 
     protected $middleware = ['auth:admin'];
@@ -41,6 +46,7 @@ class UserFormCreate extends Component
     protected $rules = [
         'student_id' => 'nullable|string|max:10',
         'employee_id' => 'nullable|string|max:10',
+        'serial_number' => 'required|string|min:5|max:6|unique:users,serial_number',
         'email' => 'required|email|unique:users,email',
         'password' => 'required|string|min:6',
         'firstname' => 'required|string|max:50',
@@ -48,7 +54,11 @@ class UserFormCreate extends Component
         'lastname' => 'required|string|max:50',
         'program' => 'required|string|max:50',
         'department' => 'required|string|max:50',
-        'license_number' => 'nullable|string|max:11',
+        'year_section' => 'nullable|string|max:2',
+        'address' => 'nullable|string|max:255',
+        'contact_number' => 'nullable|string|max:20',
+        'license_number' => 'nullable|string|max:13',
+        'expiration_date' => 'required|date|after:today',
         'profile_picture' => 'nullable|image|max:5120', // 5 MB
         'vehicles.*.type' => 'required|in:car,motorcycle',
         'vehicles.*.rfid_tag' => 'required|string|distinct|unique:vehicles,rfid_tag|max:20',
@@ -95,6 +105,23 @@ class UserFormCreate extends Component
             return;
         }
 
+        // Format serial number
+        if (!empty($this->serial_number)) {
+            $num = (int) $this->serial_number;
+
+            if ($num < 10000) {
+                // pad to 4 digits if less than 10000
+                $serialNumber = 'S' . str_pad($num, 4, '0', STR_PAD_LEFT);
+            } else {
+                // leave as is if 5 digits or more
+                $serialNumber = 'S' . $num;
+            }
+
+            // assign back to the property so validate() sees it
+            $this->serial_number = $serialNumber;
+        }
+
+
         // Validate the data
         $data = $this->validate();
 
@@ -126,13 +153,14 @@ class UserFormCreate extends Component
 
         // Log admin action
         $adminId = Auth::guard('admin')->id();
-        if (!$adminId) abort(403, 'Admin not authenticated');
+        if (!$adminId)
+            abort(403, 'Admin not authenticated');
 
         ActivityLog::create([
             'actor_type' => 'admin',
-            'actor_id'   => $adminId,
-            'action'     => 'create',
-            'details'    => "Admin " . Auth::guard('admin')->user()->firstname . " " . Auth::guard('admin')->user()->lastname . " created user {$user->firstname} {$user->lastname}.",
+            'actor_id' => $adminId,
+            'action' => 'create',
+            'details' => "Admin " . Auth::guard('admin')->user()->firstname . " " . Auth::guard('admin')->user()->lastname . " created user {$user->firstname} {$user->lastname}.",
         ]);
 
         session()->flash('success', 'User and vehicles created successfully!');
@@ -143,11 +171,25 @@ class UserFormCreate extends Component
     private function resetForm()
     {
         $this->reset([
-            'student_id', 'employee_id', 'email', 'password',
-            'firstname', 'middlename', 'lastname', 'program', 'department',
-            'license_number', 'profile_picture', 'vehicles'
+            'student_id',
+            'employee_id',
+            'email',
+            'password',
+            'firstname',
+            'middlename',
+            'lastname',
+            'program',
+            'department',
+            'license_number',
+            'profile_picture',
+            'vehicles',
+            'serial_number',
+            'year_section',
+            'address',
+            'contact_number',
+            'expiration_date',
         ]);
-        
+
         // Reset to one empty vehicle row
         $this->vehicles = [['type' => 'car', 'rfid_tag' => '', 'license_plate' => '']];
     }
