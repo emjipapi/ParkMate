@@ -67,35 +67,36 @@
     <input type="text" class="form-control mb-3" placeholder="Search users..." wire:model.live.debounce.300ms="search"
         style="max-width: 400px" />
 
-<div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
-    <div class="d-flex gap-2 flex-wrap">
-        <select class="form-select form-select-sm w-auto" wire:model.live="filterDepartment">
-            <option value="">All Departments</option>
-            @foreach($departments as $dept)
-                <option value="{{ $dept }}">{{ $dept }}</option>
-            @endforeach
-        </select>
+    <div
+        class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
+        <div class="d-flex gap-2 flex-wrap">
+            <select class="form-select form-select-sm w-auto" wire:model.live="filterDepartment">
+                <option value="">All Departments</option>
+                @foreach($departments as $dept)
+                    <option value="{{ $dept }}">{{ $dept }}</option>
+                @endforeach
+            </select>
 
-        <select class="form-select form-select-sm w-auto" wire:model.live="filterProgram">
-            <option value="">All Programs</option>
-            @foreach($programs as $prog)
-                <option value="{{ $prog }}">{{ $prog }}</option>
-            @endforeach
-        </select>
+            <select class="form-select form-select-sm w-auto" wire:model.live="filterProgram">
+                <option value="">All Programs</option>
+                @foreach($programs as $prog)
+                    <option value="{{ $prog }}">{{ $prog }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Toolbar -->
+        <div class="d-flex gap-3 justify-content-sm-end">
+            <i :class="check2 ? 'bi bi-check2-all text-primary' : 'bi bi-check2-all'"
+                style="transform: scale(1.2); cursor: pointer;" @click="toggleMaster()"
+                title="Toggle multi-select mode">
+            </i>
+
+            <i class="bi bi-trash-fill" :class="selectedIds.length > 0 ? 'text-danger' : 'text-muted'"
+                style="transform: scale(1.2); cursor: pointer;" @click="triggerDelete()" title="Delete selected">
+            </i>
+        </div>
     </div>
-
-    <!-- Toolbar -->
-    <div class="d-flex gap-3 justify-content-sm-end">
-        <i :class="check2 ? 'bi bi-check2-all text-primary' : 'bi bi-check2-all'"
-            style="transform: scale(1.2); cursor: pointer;" @click="toggleMaster()"
-            title="Toggle multi-select mode">
-        </i>
-
-        <i class="bi bi-trash-fill" :class="selectedIds.length > 0 ? 'text-danger' : 'text-muted'"
-            style="transform: scale(1.2); cursor: pointer;" @click="triggerDelete()" title="Delete selected">
-        </i>
-    </div>
-</div>
 
 
     <!-- Table -->
@@ -120,17 +121,17 @@
                         <td x-show="check2">
                             <input type="checkbox" class="form-check-input" value="{{ $user->id }}"
                                 :checked="selectedIds.includes({{ $user->id }})" @change="
-                                       if ($event.target.checked) {
-                                           if (!selectedIds.includes({{ $user->id }})) {
-                                               selectedIds.push({{ $user->id }});
-                                               console.log('[CHECKED] Added ID {{ $user->id }}, selectedIds:', selectedIds);
+                                           if ($event.target.checked) {
+                                               if (!selectedIds.includes({{ $user->id }})) {
+                                                   selectedIds.push({{ $user->id }});
+                                                   console.log('[CHECKED] Added ID {{ $user->id }}, selectedIds:', selectedIds);
+                                               }
+                                           } else {
+                                               selectedIds = selectedIds.filter(id => id !== {{ $user->id }});
+                                               console.log('[UNCHECKED] Removed ID {{ $user->id }}, selectedIds:', selectedIds);
                                            }
-                                       } else {
-                                           selectedIds = selectedIds.filter(id => id !== {{ $user->id }});
-                                           console.log('[UNCHECKED] Removed ID {{ $user->id }}, selectedIds:', selectedIds);
-                                       }
-                                       localStorage.setItem('userTable_selectedIds', JSON.stringify(selectedIds));
-                                   ">
+                                           localStorage.setItem('userTable_selectedIds', JSON.stringify(selectedIds));
+                                       ">
                         </td>
                         <td>{{ $user->id }}</td>
                         <td>{{ $user->student_id ?? $user->employee_id }}</td>
@@ -140,11 +141,54 @@
                         <td>{{ $user->program }}</td>
                         <td>{{ $user->department }}</td>
                         <td>
-                            <a href="{{ route('users.edit', $user->id) }}" class="text-primary">
-    <i class="bi bi-pencil-square text-secondary"></i>
-</a>
+    <!-- Edit Icon -->
+    <a href="{{ route('users.edit', $user->id) }}" class="text-primary me-2 text-info text-decoration-none">
+        <i class="bi bi-pencil-square text-secondary"></i>
+    </a>
 
-                        </td>
+    <!-- More Info Icon -->
+    <a href="#" class="text-info text-decoration-none" data-bs-toggle="modal" data-bs-target="#userInfoModal{{ $user->id }}">
+        <i class="bi bi-info-circle"></i>
+    </a>
+
+    <!-- Modal -->
+<div class="modal fade" id="userInfoModal{{ $user->id }}" tabindex="-1" aria-labelledby="userInfoLabel{{ $user->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userInfoLabel{{ $user->id }}">
+                    User Details: {{ $user->firstname }} {{ $user->lastname }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Year & Section:</strong></div>
+                    <div class="col-md-8">{{ $user->year_section }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Address:</strong></div>
+                    <div class="col-md-8">{{ $user->address }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Contact Number:</strong></div>
+                    <div class="col-md-8">{{ $user->contact_number }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>License Number:</strong></div>
+                    <div class="col-md-8">{{ $user->license_number }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Expiration Date:</strong></div>
+                    <div class="col-md-8">{{ $user->expiration_date }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</td>
+
                     </tr>
                 @empty
                     <tr>
