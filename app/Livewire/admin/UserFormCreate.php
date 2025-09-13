@@ -33,9 +33,22 @@ class UserFormCreate extends Component
     public $profile_picture;
 
     // Vehicles - start with one empty vehicle row
-    public $vehicles = [
-        ['type' => 'motorcycle', 'rfid_tag' => '', 'license_plate' => '']
+public $vehicles = [];
+private function defaultVehicle()
+{
+    return [
+        'type' => 'motorcycle',
+        'rfid_tag' => '',
+        'license_plate' => '',
+        'body_type_model' => '',
+        'or_number' => '',
+        'cr_number' => ''
     ];
+}
+public function mount()
+{
+    $this->vehicles[] = $this->defaultVehicle();
+}
 
     protected $middleware = ['auth:admin'];
 
@@ -63,6 +76,9 @@ class UserFormCreate extends Component
         'vehicles.*.type' => 'required|in:car,motorcycle',
         'vehicles.*.rfid_tag' => 'required|string|distinct|unique:vehicles,rfid_tag|max:20',
         'vehicles.*.license_plate' => 'nullable|string|max:20',
+            'vehicles.*.body_type_model' => 'nullable|string|max:30',
+    'vehicles.*.or_number' => 'nullable|string|max:30',
+    'vehicles.*.cr_number' => 'nullable|string|max:30',
     ];
 
     protected $messages = [
@@ -71,7 +87,7 @@ class UserFormCreate extends Component
 
     public function addVehicleRow()
     {
-        $this->vehicles[] = ['type' => 'car', 'rfid_tag' => '', 'license_plate' => ''];
+        $this->vehicles[] = $this->defaultVehicle();
     }
 
     public function removeVehicleRow($index)
@@ -144,10 +160,13 @@ class UserFormCreate extends Component
         // Create vehicles
         foreach ($this->vehicles as $vehicle) {
             Vehicle::create([
-                'user_id' => $user->id,
-                'type' => $vehicle['type'],
-                'rfid_tag' => $vehicle['rfid_tag'],
-                'license_plate' => $vehicle['license_plate'] ?? null,
+                        'user_id' => $user->id,
+        'type' => $vehicle['type'],
+        'rfid_tag' => $vehicle['rfid_tag'],
+        'license_plate' => $vehicle['license_plate'] ?? null,
+        'body_type_model' => $vehicle['body_type_model'] ?? null,
+        'or_number' => $vehicle['or_number'] ?? null,
+        'cr_number' => $vehicle['cr_number'] ?? null,
             ]);
         }
 
@@ -191,7 +210,7 @@ class UserFormCreate extends Component
         ]);
 
         // Reset to one empty vehicle row
-        $this->vehicles = [['type' => 'car', 'rfid_tag' => '', 'license_plate' => '']];
+            $this->vehicles[] = $this->defaultVehicle();
     }
 
     public function render()

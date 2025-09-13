@@ -108,37 +108,66 @@
 
         <!-- Vehicles Section -->
         <h4>Vehicles</h4>
-        <div class="vehicle-rows">
-            @foreach($vehicles as $index => $vehicle)
-                <div class="row mb-2 align-items-end">
-                    <div class="col-md">
-                        <label>Type</label>
-                        <select wire:model="vehicles.{{ $index }}.type" class="form-control" required>
-                            <option value="">Select Type</option>
-                            <option value="car">Car</option>
-                            <option value="motorcycle">Motorcycle</option>
-                        </select>
-                    </div>
-                    <div class="col-md">
-                        <label>RFID Tag</label>
-                        <input type="text" wire:model="vehicles.{{ $index }}.rfid_tag" class="form-control" required>
-                    </div>
-                    <div class="col-md">
-                        <label>License Plate</label>
-                        <input type="text" wire:model="vehicles.{{ $index }}.license_plate" class="form-control">
-                    </div>
-                    <div class="col-auto mt-3">
-                        @if(count($vehicles) > 1)
-                            <button type="button" wire:click="removeVehicleRow({{ $index }})" class="btn btn-danger">
-                                Remove
-                            </button>
-                        @else
-                            <button type="button" class="btn btn-secondary" disabled>Remove</button>
-                        @endif
-                    </div>
-                </div>
-            @endforeach
+
+<div class="vehicle-rows">
+    @foreach($vehicles as $index => $vehicle)
+    <div class="card mb-4">
+    <div class="card-body">
+        <div class="row mb-2 align-items-end">
+            <div class="col-md">
+                <label>Type</label>
+                <select wire:model="vehicles.{{ $index }}.type" class="form-control" required>
+                    <option value="">Select Type</option>
+                    <option value="motorcycle">Motorcycle</option>
+                    <option value="car">Car</option>     
+                </select>
+            </div>
+            <div class="col-md">
+                <label>RFID Tag</label>
+                <input type="text" wire:model="vehicles.{{ $index }}.rfid_tag" class="form-control" required>
+            </div>
+            <div class="col-md">
+                <label>License Plate</label>
+                <input type="text" wire:model="vehicles.{{ $index }}.license_plate" class="form-control">
+            </div>
         </div>
+
+        <!-- New row for additional fields -->
+        <div class="row mb-3">
+            <div class="col-md">
+                <label>Body Type/Model</label>
+                <input type="text" wire:model="vehicles.{{ $index }}.body_type_model" class="form-control">
+            </div>
+            <div class="col-md">
+                <label>OR Number</label>
+                <input type="text" wire:model="vehicles.{{ $index }}.or_number" class="form-control">
+            </div>
+            <div class="col-md">
+                <label>CR Number</label>
+                <input type="text" wire:model="vehicles.{{ $index }}.cr_number" class="form-control">
+            </div>
+        </div>
+
+        <!-- Remove button full width -->
+        <div class="row mb-3">
+            <div class="col">
+                @if(count($vehicles) > 1)
+                    <button type="button" wire:click="removeVehicleRow({{ $index }})" class="btn btn-danger w-100">
+                        Remove
+                    </button>
+                @else
+                    <button type="button" class="btn btn-secondary w-100" disabled>
+                        Remove
+                    </button>
+                @endif
+            </div>
+        </div>
+    </div>
+    </div>
+    @endforeach
+</div>
+
+
 
         <div class="d-flex flex-column">
             <button type="button" wire:click="addVehicleRow" class="btn btn-secondary mb-5">

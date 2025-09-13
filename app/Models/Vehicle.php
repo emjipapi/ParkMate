@@ -14,6 +14,9 @@ class Vehicle extends Model
         'type',
         'rfid_tag',
         'license_plate',
+        'body_type_model',
+        'or_number',
+        'cr_number',
     ];
 
     protected $casts = [
