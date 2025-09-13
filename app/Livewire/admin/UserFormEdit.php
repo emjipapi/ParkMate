@@ -19,6 +19,7 @@ class UserFormEdit extends Component
     // User fields
     public $student_id;
     public $employee_id;
+    public $serial_number;
     public $email;
     public $password;
     public $firstname;
@@ -26,7 +27,11 @@ class UserFormEdit extends Component
     public $lastname;
     public $program;
     public $department;
+    public $year_section;
+    public $address;
+    public $contact_number;
     public $license_number;
+    public $expiration_date;
     public $profile_picture;
     public $currentProfilePicture;
 
@@ -42,6 +47,7 @@ class UserFormEdit extends Component
     protected $rules = [
         'student_id' => 'nullable|string|max:10',
         'employee_id' => 'nullable|string|max:10',
+        'serial_number' => 'required|string|min:5|max:6|unique:users,serial_number,{{userId}}',
         'email' => 'required|email|unique:users,email,{{userId}}',
         'password' => 'nullable|string|min:6',
         'firstname' => 'required|string|max:50',
@@ -49,11 +55,18 @@ class UserFormEdit extends Component
         'lastname' => 'required|string|max:50',
         'program' => 'required|string|max:50',
         'department' => 'required|string|max:50',
-        'license_number' => 'nullable|string|max:11',
+        'year_section' => 'nullable|string|max:2',
+        'address' => 'nullable|string|max:255',
+        'contact_number' => 'nullable|string|max:20',
+        'license_number' => 'nullable|string|max:13',
+        'expiration_date' => 'required|date|after:today',
         'profile_picture' => 'nullable|image|max:5120',
         'vehicles.*.type' => 'required|in:car,motorcycle',
         'vehicles.*.rfid_tag' => 'required|string|distinct|max:20',
         'vehicles.*.license_plate' => 'nullable|string|max:20',
+        'vehicles.*.body_type_model' => 'nullable|string|max:30',
+        'vehicles.*.or_number' => 'nullable|string|max:30',
+        'vehicles.*.cr_number' => 'nullable|string|max:30',
     ];
 
     protected $messages = [
@@ -65,15 +78,21 @@ class UserFormEdit extends Component
         $user = User::with('vehicles')->findOrFail($id);
         $this->userId = $user->id;
 
+        // Load user fields
         $this->student_id = $user->student_id;
         $this->employee_id = $user->employee_id;
+        $this->serial_number = $user->serial_number;
         $this->email = $user->email;
         $this->firstname = $user->firstname;
         $this->middlename = $user->middlename;
         $this->lastname = $user->lastname;
         $this->program = $user->program;
         $this->department = $user->department;
+        $this->year_section = $user->year_section;
+        $this->address = $user->address;
+        $this->contact_number = $user->contact_number;
         $this->license_number = $user->license_number;
+        $this->expiration_date = $user->expiration_date;
         $this->currentProfilePicture = $user->profile_picture;
 
         // Load vehicles
@@ -82,18 +101,35 @@ class UserFormEdit extends Component
                 'type' => $vehicle->type,
                 'rfid_tag' => $vehicle->rfid_tag,
                 'license_plate' => $vehicle->license_plate,
+                'body_type_model' => $vehicle->body_type_model,
+                'or_number' => $vehicle->or_number,
+                'cr_number' => $vehicle->cr_number,
             ];
         })->toArray();
 
         // Ensure at least one vehicle row exists
         if (empty($this->vehicles)) {
-            $this->vehicles = [['type' => 'car', 'rfid_tag' => '', 'license_plate' => '']];
+            $this->vehicles = [[
+                'type' => 'car',
+                'rfid_tag' => '',
+                'license_plate' => '',
+                'body_type_model' => '',
+                'or_number' => '',
+                'cr_number' => ''
+            ]];
         }
     }
 
     public function addVehicleRow()
     {
-        $this->vehicles[] = ['type' => 'car', 'rfid_tag' => '', 'license_plate' => ''];
+        $this->vehicles[] = [
+            'type' => 'car',
+            'rfid_tag' => '',
+            'license_plate' => '',
+            'body_type_model' => '',
+            'or_number' => '',
+            'cr_number' => ''
+        ];
     }
 
     public function removeVehicleRow($index)
@@ -107,81 +143,99 @@ class UserFormEdit extends Component
         $this->vehicles = array_values($this->vehicles);
     }
 
-public function update()
-{
-    // Profile picture size check
-    if ($this->profile_picture && $this->profile_picture->getSize() > 5 * 1024 * 1024) {
-        $this->addError('profile_picture', 'Profile picture must be less than 5 MB.');
-        return;
-    }
+    public function update()
+    {
+        // Profile picture size check
+        if ($this->profile_picture && $this->profile_picture->getSize() > 5 * 1024 * 1024) {
+            $this->addError('profile_picture', 'Profile picture must be less than 5 MB.');
+            return;
+        }
 
-    // Custom ID validation (same as save)
-    if (empty($this->student_id) && empty($this->employee_id)) {
-        $this->addError('id', 'Please provide either Student ID or Employee ID.');
-        return;
-    }
+        // Custom ID validation
+        if (empty($this->student_id) && empty($this->employee_id)) {
+            $this->addError('id', 'Please provide either Student ID or Employee ID.');
+            return;
+        }
 
-    if (!empty($this->student_id) && !empty($this->employee_id)) {
-        $this->addError('id', 'Please provide only one: Student ID or Employee ID, not both.');
-        return;
-    }
+        if (!empty($this->student_id) && !empty($this->employee_id)) {
+            $this->addError('id', 'Please provide only one: Student ID or Employee ID, not both.');
+            return;
+        }
 
-    // Adjust email rule for uniqueness
-    $this->rules['email'] = 'required|email|unique:users,email,' . $this->userId;
+        // Adjust rules for unique fields
+        $this->rules['email'] = 'required|email|unique:users,email,' . $this->userId;
+        $this->rules['serial_number'] = 'required|string|unique:users,serial_number,' . $this->userId;
 
-    $data = $this->validate();
+        // Format serial number
+        if (!empty($this->serial_number)) {
+            $num = (int) $this->serial_number;
 
-    $user = User::findOrFail($this->userId);
+            if ($num < 10000) {
+                // pad to 4 digits if less than 10000
+                $serialNumber = 'S' . str_pad($num, 4, '0', STR_PAD_LEFT);
+            } else {
+                // leave as is if 5 digits or more
+                $serialNumber = 'S' . $num;
+            }
 
-    // Only hash if provided
-    if (!empty($this->password)) {
-        $data['password'] = Hash::make($this->password);
-    } else {
-        unset($data['password']);
-    }
+            // assign back to the property so validate() sees it
+            $this->serial_number = $serialNumber;
+        }
+        $data = $this->validate();
 
-    // Handle profile picture update
-    if ($this->profile_picture) {
-        $ext = $this->profile_picture->getClientOriginalExtension();
-        $hash = substr(md5(uniqid(rand(), true)), 0, 8);
-        $prefix = $this->student_id ?: $this->employee_id;
-        $filename = $prefix . '.' . $hash . '.' . $ext;
-        $this->profile_picture->storeAs('profile_pics', $filename);
-        $data['profile_picture'] = $filename;
+        $user = User::findOrFail($this->userId);
 
-        $this->currentProfilePicture = $filename;
-    } else {
-        $data['profile_picture'] = $this->currentProfilePicture;
-    }
+        // Only hash password if provided
+        if (!empty($this->password)) {
+            $data['password'] = Hash::make($this->password);
+        } else {
+            unset($data['password']);
+        }
 
-    // Update user
-    $user->update($data);
+        // Handle profile picture update
+        if ($this->profile_picture) {
+            $ext = $this->profile_picture->getClientOriginalExtension();
+            $hash = substr(md5(uniqid(rand(), true)), 0, 8);
+            $prefix = $this->student_id ?: $this->employee_id;
+            $filename = $prefix . '.' . $hash . '.' . $ext;
+            $this->profile_picture->storeAs('profile_pics', $filename);
+            $data['profile_picture'] = $filename;
 
-    // Replace vehicles
-    $user->vehicles()->delete();
-    foreach ($this->vehicles as $vehicle) {
-        Vehicle::create([
-            'user_id' => $user->id,
-            'type' => $vehicle['type'],
-            'rfid_tag' => $vehicle['rfid_tag'],
-            'license_plate' => $vehicle['license_plate'] ?? null,
+            $this->currentProfilePicture = $filename;
+        } else {
+            $data['profile_picture'] = $this->currentProfilePicture;
+        }
+
+        // Update user
+        $user->update($data);
+
+        // Replace vehicles
+        $user->vehicles()->delete();
+        foreach ($this->vehicles as $vehicle) {
+            Vehicle::create([
+                'user_id' => $user->id,
+                'type' => $vehicle['type'],
+                'rfid_tag' => $vehicle['rfid_tag'],
+                'license_plate' => $vehicle['license_plate'] ?? null,
+                'body_type_model' => $vehicle['body_type_model'] ?? null,
+                'or_number' => $vehicle['or_number'] ?? null,
+                'cr_number' => $vehicle['cr_number'] ?? null,
+            ]);
+        }
+
+        // Log admin action
+        $adminId = Auth::guard('admin')->id();
+        if (!$adminId) abort(403, 'Admin not authenticated');
+
+        ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id'   => $adminId,
+            'action'     => 'update',
+            'details'    => "Admin " . Auth::guard('admin')->user()->firstname . " " . Auth::guard('admin')->user()->lastname . " updated user {$user->firstname} {$user->lastname}.",
         ]);
+
+        session()->flash('success', 'User and vehicles updated successfully!');
     }
-
-    // Log admin action
-    $adminId = Auth::guard('admin')->id();
-    if (!$adminId) abort(403, 'Admin not authenticated');
-
-    ActivityLog::create([
-        'actor_type' => 'admin',
-        'actor_id'   => $adminId,
-        'action'     => 'update',
-        'details'    => "Admin " . Auth::guard('admin')->user()->firstname . " " . Auth::guard('admin')->user()->lastname . " updated user {$user->firstname} {$user->lastname}.",
-    ]);
-
-    session()->flash('success', 'User and vehicles updated successfully!');
-}
-
 
     public function render()
     {
