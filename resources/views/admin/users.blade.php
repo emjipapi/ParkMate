@@ -490,10 +490,8 @@
         </button>
     </div>
 </div>
-
-
         <div class="square-box">
-            <livewire:admin.users-table />
+            <livewire:admin.users-component />
         </div>
 
     </div>

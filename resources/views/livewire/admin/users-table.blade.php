@@ -121,17 +121,17 @@
                         <td x-show="check2">
                             <input type="checkbox" class="form-check-input" value="{{ $user->id }}"
                                 :checked="selectedIds.includes({{ $user->id }})" @change="
-                                           if ($event.target.checked) {
-                                               if (!selectedIds.includes({{ $user->id }})) {
-                                                   selectedIds.push({{ $user->id }});
-                                                   console.log('[CHECKED] Added ID {{ $user->id }}, selectedIds:', selectedIds);
+                                               if ($event.target.checked) {
+                                                   if (!selectedIds.includes({{ $user->id }})) {
+                                                       selectedIds.push({{ $user->id }});
+                                                       console.log('[CHECKED] Added ID {{ $user->id }}, selectedIds:', selectedIds);
+                                                   }
+                                               } else {
+                                                   selectedIds = selectedIds.filter(id => id !== {{ $user->id }});
+                                                   console.log('[UNCHECKED] Removed ID {{ $user->id }}, selectedIds:', selectedIds);
                                                }
-                                           } else {
-                                               selectedIds = selectedIds.filter(id => id !== {{ $user->id }});
-                                               console.log('[UNCHECKED] Removed ID {{ $user->id }}, selectedIds:', selectedIds);
-                                           }
-                                           localStorage.setItem('userTable_selectedIds', JSON.stringify(selectedIds));
-                                       ">
+                                               localStorage.setItem('userTable_selectedIds', JSON.stringify(selectedIds));
+                                           ">
                         </td>
                         <td>{{ $user->id }}</td>
                         <td>{{ $user->student_id ?? $user->employee_id }}</td>
@@ -141,53 +141,57 @@
                         <td>{{ $user->program }}</td>
                         <td>{{ $user->department }}</td>
                         <td>
-    <!-- Edit Icon -->
-    <a href="{{ route('users.edit', $user->id) }}" class="text-primary me-2 text-info text-decoration-none">
-        <i class="bi bi-pencil-square text-secondary"></i>
-    </a>
+                            <!-- Edit Icon -->
+                            <a href="{{ route('users.edit', $user->id) }}"
+                                class="text-primary me-2 text-info text-decoration-none">
+                                <i class="bi bi-pencil-square text-secondary"></i>
+                            </a>
 
-    <!-- More Info Icon -->
-    <a href="#" class="text-info text-decoration-none" data-bs-toggle="modal" data-bs-target="#userInfoModal{{ $user->id }}">
-        <i class="bi bi-info-circle"></i>
-    </a>
+                            <!-- More Info Icon -->
+                            <a href="#" class="text-info text-decoration-none" data-bs-toggle="modal"
+                                data-bs-target="#userInfoModal{{ $user->id }}">
+                                <i class="bi bi-info-circle"></i>
+                            </a>
 
-    <!-- Modal -->
-<div class="modal fade" id="userInfoModal{{ $user->id }}" tabindex="-1" aria-labelledby="userInfoLabel{{ $user->id }}" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered ">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="userInfoLabel{{ $user->id }}">
-                    User Details: {{ $user->firstname }} {{ $user->lastname }}
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row mb-2">
-                    <div class="col-md-4"><strong>Year & Section:</strong></div>
-                    <div class="col-md-8">{{ $user->year_section }}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-4"><strong>Address:</strong></div>
-                    <div class="col-md-8">{{ $user->address }}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-4"><strong>Contact Number:</strong></div>
-                    <div class="col-md-8">{{ $user->contact_number }}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-4"><strong>License Number:</strong></div>
-                    <div class="col-md-8">{{ $user->license_number }}</div>
-                </div>
-                <div class="row mb-2">
-                    <div class="col-md-4"><strong>Expiration Date:</strong></div>
-                    <div class="col-md-8">{{ $user->expiration_date }}</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+                            <!-- Modal -->
+                            <div class="modal fade" id="userInfoModal{{ $user->id }}" tabindex="-1"
+                                aria-labelledby="userInfoLabel{{ $user->id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered ">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="userInfoLabel{{ $user->id }}">
+                                                User Details: {{ $user->firstname }} {{ $user->lastname }}
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row mb-2">
+                                                <div class="col-md-4"><strong>Year & Section:</strong></div>
+                                                <div class="col-md-8">{{ $user->year_section }}</div>
+                                            </div>
+                                            <div class="row mb-2">
+                                                <div class="col-md-4"><strong>Address:</strong></div>
+                                                <div class="col-md-8">{{ $user->address }}</div>
+                                            </div>
+                                            <div class="row mb-2">
+                                                <div class="col-md-4"><strong>Contact Number:</strong></div>
+                                                <div class="col-md-8">{{ $user->contact_number }}</div>
+                                            </div>
+                                            <div class="row mb-2">
+                                                <div class="col-md-4"><strong>License Number:</strong></div>
+                                                <div class="col-md-8">{{ $user->license_number }}</div>
+                                            </div>
+                                            <div class="row mb-2">
+                                                <div class="col-md-4"><strong>Expiration Date:</strong></div>
+                                                <div class="col-md-8">{{ $user->expiration_date }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-</td>
+                        </td>
 
                     </tr>
                 @empty

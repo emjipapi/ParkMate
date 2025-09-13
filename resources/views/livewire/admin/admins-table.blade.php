@@ -1,0 +1,143 @@
+<div x-data="{
+        check2: false,
+        selectedIds: [],
+        alertMessage: '',
+        showAlert: false,
+
+        init() {
+            this.check2 = localStorage.getItem('adminTable_multiselect') === 'true';
+            const stored = localStorage.getItem('adminTable_selectedIds');
+            this.selectedIds = stored ? JSON.parse(stored) : [];
+        },
+
+        toggleMaster() {
+            this.check2 = !this.check2;
+            localStorage.setItem('adminTable_multiselect', this.check2);
+            if (!this.check2) {
+                this.selectedIds = [];
+                localStorage.removeItem('adminTable_selectedIds');
+            }
+        },
+
+        triggerDelete() {
+            if (this.selectedIds.length === 0) {
+                this.alertMessage = '⚠️ No admins selected to delete.';
+                this.showAlert = true;
+                setTimeout(() => this.showAlert = false, 3000);
+                return;
+            }
+            $wire.deleteSelected(this.selectedIds);
+            this.selectedIds = [];
+            localStorage.removeItem('adminTable_selectedIds');
+        }
+    }">
+
+    <!-- Alert -->
+    <template x-if="showAlert">
+        <div class="alert alert-warning text-center position-fixed top-0 start-50 translate-middle-x mt-3 shadow"
+             style="z-index: 2000;">
+            <span x-text="alertMessage"></span>
+        </div>
+    </template>
+
+    <!-- Clear selection button -->
+    <template x-if="selectedIds.length > 0">
+        <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
+            <div class="alert alert-primary d-flex align-items-center shadow">
+                <span class="me-3" x-text="`${selectedIds.length} admin(s) selected across all pages`"></span>
+                <button type="button" class="btn btn-sm btn-outline-primary me-2"
+                        @click="selectedIds = []; localStorage.removeItem('adminTable_selectedIds')">
+                    Clear All
+                </button>
+            </div>
+        </div>
+    </template>
+
+    <!-- Search -->
+    <input type="text" class="form-control mb-3" placeholder="Search admins..."
+           wire:model.live.debounce.300ms="search" style="max-width: 400px" />
+
+    <!-- Toolbar -->
+    <div class="d-flex justify-content-end mb-3 gap-3">
+        <i :class="check2 ? 'bi bi-check2-all text-primary' : 'bi bi-check2-all'"
+           style="transform: scale(1.2); cursor: pointer;" @click="toggleMaster()" title="Toggle multi-select mode"></i>
+
+        <i class="bi bi-trash-fill" :class="selectedIds.length > 0 ? 'text-danger' : 'text-muted'"
+           style="transform: scale(1.2); cursor: pointer;" @click="triggerDelete()" title="Delete selected"></i>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table table-striped custom-table" x-bind:class="{ 'table-hover': check2 }">
+            <thead>
+                <tr>
+                    <th x-show="check2" style="width: 40px;"></th>
+                    <th>Admin ID</th>
+                    <th>Firstname</th>
+                    <th>Lastname</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @forelse ($admins as $admin)
+                    <tr x-bind:class="{ 'table-active': check2 && selectedIds.includes({{ $admin->id }}) }">
+                        <td x-show="check2">
+                            <input type="checkbox" class="form-check-input" value="{{ $admin->id }}"
+                                   :checked="selectedIds.includes({{ $admin->id }})"
+                                   @change="
+                                       if ($event.target.checked) {
+                                           if (!selectedIds.includes({{ $admin->id }})) selectedIds.push({{ $admin->id }});
+                                       } else {
+                                           selectedIds = selectedIds.filter(id => id !== {{ $admin->id }});
+                                       }
+                                       localStorage.setItem('adminTable_selectedIds', JSON.stringify(selectedIds));
+                                   ">
+                        </td>
+                        <td>{{ $admin->id }}</td>
+                        <td>{{ $admin->firstname }}</td>
+                        <td>{{ $admin->lastname }}</td>
+                        <td>{{ $admin->email }}</td>
+                        <td>{{ $admin->role ?? 'N/A' }}</td>
+                        <td>
+                            <a href="{{ route('admins.edit', $admin->id) }}" class="text-primary me-2">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#adminInfoModal{{ $admin->id }}">
+                                <i class="bi bi-info-circle"></i>
+                            </a>
+
+                            <!-- Modal -->
+                            <div class="modal fade" id="adminInfoModal{{ $admin->id }}" tabindex="-1"
+                                 aria-labelledby="adminInfoLabel{{ $admin->id }}" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-sm">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="adminInfoLabel{{ $admin->id }}">
+                                                Admin Details: {{ $admin->firstname }} {{ $admin->lastname }}
+                                            </h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p><strong>Email:</strong> {{ $admin->email }}</p>
+                                            <p><strong>Role:</strong> {{ $admin->role ?? 'N/A' }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td :colspan="check2 ? 7 : 6" class="text-center">No admins found.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    {{ $admins->links() }}
+</div>
