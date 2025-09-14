@@ -61,10 +61,20 @@
 
             {{-- Action Buttons --}}
             <div class="flex space-x-3 mb-3">
-                <button wire:click="generateStickers" class="btn-add-slot btn btn-primary" @if(!$selectedTemplateId)
-                disabled @endif>
-                    Generate Stickers
-                </button>
+                <button 
+    wire:click="generateStickers" 
+    wire:loading.attr="disabled" 
+    wire:target="generateStickers"
+    class="btn-add-slot btn btn-primary" 
+    @if(!$selectedTemplateId) disabled @endif
+>
+    <span wire:loading.remove wire:target="generateStickers">
+        Generate Stickers
+    </span>
+    <span wire:loading wire:target="generateStickers">
+        Generating...
+    </span>
+</button>
 
                 <button wire:click="togglePreview" class="btn-add-slot btn btn-primary" @if(!$selectedTemplateId)
                 disabled @endif>

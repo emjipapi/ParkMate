@@ -23,8 +23,6 @@ class UserFormCreate extends Component
     public $firstname;
     public $middlename;
     public $lastname;
-    public $program;
-    public $department;
     public $year_section;    // ✅ add this
     public $address;         // ✅ add this
     public $contact_number;  // ✅ add this
@@ -33,28 +31,69 @@ class UserFormCreate extends Component
     public $profile_picture;
 
     // Vehicles - start with one empty vehicle row
-public $vehicles = [];
-private function defaultVehicle()
-{
-    return [
-        'type' => 'motorcycle',
-        'rfid_tag' => '',
-        'license_plate' => '',
-        'body_type_model' => '',
-        'or_number' => '',
-        'cr_number' => ''
-    ];
-}
+    public $vehicles = [];
+    private function defaultVehicle()
+    {
+        return [
+            'type' => 'motorcycle',
+            'rfid_tag' => '',
+            'license_plate' => '',
+            'body_type_model' => '',
+            'or_number' => '',
+            'cr_number' => ''
+        ];
+    }
 public function mount()
 {
+    // Sort programs inside each department
+    foreach ($this->allPrograms as $dept => $programs) {
+        sort($programs);
+        $this->allPrograms[$dept] = $programs;
+    }
+
+    // Populate and sort departments A→Z
+    $this->departments = array_keys($this->allPrograms);
+    sort($this->departments);
+
+    // Show all programs initially, sorted
+    $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
+
+    // Initialize vehicles
     $this->vehicles[] = $this->defaultVehicle();
 }
+
 
     protected $middleware = ['auth:admin'];
 
     // Hardcoded example departments & programs
-    public $departments = ['CCS'];
-    public $programs = ['BSCS', 'BSIT', 'BLIS', 'BSIS'];
+
+public $allPrograms = [
+    'CAS' => ['BAELS', 'BSAM', 'BHS', 'BSDC', 'BSMath', 'BSPA'],
+    'CCS' => ['BLIS', 'BSCS', 'BSIS', 'BSIT'],
+    'CEA' => ['BSCE', 'BSEE', 'BSECE', 'BSME'],
+    'CHS' => ['BSM', 'BSN'],
+    'CTDE' => ['BCAEd', 'BPEd', 'BSNEd', 'BTVTEd'],
+    'CTHBM' => ['BSEM', 'BSHM', 'BSOA', 'BSTM'],
+    'Graduate' => ['Doctor of Philosophy in Business Management', 'Master In Business Management', 'Master of Arts in Nursing', 'Master of Engineering'],
+];
+
+public $departments = [];
+public $department = '';
+public $program = '';
+public $programs = []; // filtered programs
+public function updatedDepartment($value)
+{
+    if ($value) {
+        // Filter and sort programs for selected department
+        $this->programs = $this->allPrograms[$value];
+    } else {
+        // No department selected, show all programs sorted
+        $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
+    }
+
+    // Reset program selection
+    $this->program = '';
+}
 
     protected $rules = [
         'student_id' => 'nullable|string|max:10',
@@ -76,9 +115,9 @@ public function mount()
         'vehicles.*.type' => 'required|in:car,motorcycle',
         'vehicles.*.rfid_tag' => 'required|string|distinct|unique:vehicles,rfid_tag|max:20',
         'vehicles.*.license_plate' => 'nullable|string|max:20',
-            'vehicles.*.body_type_model' => 'nullable|string|max:30',
-    'vehicles.*.or_number' => 'nullable|string|max:30',
-    'vehicles.*.cr_number' => 'nullable|string|max:30',
+        'vehicles.*.body_type_model' => 'nullable|string|max:30',
+        'vehicles.*.or_number' => 'nullable|string|max:30',
+        'vehicles.*.cr_number' => 'nullable|string|max:30',
     ];
 
     protected $messages = [
@@ -160,13 +199,13 @@ public function mount()
         // Create vehicles
         foreach ($this->vehicles as $vehicle) {
             Vehicle::create([
-                        'user_id' => $user->id,
-        'type' => $vehicle['type'],
-        'rfid_tag' => $vehicle['rfid_tag'],
-        'license_plate' => $vehicle['license_plate'] ?? null,
-        'body_type_model' => $vehicle['body_type_model'] ?? null,
-        'or_number' => $vehicle['or_number'] ?? null,
-        'cr_number' => $vehicle['cr_number'] ?? null,
+                'user_id' => $user->id,
+                'type' => $vehicle['type'],
+                'rfid_tag' => $vehicle['rfid_tag'],
+                'license_plate' => $vehicle['license_plate'] ?? null,
+                'body_type_model' => $vehicle['body_type_model'] ?? null,
+                'or_number' => $vehicle['or_number'] ?? null,
+                'cr_number' => $vehicle['cr_number'] ?? null,
             ]);
         }
 
@@ -210,7 +249,7 @@ public function mount()
         ]);
 
         // Reset to one empty vehicle row
-            $this->vehicles[] = $this->defaultVehicle();
+        $this->vehicles[] = $this->defaultVehicle();
     }
 
     public function render()

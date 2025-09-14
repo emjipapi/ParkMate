@@ -43,25 +43,26 @@
 </div>
 
 <div class="row mb-3">
-    <div class="col-md">
-        <label>Department</label>
-        <select wire:model="department" class="form-control" required>
-            <option value="">Select Department</option>
-            @foreach($departments as $dept)
-                <option value="{{ $dept }}">{{ $dept }}</option>
-            @endforeach
-        </select>
-    </div>
+<div class="col-md">
+    <label>Department</label>
+    <select wire:model.live="department" class="form-control">
+        <option value="">Select Department</option>
+        @foreach($departments as $dept)
+            <option value="{{ $dept }}">{{ $dept }}</option>
+        @endforeach
+    </select>
+</div>
 
-    <div class="col-md">
-        <label>Program</label>
-        <select wire:model="program" class="form-control" required>
-            <option value="">Select Program</option>
-            @foreach($programs as $prog)
-                <option value="{{ $prog }}">{{ $prog }}</option>
-            @endforeach
-        </select>
-    </div>
+<div class="col-md">
+    <label>Program</label>
+    <select wire:model.live="program" class="form-control">
+        <option value="">Select Program</option>
+        @foreach($programs as $prog)
+            <option value="{{ $prog }}">{{ $prog }}</option>
+        @endforeach
+    </select>
+</div>
+
 
     <div class="col-md">
         <label>Year & Section</label>

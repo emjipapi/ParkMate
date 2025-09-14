@@ -9,17 +9,17 @@
     <title>ParkMate - Analytics Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap 5 CDN -->
-  <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-  <!-- Inter font -->
-  <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
-      <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
+    <!-- Bootstrap 5 CDN -->
+    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Inter font -->
+    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
     @livewireStyles
-    
+
     <style>
-:root {
+        :root {
             --bg1: #56ca8b;
             --bg2: #3bc480;
             --bg3: #38b174;
@@ -69,7 +69,7 @@
             background-color: var(--bg4);
             border: none;
             padding: 10px;
-            
+
         }
 
         .sidebar button:hover {
@@ -98,7 +98,7 @@
             line-height: 36px;
         }
 
-                .live-btn-bar {
+        .live-btn-bar {
             display: flex;
             align-items: center;
             background-color: white;
@@ -138,7 +138,7 @@
             background-color: #EAEEF4;
         }
 
-      
+
 
 
         .content .cards-container {
@@ -335,33 +335,33 @@
             </a>
         </div>
         <div href='/parking-slots' wire:navigate class="btn-wrapper">
-           
-                <button class="btn">Parking Slots</button>
-            
+
+            <button class="btn">Parking Slots</button>
+
         </div>
-                <div href='/violation-tracking' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Violation Tracking</button>
-            
+        <div href='/violation-tracking' wire:navigate class="btn-wrapper">
+
+            <button class="btn">Violation Tracking</button>
+
         </div>
-                <div href='/users' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Users</button>
-            
+        <div href='/users' wire:navigate class="btn-wrapper">
+
+            <button class="btn">Users</button>
+
         </div>
-                <div href='/sticker-generator' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Sticker Generator</button>
-            
+        <div href='/sticker-generator' wire:navigate class="btn-wrapper">
+
+            <button class="btn">Sticker Generator</button>
+
         </div>
-                <div href='/activity-log' wire:navigate class="btn-wrapper">
-          
-                <button class="btn">Activity Log</button>
-            
+        <div href='/activity-log' wire:navigate class="btn-wrapper">
+
+            <button class="btn">Activity Log</button>
+
         </div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
-           <form action="{{ route('admin.logout') }}" method="POST">
+            <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn btn-danger w-100">Logout</button>
             </form>
@@ -372,9 +372,9 @@
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div href='/admin-dashboard/live-attendance-mode' wire:navigate class="live-btn-bar">
-                <button class="live-btn">
-                    Live Attendance Mode
-                </button>   
+            <button class="live-btn">
+                Live Attendance Mode
+            </button>
         </div>
     </div>
 
@@ -388,25 +388,25 @@
             <span class="text-muted">Home > Dashboard > Analytics Dashboard</span>
         </div>
 
-        <div class="position-absolute m-3">
-           <a href="/admin-dashboard" wire:navigate
-           class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
-           style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
+        <div class="position-absolute m-3 d-none d-md-block">
+            <a href="/admin-dashboard" wire:navigate
+                class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
+                style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
                 <i class="bi bi-arrow-left"></i>
             </a>
         </div>
-<div class="square-box">
-<livewire:admin.analytics-chart-component />
-    </div>
+        <div class="square-box">
+            <livewire:admin.analytics-chart-component />
+        </div>
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
         <span>Copyright © 2025 - 2025 All rights reserved</span>
         <span>ParkMate</span>
     </div>
-    
+
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    
+
     <script>
         function updateClock() {
             const now = new Date();

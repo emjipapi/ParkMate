@@ -461,7 +461,7 @@
             <span class="text-muted">Home > Slots</span>
         </div>
         <button type="button" class="btn-add-slot btn btn-primary" data-bs-toggle="modal"
-            data-bs-target="#addSlotModal">
+            data-bs-target="#createAreaModal">
             Add Slot
         </button>
 
@@ -470,6 +470,7 @@
         </div>
 
     </div>
+    <livewire:admin.create-area-modal />
 
     <!-- Bottom Bar -->
     <div class="bottom-bar">
