@@ -47,8 +47,8 @@ class UserFormEdit extends Component
     protected $rules = [
         'student_id' => 'nullable|string|max:10',
         'employee_id' => 'nullable|string|max:10',
-        'serial_number' => 'required|string|min:5|max:6|unique:users,serial_number,{{userId}}',
-        'email' => 'required|email|unique:users,email,{{userId}}',
+'serial_number' => 'required|string|min:5|max:6', // Remove unique from here
+    'email' => 'required|email', // Remove unique from here
         'password' => 'nullable|string|min:6',
         'firstname' => 'required|string|max:50',
         'middlename' => 'nullable|string|max:50',
@@ -162,25 +162,22 @@ class UserFormEdit extends Component
             return;
         }
 
-        // Adjust rules for unique fields
-        $this->rules['email'] = 'required|email|unique:users,email,' . $this->userId;
-        $this->rules['serial_number'] = 'required|string|unique:users,serial_number,' . $this->userId;
+    // Adjust rules for unique fields
+    $this->rules['email'] = 'required|email|unique:users,email,' . $this->userId;
+    $this->rules['serial_number'] = 'required|string|min:5|max:6|unique:users,serial_number,' . $this->userId;
 
-        // Format serial number
-        if (!empty($this->serial_number)) {
-            $num = (int) $this->serial_number;
+    // Format serial number ONLY if it doesn't already start with 'S'
+    if (!empty($this->serial_number) && !str_starts_with($this->serial_number, 'S')) {
+        $num = (int) $this->serial_number;
 
-            if ($num < 10000) {
-                // pad to 4 digits if less than 10000
-                $serialNumber = 'S' . str_pad($num, 4, '0', STR_PAD_LEFT);
-            } else {
-                // leave as is if 5 digits or more
-                $serialNumber = 'S' . $num;
-            }
-
-            // assign back to the property so validate() sees it
-            $this->serial_number = $serialNumber;
+        if ($num < 10000) {
+            $serialNumber = 'S' . str_pad($num, 4, '0', STR_PAD_LEFT);
+        } else {
+            $serialNumber = 'S' . $num;
         }
+
+        $this->serial_number = $serialNumber;
+    }
         $data = $this->validate();
 
         $user = User::findOrFail($this->userId);
@@ -235,6 +232,7 @@ class UserFormEdit extends Component
         ]);
 
         session()->flash('success', 'User and vehicles updated successfully!');
+        
     }
 
     public function render()
