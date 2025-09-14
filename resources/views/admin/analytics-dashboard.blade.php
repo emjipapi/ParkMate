@@ -15,7 +15,7 @@
   <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
-    
+      <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
     @livewireStyles
     
     <style>
@@ -388,7 +388,13 @@
             <span class="text-muted">Home > Dashboard > Analytics Dashboard</span>
         </div>
 
-
+        <div class="position-absolute m-3">
+           <a href="/admin-dashboard" wire:navigate
+           class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
+           style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+        </div>
 <div class="square-box">
 <livewire:admin.analytics-chart-component />
     </div>

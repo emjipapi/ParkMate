@@ -71,7 +71,10 @@ public function edit($id)
     return view('admin.user-edit', ['id' => $id]);
 }
 
-
+public function editAdmin($id)
+{
+    return view('admin.admin-edit', compact('id'));
+}
 
 
 }

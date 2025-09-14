@@ -74,9 +74,8 @@
                     <th x-show="check2" style="width: 40px;"></th>
                     <th>Admin ID</th>
                     <th>Firstname</th>
+                    <th>Middlename</th>
                     <th>Lastname</th>
-                    <th>Email</th>
-                    <th>Role</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -95,39 +94,18 @@
                                        localStorage.setItem('adminTable_selectedIds', JSON.stringify(selectedIds));
                                    ">
                         </td>
-                        <td>{{ $admin->id }}</td>
+                        <td>{{ $admin->admin_id }}</td>
                         <td>{{ $admin->firstname }}</td>
+                        <td>{{ $admin->middlename }}</td>
                         <td>{{ $admin->lastname }}</td>
-                        <td>{{ $admin->email }}</td>
-                        <td>{{ $admin->role ?? 'N/A' }}</td>
                         <td>
-                            <a href="{{ route('admins.edit', $admin->id) }}" class="text-primary me-2">
-                                <i class="bi bi-pencil-square"></i>
+                             <!-- Edit Icon -->
+                            <a href="{{ route('admins.edit', $admin->admin_id) }}"
+                                class="text-primary me-2 text-info text-decoration-none">
+                                <i class="bi bi-pencil-square text-secondary"></i>
                             </a>
 
-                            <a href="#" data-bs-toggle="modal" data-bs-target="#adminInfoModal{{ $admin->id }}">
-                                <i class="bi bi-info-circle"></i>
-                            </a>
-
-                            <!-- Modal -->
-                            <div class="modal fade" id="adminInfoModal{{ $admin->id }}" tabindex="-1"
-                                 aria-labelledby="adminInfoLabel{{ $admin->id }}" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered modal-sm">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="adminInfoLabel{{ $admin->id }}">
-                                                Admin Details: {{ $admin->firstname }} {{ $admin->lastname }}
-                                            </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <p><strong>Email:</strong> {{ $admin->email }}</p>
-                                            <p><strong>Role:</strong> {{ $admin->role ?? 'N/A' }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            
                         </td>
                     </tr>
                 @empty

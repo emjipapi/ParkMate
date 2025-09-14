@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\EvidenceController;
 use App\Http\Controllers\WebfontController;
+use App\Livewire\Admin\AdminFormEdit;
 /*
 |--------------------------------------------------------------------------
 | Public / Login Routes
@@ -110,7 +111,7 @@ Route::middleware(['admin'])->group(function () {
     })->name('admins.create');
     Route::get('/users/edit/{id}', [UserController::class, 'edit'])->name('users.edit');
     // In your routes file
-
+Route::get('/admins/edit/{id}', [UserController::class, 'editAdmin'])->name('admins.edit');
 
 
     Route::post('/users', [UserController::class, 'store'])->name('users.store');

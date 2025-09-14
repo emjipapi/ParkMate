@@ -17,9 +17,10 @@
     <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
     <livewire:styles />
     <style>
-   :root {
+        :root {
             --bg1: #56ca8b;
             --bg2: #3bc480;
             --bg3: #38b174;
@@ -69,7 +70,7 @@
             background-color: var(--bg4);
             border: none;
             padding: 10px;
-            
+
         }
 
         .sidebar button:hover {
@@ -98,7 +99,7 @@
             line-height: 36px;
         }
 
-                .live-btn-bar {
+        .live-btn-bar {
             display: flex;
             align-items: center;
             background-color: white;
@@ -128,6 +129,7 @@
         .live-btn:hover {
             background-color: var(--bg1);
         }
+
         .content {
             margin-left: 250px;
             padding: 20px;
@@ -137,7 +139,7 @@
             background-color: #EAEEF4;
         }
 
-      
+
         .content .cards-container {
             margin-top: auto;
         }
@@ -320,60 +322,79 @@
             width: 1000px;
             max-width: 50%;
         }
+
         .mobile-menu-btn {
-    display: none; /* hidden on desktop */
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: white;
-    margin-right: 10px;
-}
+            display: none;
+            /* hidden on desktop */
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            margin-right: 10px;
+        }
+
         @media (max-width: 768px) {
-        .mobile-menu-btn {
-        display: inline-block;
-    }
-        .sidebar {
-        transform: translateX(-100%); /* hidden */
-        z-index: 1000;
-        transition: transform 0.3s ease-in-out;
-        
-    }
-    .sidebar .mt-auto {
-        margin-top: 0 !important;
-    }
+            .mobile-menu-btn {
+                display: inline-block;
+            }
 
-    .sidebar.open {
-        transform: translateX(0); /* slide in */
-    }
+            .sidebar {
+                transform: translateX(-100%);
+                /* hidden */
+                z-index: 1000;
+                transition: transform 0.3s ease-in-out;
 
-    .content, .top-bar, .bottom-bar {
-        margin-left: 0; /* full width on mobile */
-    }
-    .bottom-bar {
-        left: 0;
-        width: 100%;
-        position: relative; /* or fixed if you want it always at bottom */
-        padding: 0 10px; /* optional: less padding for mobile */
-        flex-direction: column; /* optional: stack items vertically if needed */
-        gap: 5px;
-    }
-        .d-flex.align-items-baseline h3 {
-        font-size: 1.2rem; /* smaller heading on mobile */
-    }
+            }
 
-    .d-flex.align-items-baseline h6 {
-        font-size: 0.9rem; /* smaller subheading */
-    }
+            .sidebar .mt-auto {
+                margin-top: 0 !important;
+            }
 
-    .d-flex.align-items-baseline span,
-    .d-flex.align-items-baseline .text-white {
-        font-size: 0.8rem; /* smaller breadcrumb text */
-    }
-        form {
-        width: 100% !important;
-        max-width: 100% !important;
-    }
-}
+            .sidebar.open {
+                transform: translateX(0);
+                /* slide in */
+            }
+
+            .content,
+            .top-bar,
+            .bottom-bar {
+                margin-left: 0;
+                /* full width on mobile */
+            }
+
+            .bottom-bar {
+                left: 0;
+                width: 100%;
+                position: relative;
+                /* or fixed if you want it always at bottom */
+                padding: 0 10px;
+                /* optional: less padding for mobile */
+                flex-direction: column;
+                /* optional: stack items vertically if needed */
+                gap: 5px;
+            }
+
+            .d-flex.align-items-baseline h3 {
+                font-size: 1.2rem;
+                /* smaller heading on mobile */
+            }
+
+            .d-flex.align-items-baseline h6 {
+                font-size: 0.9rem;
+                /* smaller subheading */
+            }
+
+            .d-flex.align-items-baseline span,
+            .d-flex.align-items-baseline .text-white {
+                font-size: 0.8rem;
+                /* smaller breadcrumb text */
+            }
+
+            form {
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -393,29 +414,29 @@
             </a>
         </div>
         <div href='/parking-slots' wire:navigate class="btn-wrapper">
-           
-                <button class="btn">Parking Slots</button>
-            
+
+            <button class="btn">Parking Slots</button>
+
         </div>
         <div href='/violation-tracking' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Violation Tracking</button>
-            
+
+            <button class="btn">Violation Tracking</button>
+
         </div>
         <div href='/users' wire:navigate class="btn-wrapper">
-           
-                <button class="btn active">Users</button>
-           
+
+            <button class="btn active">Users</button>
+
         </div>
         <div href='/sticker-generator' wire:navigate class="btn-wrapper">
-           
-                <button class="btn">Sticker Generator</button>
-            
+
+            <button class="btn">Sticker Generator</button>
+
         </div>
         <div href='/activity-log' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Activity Log</button>
-            
+
+            <button class="btn">Activity Log</button>
+
         </div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
@@ -431,9 +452,9 @@
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div href='/admin-dashboard/live-attendance-mode' wire:navigate class="live-btn-bar">
-                <button class="live-btn">
-                    Live Attendance Mode
-                </button>   
+            <button class="live-btn">
+                Live Attendance Mode
+            </button>
         </div>
     </div>
 
@@ -446,9 +467,15 @@
             </div>
             <span class="text-muted">Home > Users > Edit</span>
         </div>
-       
+        <div class="position-absolute m-3">
+           <a href="/users" wire:navigate
+           class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
+           style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+        </div>
         @livewire('admin.user-form-edit', ['id' => $id])
-        
+
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
@@ -472,16 +499,16 @@
         setInterval(updateClock, 1000);
         updateClock(); // run once immediately
     </script>
-<script>
-function openSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('open');
-}
-function closeSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('open');
-}
-</script>
+    <script>
+        function openSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+        function closeSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('open');
+        }
+    </script>
 </body>
 
 </html>

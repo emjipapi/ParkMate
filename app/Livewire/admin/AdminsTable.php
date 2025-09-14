@@ -25,9 +25,8 @@ class AdminsTable extends Component
             $s = $this->search;
             $query->where(function ($q) use ($s) {
                 $q->where('firstname', 'like', "%$s%")
-                  ->orWhere('lastname', 'like', "%$s%")
-                  ->orWhere('email', 'like', "%$s%")
-                  ->orWhere('role', 'like', "%$s%");
+                ->orWhere('middlename', 'like', "%$s%")
+                  ->orWhere('lastname', 'like', "%$s%");
             });
         }
 
@@ -42,7 +41,7 @@ class AdminsTable extends Component
     {
         if (empty($ids)) return;
 
-        Admin::whereIn('id', $ids)->delete();
+        Admin::whereIn('admin_id', $ids)->delete();
         $this->resetPage();
         session()->flash('message', count($ids) . ' admin(s) deleted successfully.');
     }

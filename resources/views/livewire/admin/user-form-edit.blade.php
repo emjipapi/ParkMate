@@ -1,4 +1,5 @@
 <div class="flex-grow-1 d-flex justify-content-center align-items-center square-box">
+
     <form wire:submit.prevent="update" enctype="multipart/form-data" wire:loading.attr="disabled" wire:target="update">
         @csrf
 
@@ -22,6 +23,8 @@
             <label>Email</label>
             <input type="email" wire:model="email" class="form-control" required>
         </div>
+
+        
 
         <div class="mb-3">
             <label>Password <small class="text-muted">(leave blank to keep current)</small></label>
@@ -131,7 +134,6 @@
                                 <input type="text" wire:model="vehicles.{{ $index }}.license_plate" class="form-control">
                             </div>
                         </div>
-
                         <!-- New row for additional fields -->
                         <div class="row mb-3">
                             <div class="col-md">
@@ -174,8 +176,10 @@
 
             <button type="submit" class="btn btn-primary">
                 <span wire:loading.remove wire:target="update">Update User</span>
+                
                 <span wire:loading wire:target="update">Updating...</span>
             </button>
+
         </div>
 
         @if (session()->has('success'))

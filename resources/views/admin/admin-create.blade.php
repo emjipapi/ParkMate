@@ -446,11 +446,17 @@
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
                 <h3 class="mb-0 me-3">Create</h3>
-                <h6 class="mb-0">User</h6>
+                <h6 class="mb-0">Admin</h6>
             </div>
             <span class="text-muted">Home > Users > Create</span>
         </div>
-       
+               <div class="position-absolute m-3">
+           <a href="/users" wire:navigate
+           class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
+           style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+        </div>
         <livewire:admin.admin-form />
         
     </div>

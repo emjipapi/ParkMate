@@ -8,20 +8,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ParkMate - Users</title>
+    <title>ParkMate - Edit Admin</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap 5 CDN -->
-  <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-  <!-- Inter font -->
-  <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
-  <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
-
+    <!-- Bootstrap 5 CDN -->
+    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Inter font -->
+    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
     <livewire:styles />
     <style>
-:root {
+   :root {
             --bg1: #56ca8b;
             --bg2: #3bc480;
             --bg3: #38b174;
@@ -139,7 +137,7 @@
             background-color: #EAEEF4;
         }
 
-       
+      
         .content .cards-container {
             margin-top: auto;
         }
@@ -169,8 +167,8 @@
             align-items: center;
             padding: 0 20px;
             font-weight: 500;
-        }
 
+        }
 
         .btn-add-slot {
             display: inline-block;
@@ -203,7 +201,7 @@
             width: 100%;
             border-collapse: collapse;
             text-align: center;
-         
+            table-layout: fixed;
         }
 
         .custom-table th,
@@ -317,19 +315,12 @@
             opacity: 1;
             pointer-events: auto;
         }
-        .table-responsive {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    /* Hide scrollbars */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
-}
 
-.table-responsive::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
-}
-.mobile-menu-btn {
+        form {
+            width: 1000px;
+            max-width: 50%;
+        }
+        .mobile-menu-btn {
     display: none; /* hidden on desktop */
     background: none;
     border: none;
@@ -337,21 +328,7 @@
     color: white;
     margin-right: 10px;
 }
-
-.nav-tabs .nav-link {
-    cursor: pointer;
-}
-
-@media (max-width: 768px) {
-    .cards-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem; /* spacing between cards */
-    }
-
-    .cards-container .card {
-        width: 100%;
-    }
+        @media (max-width: 768px) {
         .mobile-menu-btn {
         display: inline-block;
     }
@@ -392,23 +369,10 @@
     .d-flex.align-items-baseline .text-white {
         font-size: 0.8rem; /* smaller breadcrumb text */
     }
-.table-responsive {
-    overflow-x: auto;
-    overflow-y: hidden; /* ⬅️ removes the tiny vertical scroll */
-    -webkit-overflow-scrolling: touch;
-
-}
-
-        .d-flex.flex-wrap > div {
-        flex: 1 1 100%;   /* full width on mobile */
+        form {
+        width: 100% !important;
+        max-width: 100% !important;
     }
-    .d-flex.flex-wrap > div select {
-        width: 100% !important;  /* make selects stretch */
-    }
-    .d-flex.flex-wrap .w-100 {
-        justify-content: flex-start !important; /* toolbar aligns left on wrap */
-    }
-
 }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -429,29 +393,33 @@
             </a>
         </div>
         <div href='/parking-slots' wire:navigate class="btn-wrapper">
-            
+           
                 <button class="btn">Parking Slots</button>
             
         </div>
-                <div href='/violation-tracking' wire:navigate class="btn-wrapper">
+        <div href='/violation-tracking' wire:navigate class="btn-wrapper">
             
                 <button class="btn">Violation Tracking</button>
             
         </div>
-        <div class="btn-wrapper"><button class="btn active">Users</button></div>
-                <div href='/sticker-generator' wire:navigate class="btn-wrapper">
+        <div href='/users' wire:navigate class="btn-wrapper">
+           
+                <button class="btn active">Users</button>
+           
+        </div>
+        <div href='/sticker-generator' wire:navigate class="btn-wrapper">
            
                 <button class="btn">Sticker Generator</button>
             
         </div>
-                <div href='/activity-log' wire:navigate class="btn-wrapper">
+        <div href='/activity-log' wire:navigate class="btn-wrapper">
             
                 <button class="btn">Activity Log</button>
             
         </div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
-           <form action="{{ route('admin.logout') }}" method="POST">
+            <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
                 <button type="submit" class="btn btn-danger w-100">Logout</button>
             </form>
@@ -463,11 +431,9 @@
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div href='/admin-dashboard/live-attendance-mode' wire:navigate class="live-btn-bar">
-            
                 <button class="live-btn">
                     Live Attendance Mode
-                </button>
-            
+                </button>   
         </div>
     </div>
 
@@ -475,27 +441,20 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Manage</h3>
-                <h6 class="mb-0">Users</h6>
+                <h3 class="mb-0 me-3">Create</h3>
+                <h6 class="mb-0">User</h6>
             </div>
-            <span class="text-muted">Home > Users</span>
+            <span class="text-muted">Home > Users > Edit</span>
         </div>
-<div class="d-flex gap-2">
-    <div href='/users/create-user' wire:navigate>
-        <button type="button" class="btn-add-slot btn btn-primary">
-            Create User
-        </button>
-    </div>
-    <div href='/users/create-admin' wire:navigate>
-        <button type="button" class="btn-add-slot btn btn-primary">
-            Create Admin
-        </button>
-    </div>
-</div>
-        <div class="square-box">
-            <livewire:admin.users-component />
+               <div class="position-absolute m-3">
+           <a href="/users" wire:navigate
+           class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
+           style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
         </div>
-
+        @livewire('admin.admin-form-edit', ['id' => $id])
+        
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
@@ -503,8 +462,6 @@
         <span>ParkMate</span>
     </div>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    {{-- <script src="{{ asset('js/alpine.min.js') }}"></script> --}}
-    
     <livewire:scripts />
 
     <script>
@@ -521,12 +478,15 @@
         setInterval(updateClock, 1000);
         updateClock(); // run once immediately
     </script>
-    <script>
+<script>
 function openSidebar() {
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('open');
 }
-
+function closeSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('open');
+}
 </script>
 </body>
 

@@ -25,9 +25,7 @@
         <div class="d-flex align-items-center flex-nowrap">
             <input type="date" class="form-control form-control-sm w-auto" wire:model.live="startDate"
                 onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
-
             <span class="mx-1">-</span>
-
             <input type="date" class="form-control form-control-sm w-auto" wire:model.live="endDate"
                 onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
         </div>
