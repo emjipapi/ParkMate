@@ -321,14 +321,10 @@
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
-    /* Hide scrollbars */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
+
 }
 
-.table-responsive::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
-}
+
 .mobile-menu-btn {
     display: none; /* hidden on desktop */
     background: none;
@@ -341,7 +337,21 @@
 .nav-tabs .nav-link {
     cursor: pointer;
 }
+@media (max-width: 1200px) {
+    body {
+        overflow-x: auto; /* allow scrollable content */
+    }
 
+    .table-responsive {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .custom-table {
+        min-width: 1000px; /* force horizontal scroll if screen is too narrow */
+    }
+}
 @media (max-width: 768px) {
     .cards-container {
         display: flex;

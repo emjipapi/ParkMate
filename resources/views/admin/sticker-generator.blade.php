@@ -430,6 +430,15 @@ div[style*="left:"][style*="top:"] {
 .nav-tabs .nav-link {
     cursor: pointer;
 }
+        .mobile-menu-btn {
+            display: none;
+            /* hidden on desktop */
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            margin-right: 10px;
+        }
 
 @media (max-width: 768px) {
 
