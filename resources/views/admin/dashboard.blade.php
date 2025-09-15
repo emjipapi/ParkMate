@@ -269,7 +269,8 @@
     margin-right: 10px;
 }
 
-@media (max-width: 768px) {
+
+@media (max-width: 1200px) {
     .cards-container {
         display: flex;
         flex-direction: column;
