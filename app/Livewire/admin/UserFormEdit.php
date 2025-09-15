@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\Rule;
+use Illuminate\Database\QueryException;
 
 class UserFormEdit extends Component
 {
@@ -48,8 +50,8 @@ class UserFormEdit extends Component
     protected $rules = [
         'student_id' => 'nullable|string|max:10',
         'employee_id' => 'nullable|string|max:10',
-'serial_number' => 'required|string|min:5|max:6', // Remove unique from here
-    'email' => 'required|email', // Remove unique from here
+        'serial_number' => 'required|string|min:5|max:6', // Remove unique from here
+        'email' => 'required|email', // Remove unique from here
         'password' => 'nullable|string|min:6',
         'firstname' => 'required|string|max:50',
         'middlename' => 'nullable|string|max:50',
@@ -99,6 +101,7 @@ class UserFormEdit extends Component
         // Load vehicles
         $this->vehicles = $user->vehicles->map(function ($vehicle) {
             return [
+                'id' => $vehicle->id,
                 'type' => $vehicle->type,
                 'rfid_tag' => $vehicle->rfid_tag,
                 'license_plate' => $vehicle->license_plate,
@@ -110,21 +113,23 @@ class UserFormEdit extends Component
 
         // Ensure at least one vehicle row exists
         if (empty($this->vehicles)) {
-            $this->vehicles = [[
-                'type' => 'car',
-                'rfid_tag' => '',
-                'license_plate' => '',
-                'body_type_model' => '',
-                'or_number' => '',
-                'cr_number' => ''
-            ]];
+            $this->vehicles = [
+                [
+                    'type' => 'motorcycle',
+                    'rfid_tag' => '',
+                    'license_plate' => '',
+                    'body_type_model' => '',
+                    'or_number' => '',
+                    'cr_number' => ''
+                ]
+            ];
         }
     }
 
     public function addVehicleRow()
     {
         $this->vehicles[] = [
-            'type' => 'car',
+            'type' => 'motorcycle',
             'rfid_tag' => '',
             'license_plate' => '',
             'body_type_model' => '',
@@ -132,26 +137,26 @@ class UserFormEdit extends Component
             'cr_number' => ''
         ];
     }
-public function scanRfid($index)
-{
-    try {
-        $response = Http::timeout(10)->get('http://192.168.1.199:5001/wait-for-scan');
-        
-        if ($response->successful()) {
-            $data = $response->json();
-            
-            if ($data['success'] && isset($data['rfid_tag'])) {
-                $this->vehicles[$index]['rfid_tag'] = $data['rfid_tag'];
+    public function scanRfid($index)
+    {
+        try {
+            $response = Http::timeout(10)->get('http://192.168.1.199:5001/wait-for-scan');
+
+            if ($response->successful()) {
+                $data = $response->json();
+
+                if ($data['success'] && isset($data['rfid_tag'])) {
+                    $this->vehicles[$index]['rfid_tag'] = $data['rfid_tag'];
+                } else {
+                    $this->addError("vehicles.$index.rfid_tag", $data['error'] ?? 'No RFID scan received');
+                }
             } else {
-                $this->addError("vehicles.$index.rfid_tag", $data['error'] ?? 'No RFID scan received');
+                $this->addError("vehicles.$index.rfid_tag", 'Failed to connect to RFID scanner.');
             }
-        } else {
-            $this->addError("vehicles.$index.rfid_tag", 'Failed to connect to RFID scanner.');
+        } catch (\Exception $e) {
+            $this->addError("vehicles.$index.rfid_tag", 'RFID scanner not running or timeout.');
         }
-    } catch (\Exception $e) {
-        $this->addError("vehicles.$index.rfid_tag", 'RFID scanner not running or timeout.');
     }
-}
     public function removeVehicleRow($index)
     {
         if (count($this->vehicles) <= 1) {
@@ -165,95 +170,131 @@ public function scanRfid($index)
 
     public function update()
     {
-        // Profile picture size check
-        if ($this->profile_picture && $this->profile_picture->getSize() > 5 * 1024 * 1024) {
-            $this->addError('profile_picture', 'Profile picture must be less than 5 MB.');
-            return;
-        }
+        try {
+            // Profile picture size check
+            if ($this->profile_picture && $this->profile_picture->getSize() > 5 * 1024 * 1024) {
+                $this->addError('profile_picture', 'Profile picture must be less than 5 MB.');
+                return;
+            }
 
-        // Custom ID validation
-        if (empty($this->student_id) && empty($this->employee_id)) {
-            $this->addError('id', 'Please provide either Student ID or Employee ID.');
-            return;
-        }
+            // Custom ID validation
+            if (empty($this->student_id) && empty($this->employee_id)) {
+                $this->addError('id', 'Please provide either Student ID or Employee ID.');
+                return;
+            }
 
-        if (!empty($this->student_id) && !empty($this->employee_id)) {
-            $this->addError('id', 'Please provide only one: Student ID or Employee ID, not both.');
-            return;
-        }
+            if (!empty($this->student_id) && !empty($this->employee_id)) {
+                $this->addError('id', 'Please provide only one: Student ID or Employee ID, not both.');
+                return;
+            }
 
-    // Adjust rules for unique fields
-    $this->rules['email'] = 'required|email|unique:users,email,' . $this->userId;
-    $this->rules['serial_number'] = 'required|string|min:5|max:6|unique:users,serial_number,' . $this->userId;
+            // Adjust rules for unique fields
+            $this->rules['email'] = 'required|email|unique:users,email,' . $this->userId;
+            $this->rules['serial_number'] = 'required|string|min:5|max:6|unique:users,serial_number,' . $this->userId;
+            $this->rules['vehicles.*.rfid_tag'] = [
+                'required',
+                'string',
+                'max:20',
+                Rule::unique('vehicles', 'rfid_tag')->ignore($this->userId, 'user_id'),
+            ];
 
-    // Format serial number ONLY if it doesn't already start with 'S'
-    if (!empty($this->serial_number) && !str_starts_with($this->serial_number, 'S')) {
-        $num = (int) $this->serial_number;
+            // Format serial number ONLY if it doesn't already start with 'S'
+            if (!empty($this->serial_number) && !str_starts_with($this->serial_number, 'S')) {
+                $num = (int) $this->serial_number;
 
-        if ($num < 10000) {
-            $serialNumber = 'S' . str_pad($num, 4, '0', STR_PAD_LEFT);
-        } else {
-            $serialNumber = 'S' . $num;
-        }
+                if ($num < 10000) {
+                    $serialNumber = 'S' . str_pad($num, 4, '0', STR_PAD_LEFT);
+                } else {
+                    $serialNumber = 'S' . $num;
+                }
 
-        $this->serial_number = $serialNumber;
-    }
-        $data = $this->validate();
+                $this->serial_number = $serialNumber;
+            }
 
-        $user = User::findOrFail($this->userId);
+            $data = $this->validate();
+            $user = User::findOrFail($this->userId);
 
-        // Only hash password if provided
-        if (!empty($this->password)) {
-            $data['password'] = Hash::make($this->password);
-        } else {
-            unset($data['password']);
-        }
+            // Only hash password if provided
+            if (!empty($this->password)) {
+                $data['password'] = Hash::make($this->password);
+            } else {
+                unset($data['password']);
+            }
 
-        // Handle profile picture update
-        if ($this->profile_picture) {
-            $ext = $this->profile_picture->getClientOriginalExtension();
-            $hash = substr(md5(uniqid(rand(), true)), 0, 8);
-            $prefix = $this->student_id ?: $this->employee_id;
-            $filename = $prefix . '.' . $hash . '.' . $ext;
-            $this->profile_picture->storeAs('profile_pics', $filename);
-            $data['profile_picture'] = $filename;
+            // Handle profile picture update
+            if ($this->profile_picture) {
+                $ext = $this->profile_picture->getClientOriginalExtension();
+                $hash = substr(md5(uniqid(rand(), true)), 0, 8);
+                $prefix = $this->student_id ?: $this->employee_id;
+                $filename = $prefix . '.' . $hash . '.' . $ext;
+                $this->profile_picture->storeAs('profile_pics', $filename);
+                $data['profile_picture'] = $filename;
 
-            $this->currentProfilePicture = $filename;
-        } else {
-            $data['profile_picture'] = $this->currentProfilePicture;
-        }
+                $this->currentProfilePicture = $filename;
+            } else {
+                $data['profile_picture'] = $this->currentProfilePicture;
+            }
 
-        // Update user
-        $user->update($data);
+            // Update user
+            $user->update($data);
 
-        // Replace vehicles
-        $user->vehicles()->delete();
-        foreach ($this->vehicles as $vehicle) {
-            Vehicle::create([
-                'user_id' => $user->id,
-                'type' => $vehicle['type'],
-                'rfid_tag' => $vehicle['rfid_tag'],
-                'license_plate' => $vehicle['license_plate'] ?? null,
-                'body_type_model' => $vehicle['body_type_model'] ?? null,
-                'or_number' => $vehicle['or_number'] ?? null,
-                'cr_number' => $vehicle['cr_number'] ?? null,
+            $incomingIds = collect($this->vehicles)
+                ->pluck('id')
+                ->filter() // removes null for new vehicles
+                ->toArray();
+
+            // Delete vehicles removed from the form
+            $user->vehicles()->whereNotIn('id', $incomingIds)->delete();
+
+            // Update or insert remaining vehicles
+// Update or create
+            foreach ($this->vehicles as $vehicle) {
+                if (!empty($vehicle['id'])) {
+                    // Update existing
+                    $user->vehicles()->where('id', $vehicle['id'])->update([
+                        'type' => $vehicle['type'],
+                        'rfid_tag' => $vehicle['rfid_tag'],
+                        'license_plate' => $vehicle['license_plate'] ?? null,
+                        'body_type_model' => $vehicle['body_type_model'] ?? null,
+                        'or_number' => $vehicle['or_number'] ?? null,
+                        'cr_number' => $vehicle['cr_number'] ?? null,
+                    ]);
+                } else {
+                    // Create new
+                    $user->vehicles()->create([
+                        'type' => $vehicle['type'],
+                        'rfid_tag' => $vehicle['rfid_tag'],
+                        'license_plate' => $vehicle['license_plate'] ?? null,
+                        'body_type_model' => $vehicle['body_type_model'] ?? null,
+                        'or_number' => $vehicle['or_number'] ?? null,
+                        'cr_number' => $vehicle['cr_number'] ?? null,
+                    ]);
+                }
+            }
+            // --- End sync vehicles ---
+
+            // Log admin action
+            $adminId = Auth::guard('admin')->id();
+            if (!$adminId)
+                abort(403, 'Admin not authenticated');
+
+            ActivityLog::create([
+                'actor_type' => 'admin',
+                'actor_id' => $adminId,
+                'action' => 'update',
+                'details' => "Admin " . Auth::guard('admin')->user()->firstname . " " . Auth::guard('admin')->user()->lastname . " updated user {$user->firstname} {$user->lastname}.",
             ]);
+
+            session()->flash('success', 'User and vehicles updated successfully!');
+        } catch (QueryException $e) {
+            if ($e->errorInfo[1] == 1062) { // Duplicate entry
+                $this->addError('vehicles.*.rfid_tag', 'This RFID tag is already in use.');
+            } else {
+                throw $e; // rethrow other errors
+            }
         }
-
-        // Log admin action
-        $adminId = Auth::guard('admin')->id();
-        if (!$adminId) abort(403, 'Admin not authenticated');
-
-        ActivityLog::create([
-            'actor_type' => 'admin',
-            'actor_id'   => $adminId,
-            'action'     => 'update',
-            'details'    => "Admin " . Auth::guard('admin')->user()->firstname . " " . Auth::guard('admin')->user()->lastname . " updated user {$user->firstname} {$user->lastname}.",
-        ]);
-
-        session()->flash('success', 'User and vehicles updated successfully!');
-        
     }
+
 
     public function render()
     {
