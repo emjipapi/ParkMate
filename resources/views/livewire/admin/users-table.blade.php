@@ -187,6 +187,14 @@
                                                 <div class="col-md-4"><strong>Expiration Date:</strong></div>
                                                 <div class="col-md-8">{{ $user->expiration_date }}</div>
                                             </div>
+                                            <div class="row mb-2">
+                    <div class="col-md-4"><strong>Created At:</strong></div>
+                    <div class="col-md-8">{{ $user->created_at?->format('F d, Y h:i A') }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Updated At:</strong></div>
+                    <div class="col-md-8">{{ $user->updated_at?->format('F d, Y h:i A') }}</div>
+                </div>
                                         </div>
                                     </div>
                                 </div>
