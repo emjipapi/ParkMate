@@ -66,25 +66,25 @@
 
     <div class="col-md">
         <label>Year & Section</label>
-        <input type="text" wire:model="year_section" class="form-control" maxlength="2" placeholder="1A">
+        <input type="text" wire:model="year_section" class="form-control" maxlength="2" placeholder="1A" required>
     </div>
 </div>
 
 <div class="row mb-3">
     <div class="col-md">
         <label>Address</label>
-        <input type="text" wire:model="address" class="form-control">
+        <input type="text" wire:model="address" class="form-control" required>
     </div>
     <div class="col-md">
         <label>Contact Number</label>
-        <input type="text" wire:model="contact_number" class="form-control">
+        <input type="text" wire:model="contact_number" class="form-control" required>
     </div>
 </div>
 
 <div class="row mb-3">
     <div class="col-md">
         <label>License Number</label>
-        <input type="text" wire:model="license_number" class="form-control">
+        <input type="text" wire:model="license_number" class="form-control" required>
     </div>
 <div class="col-md">
     <label>Expiration Date</label>
@@ -142,7 +142,7 @@
 
             <div class="col-md">
                 <label>License Plate</label>
-                <input type="text" wire:model="vehicles.{{ $index }}.license_plate" class="form-control">
+                <input type="text" wire:model="vehicles.{{ $index }}.license_plate" class="form-control" required>
             </div>
         </div>
 
@@ -150,15 +150,15 @@
         <div class="row mb-3">
             <div class="col-md">
                 <label>Body Type/Model</label>
-                <input type="text" wire:model="vehicles.{{ $index }}.body_type_model" class="form-control">
+                <input type="text" wire:model="vehicles.{{ $index }}.body_type_model" class="form-control" required>
             </div>
             <div class="col-md">
                 <label>OR Number</label>
-                <input type="text" wire:model="vehicles.{{ $index }}.or_number" class="form-control">
+                <input type="text" wire:model="vehicles.{{ $index }}.or_number" class="form-control" required>
             </div>
             <div class="col-md">
                 <label>CR Number</label>
-                <input type="text" wire:model="vehicles.{{ $index }}.cr_number" class="form-control">
+                <input type="text" wire:model="vehicles.{{ $index }}.cr_number" class="form-control" required>
             </div>
         </div>
 
