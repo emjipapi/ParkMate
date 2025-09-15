@@ -38,7 +38,7 @@ class User extends Authenticatable
         'contact_number',
         'expiration_date',
     ];
-public $timestamps = false;
+
 
     /**
      * The attributes that should be hidden for serialization.
