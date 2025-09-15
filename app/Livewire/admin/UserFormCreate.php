@@ -9,6 +9,7 @@ use App\Models\Vehicle;
 use Illuminate\Support\Facades\Hash;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class UserFormCreate extends Component
 {
@@ -74,7 +75,12 @@ public $allPrograms = [
     'CHS' => ['BSM', 'BSN'],
     'CTDE' => ['BCAEd', 'BPEd', 'BSNEd', 'BTVTEd'],
     'CTHBM' => ['BSEM', 'BSHM', 'BSOA', 'BSTM'],
-    'Graduate' => ['Doctor of Philosophy in Business Management', 'Master In Business Management', 'Master of Arts in Nursing', 'Master of Engineering'],
+    'Graduate' => [
+        'Doctor of Philosophy in Business Management',
+        'Master In Business Management',
+        'Master of Arts in Nursing',
+        'Master of Engineering'
+    ],
 ];
 
 public $departments = [];
@@ -93,6 +99,26 @@ public function updatedDepartment($value)
 
     // Reset program selection
     $this->program = '';
+}
+public function scanRfid($index)
+{
+    try {
+        $response = Http::timeout(15)->get('http://192.168.1.199:5001/wait-for-scan');
+        
+        if ($response->successful()) {
+            $data = $response->json();
+            
+            if ($data['success'] && isset($data['rfid_tag'])) {
+                $this->vehicles[$index]['rfid_tag'] = $data['rfid_tag'];
+            } else {
+                $this->addError("vehicles.$index.rfid_tag", $data['error'] ?? 'No RFID scan received');
+            }
+        } else {
+            $this->addError("vehicles.$index.rfid_tag", 'Failed to connect to RFID scanner.');
+        }
+    } catch (\Exception $e) {
+        $this->addError("vehicles.$index.rfid_tag", 'RFID scanner not running or timeout.');
+    }
 }
 
     protected $rules = [

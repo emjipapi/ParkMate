@@ -9,6 +9,7 @@ use App\Models\Vehicle;
 use Illuminate\Support\Facades\Hash;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class UserFormEdit extends Component
 {
@@ -131,7 +132,26 @@ class UserFormEdit extends Component
             'cr_number' => ''
         ];
     }
-
+public function scanRfid($index)
+{
+    try {
+        $response = Http::timeout(10)->get('http://192.168.1.199:5001/wait-for-scan');
+        
+        if ($response->successful()) {
+            $data = $response->json();
+            
+            if ($data['success'] && isset($data['rfid_tag'])) {
+                $this->vehicles[$index]['rfid_tag'] = $data['rfid_tag'];
+            } else {
+                $this->addError("vehicles.$index.rfid_tag", $data['error'] ?? 'No RFID scan received');
+            }
+        } else {
+            $this->addError("vehicles.$index.rfid_tag", 'Failed to connect to RFID scanner.');
+        }
+    } catch (\Exception $e) {
+        $this->addError("vehicles.$index.rfid_tag", 'RFID scanner not running or timeout.');
+    }
+}
     public function removeVehicleRow($index)
     {
         if (count($this->vehicles) <= 1) {

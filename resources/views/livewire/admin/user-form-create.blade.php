@@ -123,10 +123,23 @@
                     <option value="car">Car</option>     
                 </select>
             </div>
-            <div class="col-md">
-                <label>RFID Tag</label>
-                <input type="text" wire:model="vehicles.{{ $index }}.rfid_tag" class="form-control" required>
-            </div>
+<div class="col-md">
+    <label>RFID Tag</label>
+    <div class="input-group">
+        <input type="text" wire:model="vehicles.{{ $index }}.rfid_tag" class="form-control" required>
+        <button type="button" 
+                wire:click="scanRfid({{ $index }})" 
+                class="btn btn-primary"
+                wire:loading.attr="disabled"
+                wire:target="scanRfid">
+            <span wire:loading.remove wire:target="scanRfid">Scan</span>
+            <span wire:loading wire:target="scanRfid">
+                <i class="spinner-border spinner-border-sm me-1"></i>
+            </span>
+        </button>
+    </div>
+</div>
+
             <div class="col-md">
                 <label>License Plate</label>
                 <input type="text" wire:model="vehicles.{{ $index }}.license_plate" class="form-control">
