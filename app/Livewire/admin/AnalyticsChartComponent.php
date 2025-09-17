@@ -48,8 +48,12 @@ class AnalyticsChartComponent extends Component
     {
         if ($this->chartType === 'entries') {
             $this->loadEntriesData();
-        } else {
+        } elseif ($this->chartType === 'duration') {
             $this->loadDurationData();
+        } elseif ($this->chartType === 'logins') {
+            $this->loadLoginsData('user');
+        } elseif ($this->chartType === 'admin_logins') {
+            $this->loadLoginsData('admin');
         }
     }
 
@@ -93,6 +97,21 @@ class AnalyticsChartComponent extends Component
 
         $this->labels = collect($durations)->pluck('hour')->map(fn($h) => sprintf('%02d:00', $h))->toArray();
         $this->data = collect($durations)->pluck('avg_duration')->map(fn($d) => round($d, 1))->toArray();
+    }
+
+    private function loadLoginsData($actorType)
+    {
+        $logins = DB::table('activity_logs')
+            ->selectRaw('HOUR(created_at) as hour, COUNT(*) as total')
+            ->where('action', 'login')
+            ->where('actor_type', $actorType) // can be 'user' or 'admin'
+            ->whereDate('created_at', $this->selectedDate)
+            ->groupBy('hour')
+            ->orderBy('hour')
+            ->get();
+
+        $this->labels = $logins->pluck('hour')->map(fn($h) => sprintf('%02d:00', $h))->toArray();
+        $this->data = $logins->pluck('total')->toArray();
     }
 
     private function emitChartUpdate()

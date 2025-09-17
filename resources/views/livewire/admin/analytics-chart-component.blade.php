@@ -3,9 +3,9 @@
         <!-- Filters Row -->
         <div class="d-flex justify-content-start gap-2 mb-3" wire:loading.class="opacity-50">
             <!-- Date Selector -->
-                            <label for="chartType" class="block text-sm font-medium text-gray-700 mb-2">
-                    Date:
-                </label>
+            <label for="dateSelect" class="block text-sm font-medium text-gray-700 mb-2">
+                Date:
+            </label>
             <input type="date" id="dateSelect" wire:model.live="selectedDate" class="form-control form-control-sm w-auto d-inline 
            focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 
            sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" wire:loading.attr="disabled"
@@ -22,6 +22,8 @@
                     wire:loading.attr="disabled" wire:target="selectedDate,chartType">
                     <option value="entries">Peak Entry Hours</option>
                     <option value="duration">Average Duration of Stays</option>
+                    <option value="logins">User Logins</option>
+                    <option value="admin_logins">Admin Logins</option>   
                 </select>
             </div>
         </div>
@@ -38,18 +40,22 @@
                 chart: null,
                 isUpdating: false,
                 updateTimeout: null,
+                currentChartType: @json($chartType),
+                
                 init() {
                     const ctx = this.$refs.canvas.getContext('2d');
+                    const initialLabels = @json($labels);
+                    const initialData = @json($data);
 
                     this.chart = new Chart(ctx, {
                         type: 'bar',
                         data: {
-                            labels: @json($labels),
+                            labels: initialLabels,
                             datasets: [{
-                                label: 'Peak Entries',
-                                data: @json($data),
-                                borderColor: 'rgba(75, 192, 192, 1)',
-                                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                                label: this.getDatasetLabel(this.currentChartType),
+                                data: initialData,
+                                borderColor: this.getBorderColor(this.currentChartType),
+                                backgroundColor: this.getBackgroundColor(this.currentChartType),
                                 borderWidth: 2
                             }]
                         },
@@ -61,26 +67,24 @@
                                     beginAtZero: true,
                                     title: {
                                         display: true,
-                                        text: 'Number of Entries'
+                                        text: this.getYAxisLabel(this.currentChartType)
                                     }
                                 }
                             }
                         }
                     });
 
-                    // Single event listener for custom events with debouncing
+                    // Listen for chart updates
                     document.addEventListener('chartDataUpdated', (event) => {
                         console.log('Chart data updated:', event.detail);
 
-                        // Clear any existing timeout
                         if (this.updateTimeout) {
                             clearTimeout(this.updateTimeout);
                         }
 
-                        // Debounce the update to prevent rapid-fire updates
                         this.updateTimeout = setTimeout(() => {
                             this.updateChart(event.detail);
-                        }, 100); // 100ms delay
+                        }, 100);
                     });
                 },
 
@@ -93,22 +97,21 @@
                     this.isUpdating = true;
 
                     try {
-                        // Extract data properly
-                        const data = eventData.data || eventData;
+                        const data = eventData.data || [];
                         const labels = eventData.labels || [];
+                        const chartType = eventData.chartType || 'entries';
+                        this.currentChartType = chartType;
 
-                        console.log('Recreating chart with labels:', labels, 'data:', data);
+                        console.log('Updating chart with:', { labels, data, chartType });
 
-                        // Destroy existing chart to prevent corruption
+                        // Destroy and recreate chart (your working approach)
                         if (this.chart) {
                             this.chart.destroy();
                             this.chart = null;
                         }
 
-                        // Small delay to ensure canvas is ready
                         setTimeout(() => {
                             try {
-                                // Check if canvas context is still valid
                                 const ctx = this.$refs.canvas.getContext('2d');
                                 if (!ctx) {
                                     console.error('Canvas context is null');
@@ -116,18 +119,15 @@
                                     return;
                                 }
 
-                                const chartType = eventData.chartType || 'entries';
-                                const isEntries = chartType === 'entries';
-
                                 this.chart = new Chart(ctx, {
                                     type: 'bar',
                                     data: {
                                         labels: labels,
                                         datasets: [{
-                                            label: isEntries ? 'Peak Entries' : 'Avg Duration (minutes)',
+                                            label: this.getDatasetLabel(chartType),
                                             data: Array.isArray(data) ? data : [],
-                                            borderColor: isEntries ? 'rgba(75, 192, 192, 1)' : 'rgba(255, 99, 132, 1)',
-                                            backgroundColor: isEntries ? 'rgba(75, 192, 192, 0.2)' : 'rgba(255, 99, 132, 0.2)',
+                                            borderColor: this.getBorderColor(chartType),
+                                            backgroundColor: this.getBackgroundColor(chartType),
                                             borderWidth: 2
                                         }]
                                     },
@@ -139,7 +139,7 @@
                                                 beginAtZero: true,
                                                 title: {
                                                     display: true,
-                                                    text: isEntries ? 'Number of Entries' : 'Minutes'
+                                                    text: this.getYAxisLabel(chartType)
                                                 }
                                             }
                                         }
@@ -148,7 +148,6 @@
 
                                 console.log('Chart recreated successfully');
 
-                                // Add an extra 1-second delay before re-enabling controls
                                 setTimeout(() => {
                                     this.isUpdating = false;
                                 }, 1000);
@@ -156,13 +155,54 @@
                                 console.error('Error recreating chart:', error);
                                 this.isUpdating = false;
                             }
-                        }, 50); // 50ms delay for canvas to be ready
+                        }, 50);
 
                     } catch (error) {
                         console.error('Error in updateChart:', error);
                         this.isUpdating = false;
                     }
+                },
+
+                getDatasetLabel(chartType) {
+                    const labels = {
+                        'entries': 'Peak Entries',
+                        'duration': 'Avg Duration (minutes)',
+                        'logins': 'User Logins',
+                        'admin_logins': 'Admin Logins'
+                    };
+                    return labels[chartType] || 'Data';
+                },
+
+                getYAxisLabel(chartType) {
+                    const labels = {
+                        'entries': 'Number of Entries',
+                        'duration': 'Minutes',
+                        'logins': 'Number of Logins',
+                        'admin_logins': 'Number of Logins'
+                    };
+                    return labels[chartType] || 'Value';
+                },
+
+                getBorderColor(chartType) {
+                    const colors = {
+                        'entries': 'rgba(75, 192, 192, 1)',
+                        'duration': 'rgba(255, 99, 132, 1)',
+                        'logins': 'rgba(54, 162, 235, 1)',
+                        'admin_logins': 'rgba(255, 206, 86, 1)'
+                    };
+                    return colors[chartType] || 'rgba(0, 0, 0, 1)';
+                },
+
+                getBackgroundColor(chartType) {
+                    const colors = {
+                        'entries': 'rgba(75, 192, 192, 0.2)',
+                        'duration': 'rgba(255, 99, 132, 0.2)',
+                        'logins': 'rgba(54, 162, 235, 0.2)',
+                        'admin_logins': 'rgba(255, 206, 86, 0.2)'
+                    };
+                    return colors[chartType] || 'rgba(0, 0, 0, 0.2)';
                 }
             }
         }
     </script>
+</div>
