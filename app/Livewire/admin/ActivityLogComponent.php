@@ -12,7 +12,10 @@ class ActivityLogComponent extends Component
 {
     use WithPagination;
     public $activeTab = 'system';
-    protected $queryString = [];
+        // 👇 sync activeTab with query string
+    protected $queryString = [
+        'activeTab' => ['except' => 'system'], 
+    ];
     public function setActiveTab($tab)
     {
         $this->activeTab = $tab;

@@ -21,14 +21,24 @@
         <div class="card-footer">More Info ➜</div>
     </div>
 
-    {{-- Users --}}
-    <div onclick="window.location='{{ url('/users') }}'" class="card card-3" style="cursor:pointer;">
-        <div class="card-body">
-            <h1 class="card-title">{{ $totalUsers }}</h1>
-            <p class="card-text">Total Users</p>
-        </div>
-        <div class="card-footer">More Info ➜</div>
+{{-- Campus Entry/Exit Summary --}}
+<div onclick="window.location='{{ url('/activity-log?activeTab=entry/exit') }}'" class="card card-3" style="cursor:pointer;">
+    <div class="card-body">
+        <h2 class="card-title">Campus Activity</h2>
+
+        <p class="mb-1">
+            <strong>{{ $currentlyInside }}</strong> Currently Inside Campus
+        </p>
+        <p class="mb-1">
+            <strong>{{ $entryCount }}</strong> Entered Today
+        </p>
+        <p class="mb-0">
+            <strong>{{ $exitCount }}</strong> Exited Today
+        </p>
     </div>
+    <div class="card-footer">More Info ➜</div>
+</div>
+
 
     {{-- Analytics Dashboard --}}
     <div class="card card-5" style="cursor:pointer;">
