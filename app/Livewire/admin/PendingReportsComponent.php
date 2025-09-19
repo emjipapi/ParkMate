@@ -303,7 +303,7 @@ private function checkAndSendThresholdEmail($violatorId)
         $violations = Violation::with(['reporter', 'area', 'violator'])
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
-            ->paginate(2);
+            ->paginate(10);
 
         // Initialize form data for current page violations
         foreach ($violations as $violation) {

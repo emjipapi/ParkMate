@@ -60,7 +60,7 @@ class ApprovedReportsComponent extends Component
     {
         $violations = Violation::with(['reporter', 'area', 'violator'])
             ->where('status', 'approved') // ✅ only approved
-            ->paginate(2); // 10 items per page
+            ->paginate(10); // 10 items per page
 
         // Process violations for display
         $violations->getCollection()->transform(function ($violation) {

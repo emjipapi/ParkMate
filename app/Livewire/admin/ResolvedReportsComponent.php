@@ -111,7 +111,7 @@ class ResolvedReportsComponent extends Component
     {
         $violations = Violation::with(['reporter', 'area', 'violator'])
             ->where('status', 'resolved')
-            ->paginate(2);
+            ->paginate(10);
 
         // Process violations for display
         $violations->getCollection()->transform(function ($violation) {
