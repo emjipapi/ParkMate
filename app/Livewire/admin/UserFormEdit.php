@@ -40,7 +40,7 @@ class UserFormEdit extends Component
 
     protected $rules = [
         'student_id' => 'nullable|string|max:10',
-        'employee_id' => 'nullable|string|max:10',
+        'employee_id' => 'nullable|string|max:15',
         'serial_number' => 'required|string|min:5|max:6', // Remove unique from here
         'email' => 'required|email', // Remove unique from here
         'password' => 'nullable|string|min:6',

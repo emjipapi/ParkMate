@@ -158,7 +158,7 @@ public function scanRfid($index)
 
     protected $rules = [
         'student_id' => 'nullable|string|max:10',
-        'employee_id' => 'nullable|string|max:10',
+        'employee_id' => 'nullable|string|max:15',
         'serial_number' => 'required|string|min:5|max:6|unique:users,serial_number',
         'email' => 'required|email|unique:users,email',
         'password' => 'required|string|min:6',
