@@ -121,17 +121,17 @@
                         <td x-show="check2">
                             <input type="checkbox" class="form-check-input" value="{{ $user->id }}"
                                 :checked="selectedIds.includes({{ $user->id }})" @change="
-                                               if ($event.target.checked) {
-                                                   if (!selectedIds.includes({{ $user->id }})) {
-                                                       selectedIds.push({{ $user->id }});
-                                                       console.log('[CHECKED] Added ID {{ $user->id }}, selectedIds:', selectedIds);
+                                                   if ($event.target.checked) {
+                                                       if (!selectedIds.includes({{ $user->id }})) {
+                                                           selectedIds.push({{ $user->id }});
+                                                           console.log('[CHECKED] Added ID {{ $user->id }}, selectedIds:', selectedIds);
+                                                       }
+                                                   } else {
+                                                       selectedIds = selectedIds.filter(id => id !== {{ $user->id }});
+                                                       console.log('[UNCHECKED] Removed ID {{ $user->id }}, selectedIds:', selectedIds);
                                                    }
-                                               } else {
-                                                   selectedIds = selectedIds.filter(id => id !== {{ $user->id }});
-                                                   console.log('[UNCHECKED] Removed ID {{ $user->id }}, selectedIds:', selectedIds);
-                                               }
-                                               localStorage.setItem('userTable_selectedIds', JSON.stringify(selectedIds));
-                                           ">
+                                                   localStorage.setItem('userTable_selectedIds', JSON.stringify(selectedIds));
+                                               ">
                         </td>
                         <td>{{ $user->id }}</td>
                         <td>{{ $user->student_id ?? $user->employee_id }}</td>
@@ -146,7 +146,7 @@
                                 class="text-primary me-2 text-info text-decoration-none">
                                 <i class="bi bi-pencil-square text-secondary"></i>
                             </a>
-                            
+
 
                             <!-- More Info Icon -->
                             <a href="#" class="text-info text-decoration-none" data-bs-toggle="modal"
@@ -155,39 +155,40 @@
                             </a>
 
                             <!-- Modal -->
-                            <div class="modal fade" id="userInfoModal{{ $user->id }}" tabindex="-1"
-                                aria-labelledby="userInfoLabel{{ $user->id }}" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered ">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="userInfoLabel{{ $user->id }}">
-                                                User Details: {{ $user->firstname }} {{ $user->lastname }}
-                                            </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div class="row mb-2">
-                                                <div class="col-md-4"><strong>Year & Section:</strong></div>
-                                                <div class="col-md-8">{{ $user->year_section }}</div>
-                                            </div>
-                                            <div class="row mb-2">
-                                                <div class="col-md-4"><strong>Address:</strong></div>
-                                                <div class="col-md-8">{{ $user->address }}</div>
-                                            </div>
-                                            <div class="row mb-2">
-                                                <div class="col-md-4"><strong>Contact Number:</strong></div>
-                                                <div class="col-md-8">{{ $user->contact_number }}</div>
-                                            </div>
-                                            <div class="row mb-2">
-                                                <div class="col-md-4"><strong>License Number:</strong></div>
-                                                <div class="col-md-8">{{ $user->license_number }}</div>
-                                            </div>
-                                            <div class="row mb-2">
-                                                <div class="col-md-4"><strong>Expiration Date:</strong></div>
-                                                <div class="col-md-8">{{ $user->expiration_date }}</div>
-                                            </div>
-                                            <div class="row mb-2">
+<div class="modal fade" id="userInfoModal{{ $user->id }}" tabindex="-1"
+    aria-labelledby="userInfoLabel{{ $user->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered ">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userInfoLabel{{ $user->id }}">
+                    User Details: {{ $user->firstname }} {{ $user->lastname }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- User Details -->
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Year & Section:</strong></div>
+                    <div class="col-md-8">{{ $user->year_section }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Address:</strong></div>
+                    <div class="col-md-8">{{ $user->address }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Contact Number:</strong></div>
+                    <div class="col-md-8">{{ $user->contact_number }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>License Number:</strong></div>
+                    <div class="col-md-8">{{ $user->license_number }}</div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-md-4"><strong>Expiration Date:</strong></div>
+                    <div class="col-md-8">{{ $user->expiration_date }}</div>
+                </div>
+                <div class="row mb-2">
                     <div class="col-md-4"><strong>Created At:</strong></div>
                     <div class="col-md-8">{{ $user->created_at?->format('F d, Y h:i A') }}</div>
                 </div>
@@ -195,10 +196,57 @@
                     <div class="col-md-4"><strong>Updated At:</strong></div>
                     <div class="col-md-8">{{ $user->updated_at?->format('F d, Y h:i A') }}</div>
                 </div>
-                                        </div>
-                                    </div>
+
+                <!-- Vehicles Section -->
+                <hr>
+                <h6 class="mb-3">Vehicles</h6>
+                <div class="vehicle-rows">
+                    @forelse($user->vehicles as $vehicle)
+                        <div class="card mb-3">
+                            <div class="card-body p-3">
+                                <div class="row mb-1">
+                                    <div class="col-md-4"><strong>Type:</strong></div>
+                                    <div class="col-md-8">{{ ucfirst($vehicle->type) }}</div>
+                                </div>
+                                <div class="row mb-1">
+                                    <div class="col-md-4"><strong>Model:</strong></div>
+                                    <div class="col-md-8">{{ $vehicle->body_type_model }}</div>
+                                </div>
+                                <div class="row mb-1">
+                                    <div class="col-md-4"><strong>Plate:</strong></div>
+                                    <div class="col-md-8">{{ $vehicle->license_plate }}</div>
+                                </div>
+                                <div class="row mb-1">
+                                    <div class="col-md-4"><strong>RFID:</strong></div>
+                                    <div class="col-md-8">{{ $vehicle->rfid_tag }}</div>
+                                </div>
+                                <div class="row mb-1">
+                                    <div class="col-md-4"><strong>OR No.:</strong></div>
+                                    <div class="col-md-8">{{ $vehicle->or_number }}</div>
+                                </div>
+                                <div class="row mb-1">
+                                    <div class="col-md-4"><strong>CR No.:</strong></div>
+                                    <div class="col-md-8">{{ $vehicle->cr_number }}</div>
+                                </div>
+                                <div class="row mb-1">
+                                    <div class="col-md-4"><strong>Created At:</strong></div>
+                                    <div class="col-md-8">{{ $vehicle->created_at?->format('F d, Y h:i A') }}</div>
+                                </div>
+                                <div class="row mb-0">
+                                    <div class="col-md-4"><strong>Updated At:</strong></div>
+                                    <div class="col-md-8">{{ $vehicle->updated_at?->format('F d, Y h:i A') }}</div>
                                 </div>
                             </div>
+                        </div>
+                    @empty
+                        <p class="text-muted">No vehicles linked to this user.</p>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 
                         </td>
 

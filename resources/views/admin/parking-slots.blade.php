@@ -462,7 +462,7 @@
         </div>
         <button type="button" class="btn-add-slot btn btn-primary" data-bs-toggle="modal"
             data-bs-target="#createAreaModal">
-            Add Slot
+            Add Parking Area
         </button>
 
         <div class="square-box">
