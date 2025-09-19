@@ -38,15 +38,6 @@ class UserFormEdit extends Component
     public $profile_picture;
     public $currentProfilePicture;
 
-    // Vehicles
-    public $vehicles = [];
-
-    protected $middleware = ['auth:admin'];
-
-    // Hardcoded example departments & programs
-    public $departments = ['CCS'];
-    public $programs = ['BSCS', 'BSIT', 'BLIS', 'BSIS'];
-
     protected $rules = [
         'student_id' => 'nullable|string|max:10',
         'employee_id' => 'nullable|string|max:10',
@@ -76,12 +67,43 @@ class UserFormEdit extends Component
         'profile_picture.max' => 'Profile picture must be less than 5 MB.',
     ];
 
+        // Vehicles
+    public $vehicles = [];
+
+    // Program/Department helpers (added)
+    public $allPrograms = [];
+    public $programToDept = [];
+    public $departments = [];
+    public $programs = []; // visible program list for the Program dropdown
+
     public function mount($id)
     {
+        // optional auth guard check (since $middleware isn't used here)
+        if (!Auth::guard('admin')->check()) {
+            abort(403);
+        }
+
+        // Load master programs list from config
+        $this->allPrograms = config('programs', []);
+
+        // normalize and build reverse lookup, sort each dept
+        foreach ($this->allPrograms as $dept => $progs) {
+            $normalized = array_map(fn($p) => trim($p), $progs);
+            sort($normalized);
+            $this->allPrograms[$dept] = $normalized;
+            foreach ($normalized as $p) {
+                $this->programToDept[$p] = $dept;
+            }
+        }
+
+        // departments list
+        $this->departments = array_keys($this->allPrograms);
+        sort($this->departments);
+
+        // fetch user and populate fields
         $user = User::with('vehicles')->findOrFail($id);
         $this->userId = $user->id;
 
-        // Load user fields
         $this->student_id = $user->student_id;
         $this->employee_id = $user->employee_id;
         $this->serial_number = $user->serial_number;
@@ -89,8 +111,8 @@ class UserFormEdit extends Component
         $this->firstname = $user->firstname;
         $this->middlename = $user->middlename;
         $this->lastname = $user->lastname;
-        $this->program = $user->program;
-        $this->department = $user->department;
+        $this->program = $user->program ? trim($user->program) : '';
+        $this->department = $user->department ? trim($user->department) : '';
         $this->year_section = $user->year_section;
         $this->address = $user->address;
         $this->contact_number = $user->contact_number;
@@ -98,7 +120,20 @@ class UserFormEdit extends Component
         $this->expiration_date = $user->expiration_date;
         $this->currentProfilePicture = $user->profile_picture;
 
-        // Load vehicles
+        // populate programs dropdown depending on user's department
+        if (!empty($this->department) && isset($this->allPrograms[$this->department])) {
+            $this->programs = $this->allPrograms[$this->department];
+        } elseif (!empty($this->program) && isset($this->programToDept[$this->program])) {
+            // fallback: if department missing but program exists, set department and department programs
+            $dept = $this->programToDept[$this->program];
+            $this->department = $dept;
+            $this->programs = $this->allPrograms[$dept];
+        } else {
+            // show all programs if no department
+            $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
+        }
+
+        // load vehicles
         $this->vehicles = $user->vehicles->map(function ($vehicle) {
             return [
                 'id' => $vehicle->id,
@@ -111,7 +146,7 @@ class UserFormEdit extends Component
             ];
         })->toArray();
 
-        // Ensure at least one vehicle row exists
+        // ensure at least one vehicle row exists
         if (empty($this->vehicles)) {
             $this->vehicles = [
                 [
@@ -124,6 +159,61 @@ class UserFormEdit extends Component
                 ]
             ];
         }
+    }
+     // Select handlers (use with wire:change in blade)
+    public function onDepartmentChanged($value)
+    {
+        $value = trim((string)$value);
+
+        if ($value === '') {
+            $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
+            $this->program = '';
+            $this->department = '';
+            return;
+        }
+
+        $newPrograms = $this->allPrograms[$value] ?? [];
+        sort($newPrograms);
+        $this->programs = $newPrograms;
+        $this->department = $value;
+
+        // Only clear program if it doesn't belong to the newly chosen department
+        if (!in_array($this->program, $newPrograms, true)) {
+            $this->program = '';
+        }
+    }
+
+    public function onProgramChanged($value)
+    {
+        $value = trim((string)$value);
+
+        if ($value === '') {
+            $this->program = '';
+            $this->department = '';
+            $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
+            return;
+        }
+
+        $dept = $this->programToDept[$value] ?? null;
+
+        if ($dept) {
+            // set programs first so option exists after render, then set department, then program
+            $this->programs = $this->allPrograms[$dept];
+            $this->department = $dept;
+            $this->program = $value;
+        } else {
+            $this->program = '';
+            $this->department = '';
+        }
+    }
+
+    // optional computed property if you prefer $this->filteredPrograms in blade
+    public function getFilteredProgramsProperty()
+    {
+        if (empty($this->department)) {
+            return collect($this->allPrograms)->flatten()->sort()->values()->toArray();
+        }
+        return $this->allPrograms[$this->department] ?? [];
     }
 
     public function addVehicleRow()

@@ -24,7 +24,7 @@
             <input type="email" wire:model="email" class="form-control" required>
         </div>
 
-        
+
 
         <div class="mb-3">
             <label>Password <small class="text-muted">(leave blank to keep current)</small></label>
@@ -49,20 +49,22 @@
         <div class="row mb-3">
             <div class="col-md">
                 <label>Department</label>
-                <select wire:model="department" class="form-control" required>
+                <select wire:model="department" wire:change="onDepartmentChanged($event.target.value)"
+                    class="form-control">
                     <option value="">Select Department</option>
                     @foreach($departments as $dept)
-                        <option value="{{ $dept }}">{{ $dept }}</option>
+                        <option value="{{ $dept }}" wire:key="dept-{{ $dept }}">{{ $dept }}</option>
                     @endforeach
                 </select>
             </div>
 
             <div class="col-md">
                 <label>Program</label>
-                <select wire:model="program" class="form-control" required>
+                <select wire:model="program" wire:change="onProgramChanged($event.target.value)" class="form-control">
                     <option value="">Select Program</option>
                     @foreach($programs as $prog)
-                        <option value="{{ $prog }}">{{ $prog }}</option>
+                        <option value="{{ $prog }}" wire:key="prog-{{ \Illuminate\Support\Str::slug($prog) }}">{{ $prog }}
+                        </option>
                     @endforeach
                 </select>
             </div>
@@ -92,8 +94,8 @@
             <div class="col-md">
                 <label>Expiration Date</label>
                 <input type="date" wire:model="expiration_date"
-                       class="form-control @error('expiration_date') is-invalid @enderror"
-                       onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
+                    class="form-control @error('expiration_date') is-invalid @enderror" onfocus="this.showPicker();"
+                    onmousedown="event.preventDefault(); this.showPicker();">
                 @error('expiration_date')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
@@ -125,40 +127,42 @@
                                     <option value="car">Car</option>
                                 </select>
                             </div>
-<div class="col-md">
-    <label>RFID Tag</label>
-    <div class="input-group">
-        <input type="text" wire:model="vehicles.{{ $index }}.rfid_tag" class="form-control" required>
-        <button type="button" 
-                wire:click="scanRfid({{ $index }})" 
-                class="btn btn-primary"
-                wire:loading.attr="disabled"
-                wire:target="scanRfid">
-            <span wire:loading.remove wire:target="scanRfid">Scan</span>
-            <span wire:loading wire:target="scanRfid">
-                <i class="spinner-border spinner-border-sm me-1"></i>
-            </span>
-        </button>
-    </div>
-</div>
+                            <div class="col-md">
+                                <label>RFID Tag</label>
+                                <div class="input-group">
+                                    <input type="text" wire:model="vehicles.{{ $index }}.rfid_tag" class="form-control"
+                                        required>
+                                    <button type="button" wire:click="scanRfid({{ $index }})" class="btn btn-primary"
+                                        wire:loading.attr="disabled" wire:target="scanRfid">
+                                        <span wire:loading.remove wire:target="scanRfid">Scan</span>
+                                        <span wire:loading wire:target="scanRfid">
+                                            <i class="spinner-border spinner-border-sm me-1"></i>
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
                             <div class="col-md">
                                 <label>License Plate</label>
-                                <input type="text" wire:model="vehicles.{{ $index }}.license_plate" class="form-control" required>
+                                <input type="text" wire:model="vehicles.{{ $index }}.license_plate" class="form-control"
+                                    required>
                             </div>
                         </div>
                         <!-- New row for additional fields -->
                         <div class="row mb-3">
                             <div class="col-md">
                                 <label>Body Type/Model</label>
-                                <input type="text" wire:model="vehicles.{{ $index }}.body_type_model" class="form-control" required>
+                                <input type="text" wire:model="vehicles.{{ $index }}.body_type_model" class="form-control"
+                                    required>
                             </div>
                             <div class="col-md">
                                 <label>OR Number</label>
-                                <input type="text" wire:model="vehicles.{{ $index }}.or_number" class="form-control" required>
+                                <input type="text" wire:model="vehicles.{{ $index }}.or_number" class="form-control"
+                                    required>
                             </div>
                             <div class="col-md">
                                 <label>CR Number</label>
-                                <input type="text" wire:model="vehicles.{{ $index }}.cr_number" class="form-control" required>
+                                <input type="text" wire:model="vehicles.{{ $index }}.cr_number" class="form-control"
+                                    required>
                             </div>
                         </div>
 
@@ -166,7 +170,8 @@
                         <div class="row mb-3">
                             <div class="col">
                                 @if(count($vehicles) > 1)
-                                    <button type="button" wire:click="removeVehicleRow({{ $index }})" class="btn btn-danger w-100">
+                                    <button type="button" wire:click="removeVehicleRow({{ $index }})"
+                                        class="btn btn-danger w-100">
                                         Remove
                                     </button>
                                 @else
@@ -188,7 +193,7 @@
 
             <button type="submit" class="btn btn-primary">
                 <span wire:loading.remove wire:target="update">Update User</span>
-                
+
                 <span wire:loading wire:target="update">Updating...</span>
             </button>
 

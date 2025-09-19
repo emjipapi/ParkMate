@@ -50,7 +50,9 @@ Route::get('area-status', function (Request $request) {
 
 //main gate
 Route::post('/rfid', [RfidController::class, 'logScan']);
+
 Route::post('/rfid-area', [RfidController::class, 'logScanArea']);
+
 Route::get('heartbeat', [DeviceController::class, 'heartbeat']);
 
 

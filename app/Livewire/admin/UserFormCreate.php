@@ -30,9 +30,9 @@ class UserFormCreate extends Component
     public $license_number;
     public $expiration_date; // ✅ add this
     public $profile_picture;
+        protected $middleware = ['auth:admin'];
 
     // Vehicles - start with one empty vehicle row
-    public $vehicles = [];
     private function defaultVehicle()
     {
         return [
@@ -44,61 +44,96 @@ class UserFormCreate extends Component
             'cr_number' => ''
         ];
     }
-public function mount()
-{
-    // Sort programs inside each department
-    foreach ($this->allPrograms as $dept => $programs) {
-        sort($programs);
-        $this->allPrograms[$dept] = $programs;
-    }
-
-    // Populate and sort departments A→Z
-    $this->departments = array_keys($this->allPrograms);
-    sort($this->departments);
-
-    // Show all programs initially, sorted
-    $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
-
-    // Initialize vehicles
-    $this->vehicles[] = $this->defaultVehicle();
-}
-
-
-    protected $middleware = ['auth:admin'];
-
-    // Hardcoded example departments & programs
-
-public $allPrograms = [
-    'CAS' => ['BAELS', 'BSAM', 'BHS', 'BSDC', 'BSMath', 'BSPA'],
-    'CCS' => ['BLIS', 'BSCS', 'BSIS', 'BSIT'],
-    'CEA' => ['BSCE', 'BSEE', 'BSECE', 'BSME'],
-    'CHS' => ['BSM', 'BSN'],
-    'CTDE' => ['BCAEd', 'BPEd', 'BSNEd', 'BTVTEd'],
-    'CTHBM' => ['BSEM', 'BSHM', 'BSOA', 'BSTM'],
-    'Graduate' => [
-        'Doctor of Philosophy in Business Management',
-        'Master In Business Management',
-        'Master of Arts in Nursing',
-        'Master of Engineering'
-    ],
-];
-
+public $programToDept = [];
 public $departments = [];
 public $department = '';
 public $program = '';
-public $programs = []; // filtered programs
-public function updatedDepartment($value)
+public $allPrograms = [];
+public $vehicles = [];
+public $programs = [];
+
+
+public function mount()
 {
-    if ($value) {
-        // Filter and sort programs for selected department
-        $this->programs = $this->allPrograms[$value];
-    } else {
-        // No department selected, show all programs sorted
-        $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
+    $this->allPrograms = config('programs', []);
+
+    // build reverse lookup (program => dept) and sort each department programs
+    foreach ($this->allPrograms as $dept => $programs) {
+        sort($programs);
+        $this->allPrograms[$dept] = $programs;
+
+        foreach ($programs as $p) {
+            $this->programToDept[$p] = $dept;
+        }
     }
 
-    // Reset program selection
-    $this->program = '';
+    $this->departments = array_keys($this->allPrograms);
+    sort($this->departments);
+
+    // initialize vehicles
+    $this->vehicles[] = $this->defaultVehicle();
+    if (!Auth::guard('admin')->check()) abort(403);
+
+}
+
+public function onDepartmentChanged($value)
+{
+    $value = trim((string)$value);
+
+    if ($value === '') {
+        // reset to show all programs
+        $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
+        $this->program = ''; // clear selection
+        $this->department = '';
+        return;
+    }
+
+    // set program list for dept, keep program only if it belongs here
+    $newPrograms = $this->allPrograms[$value] ?? [];
+    sort($newPrograms);
+    $this->programs = $newPrograms;
+    $this->department = $value;
+
+    // if current program not in the department, clear it
+    if (!in_array($this->program, $newPrograms, true)) {
+        $this->program = '';
+    }
+}
+
+public function onProgramChanged($value)
+{
+    $value = trim((string)$value);
+
+    if ($value === '') {
+        // user chose "Select Program"
+        $this->program = '';
+        $this->department = '';
+        $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
+        return;
+    }
+
+    // find department quickly via reverse map
+    $dept = $this->programToDept[$value] ?? null;
+
+    if ($dept) {
+        // IMPORTANT: set programs first so when component re-renders the <option> exists
+        $this->programs = $this->allPrograms[$dept];
+        $this->department = $dept;
+        // set program last so selection persists
+        $this->program = $value;
+    } else {
+        // not found — clear
+        $this->program = '';
+        $this->department = '';
+    }
+}
+
+public function getFilteredProgramsProperty()
+{
+    if (empty($this->department)) {
+        return collect($this->allPrograms)->flatten()->sort()->values()->toArray();
+    }
+    return $this->allPrograms[$this->department] ?? [];
 }
 public function scanRfid($index)
 {
