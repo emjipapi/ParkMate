@@ -20,6 +20,7 @@ class ActivityLogEntryExitComponent extends Component
     public $startDate = null;   
     public $endDate = null;     
     public $sortOrder = 'desc'; 
+    public $reportType = 'week';
 
     // 🚫 Don’t sync anything to the query string
     protected $queryString = [];
@@ -87,6 +88,32 @@ class ActivityLogEntryExitComponent extends Component
             'activityLogs' => $logs,
         ]);
     }
+    public function generateReport()
+{
+    // compute start/end strings to pass to the controller route
+    if ($this->reportType === 'week') {
+        $start = Carbon::now()->startOfWeek()->format('Y-m-d');
+        $end   = Carbon::now()->endOfWeek()->format('Y-m-d');
+    } elseif ($this->reportType === 'month') {
+        $start = Carbon::now()->startOfMonth()->format('Y-m-d');
+        $end   = Carbon::now()->endOfMonth()->format('Y-m-d');
+    } else {
+        // custom: validate you have values
+        if (!$this->startDate || !$this->endDate) {
+            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Please select a start and end date for custom range.']);
+            return;
+        }
+        $start = Carbon::parse($this->startDate)->format('Y-m-d');
+        $end   = Carbon::parse($this->endDate)->format('Y-m-d');
+    }
+
+    // Redirect to the controller route to trigger file download
+    return redirect()->route('reports.attendance', [
+        'reportType' => $this->reportType,
+        'startDate'  => $start,
+        'endDate'    => $end,
+    ]);
+}
 
     public function refreshLogs()
     {

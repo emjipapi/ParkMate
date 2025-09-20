@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\EvidenceController;
 use App\Http\Controllers\WebfontController;
 use App\Livewire\Admin\AdminFormEdit;
+use App\Http\Controllers\ReportController;
 /*
 |--------------------------------------------------------------------------
 | Public / Login Routes
@@ -79,7 +80,8 @@ Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'sho
 
 Route::post('/webfonts/add', [WebfontController::class, 'add'])->name('webfonts.add');
 
-
+Route::get('/reports/attendance', [ReportController::class, 'generateAttendanceReport'])
+    ->name('reports.attendance');
 
 
 

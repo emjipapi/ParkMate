@@ -325,11 +325,7 @@
 .nav-tabs .nav-link {
     cursor: pointer;
 }
-  .modal-custom-width {
-    max-width: 70vw !important; /* use viewport width so it's responsive */
-    width: 70vw !important;
-    margin: 1.75rem auto;       /* keep it centered horizontally */
-  }
+
 
 @media (max-width: 768px) {
 
@@ -387,11 +383,7 @@
     .table-responsive {
         touch-action: pan-x; /* enable horizontal touch scrolling for table */
     }
-        .modal-custom-width {
-      max-width: 95vw !important;
-      width: 95vw !important;
-      margin: 0.75rem auto;
-    }
+
 }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
