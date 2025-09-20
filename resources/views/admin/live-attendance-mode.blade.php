@@ -165,6 +165,7 @@
             font-weight: 500;
         }
     </style>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body>
@@ -267,6 +268,7 @@
     setInterval(updateClock, 1000);
     updateClock(); // run once immediately
 </script>
+@livewireScripts
 </body>
 
 </html>
