@@ -76,6 +76,7 @@ class RfidController extends Controller
             $lastMainGateScan = ActivityLog::where('actor_type', 'user')
                 ->where('actor_id', $user->id)
                 ->whereNull('area_id')
+                ->whereIn('action', ['entry', 'exit'])
                 ->latest()
                 ->first();
 
@@ -191,97 +192,203 @@ class RfidController extends Controller
     /**
      * Scan inside a parking area
      */
-    public function logScanArea(Request $request)
-    {
-        $request->validate([
-            'epc' => 'required|string',
-            'area_id' => 'required|integer',
-        ]);
+public function logScanArea(Request $request)
+{
+    $request->validate([
+        'epc' => 'required|string',
+        'area_id' => 'required|integer',
+    ]);
 
-        $epc = $request->input('epc');
-        $areaId = $request->input('area_id');
+    $epc = $request->input('epc');
+    $areaId = $request->input('area_id');
 
-        try {
-            $vehicle = DB::table('vehicles')->where('rfid_tag', $epc)->first();
-            if (!$vehicle) {
-                return response()->json(['message' => 'Vehicle not found'], 404);
-            }
-            
-            $user = User::find($vehicle->user_id);
-            if (!$user) {
-                return response()->json(['message' => 'User not found'], 404);
-            }
+    try {
+        $vehicle = DB::table('vehicles')->where('rfid_tag', $epc)->first();
+        if (!$vehicle) {
+            return response()->json(['message' => 'Vehicle not found'], 404);
+        }
 
-            $area = ParkingArea::find($areaId);
-            $areaName = $area ? $area->name : 'Unknown area';
-            $now = now();
+        $user = User::find($vehicle->user_id);
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
 
-            $lastScan = ActivityLog::where('actor_type', 'user')
+        $area = ParkingArea::find($areaId);
+        if (!$area) {
+            return response()->json(['message' => 'Area not found'], 404);
+        }
+        $areaName = $area->name;
+        $now = now();
+
+        // global cooldown (anywhere)
+        $lastGlobal = ActivityLog::where('actor_type', 'user')
+            ->where('actor_id', $user->id)
+            ->latest()
+            ->first();
+
+        if ($lastGlobal && $lastGlobal->created_at->diffInSeconds($now) < 5) {
+            return response()->json([
+                'message' => 'Scan too soon',
+                'last_scan_time' => $lastGlobal->created_at,
+            ], 200);
+        }
+
+        // Check status at main gate: do we already have an "entry" (inside) at main gate?
+        $lastMainGateScan = ActivityLog::where('actor_type', 'user')
+            ->where('actor_id', $user->id)
+            ->whereNull('area_id')
+            ->whereIn('action', ['entry', 'exit'])
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $needsMainGateEntry = !$lastMainGateScan || $lastMainGateScan->action === 'exit';
+
+        // If we would need to create a main-gate entry, check violations first (deny before creating logs)
+        if ($needsMainGateEntry && $this->checkViolationStatus($user->id)) {
+            Log::warning("Parking area entry denied due to violations (auto main gate check)", [
+                'user_id' => $user->id,
+                'area_id' => $areaId,
+                'epc' => $epc,
+                'reason' => '3 or more approved violations'
+            ]);
+
+            ActivityLog::create([
+                'actor_type' => 'system',
+                'actor_id' => 1,
+                'action' => 'denied_entry',
+                'details' => "User {$user->firstname} {$user->lastname} denied entry (main gate check) due to 3 or more approved violations",
+                'area_id' => null,
+                'created_at' => $now,
+            ]);
+
+            return response()->json([
+                'message' => "Entry denied - 3 or more approved violations",
+                'user' => $user->only(['id', 'firstname', 'lastname']),
+                'vehicle_type' => $vehicle->type,
+                'denied' => true,
+            ], 403);
+        }
+
+        // Get last action for this area (only entry/exit)
+        $lastAreaScan = ActivityLog::where('actor_type', 'user')
+            ->where('actor_id', $user->id)
+            ->where('area_id', $areaId)
+            ->whereIn('action', ['entry', 'exit'])
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $newAction = ($lastAreaScan && $lastAreaScan->action === 'entry') ? 'exit' : 'entry';
+
+        // Find other active areas (areas where last action is 'entry' and NOT the current area)
+        $distinctAreaIds = ActivityLog::where('actor_type', 'user')
+            ->where('actor_id', $user->id)
+            ->whereNotNull('area_id')
+            ->distinct()
+            ->pluck('area_id');
+
+        $activeAreaIdsToExit = [];
+        foreach ($distinctAreaIds as $aId) {
+            if ($aId == $areaId) continue; // skip current area
+            $last = ActivityLog::where('actor_type', 'user')
                 ->where('actor_id', $user->id)
-                ->where('area_id', $areaId)
-                ->latest()
+                ->where('area_id', $aId)
+                ->whereIn('action', ['entry', 'exit'])
+                ->orderBy('created_at', 'desc')
                 ->first();
 
-            if ($lastScan && $lastScan->created_at->diffInSeconds($now) < 5) {
-                return response()->json([
-                    'message' => 'Scan too soon',
-                    'last_scan_time' => $lastScan->created_at,
-                ], 200);
+            if ($last && $last->action === 'entry') {
+                $activeAreaIdsToExit[] = $aId;
             }
+        }
 
-            $newAction = ($lastScan && $lastScan->action === 'entry') ? 'exit' : 'entry';
-
-            // CHECK FOR VIOLATIONS - Only deny ENTRY to parking areas, not EXIT
-            if ($newAction === 'entry' && $this->checkViolationStatus($user->id)) {
-                Log::warning("Parking area entry denied due to violations", [
-                    'user_id' => $user->id,
-                    'area_id' => $areaId,
-                    'epc' => $epc,
-                    'reason' => '3 or more approved violations'
-                ]);
-
-                // Create ActivityLog entry for denied access to parking area
+        // Wrap exits/slot changes + area entry in a transaction to avoid races
+        DB::beginTransaction();
+        try {
+            // 1) If user wasn't recorded as "inside" at main gate, create a main-gate entry now (before area changes)
+            if ($needsMainGateEntry) {
                 ActivityLog::create([
-                    'actor_type' => 'system',
-                    'actor_id' => 1,
-                    'action' => 'denied_entry',
-                    'details' => "User {$user->firstname} {$user->lastname} denied entry to {$areaName} due to 3 or more approved violations",
-                    'area_id' => $areaId,
+                    'actor_type' => 'user',
+                    'actor_id' => $user->id,
+                    'action' => 'entry',
+                    'details' => "User {$user->firstname} {$user->lastname} scanned RFID at main gate (auto-created before area scan).",
+                    'area_id' => null,
                     'created_at' => $now,
                 ]);
-
-                return response()->json([
-                    'message' => "Entry denied to {$areaName} - 3 or more approved violations",
-                    'user' => $user->only(['id', 'firstname', 'lastname']),
-                    'vehicle_type' => $vehicle->type,
-                    'area_name' => $areaName,
-                    'denied' => true,
-                ], 403);
             }
 
+            // 2) Exit other active areas (if any) before logging the new area
+            foreach ($activeAreaIdsToExit as $exitAreaId) {
+                $exitArea = ParkingArea::find($exitAreaId);
+                $exitAreaName = $exitArea ? $exitArea->name : 'Unknown area';
+
+                // if motorcycle, increment available_count safely
+                if ($vehicle->type === 'motorcycle') {
+                    $moto = DB::table('motorcycle_counts')
+                        ->where('area_id', $exitAreaId)
+                        ->lockForUpdate()
+                        ->first();
+
+                    if ($moto) {
+                        $available = (int) $moto->available_count;
+                        $total = (int) $moto->total_available;
+                        if ($available < $total) {
+                            DB::table('motorcycle_counts')
+                                ->where('id', $moto->id)
+                                ->increment('available_count');
+                        }
+                    }
+                }
+
+                ActivityLog::create([
+                    'actor_type' => 'user',
+                    'actor_id' => $user->id,
+                    'action' => 'exit',
+                    'details' => "User {$user->firstname} {$user->lastname} automatically exited area {$exitAreaName} (moved to another area).",
+                    'area_id' => $exitAreaId,
+                    'created_at' => $now,
+                ]);
+            }
+
+            // 3) Handle motorcycle counts for the target area (lock row)
             if ($vehicle->type === 'motorcycle') {
                 $moto = DB::table('motorcycle_counts')
                     ->where('area_id', $areaId)
+                    ->lockForUpdate()
                     ->first();
 
-                if ($moto) {
-                    if ($newAction === 'entry' && $moto->available_count > 0) {
-                        DB::table('motorcycle_counts')
-                            ->where('id', $moto->id)
-                            ->decrement('available_count');
-                    } elseif ($newAction === 'exit' && $moto->available_count < $moto->total_available) {
+                if (!$moto) {
+                    // config missing
+                    DB::rollBack();
+                    return response()->json([
+                        'message' => 'Parking area motorcycle slot configuration missing',
+                    ], 500);
+                }
+
+                $available = (int) $moto->available_count;
+                $total = (int) $moto->total_available;
+
+                if ($newAction === 'entry') {
+                    if ($available <= 0) {
+                        DB::rollBack();
+                        return response()->json([
+                            'message' => 'No motorcycle slots available in this area',
+                            'available_count' => $available,
+                        ], 400);
+                    }
+
+                    DB::table('motorcycle_counts')
+                        ->where('id', $moto->id)
+                        ->decrement('available_count');
+                } else { // exit
+                    if ($available < $total) {
                         DB::table('motorcycle_counts')
                             ->where('id', $moto->id)
                             ->increment('available_count');
-                    } elseif ($newAction === 'entry' && $moto->available_count <= 0) {
-                        return response()->json([
-                            'message' => 'No motorcycle slots available in this area',
-                            'available_count' => $moto->available_count,
-                        ], 400);
                     }
                 }
             }
 
+            // 4) Finally create the activity log for this area
             $log = ActivityLog::create([
                 'actor_type' => 'user',
                 'actor_id' => $user->id,
@@ -291,26 +398,33 @@ class RfidController extends Controller
                 'created_at' => $now,
             ]);
 
-            return response()->json([
-                'message' => 'Scan logged successfully',
-                'user' => $user->only(['id', 'firstname', 'lastname']),
-                'vehicle_type' => $vehicle->type,
-                'log' => $log,
-                'action' => $newAction,
-            ], 201);
-
+            DB::commit();
         } catch (\Exception $e) {
-            Log::error('Error in logScanArea', [
-                'epc' => $epc,
-                'area_id' => $areaId,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-            ]);
-            
-            return response()->json([
-                'message' => 'Failed to log scan',
-                'error' => $e->getMessage(),
-            ], 500);
+            DB::rollBack();
+            throw $e;
         }
+
+        return response()->json([
+            'message' => 'Scan logged successfully',
+            'user' => $user->only(['id', 'firstname', 'lastname']),
+            'vehicle_type' => $vehicle->type,
+            'log' => $log,
+            'action' => $newAction,
+        ], 201);
+
+    } catch (\Exception $e) {
+        Log::error('Error in logScanArea', [
+            'epc' => $epc,
+            'area_id' => $areaId,
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        return response()->json([
+            'message' => 'Failed to log scan',
+            'error' => $e->getMessage(),
+        ], 500);
     }
+}
+
 }
