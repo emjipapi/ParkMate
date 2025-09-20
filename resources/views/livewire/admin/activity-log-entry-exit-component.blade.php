@@ -1,4 +1,50 @@
 <div>
+<!-- Generate Report Button -->
+    <button type="button" class="btn-add-slot btn btn-primary mb-3" data-bs-toggle="modal"
+        data-bs-target="#reportModal">
+        Generate Report
+    </button>
+
+<!-- Report Modal -->
+<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel"
+     aria-hidden="true" wire:ignore.self>
+  <!-- Removed modal-lg and added modal-custom-width -->
+  <div class="modal-dialog modal-dialog-centered modal-custom-width">
+        <div class="modal-content" x-data="{ type: 'week' }">
+          <div class="modal-header">
+            <h5 class="modal-title" id="reportModalLabel">Generate Attendance Report</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <form id="reportForm">
+              <div class="mb-3">
+                <label for="reportType" class="form-label">Report Type</label>
+                <select class="form-select" id="reportType" name="reportType" x-model="type" required>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                  <option value="range">Custom Range</option>
+                </select>
+              </div>
+
+              <div class="row g-2 mt-2" x-show="type === 'range'" x-cloak>
+                <div class="col-md-6">
+                  <label for="startDate" class="form-label">Start Date</label>
+                  <input type="date" class="form-control" id="startDate" name="startDate" onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
+                </div>
+                <div class="col-md-6">
+                  <label for="endDate" class="form-label">End Date</label>
+                  <input type="date" class="form-control" id="endDate" name="endDate" onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" form="reportForm" class="btn btn-success">Generate</button>
+          </div>
+        </div>
+      </div>
+    </div>
     {{-- 🔍 Search Box --}}
     <input type="text" class="form-control mb-3" placeholder="Search by name, ID, or action..."
         wire:model.live.debounce.300ms="search" style="max-width: 400px">
