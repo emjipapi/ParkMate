@@ -18,33 +18,6 @@ class LiveAttendanceComponent extends Component
 
     public function pollEpc()
     {
-        $scannedTags = Cache::pull('epc_list', []);
-        $now = now();
-
-        foreach ($scannedTags as $epc) {
-            $user = \App\Models\User::where('rfid_tag', $epc)->first();
-            if (!$user) continue;
-
-            // Get last scan for this EPC
-            $lastScan = ActivityLog::where('rfid_tag', $epc)->latest()->first();
-
-            // Skip if within cooldown
-            if ($lastScan && $lastScan->created_at->diffInSeconds($now) < $this->cooldownSeconds) {
-                continue;
-            }
-
-            // Determine new status based on last scan
-            $newStatus = $lastScan && $lastScan->status === 'IN' ? 'OUT' : 'IN';
-
-            // Create new activity log
-            ActivityLog::create([
-                'user_id' => $user->id,
-                'rfid_tag' => $epc,
-                'status' => $newStatus,
-                'details' => "User {$user->firstname} {$user->lastname} scanned {$newStatus}",
-            ]);
-        }
-
         // Update frontend
         $this->loadLatestScans();
     }
