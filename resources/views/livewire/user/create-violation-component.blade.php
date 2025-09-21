@@ -37,7 +37,7 @@
         <div class="mb-3 mb-md-4">
             <label class="form-label fw-bold">Evidence <small class="text-muted">(optional but
                     encouraged)</small></label>
-            <input type="file" wire:model="evidence" class="form-control mt-1 mt-md-2" accept="image/*,video/*" />
+            <input type="file" wire:model="evidence" class="form-control mt-1 mt-md-2" accept="image/*" />
             @error('evidence') <span class="text-danger">{{ $message }}</span> @enderror
         </div>
 

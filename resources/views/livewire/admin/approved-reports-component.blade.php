@@ -41,14 +41,21 @@
                         </td>
                         <td>
                             <div class="d-flex flex-column gap-1">
+                                <div style="max-width: 100%;">
+                                    <input type="file" wire:model="proofs.{{ $violation->id }}"
+                                        class="form-control form-control-sm" accept="image/*" />
+                                    @error('proofs.' . $violation->id)
+                                        <span class="text-danger small">{{ $message }}</span>
+                                    @enderror
+                                </div>
                                 {{-- Dropdown --}}
                                 <select class="form-select form-select-sm mb-1"
                                     wire:model="violationsActionTaken.{{ $violation->id }}"
                                     @if($violation->status === 'resolved') disabled @endif>
                                     <option value="">Select action</option>
-                                    <option value="Warning Issued">Warning Issued</option>
-                                    <option value="Fine Imposed">Fine Imposed</option>
-                                    <option value="Suspended">Suspended</option>
+                                    <option value="Warning">Warning Issued</option>
+                                    <option value="6 Months Penalty">6 Months Penalty</option>
+                                    <option value="Access Denied">Access Denied</option>
                                 </select>
 
                                 {{-- Mark as Resolved --}}
@@ -72,5 +79,5 @@
             </tbody>
         </table>
     </div>
-            {{ $violations->links() }}
+    {{ $violations->links() }}
 </div>

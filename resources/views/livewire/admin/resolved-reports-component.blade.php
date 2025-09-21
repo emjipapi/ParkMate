@@ -29,7 +29,7 @@
                         </td>
                         <td class="px-4 py-3 text-sm">
                             <span class="badge bg-success rounded-pill">
-                                Resolved
+                                For Endorsement
                             </span>
                         </td>
                     </tr>
