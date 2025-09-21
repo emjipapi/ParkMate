@@ -8,7 +8,7 @@ use App\Models\Violation;
 use App\Models\Vehicle;
 use App\Models\User;
 
-class ResolvedReportsComponent extends Component
+class ForEndorsementComponent extends Component
 {
     use WithPagination;
 
@@ -110,7 +110,7 @@ class ResolvedReportsComponent extends Component
     public function render()
     {
         $violations = Violation::with(['reporter', 'area', 'violator'])
-            ->where('status', 'resolved')
+            ->where('status', 'for_endorsement')
             ->paginate(10);
 
         // Process violations for display
@@ -141,7 +141,7 @@ class ResolvedReportsComponent extends Component
             return $violation;
         });
 
-        return view('livewire.admin.resolved-reports-component', [
+        return view('livewire.admin.for-endorsement-component', [
             'violations' => $violations,
             'vehicles' => $this->vehicles,
             'users' => $this->users

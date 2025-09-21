@@ -102,10 +102,10 @@ class ApprovedReportsComponent extends Component
     }
 
     /**
-     * Mark a violation as resolved, optionally store approved image and action_taken.
+     * Mark a violation as ForEndorsement, optionally store approved image and action_taken.
      * Uses $this->proofs[$violationId] as upload from the row's file input.
      */
-    public function markResolved($violationId)
+    public function markForEndorsement($violationId)
     {
         $violation = Violation::find($violationId);
         if (! $violation) return;
@@ -160,7 +160,7 @@ class ApprovedReportsComponent extends Component
             $violation->evidence = json_encode($evidence);
         }
 
-        $violation->status = 'resolved';
+        $violation->status = 'for_endorsement';
         $violation->save();
         // determine admin user using the admin guard
 $admin = Auth::guard('admin')->user();
@@ -177,7 +177,7 @@ $admin = Auth::guard('admin')->user();
             'actor_id'   => $admin->admin_id, 
             'area_id' => $violation->area_id,
             'action' => 'resolve',
-            'details'    => "Violation #{$violation->id} marked resolved by admin {$adminName}",
+            'details'    => "Violation #{$violation->id} marked for endorsement by admin {$adminName}",
             'created_at' => now(),
         ]);
 
@@ -192,7 +192,7 @@ $admin = Auth::guard('admin')->user();
         // Reset pagination (optional)
         $this->resetPage();
 
-        session()->flash('message', 'Violation marked as resolved and evidence attached.');
+        session()->flash('message', 'Violation marked as for endorsement and evidence attached.');
     }
 
     // Add method if it doesn't exist
