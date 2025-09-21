@@ -83,7 +83,8 @@ Route::post('/webfonts/add', [WebfontController::class, 'add'])->name('webfonts.
 Route::get('/reports/attendance', [ReportController::class, 'generateAttendanceReport'])
     ->name('reports.attendance');
 
-
+Route::get('/reports/endorsement', [ReportController::class, 'endorsementReport'])
+    ->name('reports.endorsement');
 
 
 

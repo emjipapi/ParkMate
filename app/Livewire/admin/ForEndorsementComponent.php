@@ -7,7 +7,7 @@ use Livewire\WithPagination;
 use App\Models\Violation;
 use App\Models\Vehicle;
 use App\Models\User;
-
+use Carbon\Carbon;
 class ForEndorsementComponent extends Component
 {
     use WithPagination;
@@ -28,6 +28,10 @@ class ForEndorsementComponent extends Component
 
     public $searchTerm = '';
     public $searchResults = [];
+    
+public $endorsementReportType = 'week';
+public $endorsementReportStartDate = null;
+public $endorsementReportEndDate = null;
 
     public function mount()
     {
@@ -58,7 +62,40 @@ class ForEndorsementComponent extends Component
                 ];
             });
     }
+public function generateEndorsementReport()
+{
+    // Validate custom range dates if needed
+    if ($this->endorsementReportType === 'range') {
+        $this->validate([
+            'endorsementReportStartDate' => 'required|date',
+            'endorsementReportEndDate' => 'required|date|after_or_equal:endorsementReportStartDate',
+        ]);
+    }
 
+    // compute start/end as Y-m-d strings
+    if ($this->endorsementReportType === 'week') {
+        $start = Carbon::now()->startOfWeek()->toDateString();
+        $end   = Carbon::now()->endOfWeek()->toDateString();
+    } elseif ($this->endorsementReportType === 'month') {
+        $start = Carbon::now()->startOfMonth()->toDateString();
+        $end   = Carbon::now()->endOfMonth()->toDateString();
+    } else {
+        // custom range
+        try {
+            $start = Carbon::parse($this->endorsementReportStartDate)->toDateString();
+            $end   = Carbon::parse($this->endorsementReportEndDate)->toDateString();
+        } catch (\Exception $e) {
+            session()->flash('error', 'Invalid date format.');
+            return;
+        }
+    }
+
+    // Use Livewire's redirect method
+return $this->redirect(route('reports.endorsement', [
+    'startDate' => $start,
+    'endDate'   => $end,
+]));
+}
     public function updatedSearchTerm()
     {
         if (strlen($this->searchTerm) >= 2) { // start searching after 2 characters
