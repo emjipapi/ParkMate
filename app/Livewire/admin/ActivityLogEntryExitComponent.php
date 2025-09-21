@@ -16,11 +16,18 @@ class ActivityLogEntryExitComponent extends Component
 
     public $search = '';
     public $actionFilter = '';
-    public $userType = '';      
-    public $startDate = null;   
-    public $endDate = null;     
-    public $sortOrder = 'desc'; 
+    public $userType = '';
+
+    // page filters (used for the on-page table)
+    public $startDate = null;
+    public $endDate = null;
+
+    // report-specific props (separate from the page filters)
+    public $reportStartDate = null;
+    public $reportEndDate = null;
     public $reportType = 'week';
+
+    public $sortOrder = 'desc';
 
     // 🚫 Don’t sync anything to the query string
     protected $queryString = [];
@@ -30,6 +37,7 @@ class ActivityLogEntryExitComponent extends Component
 
     public function updating($name, $value)
     {
+        // only reset page when user changes the on-page filters (not report fields)
         if (in_array($name, ['search','actionFilter','userType','startDate','endDate'])) {
             $this->resetPage($this->pageName);
         }
@@ -40,7 +48,8 @@ class ActivityLogEntryExitComponent extends Component
         $logs = ActivityLog::with([
                 'user' => function ($q) {
                     $q->select('id', 'firstname', 'lastname', 'student_id', 'employee_id', 'profile_picture', 'department', 'program');
-                }
+                },
+                'area'
             ])
             // ✅ Only include entry/exit/denied_entry
             ->whereIn('action', ['entry', 'exit', 'denied_entry'])
@@ -73,7 +82,7 @@ class ActivityLogEntryExitComponent extends Component
                 $q->whereHas('user', fn ($u) => $u->whereNotNull('employee_id'))
             )
 
-            // 📅 Date Range
+            // 📅 Date Range (on-page filters)
             ->when($this->startDate, fn (Builder $q) =>
                 $q->where('created_at', '>=', Carbon::parse($this->startDate)->startOfDay())
             )
@@ -88,32 +97,73 @@ class ActivityLogEntryExitComponent extends Component
             'activityLogs' => $logs,
         ]);
     }
+
+    /**
+     * Triggered by the modal's Generate button.
+     * Builds start/end based on reportType or custom inputs and redirects to controller route
+     * which streams the PDF download (since Livewire XHR can't reliably download files).
+     */
     public function generateReport()
-{
-    // compute start/end strings to pass to the controller route
-    if ($this->reportType === 'week') {
-        $start = Carbon::now()->startOfWeek()->format('Y-m-d');
-        $end   = Carbon::now()->endOfWeek()->format('Y-m-d');
-    } elseif ($this->reportType === 'month') {
-        $start = Carbon::now()->startOfMonth()->format('Y-m-d');
-        $end   = Carbon::now()->endOfMonth()->format('Y-m-d');
-    } else {
-        // custom: validate you have values
-        if (!$this->startDate || !$this->endDate) {
-            $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Please select a start and end date for custom range.']);
-            return;
+    {
+        // compute start/end strings to pass to the controller route
+        if ($this->reportType === 'week') {
+            $start = Carbon::now()->startOfWeek()->format('Y-m-d');
+            $end   = Carbon::now()->endOfWeek()->format('Y-m-d');
+        } elseif ($this->reportType === 'month') {
+            $start = Carbon::now()->startOfMonth()->format('Y-m-d');
+            $end   = Carbon::now()->endOfMonth()->format('Y-m-d');
+        } else {
+            // custom: validate you have values
+            if (!$this->reportStartDate || !$this->reportEndDate) {
+                $this->dispatchBrowserEvent('notify', [
+                    'type' => 'error',
+                    'message' => 'Please select a start and end date for custom range.'
+                ]);
+                return;
+            }
+
+            // ensure valid date order
+            try {
+                $s = Carbon::parse($this->reportStartDate)->startOfDay();
+                $e = Carbon::parse($this->reportEndDate)->endOfDay();
+            } catch (\Exception $ex) {
+                $this->dispatchBrowserEvent('notify', [
+                    'type' => 'error',
+                    'message' => 'Invalid dates provided.'
+                ]);
+                return;
+            }
+
+            if ($s->gt($e)) {
+                $this->dispatchBrowserEvent('notify', [
+                    'type' => 'error',
+                    'message' => 'Start date must be before or equal to end date.'
+                ]);
+                return;
+            }
+
+            $start = $s->format('Y-m-d');
+            $end   = $e->format('Y-m-d');
         }
-        $start = Carbon::parse($this->startDate)->format('Y-m-d');
-        $end   = Carbon::parse($this->endDate)->format('Y-m-d');
+
+        // Redirect to the controller route to trigger file download
+        return redirect()->route('reports.attendance', [
+            'reportType' => $this->reportType,
+            'startDate'  => $start,
+            'endDate'    => $end,
+        ]);
     }
 
-    // Redirect to the controller route to trigger file download
-    return redirect()->route('reports.attendance', [
-        'reportType' => $this->reportType,
-        'startDate'  => $start,
-        'endDate'    => $end,
-    ]);
-}
+    /**
+     * Optional helper: reset the report modal inputs.
+     * Call this before opening the modal to clear prior selections.
+     */
+    public function resetReportInputs()
+    {
+        $this->reportType = 'week';
+        $this->reportStartDate = null;
+        $this->reportEndDate = null;
+    }
 
     public function refreshLogs()
     {

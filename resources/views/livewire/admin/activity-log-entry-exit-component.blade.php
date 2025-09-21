@@ -27,12 +27,12 @@
 
           <div class="row g-2 mt-2" x-show="type === 'range'" x-cloak>
             <div class="col-md-6">
-              <label for="startDate" class="form-label">Start Date</label>
-              <input type="date" id="startDate" class="form-control" wire:model="startDate" onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
+              <label for="reportStartDate" class="form-label">Start Date</label>
+              <input type="date" id="reportStartDate" class="form-control" wire:model="reportStartDate" onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
             </div>
             <div class="col-md-6">
-              <label for="endDate" class="form-label">End Date</label>
-              <input type="date" id="endDate" class="form-control" wire:model="endDate" onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
+              <label for="reportEndDate" class="form-label">End Date</label>
+              <input type="date" id="reportEndDate" class="form-control" wire:model="reportEndDate" onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
             </div>
           </div>
 
