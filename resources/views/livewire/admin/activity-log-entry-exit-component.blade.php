@@ -40,7 +40,7 @@
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
             @php
     // disable when using custom range but dates are missing
-    $disabled = ($reportType === 'range' && (empty($startDate) || empty($endDate)));
+    $disabled = ($reportType === 'range' && (empty($reportStartDate) || empty($reportEndDate)));
 @endphp
 
 <button

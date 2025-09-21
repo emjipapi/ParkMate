@@ -40,7 +40,6 @@
                 <th style="width:36%;">User (Name / ID / EPC)</th>
                 <th style="width:20%;">Area</th>
                 <th style="width:12%;">Action</th>
-                <th style="width:20%;">Details</th>
             </tr>
         </thead>
         <tbody>
@@ -88,20 +87,7 @@
                         {{ $actionLabel }}
                     </td>
 
-                    <td>
-                        {{-- show the details text but truncated a bit for readability --}}
-                        @if(!empty($log->details))
-                            {{ \Illuminate\Support\Str::limit($log->details, 200) }}
-                        @else
-                            —
-                        @endif
 
-                        @if($log->action === 'denied_entry' && !empty($log->details))
-                            <div style="margin-top:6px;color:#b00;font-size:11px;" class="status-denied">
-                                Reason: {{ \Illuminate\Support\Str::limit($log->details, 200) }}
-                            </div>
-                        @endif
-                    </td>
                 </tr>
             @empty
                 <tr>
