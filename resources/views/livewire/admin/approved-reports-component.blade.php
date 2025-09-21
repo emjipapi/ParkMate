@@ -26,14 +26,37 @@
                         <td>{{ $violation->reporter->firstname }} {{ $violation->reporter->lastname }}</td>
                         <td>{{ $violation->area->name ?? 'N/A' }}</td>
                         <td>{{ Str::limit($violation->description, 50) }}</td>
-                        <td>
-                            @if($violation->evidence)
-                                <a href="{{ asset('storage/' . $violation->evidence) }}" target="_blank"
-                                    class="text-decoration-underline">View</a>
-                            @else
-                                N/A
-                            @endif
-                        </td>
+<td class="px-4 py-3 text-sm">
+    @php
+        $raw = $violation->evidence;
+
+        // normalize to array (support casted array, JSON string, or plain string)
+        if (is_array($raw)) {
+            $evidence = $raw;
+        } elseif (is_string($raw) && $raw !== '') {
+            $decoded = @json_decode($raw, true);
+            $evidence = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : ['reported' => $raw];
+        } else {
+            $evidence = [];
+        }
+
+        // pick reported first, then approved
+        $path = $evidence['reported'] ?? $evidence['approved'] ?? null;
+
+        // convert to URL (handles full URLs or storage paths)
+        if ($path) {
+            $url = preg_match('#^https?://#i', $path) ? $path : \Illuminate\Support\Facades\Storage::url($path);
+        } else {
+            $url = null;
+        }
+    @endphp
+
+    @if($url)
+        <a href="{{ $url }}" target="_blank" class="text-decoration-underline text-primary">View</a>
+    @else
+        <span class="text-muted">N/A</span>
+    @endif
+</td>
                         <td>
                             <span class="badge {{ $violation->status === 'resolved' ? 'bg-secondary' : 'bg-success' }}">
                                 {{ ucfirst($violation->status) }}

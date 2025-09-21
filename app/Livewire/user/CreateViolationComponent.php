@@ -37,47 +37,50 @@ class CreateViolationComponent extends Component
         ]);
 
         // Process the evidence file AFTER validation
-$evidencePath = null;
-if ($this->evidence) {
-    $ext = $this->evidence->getClientOriginalExtension();
-    $hash = substr(md5(uniqid(rand(), true)), 0, 8);
-    $filename = 'evidence_' . auth()->id() . '_' . $hash . '.' . $ext;
+        $evidencePath = null;
+        if ($this->evidence) {
+            $ext = $this->evidence->getClientOriginalExtension();
+            $hash = substr(md5(uniqid(rand(), true)), 0, 8);
+            $filename = 'evidence_' . auth()->id() . '_' . $hash . '.' . $ext;
 
-    // Store the file and get the path in public storage
-    $evidencePath = $this->evidence->storeAs('evidence', $filename, 'public');
-}
+            // Store the file and get the path in public storage
+            $evidencePath = $this->evidence->storeAs('evidence/reported', $filename, 'public');
+        }
 
         // Get the correct description
         $desc = $this->description === "Other" ? $this->otherDescription : $this->description;
-
+$evidenceData = [
+    'reported' => $evidencePath, // your uploaded file
+    'approved' => null,           // will be set later when approved
+];
         // Create the violation record
         Violation::create([
-            'reporter_id'   => auth()->id(),
-            'description'   => $desc,
-            'evidence'      => $evidencePath, // Use the stored file path
-            'area_id'       => $this->area_id,   // now just the selected ID
+            'reporter_id' => auth()->id(),
+            'description' => $desc,
+             'evidence' => json_encode($evidenceData), // store JSON string
+            'area_id' => $this->area_id,   // now just the selected ID
             'license_plate' => $this->license_plate,
-            'violator'      => $this->violator,
-            'status'        => 'pending',
+            'violator' => $this->violator,
+            'status' => 'pending',
         ]);
 
-    // Build details string
-    $userName = auth()->user()->firstname . ' ' . auth()->user()->lastname;
-    $details = "User {$userName} submitted a violation report";
-    if (!empty($this->license_plate)) {
-        $details .= " for plate {$this->license_plate}";
-    }
-    $details .= ".";
+        // Build details string
+        $userName = auth()->user()->firstname . ' ' . auth()->user()->lastname;
+        $details = "User {$userName} submitted a violation report";
+        if (!empty($this->license_plate)) {
+            $details .= " for plate {$this->license_plate}";
+        }
+        $details .= ".";
 
-    // Log the activity
-    ActivityLog::create([
-        'actor_type' => 'user',
-        'actor_id'   => auth()->id(),
-        'area_id'    => $this->area_id,
-        'action'     => 'report',
-        'details'    => $details,
-        'created_at' => now(),
-    ]);
+        // Log the activity
+        ActivityLog::create([
+            'actor_type' => 'user',
+            'actor_id' => auth()->id(),
+            'area_id' => $this->area_id,
+            'action' => 'report',
+            'details' => $details,
+            'created_at' => now(),
+        ]);
 
         session()->flash('success', 'Report submitted successfully!');
         return redirect()->route('user.violation.tracking');

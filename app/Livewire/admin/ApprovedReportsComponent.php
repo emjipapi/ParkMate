@@ -4,16 +4,22 @@ namespace App\Livewire\Admin;
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 use App\Models\Violation;
 use App\Models\Vehicle;
 use App\Models\User;
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class ApprovedReportsComponent extends Component
 {
     use WithPagination;
+    use WithFileUploads;
 
     public $violationsActionTaken = [];
     public $vehicles = [];
+    public $proofs = []; // holds per-row UploadedFile instances (wire:model="proofs.{id}")
     protected $paginationTheme = 'bootstrap';
 
     public function mount()
@@ -95,11 +101,50 @@ class ApprovedReportsComponent extends Component
         ]);
     }
 
+    /**
+     * Mark a violation as resolved, optionally store approved image and action_taken.
+     * Uses $this->proofs[$violationId] as upload from the row's file input.
+     */
     public function markResolved($violationId)
     {
         $violation = Violation::find($violationId);
+        if (! $violation) return;
 
-        if (!$violation) return;
+        // validate the optional approved image (per-row)
+        $this->validate([
+            "proofs.{$violationId}" => 'nullable|image|mimes:jpg,jpeg,png|max:6144', // 6MB
+        ]);
+
+        // Load existing evidence safely (support casted array or raw JSON/string)
+        $existing = $violation->evidence;
+        if (is_string($existing) && $existing !== '') {
+            $decoded = @json_decode($existing, true);
+            $evidence = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : [];
+        } elseif (is_array($existing)) {
+            $evidence = $existing;
+        } else {
+            $evidence = [];
+        }
+
+        // If there's an uploaded approved image for this violation, store it
+        if (! empty($this->proofs[$violationId])) {
+            try {
+                $file = $this->proofs[$violationId];
+                $ext = $file->getClientOriginalExtension();
+                $hash = substr(md5(uniqid((string) mt_rand(), true)), 0, 8);
+                $filename = 'evidence_approved_' . $violationId . '_' . $hash . '.' . $ext;
+
+                // store under storage/app/public/evidence/approved
+                $path = $file->storeAs('evidence/approved', $filename, 'public');
+
+                // set approved path (preserve reported if present)
+                $evidence['approved'] = $path;
+            } catch (\Exception $e) {
+                \Log::error('Failed to store approved evidence', ['error' => $e->getMessage()]);
+                $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to store approved image.']);
+                return;
+            }
+        }
 
         // Save action taken if provided
         $actionTaken = $this->violationsActionTaken[$violationId] ?? null;
@@ -107,13 +152,47 @@ class ApprovedReportsComponent extends Component
             $violation->action_taken = $actionTaken;
         }
 
+        // Save evidence properly respecting model casts
+        $casts = $violation->getCasts();
+        if (isset($casts['evidence']) && $casts['evidence'] === 'array') {
+            $violation->evidence = $evidence;
+        } else {
+            $violation->evidence = json_encode($evidence);
+        }
+
         $violation->status = 'resolved';
         $violation->save();
+        // determine admin user using the admin guard
+$admin = Auth::guard('admin')->user();
 
-        // Reset pagination to first page after update
+// If you require an authenticated admin, you can abort or return with an error:
+// if (! $admin) { abort(403, 'Admin not authenticated'); }
+
+$adminName = $admin ? ($admin->firstname ?? $admin->name ?? 'Admin#'.$admin->id) : 'System';
+$admin = Auth::guard('admin')->user();
+
+        // optional: create activity log entry for audit
+        ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id'   => $admin->admin_id, 
+            'area_id' => $violation->area_id,
+            'action' => 'resolve',
+            'details'    => "Violation #{$violation->id} marked resolved by admin {$adminName}",
+            'created_at' => now(),
+        ]);
+
+        // clear the temporary file in Livewire so UI resets
+        if (isset($this->proofs[$violationId])) {
+            unset($this->proofs[$violationId]);
+        }
+
+        // clear validation for that input
+        $this->resetValidation("proofs.$violationId");
+
+        // Reset pagination (optional)
         $this->resetPage();
 
-        session()->flash('message', 'Violation marked as resolved.');
+        session()->flash('message', 'Violation marked as resolved and evidence attached.');
     }
 
     // Add method if it doesn't exist
