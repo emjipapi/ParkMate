@@ -98,7 +98,7 @@ class RfidController extends Controller
                     'actor_type' => 'system',
                     'actor_id' => 1,
                     'action' => 'denied_entry',
-                    'details' => "User {$user->firstname} {$user->lastname} denied entry due to 3 or more approved violations",
+                    'details' => "User {$user->firstname} {$user->lastname} denied entry due to 3 or more approved violations | {$epc} - {$vehicle->type}",
                     'area_id' => null,
                     'created_at' => $now,
                 ]);
@@ -152,7 +152,7 @@ class RfidController extends Controller
                         'actor_type' => 'user',
                         'actor_id' => $user->id,
                         'action' => 'exit',
-                        'details' => "User {$user->firstname} {$user->lastname} automatically exited area {$areaName}",
+                        'details' => "User {$user->firstname} {$user->lastname} automatically exited area {$areaName} | {$epc} - {$vehicle->type}",
                         'area_id' => $areaId,
                         'created_at' => $now,
                     ]);
@@ -164,7 +164,7 @@ class RfidController extends Controller
                 'actor_type' => 'user',
                 'actor_id' => $user->id,
                 'action' => $newAction,
-                'details' => "User {$user->firstname} {$user->lastname} scanned RFID at main gate. Action: {$newAction}",
+                'details' => "User {$user->firstname} {$user->lastname} scanned RFID at main gate. Action: {$newAction} | {$epc} - {$vehicle->type}",
                 'created_at' => $now,
             ]);
 
@@ -256,7 +256,7 @@ public function logScanArea(Request $request)
                 'actor_type' => 'system',
                 'actor_id' => 1,
                 'action' => 'denied_entry',
-                'details' => "User {$user->firstname} {$user->lastname} denied entry (main gate check) due to 3 or more approved violations",
+                'details' => "User {$user->firstname} {$user->lastname} denied entry (main gate check) due to 3 or more approved violations | {$epc} - {$vehicle->type}",
                 'area_id' => null,
                 'created_at' => $now,
             ]);
@@ -343,7 +343,7 @@ public function logScanArea(Request $request)
                     'actor_type' => 'user',
                     'actor_id' => $user->id,
                     'action' => 'exit',
-                    'details' => "User {$user->firstname} {$user->lastname} automatically exited area {$exitAreaName} (moved to another area).",
+                    'details' => "User {$user->firstname} {$user->lastname} automatically exited area {$exitAreaName} (moved to another area). | {$epc} - {$vehicle->type}",
                     'area_id' => $exitAreaId,
                     'created_at' => $now,
                 ]);
@@ -393,7 +393,7 @@ public function logScanArea(Request $request)
                 'actor_type' => 'user',
                 'actor_id' => $user->id,
                 'action' => $newAction,
-                'details' => "User {$user->firstname} {$user->lastname} scanned RFID in area {$areaName}. Action: {$newAction}",
+                'details' => "User {$user->firstname} {$user->lastname} scanned RFID in area {$areaName}. Action: {$newAction} | {$epc} - {$vehicle->type}",
                 'area_id' => $areaId,
                 'created_at' => $now,
             ]);
