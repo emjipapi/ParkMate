@@ -61,18 +61,31 @@ class ActivityLogSystemComponent extends Component
                 $q->where('action', $this->actionFilter)
             )
 
-            // USER TYPE
-            ->when($this->userType === 'student', fn (Builder $q) =>
-                $q->where('actor_type', 'user')
-                  ->whereHas('user', fn ($u) => $u->whereNotNull('student_id'))
-            )
-            ->when($this->userType === 'employee', fn (Builder $q) =>
-                $q->where('actor_type', 'user')
-                  ->whereHas('user', fn ($u) => $u->whereNotNull('employee_id'))
-            )
-            ->when($this->userType === 'admin', fn (Builder $q) =>
-                $q->where('actor_type', 'admin')
-            )
+// USER TYPE
+// USER TYPE
+->when($this->userType === 'student', fn (Builder $q) =>
+    $q->where('actor_type', 'user')
+      ->whereHas('user', fn ($u) =>
+          $u->whereNotNull('student_id')
+             ->where('student_id', '<>', '')
+             ->where('student_id', '<>', '0')
+      )
+)
+->when($this->userType === 'employee', fn (Builder $q) =>
+    $q->where('actor_type', 'user')
+      ->whereHas('user', fn ($u) =>
+          $u->whereNotNull('employee_id')
+             ->where('employee_id', '<>', '')
+             ->where('employee_id', '<>', '0')
+             ->where(function ($q) {
+                 $q->whereNull('student_id')->orWhere('student_id', '');
+             })
+      )
+)
+->when($this->userType === 'admin', fn (Builder $q) =>
+    $q->where('actor_type', 'admin')
+)
+
 
             // 📅 DATE RANGE
             ->when($this->startDate, fn (Builder $q) =>
