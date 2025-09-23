@@ -4,32 +4,103 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\User;
-use App\Models\Vehicle;
 
 class UsersTable extends Component
 {
     use WithPagination;
     protected string $paginationTheme = 'bootstrap';
 
+    // search + filters
     public $search = '';
     public $filterDepartment = '';
     public $filterProgram = '';
+
+    // mappings like in UserFormCreate
+    public $allPrograms = [];     // ['Dept A' => ['Prog 1','Prog 2'], ...]
+    public $programToDept = [];   // ['Prog 1' => 'Dept A', ...]
+    public $departments = [];     // ['Dept A', 'Dept B', ...]
+    public $programs = [];        // currently visible programs
+
+    public function mount()
+    {
+        // load static list from config exactly like UserFormCreate
+        $this->allPrograms = config('programs', []);
+
+        // normalize & sort per dept and build reverse map
+        foreach ($this->allPrograms as $dept => $plist) {
+            sort($plist);
+            $this->allPrograms[$dept] = $plist;
+            foreach ($plist as $p) {
+                $this->programToDept[$p] = $dept;
+            }
+        }
+
+        $this->departments = array_keys($this->allPrograms);
+        sort($this->departments);
+
+        // initial programs = flattened list (all)
+        $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
+    }
 
     public function updatingSearch()
     {
         $this->resetPage();
     }
-    public function updatedFilterDepartment()
+
+    // call this from blade with wire:change or rely on Livewire update naming
+    public function onDepartmentChanged($value)
     {
-        $this->resetPage(); /* optional: $this->filterProgram = ''; */
+        $value = trim((string)$value);
+        if ($value === '') {
+            $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
+            $this->filterProgram = '';
+            $this->filterDepartment = '';
+            $this->resetPage();
+            return;
+        }
+
+        $newPrograms = $this->allPrograms[$value] ?? [];
+        sort($newPrograms);
+        $this->programs = $newPrograms;
+        $this->filterDepartment = $value;
+
+        if (!in_array($this->filterProgram, $newPrograms, true)) {
+            $this->filterProgram = '';
+        }
+
+        $this->resetPage();
     }
-    public function updatedFilterProgram()
+
+    public function onProgramChanged($value)
     {
+        $value = trim((string)$value);
+
+        if ($value === '') {
+            $this->filterProgram = '';
+            $this->filterDepartment = '';
+            $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
+            $this->resetPage();
+            return;
+        }
+
+        $dept = $this->programToDept[$value] ?? null;
+
+        if ($dept) {
+            $this->programs = $this->allPrograms[$dept];
+            $this->filterDepartment = $dept;
+            $this->filterProgram = $value;
+        } else {
+            $this->filterProgram = '';
+            $this->filterDepartment = '';
+        }
+
         $this->resetPage();
     }
 
     public function render()
     {
+
+
         $query = User::query();
 
         if ($this->search !== '') {
@@ -56,34 +127,18 @@ class UsersTable extends Component
 
         $users = $query->paginate(10);
 
-        // dropdown data
-        $departments = User::select('department')->distinct()->orderBy('department')->pluck('department');
-        $programsQuery = User::query();
-        if ($this->filterDepartment !== '') {
-            $programsQuery->where('department', $this->filterDepartment);
-        }
-        $programs = $programsQuery->select('program')->distinct()->orderBy('program')->pluck('program');
-
         return view('livewire.admin.users-table', [
             'users' => $users,
-            'departments' => $departments,
-            'programs' => $programs,
+            'departments' => $this->departments,
+            'programs' => $this->programs,
         ]);
     }
 
     public function deleteSelected($ids)
     {
-        if (empty($ids)) {
-            return; // nothing to delete
-        }
-
-        // Delete the users
+        if (empty($ids)) return;
         User::whereIn('id', $ids)->delete();
-
-        // Optional: reset pagination if current page is now empty
         $this->resetPage();
-
-        // Flash success message (optional)
         session()->flash('message', count($ids) . ' user(s) deleted successfully.');
     }
 }

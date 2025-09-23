@@ -70,19 +70,27 @@
     <div
         class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
         <div class="d-flex gap-2 flex-wrap">
-            <select class="form-select form-select-sm w-auto" wire:model.live="filterDepartment">
-                <option value="">All Departments</option>
-                @foreach($departments as $dept)
-                    <option value="{{ $dept }}">{{ $dept }}</option>
-                @endforeach
-            </select>
+    <select class="form-select form-select-sm w-auto"
+            wire:model.live="filterDepartment"
+            wire:change="onDepartmentChanged($event.target.value)">
+        <option value="">All Departments</option>
+        @foreach($departments as $dept)
+            <option value="{{ $dept }}" wire:key="dept-{{ \Illuminate\Support\Str::slug($dept) }}">
+                {{ $dept }}
+            </option>
+        @endforeach
+    </select>
 
-            <select class="form-select form-select-sm w-auto" wire:model.live="filterProgram">
-                <option value="">All Programs</option>
-                @foreach($programs as $prog)
-                    <option value="{{ $prog }}">{{ $prog }}</option>
-                @endforeach
-            </select>
+    <select class="form-select form-select-sm w-auto"
+            wire:model.live="filterProgram"
+            wire:change="onProgramChanged($event.target.value)">
+        <option value="">All Programs</option>
+        @foreach($programs as $prog)
+            <option value="{{ $prog }}" wire:key="prog-{{ \Illuminate\Support\Str::slug($prog) }}">
+                {{ $prog }}
+            </option>
+        @endforeach
+    </select>
         </div>
 
         <!-- Toolbar -->
