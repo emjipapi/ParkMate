@@ -20,7 +20,15 @@ class UsersTable extends Component
     public $programToDept = [];   // ['Prog 1' => 'Dept A', ...]
     public $departments = [];     // ['Dept A', 'Dept B', ...]
     public $programs = [];        // currently visible programs
+    public $perPage = 15; // default
+    public $perPageOptions = [15, 25, 50, 100];
 
+    // reset page when perPage changes
+public function updatedPerPage()
+{
+    // explicitly reset the default "page" paginator
+    $this->resetPage('page');
+}
     public function mount()
     {
         // load static list from config exactly like UserFormCreate
@@ -96,6 +104,7 @@ class UsersTable extends Component
 
         $this->resetPage();
     }
+    
 
     public function render()
     {
@@ -125,7 +134,7 @@ class UsersTable extends Component
             $query->where('program', $this->filterProgram);
         }
 
-        $users = $query->paginate(10);
+        $users = $query->paginate($this->perPage);
 
         return view('livewire.admin.users-table', [
             'users' => $users,

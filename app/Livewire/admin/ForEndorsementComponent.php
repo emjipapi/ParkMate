@@ -32,6 +32,15 @@ class ForEndorsementComponent extends Component
 public $endorsementReportType = 'week';
 public $endorsementReportStartDate = null;
 public $endorsementReportEndDate = null;
+    public $perPage = 15; // default
+    public $perPageOptions = [15, 25, 50, 100];
+
+    // reset page when perPage changes
+public function updatedPerPage()
+{
+    // explicitly reset the default "page" paginator
+    $this->resetPage('page');
+}
 
     public function mount()
     {
@@ -148,7 +157,7 @@ return $this->redirect(route('reports.endorsement', [
     {
         $violations = Violation::with(['reporter', 'area', 'violator'])
             ->where('status', 'for_endorsement')
-            ->paginate(10);
+            ->paginate($this->perPage);
 
         // Process violations for display
         $violations->getCollection()->transform(function ($violation) {

@@ -32,6 +32,7 @@
         }
     }">
 
+
     <!-- Alert -->
     <template x-if="showAlert">
         <div class="alert alert-warning text-center position-fixed top-0 start-50 translate-middle-x mt-3 shadow"
@@ -52,11 +53,20 @@
             </div>
         </div>
     </template>
-
+<div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-3">
     <!-- Search -->
     <input type="text" class="form-control mb-3" placeholder="Search admins..."
            wire:model.live.debounce.300ms="search" style="max-width: 400px" />
-
+                   <div class="d-flex align-items-center gap-1">
+            <span>Show</span>
+            <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
+                @foreach($perPageOptions as $option)
+                <option value="{{ $option }}">{{ $option }}</option>
+                @endforeach
+            </select>
+            <span>entries</span>
+        </div>
+</div>
     <!-- Toolbar -->
     <div class="d-flex justify-content-end mb-3 gap-3">
         <i :class="check2 ? 'bi bi-check2-all text-primary' : 'bi bi-check2-all'"
@@ -104,8 +114,6 @@
                                 class="text-primary me-2 text-info text-decoration-none">
                                 <i class="bi bi-pencil-square text-secondary"></i>
                             </a>
-
-                            
                         </td>
                     </tr>
                 @empty

@@ -27,6 +27,16 @@ class ActivityLogSystemComponent extends Component
     // 👇 Give pagination a "custom name" that won't appear in the URL
     protected $pageName = 'activityLogsPage';
 
+        public $perPage = 15; // default
+    public $perPageOptions = [15, 25, 50, 100];
+
+    // reset page when perPage changes
+public function updatedPerPage()
+{
+    // explicitly reset the default "page" paginator
+    $this->resetPage('page');
+}
+
     public function updating($name, $value)
     {
         if (in_array($name, ['search','actionFilter','userType','startDate','endDate'])) {
@@ -62,7 +72,7 @@ class ActivityLogSystemComponent extends Component
             )
 
 // USER TYPE
-// USER TYPE
+
 ->when($this->userType === 'student', fn (Builder $q) =>
     $q->where('actor_type', 'user')
       ->whereHas('user', fn ($u) =>
@@ -96,7 +106,7 @@ class ActivityLogSystemComponent extends Component
             )
 
             ->orderBy('created_at', $this->sortOrder)
-            ->paginate(10, ['*'], $this->pageName); // 👈 force custom name
+            ->paginate($this->perPage, ['*'], $this->pageName); // 👈 force custom name
 
         return view('livewire.admin.activity-log-system-component', [
             'activityLogs' => $logs,

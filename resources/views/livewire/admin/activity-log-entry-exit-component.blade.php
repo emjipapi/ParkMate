@@ -1,83 +1,93 @@
 <div>
-<!-- Generate Report Button -->
+    <!-- Generate Report Button -->
     <button type="button" class="btn-add-slot btn btn-primary mb-3" data-bs-toggle="modal"
         data-bs-target="#reportModal">
         Generate Report
     </button>
-<!-- Report Modal -->
-<div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel"
-     aria-hidden="true" wire:ignore.self>
-  <div class="modal-dialog modal-dialog-centered modal-custom-width">
-    <div class="modal-content" x-data="{ type: @entangle('reportType') }">
-      <div class="modal-header">
-        <h5 class="modal-title" id="reportModalLabel">Generate Attendance Report</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+    <!-- Report Modal -->
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true"
+        wire:ignore.self>
+        <div class="modal-dialog modal-dialog-centered modal-custom-width">
+            <div class="modal-content" x-data="{ type: @entangle('reportType') }">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportModalLabel">Generate Attendance Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
 
-      <div class="modal-body">
-        <form wire:submit.prevent="generateReport">
-          <div class="mb-3">
-            <label for="reportType" class="form-label">Report Type</label>
-            <select id="reportType" class="form-select" wire:model="reportType" required>
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="range">Custom Range</option>
-            </select>
-          </div>
+                <div class="modal-body">
+                    <form wire:submit.prevent="generateReport">
+                        <div class="mb-3">
+                            <label for="reportType" class="form-label">Report Type</label>
+                            <select id="reportType" class="form-select" wire:model="reportType" required>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="range">Custom Range</option>
+                            </select>
+                        </div>
 
-          <div class="row g-2 mt-2" x-show="type === 'range'" x-cloak>
-            <div class="col-md-6">
-              <label for="reportStartDate" class="form-label">Start Date</label>
-              <input type="date" id="reportStartDate" class="form-control" wire:model="reportStartDate" onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
+                        <div class="row g-2 mt-2" x-show="type === 'range'" x-cloak>
+                            <div class="col-md-6">
+                                <label for="reportStartDate" class="form-label">Start Date</label>
+                                <input type="date" id="reportStartDate" class="form-control"
+                                    wire:model="reportStartDate" onfocus="this.showPicker();"
+                                    onmousedown="event.preventDefault(); this.showPicker();">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="reportEndDate" class="form-label">End Date</label>
+                                <input type="date" id="reportEndDate" class="form-control" wire:model="reportEndDate"
+                                    onfocus="this.showPicker();"
+                                    onmousedown="event.preventDefault(); this.showPicker();">
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            @php
+                            // disable when using custom range but dates are missing
+                            $disabled = ($reportType === 'range' && (empty($reportStartDate) || empty($reportEndDate)));
+                            @endphp
+
+                            <button type="submit" class="btn btn-success" @if($disabled) disabled
+                                title="Please select start and end date for custom range" @endif
+                                wire:loading.attr="disabled" wire:target="generateReport">
+                                <span wire:loading.remove wire:target="generateReport">
+                                    Generate
+                                </span>
+                                <span wire:loading wire:target="generateReport">
+                                    Generating...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
             </div>
-            <div class="col-md-6">
-              <label for="reportEndDate" class="form-label">End Date</label>
-              <input type="date" id="reportEndDate" class="form-control" wire:model="reportEndDate" onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
-            </div>
-          </div>
-
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            @php
-    // disable when using custom range but dates are missing
-    $disabled = ($reportType === 'range' && (empty($reportStartDate) || empty($reportEndDate)));
-@endphp
-
-<button
-    type="submit"
-    class="btn btn-success"
-    @if($disabled) disabled title="Please select start and end date for custom range" @endif
-    wire:loading.attr="disabled"
-    wire:target="generateReport"
->
-    <span wire:loading.remove wire:target="generateReport">
-        Generate
-    </span>
-    <span wire:loading wire:target="generateReport">
-        Generating...
-    </span>
-</button>
-          </div>
-        </form>
-      </div>
-
+        </div>
     </div>
-  </div>
-</div>
-
+<div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-3">
     {{-- 🔍 Search Box --}}
     <input type="text" class="form-control mb-3" placeholder="Search by name, ID, or action..."
         wire:model.live.debounce.300ms="search" style="max-width: 400px">
+                <div class="d-flex align-items-center gap-1">
+            <span>Show</span>
+            <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
+                @foreach($perPageOptions as $option)
+                <option value="{{ $option }}">{{ $option }}</option>
+                @endforeach
+            </select>
+            <span>entries</span>
+        </div>
+</div>
 
     {{-- 🎛 Filter Bar --}}
     <div class="d-flex flex-wrap justify-content-start gap-2 mb-3">
 
         {{-- Action Filter --}}
         <select class="form-select form-select-sm w-auto" wire:model.live="actionFilter">
-        <option value="">All Actions</option>
-        <option value="entry">Entry</option>
-        <option value="exit">Exit</option>
-        <option value="denied_entry">Denied Entry</option>
+            <option value="">All Actions</option>
+            <option value="entry">Entry</option>
+            <option value="exit">Exit</option>
+            <option value="denied_entry">Denied Entry</option>
         </select>
 
         {{-- User Type Filter --}}
@@ -121,52 +131,54 @@
             </thead>
             <tbody>
                 @forelse ($activityLogs as $log)
-                    <tr>
-                        <td>{{ $log->id }}</td>
+                <tr>
+                    <td>{{ $log->id }}</td>
 
-                        {{-- Show ID depending on actor type --}}
-                        <td>{{ $log->actor_type === 'admin' ? $log->admin->username ?? '—' : $log->user->student_id ?? $log->user->employee_id ?? '—' }}
-                        </td>
+                    {{-- Show ID depending on actor type --}}
+                    <td>{{ $log->actor_type === 'admin' ? $log->admin->username ?? '—' : $log->user->student_id ??
+                        $log->user->employee_id ?? '—' }}
+                    </td>
 
-                        {{-- Show Name depending on actor type --}}
-                        <td>{{ $log->actor_type === 'admin' ? $log->admin->lastname . ', ' . $log->admin->firstname : $log->user->lastname . ', ' . $log->user->firstname }}
-                        </td>
+                    {{-- Show Name depending on actor type --}}
+                    <td>{{ $log->actor_type === 'admin' ? $log->admin->lastname . ', ' . $log->admin->firstname :
+                        $log->user->lastname . ', ' . $log->user->firstname }}
+                    </td>
 
-                        <td>
-                            @php
-                                switch ($log->action) {
-                                    case 'entry':
-                                        $color = 'success';
-                                        break;
-                                    case 'exit':
-                                        $color = 'danger';
-                                        break;
-                                    case 'create':
-                                        $color = 'primary';
-                                        break;
-                                    case 'update':
-                                        $color = 'warning';
-                                        break;
-                                    case 'login':
-                                        $color = 'info';
-                                        break;
-                                    case 'logout':
-                                        $color = 'secondary';
-                                        break;
-                                    default:
-                                        $color = 'dark';
-                                        break;
-                                }
-                            @endphp
-                            <span class="badge bg-{{ $color }}">{{ ucfirst($log->action) }}</span>
-                        </td>
-                        <td>{{ $log->details }}</td>
-                        <td>{{ $log->created_at->format('Y-m-d H:i:s') }}</td>
-                    </tr>
+                    <td>
+                        @php
+                        switch ($log->action) {
+                        case 'entry':
+                        $color = 'success';
+                        break;
+                        case 'exit':
+                        $color = 'danger';
+                        break;
+                        case 'create':
+                        $color = 'primary';
+                        break;
+                        case 'update':
+                        $color = 'warning';
+                        break;
+                        case 'login':
+                        $color = 'info';
+                        break;
+                        case 'logout':
+                        $color = 'secondary';
+                        break;
+                        default:
+                        $color = 'dark';
+                        break;
+                        }
+                        @endphp
+                        <span class="badge bg-{{ $color }}">{{ ucfirst($log->action) }}</span>
+                    </td>
+                    <td>{{ $log->details }}</td>
+                    <td>{{ $log->created_at->format('Y-m-d H:i:s') }}</td>
+                </tr>
                 @empty
-                    <tr>
-                        <td colspan="6" class="text-center">No activity logs found.</td>
-                    </tr>
+                <tr>
+                    <td colspan="6" class="text-center">No activity logs found.</td>
+                </tr>
                 @endforelse
             </tbody>
         </table>

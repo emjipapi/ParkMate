@@ -35,6 +35,16 @@ class ActivityLogEntryExitComponent extends Component
     // 👇 Custom page name (so Livewire doesn’t inject ?page=2 into the URL)
     protected $pageName = 'entryExitPage';
 
+        public $perPage = 15; // default
+    public $perPageOptions = [15, 25, 50, 100];
+
+    // reset page when perPage changes
+public function updatedPerPage()
+{
+    // explicitly reset the default "page" paginator
+    $this->resetPage('page');
+}
+
     public function updating($name, $value)
     {
         // only reset page when user changes the on-page filters (not report fields)
@@ -105,7 +115,7 @@ class ActivityLogEntryExitComponent extends Component
             )
 
             ->orderBy('created_at', $this->sortOrder)
-            ->paginate(10, ['*'], $this->pageName); // 👈 custom page name
+            ->paginate($this->perPage, ['*'], $this->pageName); // 👈 custom page name
 
         return view('livewire.admin.activity-log-entry-exit-component', [
             'activityLogs' => $logs,

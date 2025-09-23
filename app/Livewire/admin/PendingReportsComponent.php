@@ -20,7 +20,15 @@ class PendingReportsComponent extends Component
     public $vehicles = [];
     public $violationInputs = []; // Store all input values
     public $violationStatuses = []; // Store search statuses
-    
+        public $perPage = 15; // default
+    public $perPageOptions = [15, 25, 50, 100];
+
+    // reset page when perPage changes
+public function updatedPerPage()
+{
+    // explicitly reset the default "page" paginator
+    $this->resetPage('page');
+}
     public function mount()
     {
         $this->vehicles = Vehicle::with('user')
@@ -303,7 +311,7 @@ private function checkAndSendThresholdEmail($violatorId)
         $violations = Violation::with(['reporter', 'area', 'violator'])
             ->where('status', 'pending')
             ->orderBy('created_at', 'desc')
-            ->paginate(10);
+            ->paginate($this->perPage);
 
         // Initialize form data for current page violations
         foreach ($violations as $violation) {

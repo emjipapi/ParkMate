@@ -12,10 +12,20 @@ class AdminsTable extends Component
 
     public $search = '';
 
+        public $perPage = 15; // default
+    public $perPageOptions = [15, 25, 50, 100];
+
+    // reset page when perPage changes
+public function updatedPerPage()
+{
+    // explicitly reset the default "page" paginator
+    $this->resetPage('page');
+}
     public function updatingSearch()
     {
         $this->resetPage();
     }
+
 
     public function render()
     {
@@ -30,7 +40,7 @@ class AdminsTable extends Component
             });
         }
 
-        $admins = $query->paginate(10);
+        $admins = $query->paginate($this->perPage);
 
         return view('livewire.admin.admins-table', [
             'admins' => $admins,

@@ -21,6 +21,15 @@ class ApprovedReportsComponent extends Component
     public $vehicles = [];
     public $proofs = []; // holds per-row UploadedFile instances (wire:model="proofs.{id}")
     protected $paginationTheme = 'bootstrap';
+        public $perPage = 15; // default
+    public $perPageOptions = [15, 25, 50, 100];
+
+    // reset page when perPage changes
+public function updatedPerPage()
+{
+    // explicitly reset the default "page" paginator
+    $this->resetPage('page');
+}
 
     public function mount()
     {
@@ -66,7 +75,7 @@ class ApprovedReportsComponent extends Component
     {
         $violations = Violation::with(['reporter', 'area', 'violator'])
             ->where('status', 'approved') // ✅ only approved
-            ->paginate(10); // 10 items per page
+            ->paginate($this->perPage); // 10 items per page
 
         // Process violations for display
         $violations->getCollection()->transform(function ($violation) {

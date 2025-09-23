@@ -1,4 +1,15 @@
 <div>
+        <div class="d-flex flex-column flex-md-row justify-content-md-end align-items-md-center gap-3 mb-3">
+                <div class="d-flex align-items-center gap-1">
+            <span>Show</span>
+            <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
+                @foreach($perPageOptions as $option)
+                <option value="{{ $option }}">{{ $option }}</option>
+                @endforeach
+            </select>
+            <span>entries</span>
+        </div>
+    </div>
     <!-- Flash Messages -->
     @if (session()->has('message'))
     <div class="alert alert-success alert-dismissible fade show" role="alert">
