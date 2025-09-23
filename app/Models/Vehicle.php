@@ -15,6 +15,7 @@ class Vehicle extends Model
         'rfid_tag',
         'license_plate',
         'body_type_model',
+        'serial_number',
         'or_number',
         'cr_number',
     ];

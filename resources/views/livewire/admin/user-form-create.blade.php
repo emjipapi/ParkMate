@@ -1,7 +1,7 @@
 <div class="flex-grow-1 d-flex justify-content-center align-items-center square-box">
     <form wire:submit.prevent="save" enctype="multipart/form-data">
         @csrf
-        
+
         <!-- User Info Fields -->
         <div class="row mb-3">
             <!-- Student ID -->
@@ -55,50 +55,42 @@
             </div>
         </div>
 
-@php
-    // determine "employee" either from userType (if present) or the checkbox flag useEmployeeId
-    $isEmployee = (($userType ?? '') === 'employee') || (isset($useEmployeeId) && $useEmployeeId);
-@endphp
+        @php
+        // determine "employee" either from userType (if present) or the checkbox flag useEmployeeId
+        $isEmployee = (($userType ?? '') === 'employee') || (isset($useEmployeeId) && $useEmployeeId);
+        @endphp
 
-<div class="row mb-3 position-relative {{ $isEmployee ? 'opacity-50 pointer-events-none' : '' }}"
-     aria-disabled="{{ $isEmployee ? 'true' : 'false' }}">
-    <div class="col-md">
-        <label>Department</label>
-        <select wire:model="department"
-                wire:change="onDepartmentChanged($event.target.value)"
-                class="form-control"
-                @disabled($isEmployee)>
-            <option value="">Select Department</option>
-            @foreach($departments as $dept)
-                <option value="{{ $dept }}" wire:key="dept-{{ $dept }}">{{ $dept }}</option>
-            @endforeach
-        </select>
-    </div>
+        <div class="row mb-3 position-relative {{ $isEmployee ? 'opacity-50 pointer-events-none' : '' }}"
+            aria-disabled="{{ $isEmployee ? 'true' : 'false' }}">
+            <div class="col-md">
+                <label>Department</label>
+                <select wire:model="department" wire:change="onDepartmentChanged($event.target.value)"
+                    class="form-control" @disabled($isEmployee)>
+                    <option value="">Select Department</option>
+                    @foreach($departments as $dept)
+                    <option value="{{ $dept }}" wire:key="dept-{{ $dept }}">{{ $dept }}</option>
+                    @endforeach
+                </select>
+            </div>
 
-    <div class="col-md">
-        <label>Program</label>
-        <select wire:model="program"
-                wire:change="onProgramChanged($event.target.value)"
-                class="form-control"
-                @disabled($isEmployee)>
-            <option value="">Select Program</option>
-            @foreach($this->filteredPrograms as $prog)
-                <option value="{{ $prog }}" wire:key="prog-{{ \Illuminate\Support\Str::slug($prog) }}">{{ $prog }}</option>
-            @endforeach
-        </select>
-    </div>
+            <div class="col-md">
+                <label>Program</label>
+                <select wire:model="program" wire:change="onProgramChanged($event.target.value)" class="form-control"
+                    @disabled($isEmployee)>
+                    <option value="">Select Program</option>
+                    @foreach($this->filteredPrograms as $prog)
+                    <option value="{{ $prog }}" wire:key="prog-{{ \Illuminate\Support\Str::slug($prog) }}">{{ $prog }}
+                    </option>
+                    @endforeach
+                </select>
+            </div>
 
-    <div class="col-md">
-        <label>Year &amp; Section</label>
-        <input type="text"
-               wire:model="year_section"
-               class="form-control"
-               maxlength="2"
-               placeholder="1A"
-               required
-               @disabled($isEmployee)>
-    </div>
-</div>
+            <div class="col-md">
+                <label>Year &amp; Section</label>
+                <input type="text" wire:model="year_section" class="form-control" maxlength="2" placeholder="1A"
+                    required @disabled($isEmployee)>
+            </div>
+        </div>
 
 
 
@@ -142,15 +134,16 @@
 
         <div class="vehicle-rows">
             @foreach($vehicles as $index => $vehicle)
-            <div class="card mb-4">
+
+            <div class="card mb-4" wire:key="vehicle-{{ $vehicle['uid'] }}">
                 <div class="card-body">
                     <div class="row mb-2 align-items-end">
                         <div class="col-md">
-                            {{-- <div class="col-md">
-                                <label>Serial Number <span class="text-muted" style="font-size: 0.75rem;">(Number
-                                        only)</span></label>
-                                <input type="text" wire:model="serial_number" class="form-control" placeholder="123">
-                            </div> --}}
+                            <label>Serial Number <span class="text-muted" style="font-size:0.75rem;">(Number
+                                    only)</span></label>
+                            <input type="text" wire:model="vehicles.{{ $index }}.serial_number" class="form-control"
+                                placeholder="123">
+
                             <label>Type</label>
                             <select wire:model="vehicles.{{ $index }}.type" class="form-control" required>
                                 <option value="">Select Type</option>
