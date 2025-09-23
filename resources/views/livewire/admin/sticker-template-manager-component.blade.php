@@ -3,9 +3,9 @@
 <div class="bg-white rounded-lg shadow-md p-6">
     {{-- Flash Messages --}}
     @if (session()->has('success'))
-        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-            {{ session('success') }}
-        </div>
+    <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+        {{ session('success') }}
+    </div>
     @endif
 
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -22,7 +22,7 @@
                         <input type="text" wire:model="templateName" class="form-control"
                             placeholder="Enter template name">
                         @error('templateName')
-                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        <div class="text-danger small mt-1">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -30,7 +30,7 @@
                         <label class="form-label">Template Image</label>
                         <input type="file" wire:model="templateFile" accept="image/*" class="form-control">
                         @error('templateFile')
-                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        <div class="text-danger small mt-1">{{ $message }}</div>
                         @enderror
                     </div>
 
@@ -43,41 +43,39 @@
                     </div>
                 </div>
             </div>
-            
+
             <h3 class="text-lg font-medium text-gray-800">Existing Templates</h3>
 
-{{-- Template List --}}
-<div class="d-flex flex-wrap gap-3 mb-5">
-    @forelse($templates as $index => $template)
-        <div class="card text-center shadow-sm {{ $selectedTemplateId == $template->id ? 'border-primary' : '' }}"
-             style="width: 180px; cursor: pointer; transition: all 0.2s;"
-             wire:click="selectTemplate({{ $template->id }})">
+            {{-- Template List --}}
+            <div class="d-flex flex-wrap gap-3 mb-5">
+                @forelse($templates as $index => $template)
+                <div class="card text-center shadow-sm {{ $selectedTemplateId == $template->id ? 'border-primary' : '' }}"
+                    style="width: 180px; cursor: pointer; transition: all 0.2s;"
+                    wire:click="selectTemplate({{ $template->id }})">
 
-            <div class="card-body p-2">
-                <h6 class="card-title mb-1 text-truncate">{{ $template->name }}</h6>
-                <small class="text-muted d-block mb-1">{{ $template->width }}x{{ $template->height }}px</small>
-                <span class="badge {{ $selectedTemplateId == $template->id ? 'bg-success' : 'bg-secondary' }}">
-                    {{ $selectedTemplateId == $template->id ? 'Active' : 'Inactive' }}
-                </span>
-            </div>
+                    <div class="card-body p-2">
+                        <h6 class="card-title mb-1 text-truncate">{{ $template->name }}</h6>
+                        <small class="text-muted d-block mb-1">{{ $template->width }}x{{ $template->height }}px</small>
+                        <span class="badge {{ $selectedTemplateId == $template->id ? 'bg-success' : 'bg-secondary' }}">
+                            {{ $selectedTemplateId == $template->id ? 'Active' : 'Inactive' }}
+                        </span>
+                    </div>
 
-            <div class="card-footer bg-transparent border-0 p-2">
-                <button type="button"
-                        class="btn btn-sm btn-outline-danger w-100"
-                        onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete this template? This cannot be undone.')) { @this.deleteTemplate({{ $template->id }}) }"
-                        wire:loading.attr="disabled"
-                        aria-label="Delete template {{ $template->name }}">
-                    <i class="bi bi-trash-fill"></i>
-                </button>
+                    <div class="card-footer bg-transparent border-0 p-2">
+                        <button type="button" class="btn btn-sm btn-outline-danger w-100"
+                            onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete this template? This cannot be undone.')) { @this.deleteTemplate({{ $template->id }}) }"
+                            wire:loading.attr="disabled" aria-label="Delete template {{ $template->name }}">
+                            <i class="bi bi-trash-fill"></i>
+                        </button>
+                    </div>
+                </div>
+                @empty
+                <div class="text-center py-4 text-muted w-100">
+                    <p class="mb-0">No templates found</p>
+                    <small>Upload your first template above</small>
+                </div>
+                @endforelse
             </div>
-        </div>
-    @empty
-        <div class="text-center py-4 text-muted w-100">
-            <p class="mb-0">No templates found</p>
-            <small>Upload your first template above</small>
-        </div>
-    @endforelse
-</div>
 
 
 
@@ -86,67 +84,69 @@
         {{-- Template Editor --}}
         <div class="xl:col-span-2">
             @if($selectedTemplate)
-                <div class="space-y-4">
-                    {{-- Template Info & Actions --}}
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="text-lg font-medium text-gray-800">{{ $selectedTemplate->name }}</h3>
-                            <p class="text-sm text-gray-600">{{ $selectedTemplate->width }} x
-                                {{ $selectedTemplate->height }}px ({{ $selectedTemplate->aspect_ratio }} ratio)
-                            </p>
-                        </div>
-                        {{-- <div class="flex space-x-2">
-                            @if($isEditing)
-                            <button wire:click="updateTemplate"
-                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm">
-                                Save Changes
-                            </button>
-                            <button wire:click="$set('isEditing', false)"
-                                class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm">
-                                Cancel
-                            </button>
-                            @else
-                            <button wire:click="startEditing" class="btn-add-slot btn btn-primary">
-                                Edit Template
-                            </button>
-                            @endif
-                        </div> --}}
+            <div class="space-y-4">
+                {{-- Template Info & Actions --}}
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h3 class="text-lg font-medium text-gray-800">{{ $selectedTemplate->name }}</h3>
+                        <p class="text-sm text-gray-600">{{ $selectedTemplate->width }} x
+                            {{ $selectedTemplate->height }}px ({{ $selectedTemplate->aspect_ratio }} ratio)
+                        </p>
+                    </div>
+                    {{-- <div class="flex space-x-2">
+                        @if($isEditing)
+                        <button wire:click="updateTemplate"
+                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm">
+                            Save Changes
+                        </button>
+                        <button wire:click="$set('isEditing', false)"
+                            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm">
+                            Cancel
+                        </button>
+                        @else
+                        <button wire:click="startEditing" class="btn-add-slot btn btn-primary">
+                            Edit Template
+                        </button>
+                        @endif
+                    </div> --}}
+                </div>
+
+                {{-- WORKING Template Preview (always rendered on page load) --}}
+                <div class="bg-gray-50 rounded-lg p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="font-medium text-gray-700">Template Preview</h4>
+                        {{-- preview toggle removed for debugging --}}
                     </div>
 
-                    {{-- WORKING Template Preview (always rendered on page load) --}}
-                    <div class="bg-gray-50 rounded-lg p-4">
-                        <div class="flex justify-between items-center mb-3">
-                            <h4 class="font-medium text-gray-700">Template Preview</h4>
-                            {{-- preview toggle removed for debugging --}}
-                        </div>
+                    <div class="flex justify-center">
+                        {{-- Percent-based overlays — simple & robust --}}
+                        <div id="template-wrapper-{{ $selectedTemplate->id }}"
+                            style="position: relative; display: inline-block; border: 2px solid #d1d5db; border-radius: .375rem; overflow: visible; padding: 0;">
+                            <img src="{{ $selectedTemplate->file_url }}" id="template-image-{{ $selectedTemplate->id }}"
+                                alt="{{ $selectedTemplate->name }}"
+                                style="display:block; width:100%; height:auto; max-height:500px;">
 
-                        <div class="flex justify-center">
-                            {{-- Percent-based overlays — simple & robust --}}
-                            <div id="template-wrapper-{{ $selectedTemplate->id }}"
-                                style="position: relative; display: inline-block; border: 2px solid #d1d5db; border-radius: .375rem; overflow: visible; padding: 0;">
-                                <img src="{{ $selectedTemplate->file_url }}" id="template-image-{{ $selectedTemplate->id }}"
-                                    alt="{{ $selectedTemplate->name }}"
-                                    style="display:block; width:100%; height:auto; max-height:500px;">
+                            {{-- ALWAYS render overlays, but position using percent CSS --}}
+                            @foreach($elementConfig as $element => $config)
+                            @if(!empty($config['enabled']))
+                            @php
+                            $x = $config['x_percent'] ?? 10;
+                            $y = $config['y_percent'] ?? 10;
+                            $fontSize = max(8, $config['font_size'] ?? 16);
 
-                                {{-- ALWAYS render overlays, but position using percent CSS --}}
-                                @foreach($elementConfig as $element => $config)
-                                    @if(!empty($config['enabled']))
-                                        @php
-                                            $x = $config['x_percent'] ?? 10;
-                                            $y = $config['y_percent'] ?? 10;
-                                            $fontSize = max(8, $config['font_size'] ?? 16);
+                            // Apply the same conversion as in StickerGeneratorService
+                            $previewFontSize = round($fontSize * 0.58);
+                            // Ensure minimum readable size
+                            $previewFontSize = max(6, $previewFontSize);
 
-                                            // Apply the same conversion as in StickerGeneratorService
-                                            $previewFontSize = round($fontSize * 0.58);
-                                            // Ensure minimum readable size
-                                            $previewFontSize = max(6, $previewFontSize);
+                            $color = $config['color'] ?? '#000';
+                            $align = $x <= 20 ? 'left' : ($x>= 80 ? 'right' : 'center');
+                                $transform = $x <= 20 ? 'translateY(-50%)' : ($x>= 80 ? 'translateX(-100%)
+                                    translateY(-50%)' : 'translate(-50%,-50%)');
+                                    @endphp
 
-                                            $color = $config['color'] ?? '#000';
-                                            $align = $x <= 20 ? 'left' : ($x >= 80 ? 'right' : 'center');
-                                            $transform = $x <= 20 ? 'translateY(-50%)' : ($x >= 80 ? 'translateX(-100%) translateY(-50%)' : 'translate(-50%,-50%)');
-                                        @endphp
-
-                                        <div class="text-element-{{ $selectedTemplate->id }}" data-element="{{ $element }}" style="position:absolute;
+                                    <div class="text-element-{{ $selectedTemplate->id }}" data-element="{{ $element }}"
+                                        style="position:absolute;
                                                     left: {{ $x }}%;
                                                     top: {{ $y }}%;
                                                     transform: {{ $transform }};
@@ -155,218 +155,219 @@
 
                                                     white-space: nowrap;
                                                     z-index: 10;">
-                                            {{ $previewData[$element] ?? $element }}
+                                        {{ $previewData[$element] ?? $element }}
 
-                                        </div>
+                                    </div>
                                     @endif
-                                @endforeach
+                                    @endforeach
 
 
-                                {{-- dots also positioned by percent --}}
-                                @foreach($elementConfig as $element => $config)
+                                    {{-- dots also positioned by percent --}}
+                                    @foreach($elementConfig as $element => $config)
                                     @if(!empty($config['enabled']))
-                                        <div class="position-dot-{{ $selectedTemplate->id }}" data-element="{{ $element }}"
-                                            style="position:absolute;
+                                    <div class="position-dot-{{ $selectedTemplate->id }}" data-element="{{ $element }}"
+                                        style="position:absolute;
                                                                                         left: {{ $config['x_percent'] ?? 10 }}%;
                                                                                         top: {{ $config['y_percent'] ?? 10 }}%;
                                                                                         transform: translate(-50%,-50%);
                                                                                         width:10px;height:10px;
-                                                                                        background:#ef4444;border:2px solid #fff;border-radius:50%;z-index:20;"></div>
+                                                                                        background:#ef4444;border:2px solid #fff;border-radius:50%;z-index:20;">
+                                    </div>
                                     @endif
-                                @endforeach
-
-                            </div>
+                                    @endforeach
 
                         </div>
-                        @if($isEditing)
-                            <div class="mt-3 text-xs text-gray-600 text-center space-y-1">
-                                <p><strong>Positioning Guide:</strong> Red dots show exact text positions</p>
-                                <p><strong>Text Alignment:</strong> Left (0-20%), Center (21-79%), Right (80-100%)</p>
-                            </div>
-                        @endif
+
+                    </div>
+                    @if($isEditing)
+                    <div class="mt-3 text-xs text-gray-600 text-center space-y-1">
+                        <p><strong>Positioning Guide:</strong> Red dots show exact text positions</p>
+                        <p><strong>Text Alignment:</strong> Left (0-20%), Center (21-79%), Right (80-100%)</p>
+                    </div>
+                    @endif
+                </div>
+
+
+                {{-- Element Configuration --}}
+                <div class="bg-white border rounded-lg p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="font-medium text-gray-700">Text Elements Configuration</h4>
+                        <button wire:click="saveElementPositions" class="btn-add-slot btn btn-primary">
+                            Save Positions
+                        </button>
                     </div>
 
-
-                    {{-- Element Configuration --}}
-                    <div class="bg-white border rounded-lg p-4">
-                        <div class="flex justify-between items-center mb-3">
-                            <h4 class="font-medium text-gray-700">Text Elements Configuration</h4>
-                            <button wire:click="saveElementPositions" class="btn-add-slot btn btn-primary">
-                                Save Positions
-                            </button>
+                    {{-- Preview Sample Data --}}
+                    {{-- <div class="mb-4 p-3 bg-gray-50 rounded">
+                        <h5 class="text-sm font-medium text-gray-700 mb-2">Sample Preview Data</h5>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <input type="text" wire:model.live="previewData.user_id" placeholder="User ID"
+                                class="px-2 py-1 border rounded text-sm">
+                            <input type="text" wire:model.live="previewData.name" placeholder="Full Name"
+                                class="px-2 py-1 border rounded text-sm">
+                            <input type="text" wire:model.live="previewData.department" placeholder="Department"
+                                class="px-2 py-1 border rounded text-sm">
+                            <input type="text" wire:model.live="previewData.expiry" placeholder="Expiry Date"
+                                class="px-2 py-1 border rounded text-sm">
                         </div>
+                    </div> --}}
 
-                        {{-- Preview Sample Data --}}
-                        {{-- <div class="mb-4 p-3 bg-gray-50 rounded">
-                            <h5 class="text-sm font-medium text-gray-700 mb-2">Sample Preview Data</h5>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <input type="text" wire:model.live="previewData.user_id" placeholder="User ID"
-                                    class="px-2 py-1 border rounded text-sm">
-                                <input type="text" wire:model.live="previewData.name" placeholder="Full Name"
-                                    class="px-2 py-1 border rounded text-sm">
-                                <input type="text" wire:model.live="previewData.department" placeholder="Department"
-                                    class="px-2 py-1 border rounded text-sm">
-                                <input type="text" wire:model.live="previewData.expiry" placeholder="Expiry Date"
-                                    class="px-2 py-1 border rounded text-sm">
+                    {{-- Position and Style Controls --}}
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        @foreach($elementConfig as $element => $config)
+                        <div class="border rounded p-3 ">
+                            <div class="flex items-center mb-2">
+                                <input type="checkbox" wire:model="elementConfig.{{ $element }}.enabled" class="mr-2"
+                                    wire:click="saveElementPositions">
+                                <label class="text-sm text-gray-700">Enable this element</label>
                             </div>
-                        </div> --}}
+                            <div class="{{ empty($config['enabled']) ? 'opacity-50 pointer-events-none' : '' }}">
+                                <h5 class="font-medium text-gray-700 mb-2 capitalize">
+                                    {{ str_replace('_', ' ', $element) }} Settings
+                                </h5>
 
-                        {{-- Position and Style Controls --}}
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                            @foreach($elementConfig as $element => $config)
-                                <div class="border rounded p-3 ">
-                                    <div class="flex items-center mb-2">
-                                        <input type="checkbox" wire:model="elementConfig.{{ $element }}.enabled" class="mr-2"
-                                            wire:click="saveElementPositions">
-                                        <label class="text-sm text-gray-700">Enable this element</label>
+                                <div class="space-y-3">
+                                    {{-- Position --}}
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600">X Position
+                                                (%)</label>
+                                            <input type="number"
+                                                wire:model.live="elementConfig.{{ $element }}.x_percent" min="0"
+                                                max="100" step="0.1"
+                                                class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
+                                            <small class="text-gray-500 text-xs">
+                                                @if($config['x_percent'] <= 15) Left aligned
+                                                    @elseif($config['x_percent']>= 85) Right aligned
+                                                    @else Center aligned @endif
+                                            </small>
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600">Y Position
+                                                (%)</label>
+                                            <input type="number"
+                                                wire:model.live="elementConfig.{{ $element }}.y_percent" min="0"
+                                                max="100" step="0.1"
+                                                class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
+                                        </div>
                                     </div>
-                                    <div class="{{ empty($config['enabled']) ? 'opacity-50 pointer-events-none' : '' }}">
-                                        <h5 class="font-medium text-gray-700 mb-2 capitalize">
-                                            {{ str_replace('_', ' ', $element) }} Settings
-                                        </h5>
 
-                                        <div class="space-y-3">
-                                            {{-- Position --}}
-                                            <div class="grid grid-cols-2 gap-2">
-                                                <div>
-                                                    <label class="block text-xs font-medium text-gray-600">X Position
-                                                        (%)</label>
-                                                    <input type="number"
-                                                        wire:model.live="elementConfig.{{ $element }}.x_percent" min="0"
-                                                        max="100" step="0.1"
-                                                        class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
-                                                    <small class="text-gray-500 text-xs">
-                                                        @if($config['x_percent'] <= 15) Left aligned
-                                                        @elseif($config['x_percent'] >= 85) Right aligned
-                                                        @else Center aligned @endif
-                                                    </small>
-                                                </div>
-                                                <div>
-                                                    <label class="block text-xs font-medium text-gray-600">Y Position
-                                                        (%)</label>
-                                                    <input type="number"
-                                                        wire:model.live="elementConfig.{{ $element }}.y_percent" min="0"
-                                                        max="100" step="0.1"
-                                                        class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
-                                                </div>
-                                            </div>
+                                    {{-- Font Size and Color --}}
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600">Font Size
+                                                (px)</label>
+                                            <input type="number"
+                                                wire:model.live="elementConfig.{{ $element }}.font_size" min="8"
+                                                max="72" step="1"
+                                                class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
+                                        </div>
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600">Text Color</label>
+                                            <input type="color" wire:model.live="elementConfig.{{ $element }}.color"
+                                                class="w-full h-8 border rounded cursor-pointer">
+                                        </div>
+                                    </div>
 
-                                            {{-- Font Size and Color --}}
-                                            <div class="grid grid-cols-2 gap-2">
-                                                <div>
-                                                    <label class="block text-xs font-medium text-gray-600">Font Size
-                                                        (px)</label>
-                                                    <input type="number"
-                                                        wire:model.live="elementConfig.{{ $element }}.font_size" min="8"
-                                                        max="72" step="1"
-                                                        class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
-                                                </div>
-                                                <div>
-                                                    <label class="block text-xs font-medium text-gray-600">Text Color</label>
-                                                    <input type="color" wire:model.live="elementConfig.{{ $element }}.color"
-                                                        class="w-full h-8 border rounded cursor-pointer">
-                                                </div>
-                                            </div>
-
-                                            {{-- Quick Position Buttons --}}
-                                            <div class="mt-2">
-                                                <label class="block text-xs font-medium text-gray-600 mb-1">Quick
-                                                    Positions</label>
-                                                <div class="grid grid-cols-3 gap-1 text-xs">
-                                                    <button wire:click="setQuickPosition('{{ $element }}', 'top_left')"
-                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
-                                                        type="button">
-                                                        ↖ Top Left
-                                                    </button>
-                                                    <button wire:click="setQuickPosition('{{ $element }}', 'top_center')"
-                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
-                                                        type="button">
-                                                        ↑ Top Center
-                                                    </button>
-                                                    <button wire:click="setQuickPosition('{{ $element }}', 'top_right')"
-                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
-                                                        type="button">
-                                                        ↗ Top Right
-                                                    </button>
-                                                    <button wire:click="setQuickPosition('{{ $element }}', 'center_left')"
-                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
-                                                        type="button">
-                                                        ← Left
-                                                    </button>
-                                                    <button wire:click="setQuickPosition('{{ $element }}', 'center')"
-                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
-                                                        type="button">
-                                                        ⊙ Center
-                                                    </button>
-                                                    <button wire:click="setQuickPosition('{{ $element }}', 'center_right')"
-                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
-                                                        type="button">
-                                                        → Right
-                                                    </button>
-                                                    <button wire:click="setQuickPosition('{{ $element }}', 'bottom_left')"
-                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
-                                                        type="button">
-                                                        ↙ Bottom Left
-                                                    </button>
-                                                    <button wire:click="setQuickPosition('{{ $element }}', 'bottom_center')"
-                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
-                                                        type="button">
-                                                        ↓ Bottom Center
-                                                    </button>
-                                                    <button wire:click="setQuickPosition('{{ $element }}', 'bottom_right')"
-                                                        class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
-                                                        type="button">
-                                                        ↘ Bottom Right
-                                                    </button>
-                                                </div>
-                                            </div>
+                                    {{-- Quick Position Buttons --}}
+                                    <div class="mt-2">
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Quick
+                                            Positions</label>
+                                        <div class="grid grid-cols-3 gap-1 text-xs">
+                                            <button wire:click="setQuickPosition('{{ $element }}', 'top_left')"
+                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
+                                                type="button">
+                                                ↖ Top Left
+                                            </button>
+                                            <button wire:click="setQuickPosition('{{ $element }}', 'top_center')"
+                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
+                                                type="button">
+                                                ↑ Top Center
+                                            </button>
+                                            <button wire:click="setQuickPosition('{{ $element }}', 'top_right')"
+                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
+                                                type="button">
+                                                ↗ Top Right
+                                            </button>
+                                            <button wire:click="setQuickPosition('{{ $element }}', 'center_left')"
+                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
+                                                type="button">
+                                                ← Left
+                                            </button>
+                                            <button wire:click="setQuickPosition('{{ $element }}', 'center')"
+                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
+                                                type="button">
+                                                ⊙ Center
+                                            </button>
+                                            <button wire:click="setQuickPosition('{{ $element }}', 'center_right')"
+                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
+                                                type="button">
+                                                → Right
+                                            </button>
+                                            <button wire:click="setQuickPosition('{{ $element }}', 'bottom_left')"
+                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
+                                                type="button">
+                                                ↙ Bottom Left
+                                            </button>
+                                            <button wire:click="setQuickPosition('{{ $element }}', 'bottom_center')"
+                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
+                                                type="button">
+                                                ↓ Bottom Center
+                                            </button>
+                                            <button wire:click="setQuickPosition('{{ $element }}', 'bottom_right')"
+                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
+                                                type="button">
+                                                ↘ Bottom Right
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
-                        </div>
-
-                        {{-- Global Layout Presets --}}
-                        {{-- <div class="mt-6 p-3 bg-blue-50 rounded">
-                            <h5 class="text-sm font-medium text-gray-700 mb-3">Layout Presets</h5>
-                            <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                <button
-                                    wire:click="setQuickPosition('user_id', 'top_left'); setQuickPosition('name', 'center_left'); setQuickPosition('department', 'center_left'); setQuickPosition('expiry', 'bottom_left')"
-                                    class="text-xs px-3 py-2 bg-white border rounded hover:bg-gray-100 text-left"
-                                    type="button">
-                                    📄 Vertical Left<br>
-                                    <small class="text-gray-500">All left aligned</small>
-                                </button>
-                                <button
-                                    wire:click="setQuickPosition('user_id', 'top_right'); setQuickPosition('name', 'center_right'); setQuickPosition('department', 'center_right'); setQuickPosition('expiry', 'bottom_right')"
-                                    class="text-xs px-3 py-2 bg-white border rounded hover:bg-gray-100 text-left"
-                                    type="button">
-                                    📄 Vertical Right<br>
-                                    <small class="text-gray-500">All right aligned</small>
-                                </button>
-                                <button
-                                    wire:click="setQuickPosition('user_id', 'top_left'); setQuickPosition('name', 'top_right'); setQuickPosition('department', 'bottom_left'); setQuickPosition('expiry', 'bottom_right')"
-                                    class="text-xs px-3 py-2 bg-white border rounded hover:bg-gray-100 text-left"
-                                    type="button">
-                                    ⊞ Four Corners<br>
-                                    <small class="text-gray-500">Distributed layout</small>
-                                </button>
-                                <button
-                                    wire:click="setQuickPosition('user_id', 'top_center'); setQuickPosition('name', 'center'); setQuickPosition('department', 'center'); setQuickPosition('expiry', 'bottom_center')"
-                                    class="text-xs px-3 py-2 bg-white border rounded hover:bg-gray-100 text-left"
-                                    type="button">
-                                    ⊙ Centered<br>
-                                    <small class="text-gray-500">All center aligned</small>
-                                </button>
                             </div>
-                        </div> --}}
+                        </div>
+                        @endforeach
                     </div>
-                </div>
-            @else
-                <div class="text-center py-16 text-gray-500">
 
-                    <p class="mt-2">Select a template to edit</p>
+                    {{-- Global Layout Presets --}}
+                    {{-- <div class="mt-6 p-3 bg-blue-50 rounded">
+                        <h5 class="text-sm font-medium text-gray-700 mb-3">Layout Presets</h5>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            <button
+                                wire:click="setQuickPosition('user_id', 'top_left'); setQuickPosition('name', 'center_left'); setQuickPosition('department', 'center_left'); setQuickPosition('expiry', 'bottom_left')"
+                                class="text-xs px-3 py-2 bg-white border rounded hover:bg-gray-100 text-left"
+                                type="button">
+                                📄 Vertical Left<br>
+                                <small class="text-gray-500">All left aligned</small>
+                            </button>
+                            <button
+                                wire:click="setQuickPosition('user_id', 'top_right'); setQuickPosition('name', 'center_right'); setQuickPosition('department', 'center_right'); setQuickPosition('expiry', 'bottom_right')"
+                                class="text-xs px-3 py-2 bg-white border rounded hover:bg-gray-100 text-left"
+                                type="button">
+                                📄 Vertical Right<br>
+                                <small class="text-gray-500">All right aligned</small>
+                            </button>
+                            <button
+                                wire:click="setQuickPosition('user_id', 'top_left'); setQuickPosition('name', 'top_right'); setQuickPosition('department', 'bottom_left'); setQuickPosition('expiry', 'bottom_right')"
+                                class="text-xs px-3 py-2 bg-white border rounded hover:bg-gray-100 text-left"
+                                type="button">
+                                ⊞ Four Corners<br>
+                                <small class="text-gray-500">Distributed layout</small>
+                            </button>
+                            <button
+                                wire:click="setQuickPosition('user_id', 'top_center'); setQuickPosition('name', 'center'); setQuickPosition('department', 'center'); setQuickPosition('expiry', 'bottom_center')"
+                                class="text-xs px-3 py-2 bg-white border rounded hover:bg-gray-100 text-left"
+                                type="button">
+                                ⊙ Centered<br>
+                                <small class="text-gray-500">All center aligned</small>
+                            </button>
+                        </div>
+                    </div> --}}
                 </div>
+            </div>
+            @else
+            <div class="text-center py-16 text-gray-500">
+
+                <p class="mt-2">Select a template to edit</p>
+            </div>
             @endif
         </div>
     </div>

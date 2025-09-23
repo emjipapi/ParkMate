@@ -1,5 +1,5 @@
 <div class="flex-grow-1 d-flex justify-content-center align-items-center square-box">
-        <form wire:submit.prevent="update" enctype="multipart/form-data" wire:loading.attr="disabled" wire:target="update">
+    <form wire:submit.prevent="update" enctype="multipart/form-data" wire:loading.attr="disabled" wire:target="update">
         @csrf
 
         <!-- User Info Fields -->
@@ -211,17 +211,17 @@
             </div>
             @endforeach
         </div>
-<div class="d-flex flex-column">
+        <div class="d-flex flex-column">
             <button type="button" wire:click="addVehicleRow" class="btn btn-secondary mb-5">
                 Add Vehicle
             </button>
             <button type="submit" class="btn btn-primary">
-                
+
                 <span wire:loading.remove wire:target="update">Update User</span>
 
                 <span wire:loading wire:target="update">Updating...</span>
             </button>
-</div>
+        </div>
 
         @if (session()->has('success'))
         <div class="alert alert-success mt-3">{{ session('success') }}</div>

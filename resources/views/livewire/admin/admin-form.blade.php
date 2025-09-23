@@ -25,13 +25,13 @@
         <button type="submit" class="btn btn-primary">Add Admin</button>
 
         @if (session()->has('success'))
-            <div class="alert alert-success mt-3">{{ session('success') }}</div>
+        <div class="alert alert-success mt-3">{{ session('success') }}</div>
         @endif
 
         @if ($errors->any())
-            <div class="alert alert-danger mt-3">
-                @foreach ($errors->all() as $error) <div>{{ $error }}</div> @endforeach
-            </div>
+        <div class="alert alert-danger mt-3">
+            @foreach ($errors->all() as $error) <div>{{ $error }}</div> @endforeach
+        </div>
         @endif
     </form>
 </div>

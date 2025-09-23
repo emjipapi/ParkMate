@@ -64,7 +64,7 @@
             background-color: var(--bg4);
             border: none;
             padding: 10px;
-            
+
         }
 
         .sidebar button:hover {
@@ -93,17 +93,17 @@
             line-height: 36px;
         }
 
-.content {
-    display: flex;
-    flex-direction: column;
-    margin-left: 250px;
-    padding: 20px;
-    padding-bottom: 60px;
-    min-height: calc(100vh - 96px);
-    background-color: #EAEEF4;
+        .content {
+            display: flex;
+            flex-direction: column;
+            margin-left: 250px;
+            padding: 20px;
+            padding-bottom: 60px;
+            min-height: calc(100vh - 96px);
+            background-color: #EAEEF4;
 
-    /* new: make the content a flex container */
-}
+            /* new: make the content a flex container */
+        }
 
 
         h1 {
@@ -133,11 +133,11 @@
             font-weight: 500;
         }
 
-       .content .cards-container {
+        .content .cards-container {
             margin-top: auto;
-            
+
         }
-        
+
         .card {
             display: flex;
             flex-direction: column;
@@ -177,13 +177,17 @@
             color: white;
             height: 200px;
         }
-.cards-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    align-items: end; /* sticks all rows to the bottom */
-    height: 100%; /* make sure the container has full height */
-}
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            align-items: end;
+            /* sticks all rows to the bottom */
+            height: 100%;
+            /* make sure the container has full height */
+        }
+
         .card-5 {
             border: 0px;
             border-radius: 0px;
@@ -192,55 +196,76 @@
             height: 200px;
         }
 
-/* Place cards exactly */
+        /* Place cards exactly */
 
 
-.card-1 { grid-column: 1; grid-row: 1; height: 200px; }
-.card-2 { grid-column: 2; grid-row: 1; height: 200px; }
-/* card-5 stacked on top of card-3 */
-.card-3 {
-    grid-column: 3;
-    grid-row: 1; /* base row */
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    height: 200px;
-}
+        .card-1 {
+            grid-column: 1;
+            grid-row: 1;
+            height: 200px;
+        }
 
-.card-5 {
-    grid-column: 3; 
-    grid-row: 1; /* same row as card-3 */
-    align-self: start; /* stick to top of this cell */
-    z-index: 1; /* sit above card-3 */
-    height: 200px;
-}
+        .card-2 {
+            grid-column: 2;
+            grid-row: 1;
+            height: 200px;
+        }
 
-.card-4 {
-    grid-column: 4; grid-row: 1;
-    border: 0; border-radius: 0; background: #fff; color: #000;
-    height: 450px; overflow-y: auto; padding: 1rem;
-}
+        /* card-5 stacked on top of card-3 */
+        .card-3 {
+            grid-column: 3;
+            grid-row: 1;
+            /* base row */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            height: 200px;
+        }
 
-/* Keep cards as flex boxes for internal layout (OK with grid) */
-.cards-container .card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
+        .card-5 {
+            grid-column: 3;
+            grid-row: 1;
+            /* same row as card-3 */
+            align-self: start;
+            /* stick to top of this cell */
+            z-index: 1;
+            /* sit above card-3 */
+            height: 200px;
+        }
 
-/* Remove leftover flex styles for cards inside grid */
-.cards-container .card {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
+        .card-4 {
+            grid-column: 4;
+            grid-row: 1;
+            border: 0;
+            border-radius: 0;
+            background: #fff;
+            color: #000;
+            height: 450px;
+            overflow-y: auto;
+            padding: 1rem;
+        }
 
-.card-4 h5 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 0.5rem;
-}
+        /* Keep cards as flex boxes for internal layout (OK with grid) */
+        .cards-container .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Remove leftover flex styles for cards inside grid */
+        .cards-container .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-4 h5 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 0.5rem;
+        }
+
         .recent-activity-item {
             padding: 0.5rem 0;
             border-bottom: 1px solid #eee;
@@ -333,9 +358,11 @@
                 font-size: 0.8rem;
                 /* smaller breadcrumb text */
             }
-                .cards-container .card-5 {
-        order: -1; /* first on mobile */
-    }
+
+            .cards-container .card-5 {
+                order: -1;
+                /* first on mobile */
+            }
         }
     </style>
 </head>
@@ -352,13 +379,13 @@
 
         <div class="btn-wrapper mt-3"><button class="btn active">Dashboard</button></div>
         <div class="btn-wrapper" href='/user-parking-slots' wire:navigate>
-                <button class="btn">Parking Slots</button>
+            <button class="btn">Parking Slots</button>
         </div>
         <div class="btn-wrapper" href='/user-violation-tracking' wire:navigate>
             <button class="btn">Violation Tracking</button>
         </div>
-        <div class="btn-wrapper" href='/user-settings' wire:navigate>  
-                <button class="btn">Settings</button>
+        <div class="btn-wrapper" href='/user-settings' wire:navigate>
+            <button class="btn">Settings</button>
         </div>
 
         <div class="mt-auto p-3">
@@ -395,7 +422,6 @@
     </div>
     @livewireScripts
     <script>
-
         function updateClock() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');

@@ -1,12 +1,10 @@
 <?php
 
+use App\Http\Controllers\DeviceController;
+use App\Http\Controllers\RfidController;
+use App\Models\CarSlot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Models\ParkingSlot;
-use Illuminate\Support\Facades\Cache;
-use App\Http\Controllers\RfidController;
-use App\Http\Controllers\DeviceController;
-use App\Models\CarSlot;
 
 Route::get('car-slots', function () {
     return CarSlot::all();
@@ -16,13 +14,13 @@ Route::get('car-slots/update', function (Request $request) {
     $label = $request->query('slot');       // C1, C2, etc.
     $occupied = $request->query('occupied');
 
-    if (!$label || !is_numeric($occupied)) {
+    if (! $label || ! is_numeric($occupied)) {
         return response()->json(['error' => 'Invalid input'], 400);
     }
 
     $slot = CarSlot::where('label', $label)->first();
 
-    if (!$slot) {
+    if (! $slot) {
         return response()->json(['error' => 'Slot not found'], 404);
     }
 
@@ -44,16 +42,13 @@ Route::get('area-status', function (Request $request) {
         ->value('available_count');
 
     return response()->json([
-        'full' => ($carAvailable === 0 && $motoAvailable === 0)
+        'full' => ($carAvailable === 0 && $motoAvailable === 0),
     ]);
 });
 
-//main gate
+// main gate
 Route::post('/rfid', [RfidController::class, 'logScan']);
 
 Route::post('/rfid-area', [RfidController::class, 'logScanArea']);
 
 Route::get('heartbeat', [DeviceController::class, 'heartbeat']);
-
-
-

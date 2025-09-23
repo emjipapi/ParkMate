@@ -6,14 +6,14 @@
     <title>ParkMate - Live Attendance Mode</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap 5 CDN -->
-  <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-  <!-- Inter font -->
-  <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    <!-- Bootstrap 5 CDN -->
+    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Inter font -->
+    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
     <style>
-:root {
+        :root {
             --bg1: #56ca8b;
             --bg2: #3bc480;
             --bg3: #38b174;
@@ -30,7 +30,7 @@
             font-family: 'Inter', sans-serif;
         }
 
-        
+
 
         .admin-header {
             background-color: var(--bg1);
@@ -62,7 +62,7 @@
 
 
         .content {
-            
+
             padding: 20px;
             padding-bottom: 60px;
             min-height: calc(100vh - 96px);
@@ -71,7 +71,7 @@
             background-color: #EAEEF4;
         }
 
-        
+
         .content .cards-container {
             margin-top: auto;
         }
@@ -91,7 +91,7 @@
         .bottom-bar {
             position: relative;
             bottom: 0;
-            
+
             height: 48px;
             background-color: 'white';
             color: 'black';
@@ -109,24 +109,24 @@
 
 
     <div class="top-bar">
-                <div id="clock" style="font-size: 1rem;"></div>
+        <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
     </div>
     <!-- Main Content -->
-<div class="content">
-    <!-- Header stays at the top -->
-    <div class="d-flex align-items-baseline justify-content-between mb-3">
-        <div class="d-flex align-items-baseline">
-            <h3 class="mb-0 me-3">Attendance</h3>
-            <h6 class="mb-0">Live Attendance Mode</h6>
+    <div class="content">
+        <!-- Header stays at the top -->
+        <div class="d-flex align-items-baseline justify-content-between mb-3">
+            <div class="d-flex align-items-baseline">
+                <h3 class="mb-0 me-3">Attendance</h3>
+                <h6 class="mb-0">Live Attendance Mode</h6>
+            </div>
+        </div>
+
+        <!-- Centering only this section -->
+        <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+            <livewire:live-attendance-component-copy />
         </div>
     </div>
-
-    <!-- Centering only this section -->
-    <div class="flex-grow-1 d-flex justify-content-center align-items-center">
-        <livewire:live-attendance-component-copy />
-    </div>
-</div>
 
 
     <!-- Bottom Bar -->
@@ -135,9 +135,9 @@
         <span>ParkMate</span>
     </div>
 
-<script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-<script>
-    function updateClock() {
+    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+    <script>
+        function updateClock() {
         const now = new Date();
         const hours = String(now.getHours()).padStart(2, '0');
         const minutes = String(now.getMinutes()).padStart(2, '0');
@@ -149,7 +149,7 @@
 
     setInterval(updateClock, 1000);
     updateClock(); // run once immediately
-</script>
+    </script>
 </body>
 
 </html>

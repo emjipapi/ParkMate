@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -26,7 +25,7 @@
     .center-box {
       min-width: 350px;
       /* keeps original width on desktop */
-      
+
       min-height: 240px;
       background-color: #ffffff;
       padding: 20px;
@@ -72,31 +71,30 @@
       <!-- Display errors -->
       @if ($errors->any())
       <div class="alert alert-danger">
-      <ul class="mb-0">
-        @foreach ($errors->all() as $error)
-      {{ $error }}
-      @endforeach
-      </ul>
+        <ul class="mb-0">
+          @foreach ($errors->all() as $error)
+          {{ $error }}
+          @endforeach
+        </ul>
       </div>
-    @endif
+      @endif
 
-<form method="POST" action="{{ route('admin.login.submit') }}">
-    @csrf
-    <div class="mb-3">
-<input type="text" name="username" class="form-control"
-    placeholder="Username" required />
+      <form method="POST" action="{{ route('admin.login.submit') }}">
+        @csrf
+        <div class="mb-3">
+          <input type="text" name="username" class="form-control" placeholder="Username" required />
 
-    </div>
-    <div class="input-group mb-3">
-        <input type="password" name="password" class="form-control" placeholder="Password" required />
-        <span class="input-group-text bg-white border-start-0">
+        </div>
+        <div class="input-group mb-3">
+          <input type="password" name="password" class="form-control" placeholder="Password" required />
+          <span class="input-group-text bg-white border-start-0">
             <i class="fas fa-lock text-secondary"></i>
-        </span>
-    </div>
-    <div class="d-flex justify-content-end mt-3">
-        <button type="submit" class="btn-signin">Sign In</button>
-    </div>
-</form>
+          </span>
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+          <button type="submit" class="btn-signin">Sign In</button>
+        </div>
+      </form>
     </div>
   </div>
 </body>

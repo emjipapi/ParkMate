@@ -336,6 +336,7 @@
             color: white;
             margin-right: 10px;
         }
+
         @media (max-width: 1200px) {
             form {
                 max-width: 100%;
@@ -343,6 +344,7 @@
                 margin-left: 12%;
             }
         }
+
         @media (max-width: 768px) {
             .mobile-menu-btn {
                 display: inline-block;

@@ -11,17 +11,17 @@
     <title>ParkMate - Sticker Generator</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap 5 CDN -->
-  <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-  <!-- Inter font -->
-  <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
-  <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
-  <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
+    <!-- Bootstrap 5 CDN -->
+    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Inter font -->
+    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
     <livewire:styles />
     <style>
-:root {
+        :root {
             --bg1: #56ca8b;
             --bg2: #3bc480;
             --bg3: #38b174;
@@ -71,7 +71,7 @@
             background-color: var(--bg4);
             border: none;
             padding: 10px;
-            
+
         }
 
         .sidebar button:hover {
@@ -100,7 +100,7 @@
             line-height: 36px;
         }
 
-                .live-btn-bar {
+        .live-btn-bar {
             display: flex;
             align-items: center;
             background-color: white;
@@ -320,116 +320,122 @@
             opacity: 1;
             pointer-events: auto;
         }
+
         .nav-tabs .nav-link {
-    cursor: pointer;
-}
-.template-preview-container {
-    position: relative !important;
-    display: inline-block;
-}
+            cursor: pointer;
+        }
 
-.template-preview-container img {
-    display: block;
-    max-width: 100%;
-    height: auto;
-}
+        .template-preview-container {
+            position: relative !important;
+            display: inline-block;
+        }
 
-.text-overlay {
-    position: absolute !important;
-    pointer-events: none;
-    user-select: none;
-    z-index: 10;
-}
+        .template-preview-container img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
 
-.position-indicator {
-    position: absolute !important;
-    z-index: 20;
-    transition: all 0.2s ease;
-}
+        .text-overlay {
+            position: absolute !important;
+            pointer-events: none;
+            user-select: none;
+            z-index: 10;
+        }
 
-.position-indicator:hover {
-    transform: translateX(-50%) translateY(-50%) scale(1.3) !important;
-}
+        .position-indicator {
+            position: absolute !important;
+            z-index: 20;
+            transition: all 0.2s ease;
+        }
 
-/* Ensure text stays within image bounds */
-.text-overlay {
-    max-width: 90%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-/* Add this to your existing CSS to fix text positioning */
+        .position-indicator:hover {
+            transform: translateX(-50%) translateY(-50%) scale(1.3) !important;
+        }
 
-/* Force container positioning */
-.template-preview-container {
-    position: relative !important;
-    display: inline-block !important;
-    overflow: hidden !important;
-    max-width: 100% !important;
-}
+        /* Ensure text stays within image bounds */
+        .text-overlay {
+            max-width: 90%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-.template-preview-container img {
-    display: block !important;
-    max-width: 100% !important;
-    height: auto !important;
-    position: relative !important;
-    z-index: 1 !important;
-}
+        /* Add this to your existing CSS to fix text positioning */
 
-/* Force text overlay positioning within container */
-.template-preview-container .text-overlay {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    pointer-events: none !important;
-    user-select: none !important;
-    z-index: 10 !important;
-    overflow: hidden !important;
-}
+        /* Force container positioning */
+        .template-preview-container {
+            position: relative !important;
+            display: inline-block !important;
+            overflow: hidden !important;
+            max-width: 100% !important;
+        }
 
-/* Force position indicators within container */
-.template-preview-container .position-indicator {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    z-index: 20 !important;
-    transition: all 0.2s ease !important;
-}
+        .template-preview-container img {
+            display: block !important;
+            max-width: 100% !important;
+            height: auto !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
 
-/* Ensure text elements are positioned relative to image */
-.template-preview-container .text-overlay > div,
-.template-preview-container .position-indicator > div {
-    position: absolute !important;
-}
+        /* Force text overlay positioning within container */
+        .template-preview-container .text-overlay {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            pointer-events: none !important;
+            user-select: none !important;
+            z-index: 10 !important;
+            overflow: hidden !important;
+        }
 
-/* Override any global positioning styles */
-div[style*="left:"][style*="top:"] {
-    position: absolute !important;
-}
+        /* Force position indicators within container */
+        .template-preview-container .position-indicator {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            z-index: 20 !important;
+            transition: all 0.2s ease !important;
+        }
 
-/* Specific override for Livewire generated elements */
-[wire\:loading], [wire\:target] {
-    position: relative !important;
-}
+        /* Ensure text elements are positioned relative to image */
+        .template-preview-container .text-overlay>div,
+        .template-preview-container .position-indicator>div {
+            position: absolute !important;
+        }
 
-/* Debug helper - remove after fixing */
-.template-preview-container {
-    border: 2px solid red !important;
-}
+        /* Override any global positioning styles */
+        div[style*="left:"][style*="top:"] {
+            position: absolute !important;
+        }
 
-.template-preview-container .text-overlay {
-    border: 1px solid blue !important;
-}
+        /* Specific override for Livewire generated elements */
+        [wire\:loading],
+        [wire\:target] {
+            position: relative !important;
+        }
 
-.template-preview-container .position-indicator {
-    border: 1px solid green !important;
-}
-.nav-tabs .nav-link {
-    cursor: pointer;
-}
+        /* Debug helper - remove after fixing */
+        .template-preview-container {
+            border: 2px solid red !important;
+        }
+
+        .template-preview-container .text-overlay {
+            border: 1px solid blue !important;
+        }
+
+        .template-preview-container .position-indicator {
+            border: 1px solid green !important;
+        }
+
+        .nav-tabs .nav-link {
+            cursor: pointer;
+        }
+
         .mobile-menu-btn {
             display: none;
             /* hidden on desktop */
@@ -440,63 +446,85 @@ div[style*="left:"][style*="top:"] {
             margin-right: 10px;
         }
 
-@media (max-width: 768px) {
+        @media (max-width: 768px) {
 
-        .mobile-menu-btn {
-        display: inline-block;
-    }
-        .sidebar {
-        transform: translateX(-100%); /* hidden */
-        z-index: 1000;
-        transition: transform 0.3s ease-in-out;
-        
-    }
-    .sidebar .mt-auto {
-        margin-top: 0 !important;
-    }
+            .mobile-menu-btn {
+                display: inline-block;
+            }
 
-    .sidebar.open {
-        transform: translateX(0); /* slide in */
-    }
+            .sidebar {
+                transform: translateX(-100%);
+                /* hidden */
+                z-index: 1000;
+                transition: transform 0.3s ease-in-out;
 
-    .content, .top-bar, .bottom-bar {
-        margin-left: 0; /* full width on mobile */
-    }
-    .bottom-bar {
-        left: 0;
-        width: 100%;
-        position: relative; /* or fixed if you want it always at bottom */
-        padding: 0 10px; /* optional: less padding for mobile */
-        flex-direction: column; /* optional: stack items vertically if needed */
-        gap: 5px;
-    }
-        .d-flex.align-items-baseline h3 {
-        font-size: 1.2rem; /* smaller heading on mobile */
-    }
+            }
 
-    .d-flex.align-items-baseline h6 {
-        font-size: 0.9rem; /* smaller subheading */
-    }
+            .sidebar .mt-auto {
+                margin-top: 0 !important;
+            }
 
-    .d-flex.align-items-baseline span,
-    .d-flex.align-items-baseline .text-white {
-        font-size: 0.8rem; /* smaller breadcrumb text */
-    }
-        .tabs-container {
-        margin: 0 -20px; /* extend to screen edges */
-        padding: 0 20px; /* add padding back inside */
-        touch-action: pan-x; /* enable horizontal touch scrolling */
-    }
-    
-    .nav-link {
-        font-size: 0.9rem; /* slightly smaller text on mobile */
-        padding: 8px 16px !important; /* adjust padding */
-    }
-    
-    .table-responsive {
-        touch-action: pan-x; /* enable horizontal touch scrolling for table */
-    }
-}
+            .sidebar.open {
+                transform: translateX(0);
+                /* slide in */
+            }
+
+            .content,
+            .top-bar,
+            .bottom-bar {
+                margin-left: 0;
+                /* full width on mobile */
+            }
+
+            .bottom-bar {
+                left: 0;
+                width: 100%;
+                position: relative;
+                /* or fixed if you want it always at bottom */
+                padding: 0 10px;
+                /* optional: less padding for mobile */
+                flex-direction: column;
+                /* optional: stack items vertically if needed */
+                gap: 5px;
+            }
+
+            .d-flex.align-items-baseline h3 {
+                font-size: 1.2rem;
+                /* smaller heading on mobile */
+            }
+
+            .d-flex.align-items-baseline h6 {
+                font-size: 0.9rem;
+                /* smaller subheading */
+            }
+
+            .d-flex.align-items-baseline span,
+            .d-flex.align-items-baseline .text-white {
+                font-size: 0.8rem;
+                /* smaller breadcrumb text */
+            }
+
+            .tabs-container {
+                margin: 0 -20px;
+                /* extend to screen edges */
+                padding: 0 20px;
+                /* add padding back inside */
+                touch-action: pan-x;
+                /* enable horizontal touch scrolling */
+            }
+
+            .nav-link {
+                font-size: 0.9rem;
+                /* slightly smaller text on mobile */
+                padding: 8px 16px !important;
+                /* adjust padding */
+            }
+
+            .table-responsive {
+                touch-action: pan-x;
+                /* enable horizontal touch scrolling for table */
+            }
+        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -516,29 +544,29 @@ div[style*="left:"][style*="top:"] {
             </a>
         </div>
         <div href='/parking-slots' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Parking Slots</button>
-            
+
+            <button class="btn">Parking Slots</button>
+
         </div>
-                <div href='/violation-tracking' wire:navigate class="btn-wrapper">
-           
-                <button class="btn">Violation Tracking</button>
-            
+        <div href='/violation-tracking' wire:navigate class="btn-wrapper">
+
+            <button class="btn">Violation Tracking</button>
+
         </div>
-                        <div href='/users' wire:navigate class="btn-wrapper">
-           
-                <button class="btn">Users</button>
-            
+        <div href='/users' wire:navigate class="btn-wrapper">
+
+            <button class="btn">Users</button>
+
         </div>
-                <div class="btn-wrapper">
-           
-                <button class="btn active">Sticker Generator</button>
-            
+        <div class="btn-wrapper">
+
+            <button class="btn active">Sticker Generator</button>
+
         </div>
-                <div href='/activity-log' wire:navigate class="btn-wrapper">
-           
-                <button class="btn">Activity Log</button>
-            
+        <div href='/activity-log' wire:navigate class="btn-wrapper">
+
+            <button class="btn">Activity Log</button>
+
         </div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
@@ -554,9 +582,9 @@ div[style*="left:"][style*="top:"] {
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div href='/admin-dashboard/live-attendance-mode' wire:navigate class="live-btn-bar">
-                <button class="live-btn">
-                    Live Attendance Mode
-                </button>   
+            <button class="live-btn">
+                Live Attendance Mode
+            </button>
         </div>
     </div>
 
@@ -582,7 +610,7 @@ div[style*="left:"][style*="top:"] {
         <span>ParkMate</span>
     </div>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    
+
     <livewire:scripts />
 
     <script>
@@ -600,11 +628,11 @@ div[style*="left:"][style*="top:"] {
         updateClock(); // run once immediately
     </script>
     <script>
-function openSidebar() {
+        function openSidebar() {
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('open');
 }
-</script>
+    </script>
 </body>
 
 </html>

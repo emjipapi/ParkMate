@@ -14,7 +14,7 @@
     <!-- Font Awesome -->
     <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
     <style>
-                :root {
+        :root {
             --bg1: #56ca8b;
             --bg2: #3bc480;
             --bg3: #38b174;
@@ -64,7 +64,7 @@
             background-color: var(--bg4);
             border: none;
             padding: 10px;
-            
+
         }
 
         .sidebar button:hover {
@@ -102,7 +102,7 @@
             background-color: #EAEEF4;
         }
 
-       
+
 
         h1 {
             font-weight: 600;
@@ -268,7 +268,8 @@
             color: white;
             margin-right: 10px;
         }
-                .square-box {
+
+        .square-box {
             background-color: white;
             width: 100%;
             min-height: 100px;
@@ -403,7 +404,6 @@
     </div>
     @livewireScripts
     <script>
-
         function updateClock() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');

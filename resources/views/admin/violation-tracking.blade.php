@@ -19,7 +19,7 @@
     <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
     <livewire:styles />
     <style>
-:root {
+        :root {
             --bg1: #56ca8b;
             --bg2: #3bc480;
             --bg3: #38b174;
@@ -69,7 +69,7 @@
             background-color: var(--bg4);
             border: none;
             padding: 10px;
-            
+
         }
 
         .sidebar button:hover {
@@ -98,7 +98,7 @@
             line-height: 36px;
         }
 
-                .live-btn-bar {
+        .live-btn-bar {
             display: flex;
             align-items: center;
             background-color: white;
@@ -138,7 +138,7 @@
             background-color: #EAEEF4;
         }
 
-       
+
         .content .cards-container {
             margin-top: auto;
         }
@@ -202,7 +202,7 @@
             width: 100%;
             border-collapse: collapse;
             text-align: center;
-            
+
         }
 
 
@@ -317,134 +317,170 @@
             opacity: 1;
             pointer-events: auto;
         }
-        
-            .mobile-menu-btn {
-    display: none; /* hidden on desktop */
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: white;
-    margin-right: 10px;
-}
-.table-responsive {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-
-.custom-table {
-    min-width: 1000px; /* adjust based on how many columns you want visible */
-    table-layout: auto; /* allow natural column widths */
-}
-.tabs-container {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    /* Hide scrollbars */
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE/Edge */
-}
-
-.tabs-container::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, Opera */
-}
-
-.nav-tabs {
-    min-width: max-content;
-    flex-wrap: nowrap;
-    display: flex;
-}
-.nav-tabs .nav-link {
-    cursor: pointer;
-}
-/* Hide table scrollbars too */
-.table-responsive {
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-
-}
-
-@media (max-width: 1200px) {
-    body {
-        overflow-x: auto; /* allow scrollable content */
-    }
-
-    .table-responsive {
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .custom-table {
-        min-width: 1000px; /* force horizontal scroll if screen is too narrow */
-    }
-}
-
-
-@media (max-width: 768px) {
 
         .mobile-menu-btn {
-        display: inline-block;
-    }
-        .sidebar {
-        transform: translateX(-100%); /* hidden */
-        z-index: 1000;
-        transition: transform 0.3s ease-in-out;
-        
-    }
-    .sidebar .mt-auto {
-        margin-top: 0 !important;
-    }
+            display: none;
+            /* hidden on desktop */
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            margin-right: 10px;
+        }
 
-    .sidebar.open {
-        transform: translateX(0); /* slide in */
-    }
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
 
-    .content, .top-bar, .bottom-bar {
-        margin-left: 0; /* full width on mobile */
-    }
-    .bottom-bar {
-        left: 0;
-        width: 100%;
-        position: relative; /* or fixed if you want it always at bottom */
-        padding: 0 10px; /* optional: less padding for mobile */
-        flex-direction: column; /* optional: stack items vertically if needed */
-        gap: 5px;
-    }
-        .d-flex.align-items-baseline h3 {
-        font-size: 1.2rem; /* smaller heading on mobile */
-    }
 
-    .d-flex.align-items-baseline h6 {
-        font-size: 0.9rem; /* smaller subheading */
-    }
+        .custom-table {
+            min-width: 1000px;
+            /* adjust based on how many columns you want visible */
+            table-layout: auto;
+            /* allow natural column widths */
+        }
 
-    .d-flex.align-items-baseline span,
-    .d-flex.align-items-baseline .text-white {
-        font-size: 0.8rem; /* smaller breadcrumb text */
-    }
-.table-responsive {
-    overflow-x: auto;
-    overflow-y: hidden; /* ⬅️ removes the tiny vertical scroll */
-    -webkit-overflow-scrolling: touch;
-}
-    .tabs-container {
-        margin: 0 -20px; /* extend to screen edges */
-        padding: 0 20px; /* add padding back inside */
-        touch-action: pan-x; /* enable horizontal touch scrolling */
-    }
-    
-    .nav-link {
-        font-size: 0.9rem; /* slightly smaller text on mobile */
-        padding: 8px 16px !important; /* adjust padding */
-    }
-    
-    .table-responsive {
-        touch-action: pan-x; /* enable horizontal touch scrolling for table */
-    }
+        .tabs-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            /* Hide scrollbars */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE/Edge */
+        }
 
-}
+        .tabs-container::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
+        }
+
+        .nav-tabs {
+            min-width: max-content;
+            flex-wrap: nowrap;
+            display: flex;
+        }
+
+        .nav-tabs .nav-link {
+            cursor: pointer;
+        }
+
+        /* Hide table scrollbars too */
+        .table-responsive {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+
+        }
+
+        @media (max-width: 1200px) {
+            body {
+                overflow-x: auto;
+                /* allow scrollable content */
+            }
+
+            .table-responsive {
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .custom-table {
+                min-width: 1000px;
+                /* force horizontal scroll if screen is too narrow */
+            }
+        }
+
+
+        @media (max-width: 768px) {
+
+            .mobile-menu-btn {
+                display: inline-block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                /* hidden */
+                z-index: 1000;
+                transition: transform 0.3s ease-in-out;
+
+            }
+
+            .sidebar .mt-auto {
+                margin-top: 0 !important;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                /* slide in */
+            }
+
+            .content,
+            .top-bar,
+            .bottom-bar {
+                margin-left: 0;
+                /* full width on mobile */
+            }
+
+            .bottom-bar {
+                left: 0;
+                width: 100%;
+                position: relative;
+                /* or fixed if you want it always at bottom */
+                padding: 0 10px;
+                /* optional: less padding for mobile */
+                flex-direction: column;
+                /* optional: stack items vertically if needed */
+                gap: 5px;
+            }
+
+            .d-flex.align-items-baseline h3 {
+                font-size: 1.2rem;
+                /* smaller heading on mobile */
+            }
+
+            .d-flex.align-items-baseline h6 {
+                font-size: 0.9rem;
+                /* smaller subheading */
+            }
+
+            .d-flex.align-items-baseline span,
+            .d-flex.align-items-baseline .text-white {
+                font-size: 0.8rem;
+                /* smaller breadcrumb text */
+            }
+
+            .table-responsive {
+                overflow-x: auto;
+                overflow-y: hidden;
+                /* ⬅️ removes the tiny vertical scroll */
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .tabs-container {
+                margin: 0 -20px;
+                /* extend to screen edges */
+                padding: 0 20px;
+                /* add padding back inside */
+                touch-action: pan-x;
+                /* enable horizontal touch scrolling */
+            }
+
+            .nav-link {
+                font-size: 0.9rem;
+                /* slightly smaller text on mobile */
+                padding: 8px 16px !important;
+                /* adjust padding */
+            }
+
+            .table-responsive {
+                touch-action: pan-x;
+                /* enable horizontal touch scrolling for table */
+            }
+
+        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -528,7 +564,7 @@
         <span>ParkMate</span>
     </div>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    
+
     {{-- <script src="{{ asset('js/alpine.min.js') }}"></script> --}}
     <livewire:scripts />
 
@@ -547,7 +583,7 @@
         updateClock(); // run once immediately
     </script>
     <script>
-function openSidebar() {
+        function openSidebar() {
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('open');
 }
@@ -555,7 +591,7 @@ function closeSidebar() {
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('open');
 }
-</script>
+    </script>
 
 </body>
 

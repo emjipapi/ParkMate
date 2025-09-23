@@ -64,7 +64,7 @@
             background-color: var(--bg4);
             border: none;
             padding: 10px;
-            
+
         }
 
         .sidebar button:hover {
@@ -267,7 +267,8 @@
             color: white;
             margin-right: 10px;
         }
-                .square-box {
+
+        .square-box {
             background-color: white;
             width: 100%;
             min-height: 100px;
@@ -405,7 +406,6 @@
     </div>
     @livewireScripts
     <script>
-
         function updateClock() {
             const now = new Date();
             const hours = String(now.getHours()).padStart(2, '0');

@@ -1,6 +1,6 @@
 <div class="flex-grow-1 d-flex justify-content-center align-items-center square-box">
     <form wire:submit.prevent="update">
-        
+        @csrf
 
         <div class="mb-3">
             <label>Username</label>
@@ -33,15 +33,15 @@
         </button>
 
         @if (session()->has('success'))
-            <div class="alert alert-success mt-3">{{ session('success') }}</div>
+        <div class="alert alert-success mt-3">{{ session('success') }}</div>
         @endif
 
         @if ($errors->any())
-            <div class="alert alert-danger mt-3">
-                @foreach ($errors->all() as $error)
-                    <div>{{ $error }}</div>
-                @endforeach
-            </div>
+        <div class="alert alert-danger mt-3">
+            @foreach ($errors->all() as $error)
+            <div>{{ $error }}</div>
+            @endforeach
+        </div>
         @endif
     </form>
 </div>

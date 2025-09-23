@@ -1,7 +1,7 @@
 <div wire:ignore.self class="modal fade" id="createAreaModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      
+
       <div class="modal-header">
         <h5 class="modal-title">Create Parking Area</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
@@ -13,7 +13,7 @@
           <label class="form-label">Area Name</label>
           <input type="text" class="form-control @error('areaName') is-invalid @enderror" wire:model="areaName">
           @error('areaName')
-            <div class="invalid-feedback">{{ $message }}</div>
+          <div class="invalid-feedback">{{ $message }}</div>
           @enderror
         </div>
 
@@ -24,30 +24,32 @@
             <select class="form-select @error('slotPrefix') is-invalid @enderror" wire:model="slotPrefix">
               <option value="">-- Select Letter --</option>
               @foreach (range('A', 'Z') as $letter)
-                <option value="{{ $letter }}">{{ $letter }}</option>
+              <option value="{{ $letter }}">{{ $letter }}</option>
               @endforeach
             </select>
             <small class="text-muted">Ex: D + 14 → D1…D14</small>
             @error('slotPrefix')
-              <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
           </div>
 
           {{-- Car Slots --}}
           <div class="col-md-4 mb-3">
             <label class="form-label">Car Slots</label>
-            <input type="number" class="form-control @error('carSlots') is-invalid @enderror" wire:model="carSlots" min="0">
+            <input type="number" class="form-control @error('carSlots') is-invalid @enderror" wire:model="carSlots"
+              min="0">
             @error('carSlots')
-              <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
           </div>
 
           {{-- Motorcycle Slots --}}
           <div class="col-md-4 mb-3">
             <label class="form-label">Motorcycle Slots</label>
-            <input type="number" class="form-control @error('motorcycleSlots') is-invalid @enderror" wire:model="motorcycleSlots" min="0">
+            <input type="number" class="form-control @error('motorcycleSlots') is-invalid @enderror"
+              wire:model="motorcycleSlots" min="0">
             @error('motorcycleSlots')
-              <div class="invalid-feedback">{{ $message }}</div>
+            <div class="invalid-feedback">{{ $message }}</div>
             @enderror
           </div>
         </div>
@@ -62,7 +64,7 @@
   </div>
 </div>
 <script>
-document.addEventListener('DOMContentLoaded', function () {
+  document.addEventListener('DOMContentLoaded', function () {
     window.addEventListener('close-create-area-modal', () => {
         const modalEl = document.getElementById('createAreaModal');
         if (!modalEl) return;

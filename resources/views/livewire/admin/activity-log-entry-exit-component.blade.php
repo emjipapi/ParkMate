@@ -64,11 +64,11 @@
             </div>
         </div>
     </div>
-<div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-3">
-    {{-- 🔍 Search Box --}}
-    <input type="text" class="form-control mb-3" placeholder="Search by name, ID, or action..."
-        wire:model.live.debounce.300ms="search" style="max-width: 400px">
-                <div class="d-flex align-items-center gap-1">
+    <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-3">
+        {{-- 🔍 Search Box --}}
+        <input type="text" class="form-control mb-3" placeholder="Search by name, ID, or action..."
+            wire:model.live.debounce.300ms="search" style="max-width: 400px">
+        <div class="d-flex align-items-center gap-1">
             <span>Show</span>
             <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
                 @foreach($perPageOptions as $option)
@@ -77,7 +77,7 @@
             </select>
             <span>entries</span>
         </div>
-</div>
+    </div>
 
     {{-- 🎛 Filter Bar --}}
     <div class="d-flex flex-wrap justify-content-start gap-2 mb-3">

@@ -36,7 +36,7 @@
     <!-- Alert -->
     <template x-if="showAlert">
         <div class="alert alert-warning text-center position-fixed top-0 start-50 translate-middle-x mt-3 shadow"
-             style="z-index: 2000;">
+            style="z-index: 2000;">
             <span x-text="alertMessage"></span>
         </div>
     </template>
@@ -47,17 +47,17 @@
             <div class="alert alert-primary d-flex align-items-center shadow">
                 <span class="me-3" x-text="`${selectedIds.length} admin(s) selected across all pages`"></span>
                 <button type="button" class="btn btn-sm btn-outline-primary me-2"
-                        @click="selectedIds = []; localStorage.removeItem('adminTable_selectedIds')">
+                    @click="selectedIds = []; localStorage.removeItem('adminTable_selectedIds')">
                     Clear All
                 </button>
             </div>
         </div>
     </template>
-<div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-3">
-    <!-- Search -->
-    <input type="text" class="form-control mb-3" placeholder="Search admins..."
-           wire:model.live.debounce.300ms="search" style="max-width: 400px" />
-                   <div class="d-flex align-items-center gap-1">
+    <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-3">
+        <!-- Search -->
+        <input type="text" class="form-control mb-3" placeholder="Search admins..."
+            wire:model.live.debounce.300ms="search" style="max-width: 400px" />
+        <div class="d-flex align-items-center gap-1">
             <span>Show</span>
             <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
                 @foreach($perPageOptions as $option)
@@ -66,14 +66,15 @@
             </select>
             <span>entries</span>
         </div>
-</div>
+    </div>
     <!-- Toolbar -->
     <div class="d-flex justify-content-end mb-3 gap-3">
         <i :class="check2 ? 'bi bi-check2-all text-primary' : 'bi bi-check2-all'"
-           style="transform: scale(1.2); cursor: pointer;" @click="toggleMaster()" title="Toggle multi-select mode"></i>
+            style="transform: scale(1.2); cursor: pointer;" @click="toggleMaster()"
+            title="Toggle multi-select mode"></i>
 
         <i class="bi bi-trash-fill" :class="selectedIds.length > 0 ? 'text-danger' : 'text-muted'"
-           style="transform: scale(1.2); cursor: pointer;" @click="triggerDelete()" title="Delete selected"></i>
+            style="transform: scale(1.2); cursor: pointer;" @click="triggerDelete()" title="Delete selected"></i>
     </div>
 
     <!-- Table -->
@@ -91,11 +92,10 @@
             </thead>
             <tbody>
                 @forelse ($admins as $admin)
-                    <tr x-bind:class="{ 'table-active': check2 && selectedIds.includes({{ $admin->id }}) }">
-                        <td x-show="check2">
-                            <input type="checkbox" class="form-check-input" value="{{ $admin->id }}"
-                                   :checked="selectedIds.includes({{ $admin->id }})"
-                                   @change="
+                <tr x-bind:class="{ 'table-active': check2 && selectedIds.includes({{ $admin->id }}) }">
+                    <td x-show="check2">
+                        <input type="checkbox" class="form-check-input" value="{{ $admin->id }}"
+                            :checked="selectedIds.includes({{ $admin->id }})" @change="
                                        if ($event.target.checked) {
                                            if (!selectedIds.includes({{ $admin->id }})) selectedIds.push({{ $admin->id }});
                                        } else {
@@ -103,23 +103,23 @@
                                        }
                                        localStorage.setItem('adminTable_selectedIds', JSON.stringify(selectedIds));
                                    ">
-                        </td>
-                        <td>{{ $admin->admin_id }}</td>
-                        <td>{{ $admin->firstname }}</td>
-                        <td>{{ $admin->middlename }}</td>
-                        <td>{{ $admin->lastname }}</td>
-                        <td>
-                             <!-- Edit Icon -->
-                            <a href="{{ route('admins.edit', $admin->admin_id) }}"
-                                class="text-primary me-2 text-info text-decoration-none">
-                                <i class="bi bi-pencil-square text-secondary"></i>
-                            </a>
-                        </td>
-                    </tr>
+                    </td>
+                    <td>{{ $admin->admin_id }}</td>
+                    <td>{{ $admin->firstname }}</td>
+                    <td>{{ $admin->middlename }}</td>
+                    <td>{{ $admin->lastname }}</td>
+                    <td>
+                        <!-- Edit Icon -->
+                        <a href="{{ route('admins.edit', $admin->admin_id) }}"
+                            class="text-primary me-2 text-info text-decoration-none">
+                            <i class="bi bi-pencil-square text-secondary"></i>
+                        </a>
+                    </td>
+                </tr>
                 @empty
-                    <tr>
-                        <td :colspan="check2 ? 7 : 6" class="text-center">No admins found.</td>
-                    </tr>
+                <tr>
+                    <td :colspan="check2 ? 7 : 6" class="text-center">No admins found.</td>
+                </tr>
                 @endforelse
             </tbody>
         </table>

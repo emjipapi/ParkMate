@@ -1,16 +1,17 @@
 <?php
-use Illuminate\Support\Facades\Route;
+
+use App\Charts\AnalyticsChart;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\Auth\UserAuthController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\EvidenceController;
 use App\Http\Controllers\ProfilePictureController;
-use App\Charts\AnalyticsChart;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\WebfontController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Controllers\EvidenceController;
-use App\Http\Controllers\WebfontController;
-use App\Livewire\Admin\AdminFormEdit;
-use App\Http\Controllers\ReportController;
+use Illuminate\Support\Facades\Route;
+
 /*
 |--------------------------------------------------------------------------
 | Public / Login Routes
@@ -41,7 +42,6 @@ Route::post('/user/login', [UserAuthController::class, 'login'])->name('user.log
 // Handle logout
 Route::post('/user/logout', [UserAuthController::class, 'logout'])->name('user.logout');
 
-
 // Show admin login form
 Route::get('/admin/login', function (Request $request) {
     Auth::guard('admin')->logout();   // logout admin if logged in
@@ -61,8 +61,8 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admi
 Route::get('/test-email/{userId}', function ($userId) {
     try {
         $user = \App\Models\User::find($userId);
-        if (!$user) {
-            return "User not found";
+        if (! $user) {
+            return 'User not found';
         }
 
         \Illuminate\Support\Facades\Mail::to($user->email)
@@ -70,7 +70,7 @@ Route::get('/test-email/{userId}', function ($userId) {
 
         return "Email sent to {$user->email}";
     } catch (\Exception $e) {
-        return "Error: " . $e->getMessage();
+        return 'Error: '.$e->getMessage();
     }
 });
 Route::view('/live-attendance', 'live-attendance-mode');
@@ -85,12 +85,6 @@ Route::get('/reports/attendance', [ReportController::class, 'generateAttendanceR
 
 Route::get('/reports/endorsement', [ReportController::class, 'endorsementReport'])
     ->name('reports.endorsement');
-
-
-
-
-
-
 
 /*
 |--------------------------------------------------------------------------
@@ -114,8 +108,7 @@ Route::middleware(['admin'])->group(function () {
     })->name('admins.create');
     Route::get('/users/edit/{id}', [UserController::class, 'edit'])->name('users.edit');
     // In your routes file
-Route::get('/admins/edit/{id}', [UserController::class, 'editAdmin'])->name('admins.edit');
-
+    Route::get('/admins/edit/{id}', [UserController::class, 'editAdmin'])->name('admins.edit');
 
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
 
@@ -130,15 +123,12 @@ Route::get('/admins/edit/{id}', [UserController::class, 'editAdmin'])->name('adm
     // routes/web.php
     Route::get('/dashboard/analytics-dashboard', function () {
         $chart = new AnalyticsChart;
+
         return view('admin.analytics-dashboard', compact('chart'));
     });
 
-
-
 });
 // Route::get('/analytics', [AnalyticsController::class, 'index']);
-
-
 
 /*
 |--------------------------------------------------------------------------

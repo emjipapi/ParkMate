@@ -1,9 +1,9 @@
 <div>
     <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-3">
-    {{-- 🔍 Search Box --}}
-    <input type="text" class="form-control mb-3" placeholder="Search by name, ID, or action..."
-        wire:model.live.debounce.300ms="search" style="max-width: 400px">
-                <div class="d-flex align-items-center gap-1">
+        {{-- 🔍 Search Box --}}
+        <input type="text" class="form-control mb-3" placeholder="Search by name, ID, or action..."
+            wire:model.live.debounce.300ms="search" style="max-width: 400px">
+        <div class="d-flex align-items-center gap-1">
             <span>Show</span>
             <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
                 @foreach($perPageOptions as $option)
@@ -71,52 +71,54 @@
             </thead>
             <tbody>
                 @forelse ($activityLogs as $log)
-                    <tr>
-                        <td>{{ $log->id }}</td>
+                <tr>
+                    <td>{{ $log->id }}</td>
 
-                        {{-- Show ID depending on actor type --}}
-                        <td>{{ $log->actor_type === 'admin' ? $log->admin->username ?? '—' : $log->user->student_id ?? $log->user->employee_id ?? '—' }}
-                        </td>
+                    {{-- Show ID depending on actor type --}}
+                    <td>{{ $log->actor_type === 'admin' ? $log->admin->username ?? '—' : $log->user->student_id ??
+                        $log->user->employee_id ?? '—' }}
+                    </td>
 
-                        {{-- Show Name depending on actor type --}}
-                        <td>{{ $log->actor_type === 'admin' ? $log->admin->lastname . ', ' . $log->admin->firstname : $log->user->lastname . ', ' . $log->user->firstname }}
-                        </td>
+                    {{-- Show Name depending on actor type --}}
+                    <td>{{ $log->actor_type === 'admin' ? $log->admin->lastname . ', ' . $log->admin->firstname :
+                        $log->user->lastname . ', ' . $log->user->firstname }}
+                    </td>
 
-                        <td>
-                            @php
-                                switch ($log->action) {
-                                    case 'entry':
-                                        $color = 'success';
-                                        break;
-                                    case 'exit':
-                                        $color = 'danger';
-                                        break;
-                                    case 'create':
-                                        $color = 'primary';
-                                        break;
-                                    case 'update':
-                                        $color = 'warning';
-                                        break;
-                                    case 'login':
-                                        $color = 'info';
-                                        break;
-                                    case 'logout':
-                                        $color = 'secondary';
-                                        break;
-                                    default:
-                                        $color = 'dark';
-                                        break;
-                                }
-                            @endphp
-                            <span class="badge bg-{{ $color }}">{{ ucfirst($log->action) }}</span>
-                        </td>
-                        <td>{{ $log->details }}</td>
-                        <td>{{ $log->created_at->format('Y-m-d H:i:s') }}</td>
-                    </tr>
+                    <td>
+                        @php
+                        switch ($log->action) {
+                        case 'entry':
+                        $color = 'success';
+                        break;
+                        case 'exit':
+                        $color = 'danger';
+                        break;
+                        case 'create':
+                        $color = 'primary';
+                        break;
+                        case 'update':
+                        $color = 'warning';
+                        break;
+                        case 'login':
+                        $color = 'info';
+                        break;
+                        case 'logout':
+                        $color = 'secondary';
+                        break;
+                        default:
+                        $color = 'dark';
+                        break;
+                        }
+                        @endphp
+                        <span class="badge bg-{{ $color }}">{{ ucfirst($log->action) }}</span>
+                    </td>
+                    <td>{{ $log->details }}</td>
+                    <td>{{ $log->created_at->format('Y-m-d H:i:s') }}</td>
+                </tr>
                 @empty
-                    <tr>
-                        <td colspan="6" class="text-center">No activity logs found.</td>
-                    </tr>
+                <tr>
+                    <td colspan="6" class="text-center">No activity logs found.</td>
+                </tr>
                 @endforelse
             </tbody>
         </table>

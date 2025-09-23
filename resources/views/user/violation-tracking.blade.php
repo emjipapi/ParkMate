@@ -14,7 +14,7 @@
     <!-- Font Awesome -->
     <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
     <style>
-              :root {
+        :root {
             --bg1: #56ca8b;
             --bg2: #3bc480;
             --bg3: #38b174;
@@ -64,7 +64,7 @@
             background-color: var(--bg4);
             border: none;
             padding: 10px;
-            
+
         }
 
         .sidebar button:hover {
@@ -102,7 +102,7 @@
             background-color: #EAEEF4;
         }
 
-               .btn-add {
+        .btn-add {
             display: inline-block;
             width: auto;
             background-color: var(--bg1);
@@ -283,7 +283,8 @@
             color: white;
             margin-right: 10px;
         }
-                .square-box {
+
+        .square-box {
             background-color: white;
             width: 100%;
             min-height: 100px;
@@ -363,6 +364,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column">
@@ -409,9 +411,9 @@
             </div>
             <span class="text-muted">Home > Violation Tracking</span>
         </div>
-        
-            <livewire:user.create-violation-component />
-        
+
+        <livewire:user.create-violation-component />
+
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
@@ -444,4 +446,5 @@
     </script>
 
 </body>
+
 </html>

@@ -1,6 +1,6 @@
 <div>
-        <div class="d-flex flex-column flex-md-row justify-content-md-end align-items-md-center gap-3 mb-3">
-                <div class="d-flex align-items-center gap-1">
+    <div class="d-flex flex-column flex-md-row justify-content-md-end align-items-md-center gap-3 mb-3">
+        <div class="d-flex align-items-center gap-1">
             <span>Show</span>
             <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
                 @foreach($perPageOptions as $option)
@@ -98,7 +98,8 @@
                             @if($violation->status === 'resolved')
                             <button class="btn btn-sm btn-secondary" disabled>✓ Resolved</button>
                             @else
-                            <button wire:click="markForEndorsement({{ $violation->id }})" class="btn btn-sm btn-primary">
+                            <button wire:click="markForEndorsement({{ $violation->id }})"
+                                class="btn btn-sm btn-primary">
                                 Mark as For Endorsement
                             </button>
                             @endif

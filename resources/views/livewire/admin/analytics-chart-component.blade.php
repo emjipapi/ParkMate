@@ -23,7 +23,7 @@
                     <option value="entries">Peak Entry Hours</option>
                     <option value="duration">Average Duration of Stays</option>
                     <option value="logins">User Logins</option>
-                    <option value="admin_logins">Admin Logins</option>   
+                    <option value="admin_logins">Admin Logins</option>
                 </select>
             </div>
         </div>

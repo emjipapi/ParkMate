@@ -23,11 +23,11 @@
     <div>
         {{-- Generate Stickers Tab --}}
         @if ($activeTab === 'generate')
-            <livewire:admin.sticker-generate-component />
+        <livewire:admin.sticker-generate-component />
 
         {{-- Manage Templates Tab --}}
         @elseif ($activeTab === 'manage')
-            <livewire:admin.sticker-template-manager-component />
+        <livewire:admin.sticker-template-manager-component />
         @endif
     </div>
 </div>

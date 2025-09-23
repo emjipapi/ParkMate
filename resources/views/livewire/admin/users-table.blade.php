@@ -93,7 +93,7 @@
             </select>
 
             <select class="form-select form-select-sm w-auto" wire:model.live="filterProgram"
-                wire:change="onProgramChanged($event.target.value)"style="max-width: 250px; min-width: 150px;">
+                wire:change="onProgramChanged($event.target.value)" style="max-width: 250px; min-width: 150px;">
                 <option value="">All Programs</option>
                 @foreach($programs as $prog)
                 <option value="{{ $prog }}" wire:key="prog-{{ \Illuminate\Support\Str::slug($prog) }}">

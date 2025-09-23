@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -39,19 +38,20 @@
       transform: translateY(-140px);
     }
 
-.btn {
-  background-color: #56ca8b;
-  color: white;
-  border: none;
-  padding: 8px 24px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
+    .btn {
+      background-color: #56ca8b;
+      color: white;
+      border: none;
+      padding: 8px 24px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
 
     .btn:hover {
       background-color: #38b174;
       color: white;
     }
+
     .text-error {
       color: red;
       text-align: center;
@@ -61,19 +61,19 @@
 </head>
 
 <body>
-<div class="d-flex flex-column justify-content-center align-items-center vh-100 offset-up">
-  <h2 class="mb-4">Welcome to ParkMate</h2>
-  <div class="center-box d-flex flex-column justify-content-center align-items-center">
-    <div href='/user/login' wire:navigate>
-    <button class="btn btn-primary mb-2" style="width: 150px;">Student</button>
-    </div>
-    <div href='/user/login' wire:navigate>
-    <button class="btn btn-primary mb-2" style="width: 150px;">Employee</button>
-    </div>
-    <div href='/admin/login' wire:navigate>
-    <button class="btn btn-primary" style="width: 150px;">Admin</button>
+  <div class="d-flex flex-column justify-content-center align-items-center vh-100 offset-up">
+    <h2 class="mb-4">Welcome to ParkMate</h2>
+    <div class="center-box d-flex flex-column justify-content-center align-items-center">
+      <div href='/user/login' wire:navigate>
+        <button class="btn btn-primary mb-2" style="width: 150px;">Student</button>
+      </div>
+      <div href='/user/login' wire:navigate>
+        <button class="btn btn-primary mb-2" style="width: 150px;">Employee</button>
+      </div>
+      <div href='/admin/login' wire:navigate>
+        <button class="btn btn-primary" style="width: 150px;">Admin</button>
+      </div>
     </div>
   </div>
-</div>
-@livewireScripts
+  @livewireScripts
 </body>

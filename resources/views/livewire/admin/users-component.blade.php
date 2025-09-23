@@ -22,11 +22,11 @@
     <div>
         {{-- Pending Reports --}}
         @if ($activeTab === 'users')
-            <livewire:admin.users-table />
+        <livewire:admin.users-table />
 
-            {{-- Approved Reports --}}
+        {{-- Approved Reports --}}
         @elseif ($activeTab === 'admins')
-            <livewire:admin.admins-table />
+        <livewire:admin.admins-table />
 
         @endif
     </div>

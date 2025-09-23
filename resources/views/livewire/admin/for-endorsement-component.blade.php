@@ -1,10 +1,11 @@
 <div>
 
-<div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-3">
+    <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-3">
         <!-- Generate For Endorsement Report Button -->
-    <button type="button" class="btn-add-slot btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#endorsementReportModal">
-        Generate For Endorsement Report
-    </button>
+        <button type="button" class="btn-add-slot btn btn-primary mb-3" data-bs-toggle="modal"
+            data-bs-target="#endorsementReportModal">
+            Generate For Endorsement Report
+        </button>
         <div class="d-flex align-items-center gap-1">
             <span>Show</span>
             <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
@@ -14,7 +15,7 @@
             </select>
             <span>entries</span>
         </div>
-</div>
+    </div>
     <!-- Report Modal -->
     <div class="modal fade" id="endorsementReportModal" tabindex="-1" aria-labelledby="endorsementReportModalLabel"
         aria-hidden="true" wire:ignore.self>

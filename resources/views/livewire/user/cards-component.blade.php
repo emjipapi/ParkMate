@@ -16,26 +16,26 @@
             <h1 class="card-title">{{ $totalMotoSlots }}</h1>
             <p class="card-text">Total Motorcycle Slots</p>
             <small>{{ $totalMotoOccupied }} Occupied</small>
-            
+
         </div>
         <div class="card-footer">More Info ➜</div>
     </div>
-{{-- Violations & Pending Reports --}}
-<div href='/user-violation-tracking' wire:navigate class="card card-3" style="cursor:pointer;">
-    <div class="card-body">
-        <h1 class="card-title">{{ $myViolationsCount }}</h1>
-        <p class="card-text">Violations</p>
-        <small>{{ $myPendingReports }} Reports Pending</small>
+    {{-- Violations & Pending Reports --}}
+    <div href='/user-violation-tracking' wire:navigate class="card card-3" style="cursor:pointer;">
+        <div class="card-body">
+            <h1 class="card-title">{{ $myViolationsCount }}</h1>
+            <p class="card-text">Violations</p>
+            <small>{{ $myPendingReports }} Reports Pending</small>
+        </div>
+        <div class="card-footer">More Info ➜</div>
     </div>
-    <div class="card-footer">More Info ➜</div>
-</div>
 
-<div href='/user-violation-tracking' wire:navigate class="card card-5 text-center" style="cursor:pointer;">
-    <div class="card-body d-flex flex-column justify-content-center align-items-center">
-        <i class="fas fa-plus-circle" style="font-size: 5rem; color: white;"></i>
-        <p class="card-text mt-2 mb-1 fw-bold">Make Report</p>
+    <div href='/user-violation-tracking' wire:navigate class="card card-5 text-center" style="cursor:pointer;">
+        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+            <i class="fas fa-plus-circle" style="font-size: 5rem; color: white;"></i>
+            <p class="card-text mt-2 mb-1 fw-bold">Make Report</p>
+        </div>
     </div>
-</div>
 
     {{-- Activity Logs --}}
     <div class="card card-4">
@@ -43,11 +43,11 @@
             <div class="card-body">
                 <h5>Recent Activity</h5>
                 @forelse ($recentActivities as $activity)
-                    <div class="recent-activity-item mb-2">
-                        {{ $activity->details }}
-                    </div>
+                <div class="recent-activity-item mb-2">
+                    {{ $activity->details }}
+                </div>
                 @empty
-                    <p>No recent activity.</p>
+                <p>No recent activity.</p>
                 @endforelse
             </div>
         </a>

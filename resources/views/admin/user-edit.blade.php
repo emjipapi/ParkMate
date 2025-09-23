@@ -17,7 +17,7 @@
     <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
-      <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
+    <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
     <livewire:styles />
     <style>
         :root {
@@ -332,6 +332,7 @@
             color: white;
             margin-right: 10px;
         }
+
         @media (max-width: 1200px) {
             form {
                 max-width: 100%;
@@ -339,6 +340,7 @@
                 margin-left: 12%;
             }
         }
+
         @media (max-width: 768px) {
             .mobile-menu-btn {
                 display: inline-block;
@@ -405,6 +407,7 @@
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
+
 <body>
 
     <!-- Sidebar -->
@@ -473,9 +476,9 @@
             <span class="text-muted">Home > Users > Edit</span>
         </div>
         <div class="position-absolute m-3 d-none d-md-block">
-           <a href="/users" wire:navigate
-           class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
-           style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
+            <a href="/users" wire:navigate
+                class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
+                style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
                 <i class="bi bi-arrow-left"></i>
             </a>
         </div>

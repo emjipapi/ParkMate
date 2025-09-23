@@ -13,7 +13,7 @@
     <!-- Font Awesome -->
     <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
     <style>
-      :root {
+        :root {
             --bg1: #56ca8b;
             --bg2: #3bc480;
             --bg3: #38b174;
@@ -63,7 +63,7 @@
             background-color: var(--bg4);
             border: none;
             padding: 10px;
-            
+
         }
 
         .sidebar button:hover {
@@ -92,7 +92,7 @@
             line-height: 36px;
         }
 
-                .live-btn-bar {
+        .live-btn-bar {
             display: flex;
             align-items: center;
             background-color: white;
@@ -122,6 +122,7 @@
         .live-btn:hover {
             background-color: var(--bg1);
         }
+
         .content {
             margin-left: 250px;
             padding: 20px;
@@ -131,7 +132,7 @@
             background-color: #EAEEF4;
         }
 
-    
+
 
 
 
@@ -165,6 +166,7 @@
             padding: 0 20px;
             font-weight: 500;
         }
+
         .btn-add-slot {
             display: inline-block;
             width: auto;
@@ -310,88 +312,107 @@
             opacity: 1;
             pointer-events: auto;
         }
-        <style>
-    .slot-tile {
-        border-radius: .5rem;
-        height: 56px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
-        transition: transform .08s ease, box-shadow .12s ease;
-    }
 
-    .slot-tile:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
-    }
+        <style>.slot-tile {
+            border-radius: .5rem;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .05);
+            transition: transform .08s ease, box-shadow .12s ease;
+        }
 
-    .slot-label {
-        letter-spacing: .5px;
-    }
-    .mobile-menu-btn {
-    display: none; /* hidden on desktop */
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: white;
-    margin-right: 10px;
-}
+        .slot-tile:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
+        }
 
-@media (max-width: 768px) {
-    .cards-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem; /* spacing between cards */
-    }
+        .slot-label {
+            letter-spacing: .5px;
+        }
 
-    .cards-container .card {
-        width: 100%;
-    }
         .mobile-menu-btn {
-        display: inline-block;
-    }
-        .sidebar {
-        transform: translateX(-100%); /* hidden */
-        z-index: 1000;
-        transition: transform 0.3s ease-in-out;
-        
-    }
-    .sidebar .mt-auto {
-        margin-top: 0 !important;
-    }
+            display: none;
+            /* hidden on desktop */
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            margin-right: 10px;
+        }
 
-    .sidebar.open {
-        transform: translateX(0); /* slide in */
-    }
+        @media (max-width: 768px) {
+            .cards-container {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                /* spacing between cards */
+            }
 
-    .content, .top-bar, .bottom-bar {
-        margin-left: 0; /* full width on mobile */
-    }
-    .bottom-bar {
-        left: 0;
-        width: 100%;
-        position: relative; /* or fixed if you want it always at bottom */
-        padding: 0 10px; /* optional: less padding for mobile */
-        flex-direction: column; /* optional: stack items vertically if needed */
-        gap: 5px;
-    }
-        .d-flex.align-items-baseline h3 {
-        font-size: 1.2rem; /* smaller heading on mobile */
-    }
+            .cards-container .card {
+                width: 100%;
+            }
 
-    .d-flex.align-items-baseline h6 {
-        font-size: 0.9rem; /* smaller subheading */
-    }
+            .mobile-menu-btn {
+                display: inline-block;
+            }
 
-    .d-flex.align-items-baseline span,
-    .d-flex.align-items-baseline .text-white {
-        font-size: 0.8rem; /* smaller breadcrumb text */
-    }
-}
-</style>
-   
+            .sidebar {
+                transform: translateX(-100%);
+                /* hidden */
+                z-index: 1000;
+                transition: transform 0.3s ease-in-out;
+
+            }
+
+            .sidebar .mt-auto {
+                margin-top: 0 !important;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                /* slide in */
+            }
+
+            .content,
+            .top-bar,
+            .bottom-bar {
+                margin-left: 0;
+                /* full width on mobile */
+            }
+
+            .bottom-bar {
+                left: 0;
+                width: 100%;
+                position: relative;
+                /* or fixed if you want it always at bottom */
+                padding: 0 10px;
+                /* optional: less padding for mobile */
+                flex-direction: column;
+                /* optional: stack items vertically if needed */
+                gap: 5px;
+            }
+
+            .d-flex.align-items-baseline h3 {
+                font-size: 1.2rem;
+                /* smaller heading on mobile */
+            }
+
+            .d-flex.align-items-baseline h6 {
+                font-size: 0.9rem;
+                /* smaller subheading */
+            }
+
+            .d-flex.align-items-baseline span,
+            .d-flex.align-items-baseline .text-white {
+                font-size: 0.8rem;
+                /* smaller breadcrumb text */
+            }
+        }
+    </style>
+
 </head>
 
 <body>
@@ -412,24 +433,24 @@
             <button class="btn active">Parking Slots</button>
         </div>
         <div href='/violation-tracking' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Violation Tracking</button>
-            
+
+            <button class="btn">Violation Tracking</button>
+
         </div>
         <div href='/users' wire:navigate class="btn-wrapper">
-           
-                <button class="btn">Users</button>
-            
+
+            <button class="btn">Users</button>
+
         </div>
         <div href='/sticker-generator' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Sticker Generator</button>
-            
+
+            <button class="btn">Sticker Generator</button>
+
         </div>
         <div href='/activity-log' wire:navigate class="btn-wrapper">
-           
-                <button class="btn">Activity Log</button>
-            
+
+            <button class="btn">Activity Log</button>
+
         </div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
@@ -445,9 +466,9 @@
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div href='/admin-dashboard/live-attendance-mode' wire:navigate class="live-btn-bar">
-                <button class="live-btn">
-                    Live Attendance Mode
-                </button>   
+            <button class="live-btn">
+                Live Attendance Mode
+            </button>
         </div>
     </div>
 
@@ -532,8 +553,8 @@
         setInterval(updateClock, 1000);
         updateClock(); // run once immediately
     </script>
-<script>
-function openSidebar() {
+    <script>
+        function openSidebar() {
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('open');
 }
@@ -541,7 +562,7 @@ function closeSidebar() {
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('open');
 }
-</script>
+    </script>
 
 
 </body>

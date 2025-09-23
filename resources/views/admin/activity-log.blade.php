@@ -9,14 +9,14 @@
     <title>ParkMate - Activity Log</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
-  <!-- Inter font -->
-  <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
-  <!-- Font Awesome -->
-  <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet">
+    <!-- Inter font -->
+    <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
     <livewire:styles />
     <style>
-:root {
+        :root {
             --bg1: #56ca8b;
             --bg2: #3bc480;
             --bg3: #38b174;
@@ -66,7 +66,7 @@
             background-color: var(--bg4);
             border: none;
             padding: 10px;
-            
+
         }
 
         .sidebar button:hover {
@@ -95,7 +95,7 @@
             line-height: 36px;
         }
 
-                .live-btn-bar {
+        .live-btn-bar {
             display: flex;
             align-items: center;
             background-color: white;
@@ -125,6 +125,7 @@
         .live-btn:hover {
             background-color: var(--bg1);
         }
+
         .content {
             margin-left: 250px;
             padding: 20px;
@@ -134,7 +135,7 @@
             background-color: #EAEEF4;
         }
 
-       
+
 
 
         .content .cards-container {
@@ -200,7 +201,7 @@
             width: 100%;
             border-collapse: collapse;
             text-align: center;
-            
+
         }
 
         .custom-table th,
@@ -314,77 +315,102 @@
             opacity: 1;
             pointer-events: auto;
         }
-        .mobile-menu-btn {
-    display: none; /* hidden on desktop */
-    background: none;
-    border: none;
-    font-size: 1.5rem;
-    color: white;
-    margin-right: 10px;
-}
-.nav-tabs .nav-link {
-    cursor: pointer;
-}
-
-
-@media (max-width: 768px) {
 
         .mobile-menu-btn {
-        display: inline-block;
-    }
-        .sidebar {
-        transform: translateX(-100%); /* hidden */
-        z-index: 1000;
-        transition: transform 0.3s ease-in-out;
-        
-    }
-    .sidebar .mt-auto {
-        margin-top: 0 !important;
-    }
+            display: none;
+            /* hidden on desktop */
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            margin-right: 10px;
+        }
 
-    .sidebar.open {
-        transform: translateX(0); /* slide in */
-    }
+        .nav-tabs .nav-link {
+            cursor: pointer;
+        }
 
-    .content, .top-bar, .bottom-bar {
-        margin-left: 0; /* full width on mobile */
-    }
-    .bottom-bar {
-        left: 0;
-        width: 100%;
-        position: relative; /* or fixed if you want it always at bottom */
-        padding: 0 10px; /* optional: less padding for mobile */
-        flex-direction: column; /* optional: stack items vertically if needed */
-        gap: 5px;
-    }
-        .d-flex.align-items-baseline h3 {
-        font-size: 1.2rem; /* smaller heading on mobile */
-    }
 
-    .d-flex.align-items-baseline h6 {
-        font-size: 0.9rem; /* smaller subheading */
-    }
+        @media (max-width: 768px) {
 
-    .d-flex.align-items-baseline span,
-    .d-flex.align-items-baseline .text-white {
-        font-size: 0.8rem; /* smaller breadcrumb text */
-    }
-        .tabs-container {
-        margin: 0 -20px; /* extend to screen edges */
-        padding: 0 20px; /* add padding back inside */
-        touch-action: pan-x; /* enable horizontal touch scrolling */
-    }
-    
-    .nav-link {
-        font-size: 0.9rem; /* slightly smaller text on mobile */
-        padding: 8px 16px !important; /* adjust padding */
-    }
-    
-    .table-responsive {
-        touch-action: pan-x; /* enable horizontal touch scrolling for table */
-    }
+            .mobile-menu-btn {
+                display: inline-block;
+            }
 
-}
+            .sidebar {
+                transform: translateX(-100%);
+                /* hidden */
+                z-index: 1000;
+                transition: transform 0.3s ease-in-out;
+
+            }
+
+            .sidebar .mt-auto {
+                margin-top: 0 !important;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                /* slide in */
+            }
+
+            .content,
+            .top-bar,
+            .bottom-bar {
+                margin-left: 0;
+                /* full width on mobile */
+            }
+
+            .bottom-bar {
+                left: 0;
+                width: 100%;
+                position: relative;
+                /* or fixed if you want it always at bottom */
+                padding: 0 10px;
+                /* optional: less padding for mobile */
+                flex-direction: column;
+                /* optional: stack items vertically if needed */
+                gap: 5px;
+            }
+
+            .d-flex.align-items-baseline h3 {
+                font-size: 1.2rem;
+                /* smaller heading on mobile */
+            }
+
+            .d-flex.align-items-baseline h6 {
+                font-size: 0.9rem;
+                /* smaller subheading */
+            }
+
+            .d-flex.align-items-baseline span,
+            .d-flex.align-items-baseline .text-white {
+                font-size: 0.8rem;
+                /* smaller breadcrumb text */
+            }
+
+            .tabs-container {
+                margin: 0 -20px;
+                /* extend to screen edges */
+                padding: 0 20px;
+                /* add padding back inside */
+                touch-action: pan-x;
+                /* enable horizontal touch scrolling */
+            }
+
+            .nav-link {
+                font-size: 0.9rem;
+                /* slightly smaller text on mobile */
+                padding: 8px 16px !important;
+                /* adjust padding */
+            }
+
+            .table-responsive {
+                touch-action: pan-x;
+                /* enable horizontal touch scrolling for table */
+            }
+
+        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -405,33 +431,33 @@
             </a>
         </div>
         <div href='/parking-slots' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Parking Slots</button>
-            
+
+            <button class="btn">Parking Slots</button>
+
         </div>
         <div href='/violation-tracking' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Violation Tracking</button>
-            
+
+            <button class="btn">Violation Tracking</button>
+
         </div>
         <div href='/users' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Users</button>
-            
+
+            <button class="btn">Users</button>
+
         </div>
-                        <div href='/sticker-generator' wire:navigate class="btn-wrapper">
-            
-                <button class="btn">Sticker Generator</button>
-            
+        <div href='/sticker-generator' wire:navigate class="btn-wrapper">
+
+            <button class="btn">Sticker Generator</button>
+
         </div>
         <div class="btn-wrapper"><button class="btn active">Activity Log</button></div>
         <div class="btn-wrapper"><button class="btn">Settings</button></div>
         <div class="mt-auto p-3">
-    <form action="{{ route('admin.logout') }}" method="POST">
-        @csrf
-        <button type="submit" class="btn btn-danger w-100">Logout</button>
-    </form>
-</div>
+            <form action="{{ route('admin.logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="btn btn-danger w-100">Logout</button>
+            </form>
+        </div>
 
     </div>
 
@@ -440,9 +466,9 @@
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div href='/admin-dashboard/live-attendance-mode' wire:navigate class="live-btn-bar">
-                <button class="live-btn">
-                    Live Attendance Mode
-                </button>   
+            <button class="live-btn">
+                Live Attendance Mode
+            </button>
         </div>
     </div>
 
@@ -478,16 +504,16 @@
         updateClock(); // run once immediately
     </script>
     <script>
-    flatpickr("#startDate", { dateFormat: "Y-m-d" });
+        flatpickr("#startDate", { dateFormat: "Y-m-d" });
     flatpickr("#endDate", { dateFormat: "Y-m-d" });
-</script>
-<script>
-function openSidebar() {
+    </script>
+    <script>
+        function openSidebar() {
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('open');
 }
-</script>
-@livewireScripts
+    </script>
+    @livewireScripts
 </body>
 
 </html>
