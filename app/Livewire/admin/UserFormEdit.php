@@ -11,7 +11,8 @@ use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
-use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class UserFormEdit extends Component
 {
@@ -22,14 +23,11 @@ class UserFormEdit extends Component
     // User fields
     public $student_id;
     public $employee_id;
-    public $serial_number;
     public $email;
     public $password;
     public $firstname;
     public $middlename;
     public $lastname;
-    public $program;
-    public $department;
     public $year_section;
     public $address;
     public $contact_number;
@@ -38,65 +36,64 @@ class UserFormEdit extends Component
     public $profile_picture;
     public $currentProfilePicture;
 
-    protected $rules = [
-        'student_id' => 'nullable|string|max:10',
-        'employee_id' => 'nullable|string|max:15',
-        'serial_number' => 'required|string|min:5|max:6', // Remove unique from here
-        'email' => 'required|email', // Remove unique from here
-        'password' => 'nullable|string|min:6',
-        'firstname' => 'required|string|max:50',
-        'middlename' => 'nullable|string|max:50',
-        'lastname' => 'required|string|max:50',
-        'program' => 'required|string|max:50',
-        'department' => 'required|string|max:50',
-        'year_section' => 'nullable|string|max:2',
-        'address' => 'nullable|string|max:255',
-        'contact_number' => 'nullable|string|max:20',
-        'license_number' => 'nullable|string|max:13',
-        'expiration_date' => 'required|date|after:today',
-        'profile_picture' => 'nullable|image|max:5120',
-        'vehicles.*.type' => 'required|in:car,motorcycle',
-        'vehicles.*.rfid_tag' => 'required|string|distinct|max:20',
-        'vehicles.*.license_plate' => 'nullable|string|max:20',
-        'vehicles.*.body_type_model' => 'nullable|string|max:30',
-        'vehicles.*.or_number' => 'nullable|string|max:30',
-        'vehicles.*.cr_number' => 'nullable|string|max:30',
-    ];
+    protected $middleware = ['auth:admin'];
+    public $useStudentId = false;
+    public $useEmployeeId = false;
 
-    protected $messages = [
-        'profile_picture.max' => 'Profile picture must be less than 5 MB.',
-    ];
+    public function updatedUseEmployeeId($value)
+    {
+        if ($value) { // just became an employee
+            $this->department = null;
+            $this->program = null;
+            $this->year_section = null;
 
-        // Vehicles
-    public $vehicles = [];
+            // also turn off student checkbox + value
+            $this->useStudentId = false;
+            $this->student_id = null;
+        }
+    }
 
-    // Program/Department helpers (added)
-    public $allPrograms = [];
+    // Vehicles - start with one empty vehicle row
+    private function defaultVehicle()
+    {
+        return [
+            'uid' => (string) Str::uuid(),
+            'serial_number' => '',
+            'type' => 'motorcycle',
+            'rfid_tag' => '',
+            'license_plate' => '',
+            'body_type_model' => '',
+            'or_number' => '',
+            'cr_number' => ''
+        ];
+    }
+
     public $programToDept = [];
     public $departments = [];
-    public $programs = []; // visible program list for the Program dropdown
+    public $department = '';
+    public $program = '';
+    public $allPrograms = [];
+    public $vehicles = [];
+    public $programs = [];
 
     public function mount($id)
     {
-        // optional auth guard check (since $middleware isn't used here)
         if (!Auth::guard('admin')->check()) {
             abort(403);
         }
 
-        // Load master programs list from config
         $this->allPrograms = config('programs', []);
 
-        // normalize and build reverse lookup, sort each dept
-        foreach ($this->allPrograms as $dept => $progs) {
-            $normalized = array_map(fn($p) => trim($p), $progs);
-            sort($normalized);
-            $this->allPrograms[$dept] = $normalized;
-            foreach ($normalized as $p) {
+        // build reverse lookup (program => dept) and sort each department programs
+        foreach ($this->allPrograms as $dept => $programs) {
+            sort($programs);
+            $this->allPrograms[$dept] = $programs;
+
+            foreach ($programs as $p) {
                 $this->programToDept[$p] = $dept;
             }
         }
 
-        // departments list
         $this->departments = array_keys($this->allPrograms);
         sort($this->departments);
 
@@ -106,7 +103,6 @@ class UserFormEdit extends Component
 
         $this->student_id = $user->student_id;
         $this->employee_id = $user->employee_id;
-        $this->serial_number = $user->serial_number;
         $this->email = $user->email;
         $this->firstname = $user->firstname;
         $this->middlename = $user->middlename;
@@ -119,6 +115,10 @@ class UserFormEdit extends Component
         $this->license_number = $user->license_number;
         $this->expiration_date = $user->expiration_date;
         $this->currentProfilePicture = $user->profile_picture;
+
+        // Set checkboxes based on which ID is present
+        $this->useStudentId = !empty($this->student_id);
+        $this->useEmployeeId = !empty($this->employee_id);
 
         // populate programs dropdown depending on user's department
         if (!empty($this->department) && isset($this->allPrograms[$this->department])) {
@@ -133,10 +133,18 @@ class UserFormEdit extends Component
             $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
         }
 
-        // load vehicles
+        // load vehicles with proper structure
         $this->vehicles = $user->vehicles->map(function ($vehicle) {
+            // Extract just the number from S0123 format for editing
+            $serialNumber = '';
+            if ($vehicle->serial_number && str_starts_with($vehicle->serial_number, 'S')) {
+                $serialNumber = ltrim(substr($vehicle->serial_number, 1), '0');
+            }
+
             return [
                 'id' => $vehicle->id,
+                'uid' => (string) Str::uuid(),
+                'serial_number' => $serialNumber,
                 'type' => $vehicle->type,
                 'rfid_tag' => $vehicle->rfid_tag,
                 'license_plate' => $vehicle->license_plate,
@@ -148,36 +156,29 @@ class UserFormEdit extends Component
 
         // ensure at least one vehicle row exists
         if (empty($this->vehicles)) {
-            $this->vehicles = [
-                [
-                    'type' => 'motorcycle',
-                    'rfid_tag' => '',
-                    'license_plate' => '',
-                    'body_type_model' => '',
-                    'or_number' => '',
-                    'cr_number' => ''
-                ]
-            ];
+            $this->vehicles = [$this->defaultVehicle()];
         }
     }
-     // Select handlers (use with wire:change in blade)
+
     public function onDepartmentChanged($value)
     {
         $value = trim((string)$value);
 
         if ($value === '') {
+            // reset to show all programs
             $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
-            $this->program = '';
+            $this->program = ''; // clear selection
             $this->department = '';
             return;
         }
 
+        // set program list for dept, keep program only if it belongs here
         $newPrograms = $this->allPrograms[$value] ?? [];
         sort($newPrograms);
         $this->programs = $newPrograms;
         $this->department = $value;
 
-        // Only clear program if it doesn't belong to the newly chosen department
+        // if current program not in the department, clear it
         if (!in_array($this->program, $newPrograms, true)) {
             $this->program = '';
         }
@@ -188,26 +189,29 @@ class UserFormEdit extends Component
         $value = trim((string)$value);
 
         if ($value === '') {
+            // user chose "Select Program"
             $this->program = '';
             $this->department = '';
             $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
             return;
         }
 
+        // find department quickly via reverse map
         $dept = $this->programToDept[$value] ?? null;
 
         if ($dept) {
-            // set programs first so option exists after render, then set department, then program
+            // IMPORTANT: set programs first so when component re-renders the <option> exists
             $this->programs = $this->allPrograms[$dept];
             $this->department = $dept;
+            // set program last so selection persists
             $this->program = $value;
         } else {
+            // not found — clear
             $this->program = '';
             $this->department = '';
         }
     }
 
-    // optional computed property if you prefer $this->filteredPrograms in blade
     public function getFilteredProgramsProperty()
     {
         if (empty($this->department)) {
@@ -216,25 +220,14 @@ class UserFormEdit extends Component
         return $this->allPrograms[$this->department] ?? [];
     }
 
-    public function addVehicleRow()
-    {
-        $this->vehicles[] = [
-            'type' => 'motorcycle',
-            'rfid_tag' => '',
-            'license_plate' => '',
-            'body_type_model' => '',
-            'or_number' => '',
-            'cr_number' => ''
-        ];
-    }
     public function scanRfid($index)
     {
         try {
-            $response = Http::timeout(10)->get('http://192.168.1.199:5001/wait-for-scan');
-
+            $response = Http::timeout(15)->get('http://192.168.1.199:5001/wait-for-scan');
+            
             if ($response->successful()) {
                 $data = $response->json();
-
+                
                 if ($data['success'] && isset($data['rfid_tag'])) {
                     $this->vehicles[$index]['rfid_tag'] = $data['rfid_tag'];
                 } else {
@@ -247,87 +240,186 @@ class UserFormEdit extends Component
             $this->addError("vehicles.$index.rfid_tag", 'RFID scanner not running or timeout.');
         }
     }
+
+    public function rules()
+    {
+        // decide "is employee" from either explicit userType or the checkbox flag
+        $isEmployee = ($this->useEmployeeId ?? false) || (($this->userType ?? '') === 'employee');
+
+        // base rules that apply regardless
+        $rules = [
+            'student_id' => 'nullable|string|max:10',
+            'employee_id' => 'nullable|string|max:15',
+            'email' => 'required|email|unique:users,email,' . $this->userId,
+            'password' => 'nullable|string|min:6', // nullable for edit
+            'firstname' => 'required|string|max:50',
+            'middlename' => 'nullable|string|max:50',
+            'lastname' => 'required|string|max:50',
+            'year_section' => 'nullable|string|max:2',
+            'address' => 'nullable|string|max:255',
+            'contact_number' => 'nullable|string|max:20',
+            'license_number' => 'nullable|string|max:13',
+            'expiration_date' => 'required|date|after:today',
+            'profile_picture' => 'nullable|image|max:5120', // 5 MB
+            'vehicles.*.type' => 'required|in:car,motorcycle',
+            'vehicles.*.rfid_tag' => [
+                'required',
+                'string',
+                'max:20',
+                'distinct',
+                Rule::unique('vehicles', 'rfid_tag')->ignore($this->userId, 'user_id'),
+            ],
+            'vehicles.*.license_plate' => 'nullable|string|max:20',
+            'vehicles.*.body_type_model' => 'nullable|string|max:30',
+            'vehicles.*.or_number' => 'nullable|string|max:30',
+            'vehicles.*.cr_number' => 'nullable|string|max:30',
+            'vehicles.*.serial_number' => [
+                'required',
+                'regex:/^\d{1,6}$/', // only digits, max length 6
+                'distinct',
+                // Custom validation for uniqueness that processes the serial number
+                function ($attribute, $value, $fail) {
+                    if (!empty($value)) {
+                        $digits = preg_replace('/\D/', '', $value);
+                        
+                        $processedSerial = null;
+                        if (strlen($digits) <= 4) {
+                            $processedSerial = 'S' . str_pad($digits, 4, '0', STR_PAD_LEFT);
+                        } else {
+                            $processedSerial = 'S' . $digits;
+                        }
+                        
+                        // Check if this processed serial number already exists (excluding current user's vehicles)
+                        if (Vehicle::where('serial_number', $processedSerial)
+                                  ->where('user_id', '!=', $this->userId)
+                                  ->exists()) {
+                            $fail('The serial number has already been taken.');
+                        }
+                    }
+                },
+            ],
+        ];
+
+        if ($isEmployee) {
+            // employees can't have these — make them nullable/optional
+            $rules['program'] = 'nullable|string|max:50';
+            $rules['department'] = 'nullable|string|max:50';
+            $rules['year_section'] = 'nullable|string|max:2';
+        } else {
+            // students — make department and program required
+            $rules['program'] = 'required|string|max:50';
+            $rules['department'] = 'required|string|max:50';
+            $rules['year_section'] = 'nullable|string|max:2';
+        }
+
+        return $rules;
+    }
+
+    protected $messages = [
+        'profile_picture.max' => 'Profile picture must be less than 5 MB.',
+    ];
+
+    public function addVehicleRow()
+    {
+        $this->vehicles[] = $this->defaultVehicle();
+    }
+
     public function removeVehicleRow($index)
     {
+        // Don't allow removing if it's the only vehicle
         if (count($this->vehicles) <= 1) {
             $this->addError('vehicles', 'At least one vehicle is required.');
             return;
         }
 
-        unset($this->vehicles[$index]);
-        $this->vehicles = array_values($this->vehicles);
+        array_splice($this->vehicles, $index, 1);
     }
 
     public function update()
     {
-        try {
-            // Profile picture size check
-            if ($this->profile_picture && $this->profile_picture->getSize() > 5 * 1024 * 1024) {
-                $this->addError('profile_picture', 'Profile picture must be less than 5 MB.');
+        // quick size check for picture
+        if ($this->profile_picture && $this->profile_picture->getSize() > 5 * 1024 * 1024) {
+            $this->addError('profile_picture', 'Profile picture must be less than 5 MB.');
+            return;
+        }
+
+        // require either student_id or employee_id
+        if (empty($this->student_id) && empty($this->employee_id)) {
+            $this->addError('id', 'Please provide either Student ID or Employee ID.');
+            return;
+        }
+        if (!empty($this->student_id) && !empty($this->employee_id)) {
+            $this->addError('id', 'Please provide only one: Student ID or Employee ID, not both.');
+            return;
+        }
+
+        // Validate incoming raw input first
+        $data = $this->validate();
+
+        // --- Normalize serials and perform all vehicle-level checks BEFORE updating ---
+        $normalizedSerials = [];
+        foreach ($this->vehicles as $i => $vehicle) {
+            $raw = isset($vehicle['serial_number']) ? (string) $vehicle['serial_number'] : '';
+            $digits = preg_replace('/\D/', '', $raw); // keep digits only
+
+            if ($digits === '') {
+                $this->addError("vehicles.$i.serial_number", 'Serial number must contain at least one digit.');
                 return;
             }
 
-            // Custom ID validation
-            if (empty($this->student_id) && empty($this->employee_id)) {
-                $this->addError('id', 'Please provide either Student ID or Employee ID.');
-                return;
-            }
-
-            if (!empty($this->student_id) && !empty($this->employee_id)) {
-                $this->addError('id', 'Please provide only one: Student ID or Employee ID, not both.');
-                return;
-            }
-
-            // Adjust rules for unique fields
-            $this->rules['email'] = 'required|email|unique:users,email,' . $this->userId;
-            $this->rules['serial_number'] = 'required|string|min:5|max:6|unique:users,serial_number,' . $this->userId;
-            $this->rules['vehicles.*.rfid_tag'] = [
-                'required',
-                'string',
-                'max:20',
-                Rule::unique('vehicles', 'rfid_tag')->ignore($this->userId, 'user_id'),
-            ];
-
-            // Format serial number ONLY if it doesn't already start with 'S'
-            if (!empty($this->serial_number) && !str_starts_with($this->serial_number, 'S')) {
-                $num = (int) $this->serial_number;
-
-                if ($num < 10000) {
-                    $serialNumber = 'S' . str_pad($num, 4, '0', STR_PAD_LEFT);
-                } else {
-                    $serialNumber = 'S' . $num;
-                }
-
-                $this->serial_number = $serialNumber;
-            }
-
-            $data = $this->validate();
-            $user = User::findOrFail($this->userId);
-
-            // Only hash password if provided
-            if (!empty($this->password)) {
-                $data['password'] = Hash::make($this->password);
+            // Normalization logic: pad up to 4 digits, otherwise keep as-is, always prefix with 'S'
+            if (strlen($digits) <= 4) {
+                $norm = 'S' . str_pad($digits, 4, '0', STR_PAD_LEFT);
             } else {
-                unset($data['password']);
+                $norm = 'S' . $digits;
             }
 
-            // Handle profile picture update
-            if ($this->profile_picture) {
-                $ext = $this->profile_picture->getClientOriginalExtension();
-                $hash = substr(md5(uniqid(rand(), true)), 0, 8);
-                $prefix = $this->student_id ?: $this->employee_id;
-                $filename = $prefix . '.' . $hash . '.' . $ext;
-                $this->profile_picture->storeAs('profile_pics', $filename);
-                $data['profile_picture'] = $filename;
+            $normalizedSerials[$i] = $norm;
+        }
 
-                $this->currentProfilePicture = $filename;
-            } else {
-                $data['profile_picture'] = $this->currentProfilePicture;
-            }
+        // check duplicates within submitted normalized set
+        if (count(array_unique($normalizedSerials)) !== count($normalizedSerials)) {
+            $this->addError('vehicles', 'Two or more vehicles have the same serial number after normalization.');
+            return;
+        }
 
+        // check DB for collisions against normalized values (excluding current user's vehicles)
+        $existing = Vehicle::whereIn('serial_number', array_values($normalizedSerials))
+                          ->where('user_id', '!=', $this->userId)
+                          ->pluck('serial_number')
+                          ->toArray();
+        if (!empty($existing)) {
+            $this->addError('vehicles', 'One or more vehicle serial numbers already exist: ' . implode(', ', $existing));
+            return;
+        }
+
+        $user = User::findOrFail($this->userId);
+
+        // Only hash password if provided
+        if (!empty($this->password)) {
+            $data['password'] = Hash::make($this->password);
+        } else {
+            unset($data['password']);
+        }
+
+        // Handle profile picture update
+        if ($this->profile_picture) {
+            $ext = $this->profile_picture->getClientOriginalExtension();
+            $hash = substr(md5(uniqid(rand(), true)), 0, 8);
+            $prefix = $this->student_id ?: $this->employee_id;
+            $filename = $prefix . '.' . $hash . '.' . $ext;
+            $this->profile_picture->storeAs('profile_pics', $filename);
+            $data['profile_picture'] = $filename;
+            $this->currentProfilePicture = $filename;
+        } else {
+            $data['profile_picture'] = $this->currentProfilePicture;
+        }
+
+        DB::transaction(function () use ($data, $user, $normalizedSerials) {
             // Update user
             $user->update($data);
 
+            // Get incoming vehicle IDs (existing vehicles being kept)
             $incomingIds = collect($this->vehicles)
                 ->pluck('id')
                 ->filter() // removes null for new vehicles
@@ -336,37 +428,32 @@ class UserFormEdit extends Component
             // Delete vehicles removed from the form
             $user->vehicles()->whereNotIn('id', $incomingIds)->delete();
 
-            // Update or insert remaining vehicles
-// Update or create
-            foreach ($this->vehicles as $vehicle) {
+            // Update or create vehicles
+            foreach ($this->vehicles as $idx => $vehicle) {
+                $vehicleData = [
+                    'type' => $vehicle['type'],
+                    'serial_number' => $normalizedSerials[$idx] ?? null,
+                    'rfid_tag' => $vehicle['rfid_tag'],
+                    'license_plate' => $vehicle['license_plate'] ?? null,
+                    'body_type_model' => $vehicle['body_type_model'] ?? null,
+                    'or_number' => $vehicle['or_number'] ?? null,
+                    'cr_number' => $vehicle['cr_number'] ?? null,
+                ];
+
                 if (!empty($vehicle['id'])) {
-                    // Update existing
-                    $user->vehicles()->where('id', $vehicle['id'])->update([
-                        'type' => $vehicle['type'],
-                        'rfid_tag' => $vehicle['rfid_tag'],
-                        'license_plate' => $vehicle['license_plate'] ?? null,
-                        'body_type_model' => $vehicle['body_type_model'] ?? null,
-                        'or_number' => $vehicle['or_number'] ?? null,
-                        'cr_number' => $vehicle['cr_number'] ?? null,
-                    ]);
+                    // Update existing vehicle
+                    $user->vehicles()->where('id', $vehicle['id'])->update($vehicleData);
                 } else {
-                    // Create new
-                    $user->vehicles()->create([
-                        'type' => $vehicle['type'],
-                        'rfid_tag' => $vehicle['rfid_tag'],
-                        'license_plate' => $vehicle['license_plate'] ?? null,
-                        'body_type_model' => $vehicle['body_type_model'] ?? null,
-                        'or_number' => $vehicle['or_number'] ?? null,
-                        'cr_number' => $vehicle['cr_number'] ?? null,
-                    ]);
+                    // Create new vehicle
+                    $user->vehicles()->create($vehicleData);
                 }
             }
-            // --- End sync vehicles ---
 
             // Log admin action
             $adminId = Auth::guard('admin')->id();
-            if (!$adminId)
+            if (!$adminId) {
                 abort(403, 'Admin not authenticated');
+            }
 
             ActivityLog::create([
                 'actor_type' => 'admin',
@@ -374,17 +461,10 @@ class UserFormEdit extends Component
                 'action' => 'update',
                 'details' => "Admin " . Auth::guard('admin')->user()->firstname . " " . Auth::guard('admin')->user()->lastname . " updated user {$user->firstname} {$user->lastname}.",
             ]);
+        });
 
-            session()->flash('success', 'User and vehicles updated successfully!');
-        } catch (QueryException $e) {
-            if ($e->errorInfo[1] == 1062) { // Duplicate entry
-                $this->addError('vehicles.*.rfid_tag', 'This RFID tag is already in use.');
-            } else {
-                throw $e; // rethrow other errors
-            }
-        }
+        session()->flash('success', 'User and vehicles updated successfully!');
     }
-
 
     public function render()
     {
