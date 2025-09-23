@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Validation\Rule;
 
 class UserFormCreate extends Component
 {
@@ -31,6 +32,21 @@ class UserFormCreate extends Component
     public $expiration_date; // ✅ add this
     public $profile_picture;
         protected $middleware = ['auth:admin'];
+        public $useStudentId = false;
+public $useEmployeeId = false;
+
+public function updatedUseEmployeeId($value)
+{
+    if ($value) { // just became an employee
+        $this->department = null;
+        $this->program = null;
+        $this->year_section = null;
+
+        // also turn off student checkbox + value
+        $this->useStudentId = false;
+        $this->student_id = null;
+    }
+}
 
     // Vehicles - start with one empty vehicle row
     private function defaultVehicle()
@@ -156,17 +172,22 @@ public function scanRfid($index)
     }
 }
 
-    protected $rules = [
+public function rules()
+{
+    // decide "is employee" from either explicit userType or the checkbox flag
+    $isEmployee = ($this->useEmployeeId ?? false) || (($this->userType ?? '') === 'employee');
+
+    // base rules that apply regardless
+    $rules = [
         'student_id' => 'nullable|string|max:10',
         'employee_id' => 'nullable|string|max:15',
-        'serial_number' => 'required|string|min:5|max:6|unique:users,serial_number',
+        // 'serial_number' => 'required|string|min:5|max:6|unique:users,serial_number',
         'email' => 'required|email|unique:users,email',
         'password' => 'required|string|min:6',
         'firstname' => 'required|string|max:50',
         'middlename' => 'nullable|string|max:50',
         'lastname' => 'required|string|max:50',
-        'program' => 'required|string|max:50',
-        'department' => 'required|string|max:50',
+        // year_section stays nullable by default (adjust below if you want it required for students)
         'year_section' => 'nullable|string|max:2',
         'address' => 'nullable|string|max:255',
         'contact_number' => 'nullable|string|max:20',
@@ -180,6 +201,23 @@ public function scanRfid($index)
         'vehicles.*.or_number' => 'nullable|string|max:30',
         'vehicles.*.cr_number' => 'nullable|string|max:30',
     ];
+
+    if ($isEmployee) {
+        // employees can't have these — make them nullable/optional
+        $rules['program'] = 'nullable|string|max:50';
+        $rules['department'] = 'nullable|string|max:50';
+        // keep year_section nullable for employees
+        $rules['year_section'] = 'nullable|string|max:2';
+    } else {
+        // students — make department and program required
+        $rules['program'] = 'required|string|max:50';
+        $rules['department'] = 'required|string|max:50';
+        // if you want year_section required for students, change to 'required|string|max:2'
+        $rules['year_section'] = 'nullable|string|max:2';
+    }
+
+    return $rules;
+}
 
     protected $messages = [
         'profile_picture.max' => 'Profile picture must be less than 5 MB.',
@@ -221,21 +259,21 @@ public function scanRfid($index)
             return;
         }
 
-        // Format serial number
-        if (!empty($this->serial_number)) {
-            $num = (int) $this->serial_number;
+        // // Format serial number
+        // if (!empty($this->serial_number)) {
+        //     $num = (int) $this->serial_number;
 
-            if ($num < 10000) {
-                // pad to 4 digits if less than 10000
-                $serialNumber = 'S' . str_pad($num, 4, '0', STR_PAD_LEFT);
-            } else {
-                // leave as is if 5 digits or more
-                $serialNumber = 'S' . $num;
-            }
+        //     if ($num < 10000) {
+        //         // pad to 4 digits if less than 10000
+        //         $serialNumber = 'S' . str_pad($num, 4, '0', STR_PAD_LEFT);
+        //     } else {
+        //         // leave as is if 5 digits or more
+        //         $serialNumber = 'S' . $num;
+        //     }
 
-            // assign back to the property so validate() sees it
-            $this->serial_number = $serialNumber;
-        }
+        //     // assign back to the property so validate() sees it
+        //     $this->serial_number = $serialNumber;
+        // }
 
 
         // Validate the data
