@@ -31,8 +31,10 @@
                             <span class="text-muted">🚗 {{ $area['car_available'] }}/{{ $area['car_total'] }}
                                 cars</span>
                             @endif
+                            @if ((int) ($area['moto_total'] ?? 0) > 0)
                             <span class="text-muted">🛵 {{ $area['moto_available_count'] }}/{{ $area['moto_total'] }}
                                 motorcycles</span>
+                            @endif
                         </div>
                     </div>
                 </button>
@@ -43,17 +45,26 @@
                 <div class="accordion-body pt-3 pb-4">
                     {{-- Motorcycles: counter style --}}
                     <div class="d-flex align-items-center justify-content-between mb-4">
+                        @if ((int) ($area['moto_total'] ?? 0) > 0)
                         <div class="d-flex align-items-center gap-3">
                             <span class="fw-semibold">🛵 Motorcycles</span>
                             <span class="badge bg-secondary">
                                 {{ $area['moto_available_count'] }} / {{ $area['moto_total'] }}
                             </span>
                         </div>
-                        <div class="btn-group btn-group-sm" role="group" aria-label="Adjust motorcycle count">
+                        <div class="btn-group btn-group-sm ms-2" role="group" aria-label="Adjust motorcycle count">
                             <button class="btn btn-outline-danger"
                                 wire:click="decrementMoto({{ $area['id'] }})">−</button>
                             <button class="btn btn-outline-success"
                                 wire:click="incrementMoto({{ $area['id'] }})">+</button>
+
+                        </div>
+                        @endif
+                        <div class="ms-auto">
+                            <a href="#" class="text-secondary text-decoration-none"
+                                wire:click="openEditAreaModalServer({{ $area['id'] ?? $area->id }})">
+                                <i class="bi bi-gear-fill fs-5"></i>
+                            </a>
                         </div>
                     </div>
 
@@ -65,15 +76,6 @@
                         <small class="me-3">Available</small>
                         <span class="badge bg-danger me-1">&nbsp;</span>
                         <small>Occupied</small>
-                        <div class="ms-auto">
-<a href="#"
-   class="text-secondary text-decoration-none"
-   wire:click="openEditAreaModalServer({{ $area['id'] ?? $area->id }})">
-    <i class="bi bi-gear-fill fs-5"></i>
-</a>
-
-
-                        </div>
                     </div>
 
                     <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
