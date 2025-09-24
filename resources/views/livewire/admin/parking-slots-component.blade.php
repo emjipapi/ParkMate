@@ -65,8 +65,14 @@
                         <small class="me-3">Available</small>
                         <span class="badge bg-danger me-1">&nbsp;</span>
                         <small>Occupied</small>
-                        <div class="ms-auto small text-muted">
-                            Updated live
+                        <div class="ms-auto">
+<a href="#"
+   class="text-secondary text-decoration-none"
+   wire:click="openEditAreaModalServer({{ $area['id'] ?? $area->id }})">
+    <i class="bi bi-gear-fill fs-5"></i>
+</a>
+
+
                         </div>
                     </div>
 

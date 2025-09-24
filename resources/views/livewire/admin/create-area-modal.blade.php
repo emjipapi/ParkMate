@@ -45,7 +45,7 @@
 
           {{-- Motorcycle Slots --}}
           <div class="col-md-4 mb-3">
-            <label class="form-label">Motorcycle Slots</label>
+            <label class="form-label">Motorcycles Count</label>
             <input type="number" class="form-control @error('motorcycleSlots') is-invalid @enderror"
               wire:model="motorcycleSlots" min="0">
             @error('motorcycleSlots')

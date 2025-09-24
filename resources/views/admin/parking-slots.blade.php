@@ -12,6 +12,7 @@
     <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
     <style>
         :root {
             --bg1: #56ca8b;
@@ -492,6 +493,7 @@
 
     </div>
     <livewire:admin.create-area-modal />
+    <livewire:admin.edit-area-modal />
 
     <!-- Bottom Bar -->
     <div class="bottom-bar">

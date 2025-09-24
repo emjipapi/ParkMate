@@ -17,7 +17,23 @@ class ParkingSlotsComponent extends Component
     {
         $this->loadAreasData();
     }
-
+    // Fixed method using dispatch() - this is the proper Livewire v3 way
+    public function openEditAreaModalServer($areaId)
+    {
+        // First, dispatch to the EditAreaModal component to load the area data
+        $this->dispatch('openEditAreaModal', areaId: $areaId);
+        
+        // Then use js() for a simple JavaScript call to show the modal
+        $this->js("
+            setTimeout(() => {
+                const modalEl = document.getElementById('editAreaModal');
+                if (modalEl) {
+                    const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                    bsModal.show();
+                }
+            }, 100);
+        ");
+    }
     private function loadAreasData()
     {
         Log::info('Loading parking areas data...'); // 👈 log when loading

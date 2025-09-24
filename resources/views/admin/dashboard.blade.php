@@ -130,7 +130,7 @@
             min-height: calc(100vh - 96px);
             display: flex;
             flex-direction: column;
-            background-image: url('{{ asset(' images/image1.png') }}');
+            background-image: url('{{ asset('images/image1.png') }}');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;

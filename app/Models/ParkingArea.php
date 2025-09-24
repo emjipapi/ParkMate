@@ -17,4 +17,20 @@ class ParkingArea extends Model
     ];
 
     public $timestamps = true;
+        protected $table = 'parking_areas';
+
+    // If you use guarded/fillable adjust accordingly
+    protected $guarded = [];
+
+    // one area has many car slots
+    public function carSlots()
+    {
+        return $this->hasMany(CarSlot::class, 'area_id', 'id');
+    }
+
+    // one area has one motorcycle count row
+    public function motorcycleCount()
+    {
+        return $this->hasOne(MotorcycleCount::class, 'area_id', 'id');
+    }
 }
