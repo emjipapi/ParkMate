@@ -136,6 +136,11 @@
                             <div style="max-width: 100%;">
                                 <input type="file" wire:model="proofs.{{ $violation->id }}"
                                     class="form-control form-control-sm" accept="image/*" />
+                                    <div wire:loading wire:target="proofs.{{ $violation->id }}" class="mt-2 text-muted">
+    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+    Uploading image…
+</div>
+
                                 @error('proofs.' . $violation->id)
                                 <span class="text-danger small">{{ $message }}</span>
                                 @enderror

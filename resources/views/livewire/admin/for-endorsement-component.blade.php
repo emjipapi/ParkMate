@@ -121,6 +121,7 @@
                                 wire:loading.attr="disabled" wire:target="generateEndorsementReport">
                                 <span wire:loading.remove wire:target="generateEndorsementReport">Generate</span>
                                 <span wire:loading wire:target="generateEndorsementReport">Generating...</span>
+                                
                             </button>
                         </div>
                     </form>

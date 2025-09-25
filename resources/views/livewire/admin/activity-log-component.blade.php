@@ -22,11 +22,11 @@
     <div>
         {{-- Pending Reports --}}
         @if ($activeTab === 'system')
-            <livewire:admin.activity-log-system-component />
+        <livewire:admin.activity-log-system-component />
 
-            {{-- Approved Reports --}}
+        {{-- Approved Reports --}}
         @elseif ($activeTab === 'entry/exit')
-            <livewire:admin.activity-log-entry-exit-component />
+        <livewire:admin.activity-log-entry-exit-component />
 
         @endif
     </div>

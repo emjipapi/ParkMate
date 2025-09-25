@@ -120,6 +120,11 @@
 
     <!-- Table -->
     <div class="table-responsive">
+            <div wire:loading wire:target="page" class="text-muted me-2">
+        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+        Loading page…
+    </div>
+
         <table class="table table-striped custom-table" x-bind:class="{ 'table-hover': check2 }">
             <thead>
                 <tr>

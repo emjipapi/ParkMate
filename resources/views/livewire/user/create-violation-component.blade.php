@@ -38,6 +38,11 @@
             <label class="form-label fw-bold">Evidence <small class="text-muted">(optional but
                     encouraged)</small></label>
             <input type="file" wire:model="evidence" class="form-control mt-1 mt-md-2" accept="image/*" />
+<div wire:loading wire:target="evidence" class="mt-2 text-muted">
+    <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+    Uploading image…
+</div>
+
             @error('evidence') <span class="text-danger">{{ $message }}</span> @enderror
         </div>
 

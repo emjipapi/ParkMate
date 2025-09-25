@@ -49,12 +49,14 @@ public function updatedEvidence()
 
             // ✅ store compressed file path separately
             $this->compressedEvidence = $path;
+            // DON'T set $this->evidence = null - this breaks Livewire's upload tracking
 
             \Log::info('✅ Compression finished successfully. Saved to: ' . $path);
         } catch (\Exception $e) {
             \Log::error('❌ Failed to process evidence image on upload: ' . $e->getMessage());
             session()->flash('error', 'Failed to process the uploaded image. Please try again.');
             $this->compressedEvidence = null;
+            // DON'T set $this->evidence = null here either
         }
     } else {
         \Log::warning('⚠️ updatedEvidence() called, but $this->evidence is not a TemporaryUploadedFile.');
@@ -87,7 +89,6 @@ public function submitReport()
     $this->validate([
         'description' => 'required|string',
         'area_id' => 'required|exists:parking_areas,id',
-        'evidence' => 'nullable|file|mimes:jpg,jpeg,png|max:10240', // 10MB
         'license_plate' => 'nullable|string|max:255',
         'violator' => 'nullable|integer|exists:users,id',
     ]);
