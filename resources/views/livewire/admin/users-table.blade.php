@@ -63,7 +63,19 @@
             </div>
         </div>
     </template>
-
+<div class="mb-3">
+    <button type="button" class="btn-add-slot btn btn-primary" 
+            wire:click="generateReport"
+            wire:loading.attr="disabled" 
+            wire:target="generateReport">
+        <span wire:loading.remove wire:target="generateReport">
+            Export
+        </span>
+        <span wire:loading wire:target="generateReport">
+            Exporting...
+        </span>
+    </button>
+</div>
     <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-3">
         <input type="text" class="form-control" placeholder="Search users..." wire:model.live.debounce.300ms="search"
             style="max-width: 400px" />
@@ -78,7 +90,6 @@
             <span>entries</span>
         </div>
     </div>
-
     <div
         class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
         <div class="d-flex gap-2 flex-wrap">
@@ -120,11 +131,6 @@
 
     <!-- Table -->
     <div class="table-responsive">
-            <div wire:loading wire:target="page" class="text-muted me-2">
-        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
-        Loading page…
-    </div>
-
         <table class="table table-striped custom-table" x-bind:class="{ 'table-hover': check2 }">
             <thead>
                 <tr>
@@ -191,6 +197,22 @@
                                             aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">
+                                                        <!-- Profile Picture -->
+                <div class="text-center mb-4">
+                    @if($user->profile_picture)
+                        <img src="{{ route('profile.picture', $user->profile_picture) }}"
+                             alt="Profile Picture" 
+                             class="rounded-circle"
+                             style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #dee2e6;">
+                              
+               
+                    @else
+                        <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center text-white"
+                             style="width: 100px; height: 100px; font-size: 36px; font-weight: bold;">
+                            {{ strtoupper(substr($user->firstname, 0, 1) . substr($user->lastname, 0, 1)) }}
+                        </div>
+                    @endif
+                </div>
                                         <!-- User Details -->
                                         <div class="row mb-2">
                                             <div class="col-md-4"><strong>Year & Section:</strong></div>

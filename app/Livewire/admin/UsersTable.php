@@ -150,4 +150,109 @@ public function updatedPerPage()
         $this->resetPage();
         session()->flash('message', count($ids) . ' user(s) deleted successfully.');
     }
+public function generateReport()
+{
+    try {
+        // Get all users with their vehicles (excluding soft deleted users)
+        $users = User::with(['vehicles' => function($query) {
+                $query->orderBy('id');
+            }])
+            ->whereNull('deleted_at')
+            ->orderBy('id')
+            ->get();
+
+        // Prepare CSV data
+        $csvData = [];
+        
+        // CSV Headers - following your specified order
+        $headers = [
+            'ID',                    // auto-incremented row number
+            'User ID',              // employee_id/student_id
+            'Serial No.',           // vehicle serial number (from vehicles table)
+            'Last Name',
+            'First Name', 
+            'Middle Name',
+            'Created At',
+            'Department',
+            'Program',
+            'Year & Section',
+            'Address',
+            'Contact No.',
+            'License No.',
+            'Expiration Date',
+            'Email',
+            // Vehicle fields
+            'Vehicle Type',
+            'Body Type/Model',
+            'OR Number',
+            'CR Number',
+            'RFID Tag',
+            'License Plate',
+            'Vehicle Created At'
+        ];
+        
+        $csvData[] = $headers;
+        
+        $rowId = 1; // auto-incremented ID
+        
+        foreach ($users as $user) {
+            // Determine User ID (prefer employee_id, fallback to student_id)
+            $userId = $user->employee_id ?: $user->student_id;
+            
+            // Each user has vehicles - create one row per vehicle
+            foreach ($user->vehicles as $vehicle) {
+                $csvData[] = [
+                    $user->id,
+                    $userId,
+                    $vehicle->serial_number,
+                    $user->lastname,
+                    $user->firstname,
+                    $user->middlename,
+                    $user->created_at ? $user->created_at->format('Y-m-d H:i:s') : '',
+                    $user->department,
+                    $user->program,
+                    $user->year_section,
+                    $user->address,
+                    $user->contact_number,
+                    $user->license_number,
+                    $user->expiration_date,
+                    $user->email,
+                    // Vehicle data
+                    $vehicle->type,
+                    $vehicle->body_type_model,
+                    $vehicle->or_number,
+                    $vehicle->cr_number,
+                    $vehicle->rfid_tag,
+                    $vehicle->license_plate,
+                    $vehicle->created_at ? $vehicle->created_at->format('Y-m-d H:i:s') : ''
+                ];
+            }
+        }
+
+        // Generate CSV content
+        $filename = 'users_vehicles_export_' . now()->format('Y-m-d_H-i-s') . '.csv';
+        
+        $handle = fopen('php://temp', 'r+');
+        
+        foreach ($csvData as $row) {
+            fputcsv($handle, $row);
+        }
+        
+        rewind($handle);
+        $csvContent = stream_get_contents($handle);
+        fclose($handle);
+
+        // Return CSV download
+        return response()->streamDownload(function () use ($csvContent) {
+            echo $csvContent;
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+
+    } catch (\Exception $e) {
+        session()->flash('error', 'Failed to generate report: ' . $e->getMessage());
+        return;
+    }
+}
 }
