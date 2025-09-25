@@ -126,6 +126,16 @@
         <div class="mb-3">
             <label>Profile Picture <small class="text-muted">(optional)</small></label>
             <input type="file" wire:model="profile_picture" class="form-control">
+                @if ($compressedProfilePicture)
+        <small class="d-block mt-2">
+            Preview: 
+            <img 
+                src="{{ Storage::url($compressedProfilePicture) }}" 
+                width="80" 
+                style="border-radius: 50%; object-fit: cover;"
+            >
+        </small>
+    @endif
         </div>
 
 

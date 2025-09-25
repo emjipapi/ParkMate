@@ -13,7 +13,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Laravel\Facades\Image;
 class UserFormCreate extends Component
 {
     use WithFileUploads;
@@ -52,6 +53,41 @@ class UserFormCreate extends Component
     public $useStudentId = false;
 
     public $useEmployeeId = false;
+    public $compressedProfilePicture; // holds the compressed tmp path (e.g. profile_pics/tmp/...)
+
+public function updatedProfilePicture()
+{
+    // Only run when we get the Livewire TemporaryUploadedFile instance
+    if ($this->profile_picture instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+        try {
+            \Log::info('📥 Profile picture upload detected — starting compression process...');
+
+            $hash = substr(md5(uniqid((string) rand(), true)), 0, 8);
+            $prefix = $this->student_id ?: $this->employee_id ?: 'u';
+            $filename = 'pf_' . $prefix . '_' . $hash . '.jpg';
+
+            \Log::info('⚙️ Compressing profile picture: ' . ($this->profile_picture->getClientOriginalName() ?? 'unknown'));
+
+            $image = Image::read($this->profile_picture->getPathname())
+                ->cover(800, 800, 'center')   // adjust max dimensions if you prefer
+                ->toJpeg(85);           // quality 0-100
+
+            $tmpPath = 'profile_pics/tmp/' . $filename;
+Storage::disk('public')->put($tmpPath, $image);
+
+
+            $this->compressedProfilePicture = $tmpPath;
+
+            \Log::info('✅ Profile picture compressed and saved to tmp: ' . $tmpPath);
+        } catch (\Exception $e) {
+            \Log::error('❌ Failed to compress profile picture on upload: ' . $e->getMessage());
+            session()->flash('error', 'Failed to process the profile picture. Please try again.');
+            $this->compressedProfilePicture = null;
+        }
+    } else {
+        \Log::warning('⚠️ updatedProfilePicture() called but profile_picture is not a TemporaryUploadedFile.');
+    }
+}
 
 public function updatedUseEmployeeId($value)
 {
@@ -247,7 +283,7 @@ public function updatedUseStudentId($value)
             'contact_number' => 'nullable|string|max:20',
             'license_number' => 'nullable|string|max:13',
             'expiration_date' => 'required|date|after:today',
-            'profile_picture' => 'nullable|image|max:5120', // 5 MB
+            'profile_picture' => 'nullable|image|max:10240', // 5 MB
             'vehicles.*.type' => 'required|in:car,motorcycle',
             'vehicles.*.rfid_tag' => 'required|string|distinct|unique:vehicles,rfid_tag|max:20',
             'vehicles.*.license_plate' => 'nullable|string|max:20',
@@ -281,7 +317,7 @@ public function updatedUseStudentId($value)
     }
 
     protected $messages = [
-        'profile_picture.max' => 'Profile picture must be less than 5 MB.',
+        'profile_picture.max' => 'Profile picture must be less than 10 MB.',
     ];
 
     public function addVehicleRow()
@@ -304,10 +340,10 @@ public function updatedUseStudentId($value)
 public function save()
 {
     // quick size check for picture
-    if ($this->profile_picture && $this->profile_picture->getSize() > 5 * 1024 * 1024) {
-        $this->addError('profile_picture', 'Profile picture must be less than 5 MB.');
-        return;
-    }
+    // if ($this->profile_picture && $this->profile_picture->getSize() > 5 * 1024 * 1024) {
+    //     $this->addError('profile_picture', 'Profile picture must be less than 5 MB.');
+    //     return;
+    // }
 
     // require either student_id or employee_id
     if (empty($this->student_id) && empty($this->employee_id)) {
@@ -318,7 +354,11 @@ public function save()
         $this->addError('id', 'Please provide only one: Student ID or Employee ID, not both.');
         return;
     }
-
+$originalProfileUpload = null;
+if (!empty($this->compressedProfilePicture)) {
+    $originalProfileUpload = $this->profile_picture;
+    $this->profile_picture = null;
+}
     // Validate incoming raw input first (this will check email uniqueness etc.)
     $data = $this->validate();
 
@@ -360,17 +400,7 @@ public function save()
     // Hash password and prepare $data for insert
     $data['password'] = Hash::make($data['password'] ?? '');
 
-    // If you want to store profile picture with a deterministic filename, do it here.
-    // NOTE: storing files is not part of DB transaction; if you care about orphan files, you can
-    // store after transaction or delete on failure. This example stores before create.
-    if ($this->profile_picture) {
-        $ext = $this->profile_picture->getClientOriginalExtension();
-        $hash = substr(md5(uniqid((string) rand(), true)), 0, 8);
-        $prefix = $this->student_id ?: $this->employee_id;
-        $filename = $prefix . '.' . $hash . '.' . $ext;
-        $this->profile_picture->storeAs('profile_pics', $filename);
-        $data['profile_picture'] = $filename;
-    }
+
 
     // Log normalized serials for debugging (optional)
     \Log::debug('Normalized serials before insert: ' . json_encode($normalizedSerials));
@@ -378,6 +408,31 @@ public function save()
     DB::transaction(function () use ($data, $normalizedSerials) {
         // create user
         $user = User::create($data);
+
+        // Handle profile picture with user ID using compressed version
+if ($this->compressedProfilePicture) {
+    // Generate the final filename
+    $hash = substr(md5(uniqid((string) rand(), true)), 0, 8);
+    $filename = $user->id . '_' . $hash . '.jpg'; // Always .jpg since compressed to JPEG
+
+    // Define final path using new filename
+    $finalPath = 'profile_pics/' . $filename;
+
+    // Read the image from the public tmp folder
+    $fileContents = Storage::disk('public')->get($this->compressedProfilePicture);
+
+    // Save it to the private disk
+    Storage::disk('private')->put($finalPath, $fileContents);
+
+    // Delete the original tmp file
+    Storage::disk('public')->delete($this->compressedProfilePicture);
+
+    // Update the user with the new profile picture filename
+    $user->update(['profile_picture' => $filename]);
+
+    \Log::info('✅ Profile picture moved from tmp to final: ' . $finalPath);
+}
+
 
         // create vehicles
         foreach ($this->vehicles as $idx => $vehicle) {
@@ -426,6 +481,7 @@ public function save()
             'department',
             'license_number',
             'profile_picture',
+            'compressedProfilePicture',
             'vehicles',
             'year_section',
             'address',
