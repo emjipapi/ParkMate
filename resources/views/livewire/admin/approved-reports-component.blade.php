@@ -1,14 +1,54 @@
 <div>
-    <div class="d-flex flex-column flex-md-row justify-content-md-end align-items-md-center gap-3 mb-3">
-        <div class="d-flex align-items-center gap-1">
-            <span>Show</span>
-            <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
-                @foreach($perPageOptions as $option)
-                <option value="{{ $option }}">{{ $option }}</option>
-                @endforeach
+    <div class="d-flex w-100 flex-wrap justify-content-between gap-2 mb-3 align-items-center">
+
+        <!-- LEFT: filters -->
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            {{-- Search --}}
+            <div class="input-group input-group-sm w-auto">
+                <input type="search" class="form-control form-control-sm"
+                    placeholder="Search plate, reporter, violator, description..."
+                    wire:model.live.debounce.500ms="search">
+            </div>
+
+            {{-- Reporter Type Filter --}}
+            <select class="form-select form-select-sm w-auto" wire:model.live="reporterType">
+                <option value="">All Reporters</option>
+                <option value="student">Students</option>
+                <option value="employee">Employees</option>
             </select>
-            <span>entries</span>
+
+            {{-- Date Range --}}
+            <div class="d-flex align-items-center flex-nowrap">
+                <input type="date" class="form-control form-control-sm w-auto" wire:model.live="startDate"
+                    onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
+                <span class="mx-1">-</span>
+                <input type="date" class="form-control form-control-sm w-auto" wire:model.live="endDate"
+                    onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
+            </div>
+
+            {{-- Sort buttons --}}
+            <div class="btn-group btn-group-sm ms-2" role="group" x-data="{ sortOrder: @entangle('sortOrder') }">
+                <button type="button" class="btn" :class="sortOrder === 'desc' ? 'btn-primary' : 'btn-outline-primary'"
+                    wire:click="$set('sortOrder', 'desc')">Newest</button>
+                <button type="button" class="btn" :class="sortOrder === 'asc' ? 'btn-primary' : 'btn-outline-primary'"
+                    wire:click="$set('sortOrder', 'asc')">Oldest</button>
+            </div>
         </div>
+
+        <!-- RIGHT: per-page + pagination (anchored to far right) -->
+        <div class="d-flex align-items-center gap-2 ms-auto">
+            <div class="d-flex align-items-center gap-1">
+                <span>Show</span>
+                <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
+                    @foreach($perPageOptions as $option)
+                    <option value="{{ $option }}">{{ $option }}</option>
+                    @endforeach
+                </select>
+                <span>entries</span>
+            </div>
+
+        </div>
+
     </div>
     <!-- Flash Messages -->
     @if (session()->has('message'))
@@ -24,6 +64,7 @@
             <thead>
                 <tr>
                     <th>Reporter</th>
+                    <th class="px-3 py-2 text-left text-sm font-semibold text-gray-700">Date</th>
                     <th>Area</th>
                     <th>Description</th>
                     <th>Evidence</th>
@@ -35,6 +76,21 @@
                 @forelse($violations as $violation)
                 <tr>
                     <td>{{ $violation->reporter->firstname }} {{ $violation->reporter->lastname }}</td>
+                                        
+
+                    <!-- DATE cell (insert right after your Reporter cell) -->
+<td class="px-3 py-2 text-sm text-gray-700">
+    @if($violation->created_at)
+        <span title="{{ $violation->created_at->toDayDateTimeString() }}">
+            {{ $violation->created_at->format('M j, Y H:i') }}
+        </span>
+        <div class="text-xs text-muted">
+            ({{ $violation->created_at->diffForHumans() }})
+        </div>
+    @else
+        <span class="text-muted">N/A</span>
+    @endif
+</td>
                     <td>{{ $violation->area->name ?? 'N/A' }}</td>
                     <td>{{ Str::limit($violation->description, 50) }}</td>
                     <td class="px-4 py-3 text-sm">
@@ -93,7 +149,9 @@
                                 <option value="6 Months Penalty">6 Months Penalty</option>
                                 <option value="Access Denied">Access Denied</option>
                             </select>
-
+@error('violationsActionTaken.' . $violation->id)
+<span class="text-danger small">{{ $message }}</span>
+@enderror
                             {{-- Mark as Resolved --}}
                             @if($violation->status === 'resolved')
                             <button class="btn btn-sm btn-secondary" disabled>✓ Resolved</button>
