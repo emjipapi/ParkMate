@@ -39,8 +39,8 @@
         }
 
         .evidence-image {
-            max-width: 400px;
-            max-height: 300px;
+            
+            max-height: 250px;
             margin: 10px 0;
             display: block;
             border: 1px solid #ccc;
@@ -87,16 +87,9 @@
         <p><span class="label">Area:</span> {{ $v->area ? $v->area->name : 'N/A' }}</p>
         <p><span class="label">Description:</span> {{ $v->description ?? 'N/A' }}</p>
 
-        @php
-        $evidences = [];
-        if (!empty($v->evidence)) {
-        try {
-        $evidences = json_decode($v->evidence, true) ?? [];
-        } catch (\Exception $e) {
-        $evidences = [];
-        }
-        }
-        @endphp
+@php
+$evidences = $v->evidence ?? [];
+@endphp
 
         @if(!empty($evidences))
         <div style="margin-top: 10px;">

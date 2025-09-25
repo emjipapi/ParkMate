@@ -101,8 +101,8 @@ public function endorsementReport(Request $request)
 
     $violations = Violation::with(['reporter', 'area', 'violator'])
         ->where('status', 'for_endorsement')
-        ->whereBetween('created_at', [$start, $end])
-        ->orderBy('created_at', 'asc')
+        ->whereBetween('endorsed_at', [$start, $end])
+        ->orderBy('endorsed_at', 'asc')
         ->get();
 
     $summary = [

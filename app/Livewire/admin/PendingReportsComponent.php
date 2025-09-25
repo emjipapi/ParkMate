@@ -11,17 +11,27 @@ use App\Mail\ViolationThresholdReached;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-
+use Illuminate\Database\Eloquent\Builder;
+use Carbon\Carbon;
 class PendingReportsComponent extends Component
 {
     use WithPagination;
     protected string $paginationTheme = 'bootstrap';
     
+    // UI / filters
+    public $search = '';
+    public $reporterType = '';     // '' | 'student' | 'employee' | 'admin'
+    public $startDate = null;
+    public $endDate = null;
+    public $sortOrder = 'desc';    // 'desc' or 'asc'
+
     public $vehicles = [];
     public $violationInputs = []; // Store all input values
     public $violationStatuses = []; // Store search statuses
-        public $perPage = 15; // default
+
+    public $perPage = 15; // default
     public $perPageOptions = [15, 25, 50, 100];
+    public $pageName = 'page';
 
     // reset page when perPage changes
 public function updatedPerPage()
@@ -133,8 +143,12 @@ public function updateStatus($violationId, $newStatus)
             'has_violator_id' => !empty($violation->violator_id)
         ]);
         
-        $violation->status = $newStatus;
-        $violation->save();
+        // Use model helper method for approved status
+        if ($newStatus === 'approved') {
+            $violation->markAsApproved();
+        } elseif ($newStatus === 'rejected') {
+            $violation->markAsRejected();
+        } 
         
         \Log::info("Violation status updated", [
             'violation_id' => $violationId,
@@ -306,28 +320,82 @@ private function checkAndSendThresholdEmail($violatorId)
         }
     }
 
-    public function render()
+ public function render()
     {
-        $violations = Violation::with(['reporter', 'area', 'violator'])
-            ->where('status', 'pending')
-            ->orderBy('created_at', 'desc')
-            ->paginate($this->perPage);
+        $violationsQuery = Violation::with(['reporter', 'area', 'violator'])
+            // ALWAYS pending for this tab
+            ->where('status', 'pending');
 
-        // Initialize form data for current page violations
+        // 🔍 SEARCH (license_plate, description, reporter name/id, violator name/id)
+        $violationsQuery->when(trim($this->search) !== '', function (Builder $q) {
+            $s = trim($this->search);
+            $q->where(function (Builder $sub) use ($s) {
+                $sub->where('license_plate', 'like', "%{$s}%")
+                    ->orWhere('description', 'like', "%{$s}%")
+                    ->orWhereHas('reporter', function (Builder $r) use ($s) {
+                        $r->where('firstname', 'like', "%{$s}%")
+                          ->orWhere('lastname', 'like', "%{$s}%")
+                          ->orWhere('student_id', 'like', "%{$s}%")
+                          ->orWhere('employee_id', 'like', "%{$s}%")
+                          ->orWhereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%{$s}%"]);
+                    })
+                    ->orWhereHas('violator', function (Builder $v) use ($s) {
+                        $v->where('firstname', 'like', "%{$s}%")
+                          ->orWhere('lastname', 'like', "%{$s}%")
+                          ->orWhere('student_id', 'like', "%{$s}%")
+                          ->orWhere('employee_id', 'like', "%{$s}%")
+                          ->orWhereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%{$s}%"]);
+                    });
+            });
+        });
+
+        // 🎛 Reporter Type Filter (student / employee)
+        $violationsQuery->when($this->reporterType === 'student', fn (Builder $q) =>
+            $q->whereHas('reporter', fn (Builder $u) =>
+                $u->whereNotNull('student_id')
+                  ->where('student_id', '<>', '')
+                  ->where('student_id', '<>', '0')
+            )
+        );
+
+        $violationsQuery->when($this->reporterType === 'employee', fn (Builder $q) =>
+            $q->whereHas('reporter', fn (Builder $u) =>
+                $u->whereNotNull('employee_id')
+                  ->where('employee_id', '<>', '')
+                  ->where('employee_id', '<>', '0')
+                  ->where(function ($q) {
+                      $q->whereNull('student_id')->orWhere('student_id', '');
+                  })
+            )
+        );
+
+        // 📅 Date Range
+        $violationsQuery->when($this->startDate, fn (Builder $q) =>
+            $q->where('created_at', '>=', Carbon::parse($this->startDate)->startOfDay())
+        );
+        $violationsQuery->when($this->endDate, fn (Builder $q) =>
+            $q->where('created_at', '<=', Carbon::parse($this->endDate)->endOfDay())
+        );
+
+        $violations = $violationsQuery
+            ->orderBy('created_at', $this->sortOrder === 'asc' ? 'asc' : 'desc')
+            ->paginate($this->perPage, ['*'], $this->pageName);
+
+        // Initialize form data for current page violations (keep your existing initialization logic)
         foreach ($violations as $violation) {
             if (!isset($this->violationInputs[$violation->id])) {
                 $this->violationInputs[$violation->id] = [
                     'license_plate' => $violation->license_plate ?? '',
                     'violator_id' => $violation->violator_id ?? '',
                 ];
-                
+
                 $this->violationStatuses[$violation->id] = [
                     'plate_status' => null,
                     'violator_status' => null,
                     'found_owner' => '',
                     'found_violator' => '',
                 ];
-                
+
                 // Set initial status if data exists
                 if ($violation->violator) {
                     $violatorName = trim($violation->violator->firstname . ' ' . $violation->violator->lastname);

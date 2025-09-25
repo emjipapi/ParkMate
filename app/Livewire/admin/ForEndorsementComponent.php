@@ -11,7 +11,11 @@ use Carbon\Carbon;
 class ForEndorsementComponent extends Component
 {
     use WithPagination;
-
+public $search = '';
+public $reporterType = '';
+public $startDate = null;
+public $endDate = null;
+public $sortOrder = 'desc';
     public $violationsActionTaken = [];
     public $activeTab = 'pending';
     public $vehicles = [];
@@ -34,6 +38,9 @@ public $endorsementReportStartDate = null;
 public $endorsementReportEndDate = null;
     public $perPage = 15; // default
     public $perPageOptions = [15, 25, 50, 100];
+    public $evidence;
+public $compressedEvidence;
+
 
     // reset page when perPage changes
 public function updatedPerPage()
@@ -153,44 +160,100 @@ return $this->redirect(route('reports.endorsement', [
         return $vehicles ? ['plates' => $vehicles] : null;
     }
 
-    public function render()
-    {
-        $violations = Violation::with(['reporter', 'area', 'violator'])
-            ->where('status', 'for_endorsement')
-            ->paginate($this->perPage);
+public function render()
+{
+    // Base query: only for_endorsement status
+    $violationsQuery = Violation::with(['reporter', 'area', 'violator'])
+        ->where('status', 'for_endorsement');
 
-        // Process violations for display
-        $violations->getCollection()->transform(function ($violation) {
-            // Populate missing violator_id from license_plate
-            if (empty($violation->violator_id) && !empty($violation->license_plate)) {
-                $match = $this->findViolatorByPlate($violation->license_plate);
-                if ($match) {
-                    $violation->violator_id = $match['user_id'];
-                    $violation->save();
-                }
-            }
-
-            // Populate missing license_plate from violator_id
-            if (!empty($violation->violator_id) && empty($violation->license_plate)) {
-                $match = $this->findPlatesByViolator($violation->violator_id);
-                if ($match && !empty($match['plates'])) {
-                    $violation->license_plate = $match['plates'][0];
-                    $violation->save();
-                }
-            }
-
-            // Add virtual property for the view
-            $violation->violator_name = $violation->violator
-                ? trim($violation->violator->firstname . ' ' . $violation->violator->lastname)
-                : 'Unknown';
-
-            return $violation;
+    // SEARCH: license_plate, description, reporter, violator
+    $violationsQuery->when(trim($this->search ?? '') !== '', function ($q) {
+        $s = trim($this->search);
+        $q->where(function ($sub) use ($s) {
+            $sub->where('license_plate', 'like', "%{$s}%")
+                ->orWhere('description', 'like', "%{$s}%")
+                ->orWhereHas('reporter', function ($r) use ($s) {
+                    $r->where('firstname', 'like', "%{$s}%")
+                      ->orWhere('lastname', 'like', "%{$s}%")
+                      ->orWhere('student_id', 'like', "%{$s}%")
+                      ->orWhere('employee_id', 'like', "%{$s}%")
+                      ->orWhereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%{$s}%"]);
+                })
+                ->orWhereHas('violator', function ($v) use ($s) {
+                    $v->where('firstname', 'like', "%{$s}%")
+                      ->orWhere('lastname', 'like', "%{$s}%")
+                      ->orWhere('student_id', 'like', "%{$s}%")
+                      ->orWhere('employee_id', 'like', "%{$s}%")
+                      ->orWhereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%{$s}%"]);
+                });
         });
+    });
 
-        return view('livewire.admin.for-endorsement-component', [
-            'violations' => $violations,
-            'vehicles' => $this->vehicles,
-            'users' => $this->users
-        ]);
-    }
+    // Reporter type filters (student / employee)
+    $violationsQuery->when(($this->reporterType ?? '') === 'student', fn ($q) =>
+        $q->whereHas('reporter', fn ($u) =>
+            $u->whereNotNull('student_id')
+              ->where('student_id', '<>', '')
+              ->where('student_id', '<>', '0')
+        )
+    );
+
+    $violationsQuery->when(($this->reporterType ?? '') === 'employee', fn ($q) =>
+        $q->whereHas('reporter', fn ($u) =>
+            $u->whereNotNull('employee_id')
+              ->where('employee_id', '<>', '')
+              ->where('employee_id', '<>', '0')
+              ->where(function ($q) {
+                  $q->whereNull('student_id')->orWhere('student_id', '');
+              })
+        )
+    );
+
+    // Date range filters
+    $violationsQuery->when($this->startDate ?? null, fn ($q) =>
+        $q->where('created_at', '>=', Carbon::parse($this->startDate)->startOfDay())
+    );
+    $violationsQuery->when($this->endDate ?? null, fn ($q) =>
+        $q->where('created_at', '<=', Carbon::parse($this->endDate)->endOfDay())
+    );
+
+    // Ordering + pagination
+    $violations = $violationsQuery
+        ->orderBy('created_at', ($this->sortOrder ?? 'desc') === 'asc' ? 'asc' : 'desc')
+        ->paginate($this->perPage);
+
+    // Process violations for display
+    $violations->getCollection()->transform(function ($violation) {
+        // Populate missing violator_id from license_plate
+        if (empty($violation->violator_id) && !empty($violation->license_plate)) {
+            $match = $this->findViolatorByPlate($violation->license_plate);
+            if ($match) {
+                $violation->violator_id = $match['user_id'];
+                $violation->save();
+            }
+        }
+
+        // Populate missing license_plate from violator_id
+        if (!empty($violation->violator_id) && empty($violation->license_plate)) {
+            $match = $this->findPlatesByViolator($violation->violator_id);
+            if ($match && !empty($match['plates'])) {
+                $violation->license_plate = $match['plates'][0];
+                $violation->save();
+            }
+        }
+
+        // Add virtual property for the view
+        $violation->violator_name = $violation->violator
+            ? trim($violation->violator->firstname . ' ' . $violation->violator->lastname)
+            : 'Unknown';
+
+        return $violation;
+    });
+
+    return view('livewire.admin.for-endorsement-component', [
+        'violations' => $violations,
+        'vehicles' => $this->vehicles,
+        'users' => $this->users
+    ]);
+}
 }
