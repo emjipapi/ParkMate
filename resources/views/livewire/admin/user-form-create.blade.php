@@ -126,6 +126,10 @@
         <div class="mb-3">
             <label>Profile Picture <small class="text-muted">(optional)</small></label>
             <input type="file" wire:model="profile_picture" class="form-control">
+                <div wire:loading wire:target="profile_picture" class="mt-2 text-muted">
+        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+        Uploading image…
+    </div>
                 @if ($compressedProfilePicture)
         <small class="d-block mt-2">
             Preview: 

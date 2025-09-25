@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Laravel\Facades\Image;
+
 
 class UserFormEdit extends Component
 {
@@ -39,6 +42,40 @@ class UserFormEdit extends Component
     protected $middleware = ['auth:admin'];
     public $useStudentId = false;
     public $useEmployeeId = false;
+    public $compressedProfilePicture; // holds tmp compressed path (public disk)
+
+    public function updatedProfilePicture()
+{
+    if ($this->profile_picture instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+        try {
+            \Log::info('📥 Profile picture upload detected — starting compression process...');
+
+            $hash = substr(md5(uniqid((string) rand(), true)), 0, 8);
+            $prefix = $this->student_id ?: $this->employee_id ?: 'u';
+            $filename = 'pf_' . $prefix . '_' . $hash . '.jpg';
+
+            \Log::info('⚙️ Compressing profile picture: ' . ($this->profile_picture->getClientOriginalName() ?? 'unknown'));
+
+            $image = Image::read($this->profile_picture->getPathname())
+                ->cover(800, 800, 'center')   // ensures 1:1 aspect
+                ->toJpeg(85);
+
+            $tmpPath = 'profile_pics/tmp/' . $filename;
+            Storage::disk('public')->put($tmpPath, $image);
+
+            $this->compressedProfilePicture = $tmpPath;
+
+            \Log::info('✅ Profile picture compressed and saved to tmp: ' . $tmpPath);
+        } catch (\Exception $e) {
+            \Log::error('❌ Failed to compress profile picture on upload: ' . $e->getMessage());
+            session()->flash('error', 'Failed to process the profile picture. Please try again.');
+            $this->compressedProfilePicture = null;
+        }
+    } else {
+        \Log::warning('⚠️ updatedProfilePicture() called but profile_picture is not a TemporaryUploadedFile.');
+    }
+}
+
 
     public function updatedUseEmployeeId($value)
     {
@@ -337,11 +374,13 @@ class UserFormEdit extends Component
 
     public function update()
     {
-        // quick size check for picture
-        if ($this->profile_picture && $this->profile_picture->getSize() > 5 * 1024 * 1024) {
-            $this->addError('profile_picture', 'Profile picture must be less than 5 MB.');
-            return;
-        }
+ // If we created a compressed tmp image, temporarily clear $this->profile_picture
+$originalProfileUpload = null;
+if (!empty($this->compressedProfilePicture)) {
+    $originalProfileUpload = $this->profile_picture;
+    $this->profile_picture = null;
+}
+
 
         // require either student_id or employee_id
         if (empty($this->student_id) && empty($this->employee_id)) {
@@ -418,6 +457,30 @@ class UserFormEdit extends Component
         DB::transaction(function () use ($data, $user, $normalizedSerials) {
             // Update user
             $user->update($data);
+            if ($this->compressedProfilePicture) {
+    try {
+        $hash = substr(md5(uniqid((string) rand(), true)), 0, 8);
+        $filename = $user->id . '_' . $hash . '.jpg';
+        $finalPath = 'profile_pics/' . $filename;
+
+        // read tmp from public disk and put into private disk
+        $fileContents = Storage::disk('public')->get($this->compressedProfilePicture);
+        Storage::disk('private')->put($finalPath, $fileContents);
+
+        // remove tmp file from public
+        Storage::disk('public')->delete($this->compressedProfilePicture);
+
+        // update user record and currentProfilePicture
+        $user->update(['profile_picture' => $filename]);
+        $this->currentProfilePicture = $filename;
+
+        \Log::info("✅ Profile picture moved from tmp to private: {$finalPath}");
+    } catch (\Exception $e) {
+        \Log::error("❌ Failed to move compressed profile picture: " . $e->getMessage());
+        // swallow or handle — don't abort the entire update if image move fails
+    }
+}
+
 
             // Get incoming vehicle IDs (existing vehicles being kept)
             $incomingIds = collect($this->vehicles)
@@ -464,6 +527,8 @@ class UserFormEdit extends Component
         });
 
         session()->flash('success', 'User and vehicles updated successfully!');
+        $this->profile_picture = null;
+$this->compressedProfilePicture = null;
     }
 
     public function render()

@@ -123,15 +123,39 @@
 
         </div>
 
-        <div class="mb-3">
-            <label>Profile Picture <small class="text-muted">(optional)</small></label>
-            <input type="file" wire:model="profile_picture" class="form-control">
-                        @if($currentProfilePicture)
-                <small class="d-block mt-2">
-                    Current: <img src="{{ route('profile.picture', $currentProfilePicture) }}" width="80">
-                </small>
-            @endif
-        </div>
+<div class="mb-3">
+    <label>Profile Picture <small class="text-muted">(optional)</small></label>
+    <input type="file" wire:model="profile_picture" class="form-control">
+
+    {{-- 👇 Show a loading spinner only while uploading --}}
+    <div wire:loading wire:target="profile_picture" class="mt-2 text-muted">
+        <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+        Uploading image…
+    </div>
+
+    @if ($compressedProfilePicture)
+        <small class="d-block mt-2">
+            Preview:
+            <img 
+                src="{{ Storage::url($compressedProfilePicture) }}" 
+                width="80"
+                style="border-radius:50%; object-fit:cover;"
+            >
+        </small>
+    @elseif($currentProfilePicture)
+        <small class="d-block mt-2">
+            Current:
+            <img 
+                src="{{ route('profile.picture', $currentProfilePicture) }}" 
+                width="80"
+                style="border-radius:50%; object-fit:cover;"
+            >
+        </small>
+    @endif
+</div>
+
+
+
 
 
         <!-- Vehicles Section -->
