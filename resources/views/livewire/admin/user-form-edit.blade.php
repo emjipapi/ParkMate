@@ -126,6 +126,11 @@
         <div class="mb-3">
             <label>Profile Picture <small class="text-muted">(optional)</small></label>
             <input type="file" wire:model="profile_picture" class="form-control">
+                        @if($currentProfilePicture)
+                <small class="d-block mt-2">
+                    Current: <img src="{{ route('profile.picture', $currentProfilePicture) }}" width="80">
+                </small>
+            @endif
         </div>
 
 
