@@ -76,11 +76,16 @@
 
 
         {{-- Submit --}}
-        <div class="mt-3 mt-md-4">
-            <button type="submit" class="btn-add-slot px-3 px-md-4 py-2" @disabled($violatorStatus !== 'found')>
-                Submit Report
-            </button>
-        </div>
+<div class="mt-3 mt-md-4 d-flex gap-2">
+    <button type="button" wire:click="submitReport('pending')" class="btn btn-warning px-3 px-md-4 py-2" @disabled($violatorStatus !== 'found')>
+        Submit as Pending
+    </button>
+
+    <button type="button" wire:click="submitReport('approved')" class="btn btn-success px-3 px-md-4 py-2" @disabled($violatorStatus !== 'found')>
+        Submit as Approved
+    </button>
+</div>
+
         {{-- Success & Error Messages --}}
         @if (session()->has('success'))
         <div class="alert alert-success mt-3">{{ session('success') }}</div>

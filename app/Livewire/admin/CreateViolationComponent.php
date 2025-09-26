@@ -101,69 +101,59 @@ public function updatedLicensePlate($value)
     }
 }
 
-    public function submitReport()
-    {
-        // Validate FIRST
-        $this->validate([
-            'description' => 'required|string',
-            'area_id' => 'required|exists:parking_areas,id',
-            'evidence' => 'nullable|file|mimes:jpg,jpeg,png|max:10240', // 10MB
-            'license_plate' => 'nullable|string|max:255',
-            'violator' => 'nullable|integer|exists:users,id',
-        ]);
+public function submitReport($status = 'approved')
+{
+    $this->validate([
+        'description' => 'required|string',
+        'area_id' => 'required|exists:parking_areas,id',
+        'evidence' => 'nullable|file|mimes:jpg,jpeg,png|max:10240',
+        'license_plate' => 'nullable|string|max:255',
+        'violator' => 'nullable|integer|exists:users,id',
+    ]);
 
-        // Process compressed evidence AFTER validation
-        $evidencePath = null;
-        if ($this->compressedEvidence) {
-            $finalPath = str_replace('tmp/', 'reported/', $this->compressedEvidence);
-            Storage::disk('public')->move($this->compressedEvidence, $finalPath);
-            $evidencePath = $finalPath;
-        }
-
-        // description
-        $desc = $this->description === "Other" ? $this->otherDescription : $this->description;
-
-        // For admin-created report we mark as approved and attach approved evidence
-        $evidenceData = [
-            'reported' => null,
-            'approved' => $evidencePath,
-        ];
-
-        $admin = Auth::guard('admin')->user();
-        $adminId = $admin->id ?? null;
-if (! $admin) {
-    abort(403, 'Admin not authenticated');
-}
-// Create violation via admin relation (polymorphic reporter)
-// $admin is already set above
-$data = [
-    'description'   => $desc,
-    'evidence'      => $evidenceData,
-    'area_id'       => $this->area_id,
-    'license_plate' => strtoupper(trim($this->license_plate)),
-    'violator_id'   => $this->violator,
-    'status'        => 'approved',
-    'submitted_at'  => now(),
-];
-
-// this will set reporter_type = Admin::class and reporter_id = $admin->getKey()
-$violation = $admin->reportedViolations()->create($data);
-
-        // log activity as admin
-$adminName = trim(($admin->firstname ?? '') . ' ' . ($admin->lastname ?? ''));
-ActivityLog::create([
-    'actor_type' => 'admin',
-    'actor_id'   => $admin->getKey(),
-    'area_id'    => $this->area_id,
-    'action'     => 'report',
-    'details'    => "Admin {$adminName} created & approved a violation report" . (!empty($this->license_plate) ? " for plate {$this->license_plate}" : '') . ".",
-    'created_at' => now(),
-]);
-
-        session()->flash('success', 'Report submitted and approved successfully!');
-        // redirect to an admin tracking/listing page (adjust route name to your app)
-        // return redirect()->route('admin.violation.tracking');
+    // Move compressed evidence if exists
+    $evidencePath = null;
+    if ($this->compressedEvidence) {
+        $finalPath = str_replace('tmp/', 'reported/', $this->compressedEvidence);
+        Storage::disk('public')->move($this->compressedEvidence, $finalPath);
+        $evidencePath = $finalPath;
     }
+
+    $desc = $this->description === "Other" ? $this->otherDescription : $this->description;
+
+    $evidenceData = [
+        'reported' => $status === 'pending' ? $evidencePath : null,
+        'approved' => $status === 'approved' ? $evidencePath : null,
+    ];
+
+    $admin = Auth::guard('admin')->user();
+    if (!$admin) abort(403, 'Admin not authenticated');
+
+    $data = [
+        'description'   => $desc,
+        'evidence'      => $evidenceData,
+        'area_id'       => $this->area_id,
+        'license_plate' => strtoupper(trim($this->license_plate)),
+        'violator_id'   => $this->violator,
+        'status'        => $status, // 👈 now dynamic
+        'submitted_at'  => now(),
+    ];
+
+    $violation = $admin->reportedViolations()->create($data);
+
+    ActivityLog::create([
+        'actor_type' => 'admin',
+        'actor_id'   => $admin->getKey(),
+        'area_id'    => $this->area_id,
+        'action'     => 'report',
+        'details'    => "Admin {$admin->firstname} created a {$status} violation report" 
+                         . (!empty($this->license_plate) ? " for plate {$this->license_plate}" : '') . ".",
+        'created_at' => now(),
+    ]);
+
+    session()->flash('success', "Report submitted as {$status} successfully!");
+}
+
 
     public function render()
     {
