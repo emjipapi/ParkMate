@@ -111,17 +111,25 @@ if ($this->compressedEvidence) {
         'approved' => null,           // will be set later when approved
     ];
 
-    // Create the violation record
-    Violation::create([
-        'reporter_id' => auth()->id(),
-        'description' => $desc,
-        'evidence' => $evidenceData, // Remove json_encode since model casts it as array
-        'area_id' => $this->area_id,
-        'license_plate' => strtoupper(trim($this->license_plate)),
-        'violator_id' => $this->violator,
-        'status' => 'pending',
-        'submitted_at' => now(), // Add this timestamp
-    ]);
+// defensive: current user must be present
+$user = auth()->user();
+if (! $user) {
+    abort(403, 'User not authenticated');
+}
+
+// payload for Violation (polymorphic reporter will be filled by the relation)
+$data = [
+    'description'   => $desc,
+    'evidence'      => $evidenceData,
+    'area_id'       => $this->area_id,
+    'license_plate' => strtoupper(trim($this->license_plate)),
+    'violator_id'   => $this->violator,
+    'status'        => 'pending',
+    'submitted_at'  => now(),
+];
+
+// create via user relation — sets reporter_type = App\Models\User and reporter_id = $user->getKey()
+$violation = $user->reportedViolations()->create($data);
 
     // Build details string
     $userName = auth()->user()->firstname . ' ' . auth()->user()->lastname;
@@ -131,15 +139,16 @@ if ($this->compressedEvidence) {
     }
     $details .= ".";
 
-    // Log the activity
-    ActivityLog::create([
-        'actor_type' => 'user',
-        'actor_id' => auth()->id(),
-        'area_id' => $this->area_id,
-        'action' => 'report',
-        'details' => $details,
-        'created_at' => now(),
-    ]);
+// log activity as user (use user primary key)
+$userName = trim(($user->firstname ?? '') . ' ' . ($user->lastname ?? ''));
+ActivityLog::create([
+    'actor_type' => 'user',
+    'actor_id'   => $user->getKey(),
+    'area_id'    => $this->area_id,
+    'action'     => 'report',
+    'details'    => "User {$userName} submitted a violation report" . (!empty($this->license_plate) ? " for plate {$this->license_plate}" : '') . ".",
+    'created_at' => now(),
+]);
 
     session()->flash('success', 'Report submitted successfully!');
     return redirect()->route('user.violation.tracking');

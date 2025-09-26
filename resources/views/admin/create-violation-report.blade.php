@@ -8,7 +8,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ParkMate - Violation Tracking</title>
+    <title>ParkMate - Create Report</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap 5 CDN -->
@@ -17,6 +17,7 @@
     <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
     <livewire:styles />
     <style>
         :root {
@@ -392,6 +393,10 @@
                 /* force horizontal scroll if screen is too narrow */
             }
         }
+        .btn-add-slot:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
 
 
         @media (max-width: 768px) {
@@ -548,20 +553,20 @@
                 <h3 class="mb-0 me-3">Ano ilalagay ko</h3>
                 <h6 class="mb-0">otid</h6>
             </div>
-            <span class="text-muted">Home > Violation Tracking</span>
-        </div>
-        <div class="d-flex gap-2">
-            <div href='/create-report' wire:navigate>
-                <button type="button" class="btn-add-slot btn btn-primary">
-                    Create Report
-                </button>
-            </div>
+            <span class="text-muted">Home > Violation Tracking > Create Report</span>
         </div>
 
-        <div class="square-box">
-            <livewire:admin.violation-admin-component />
-
+        <div class="position-absolute m-3 d-none d-md-block">
+            <a href="/violation-tracking" wire:navigate
+                class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
+                style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
         </div>
+        
+            <livewire:admin.create-violation-component />
+
+        
 
     </div>
     <!-- Bottom Bar -->

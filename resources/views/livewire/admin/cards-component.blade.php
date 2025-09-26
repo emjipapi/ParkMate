@@ -39,12 +39,14 @@
         </div>
         <div class="card-footer">More Info ➜</div>
     </div>
-        <div href='' wire:navigate class="card card-6 text-center" style="cursor:pointer;">
-        <div class="card-body d-flex flex-column justify-content-center align-items-center">
-            <i class="fas fa-plus-circle" style="font-size: 5rem; color: white;"></i>
-            <p class="card-text mt-2 mb-1 fw-bold">Make Report</p>
-        </div>
+<div class="card card-6 text-center d-flex flex-column justify-content-center align-items-center" 
+     style="cursor:pointer;" 
+     onclick="window.location='{{ url('/create-report') }}'">
+    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+        <i class="fas fa-plus-circle" style="font-size: 5rem; color: white;"></i>
+        <p class="card-text mt-2 mb-1 fw-bold">Make Report</p>
     </div>
+</div>
 
     {{-- Analytics Dashboard --}}
     <div class="card card-5" style="cursor:pointer;">

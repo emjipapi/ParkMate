@@ -118,6 +118,7 @@ Route::middleware(['admin'])->group(function () {
     Route::view('/admin-dashboard/live-attendance-mode', 'admin.live-attendance-mode');
     Route::view('/sticker-generator', 'admin.sticker-generator');
     Route::view('/violation-tracking', 'admin.violation-tracking');
+    Route::view('/create-report', 'admin.create-violation-report');
     Route::view('/activity-log', 'admin.activity-log');
     Route::view('/parking-slots', 'admin.parking-slots')->name('parking.slots');
     // routes/web.php
