@@ -85,7 +85,7 @@ public function vehicles()
 
 public function reportedViolations()
 {
-    return $this->hasMany(Violation::class, 'reporter_id');
+    return $this->morphMany(\App\Models\Violation::class, 'reporter');
 }
 
 public function violations()

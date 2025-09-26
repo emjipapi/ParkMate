@@ -30,4 +30,8 @@ class Admin extends Authenticatable
     {
         return $this->password; // must match DB column exactly (lowercase)
     }
+    public function reportedViolations()
+{
+    return $this->morphMany(\App\Models\Violation::class, 'reporter');
+}
 }
