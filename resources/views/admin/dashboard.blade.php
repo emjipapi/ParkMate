@@ -225,6 +225,21 @@
             background: #6c63ff;
             color: #fff;
         }
+                .card-6 {
+            grid-column: 3;
+            grid-row: 2;
+            /* same row as card-3 */
+            align-self: start;
+            /* stick to top of this cell */
+            z-index: 1;
+            /* sit above card-3 */
+           
+                        border: 0px;
+            border-radius: 0px;
+            background-color: #03ca6aff;
+            color: white;
+            height: 200px;
+        }
 
         .card-1 {
             grid-column: 1;
@@ -368,6 +383,10 @@
             .d-flex.align-items-baseline .text-white {
                 font-size: 0.8rem;
                 /* smaller breadcrumb text */
+            }
+                        .cards-container .card-6 {
+                order: -1;
+                /* first on mobile */
             }
         }
     </style>
