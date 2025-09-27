@@ -188,6 +188,9 @@
         .btn-add-slot:hover {
             background-color: var(--bg3);
         }
+        .btn-warning {
+    color: #fff !important;
+}
 
         .square-box {
             background-color: white;

@@ -77,11 +77,11 @@
 
         {{-- Submit --}}
 <div class="mt-3 mt-md-4 d-flex gap-2">
-    <button type="button" wire:click="submitReport('pending')" class="btn btn-warning px-3 px-md-4 py-2" @disabled($violatorStatus !== 'found')>
+    <button type="button" wire:click="submitReport('pending')" class="btn btn-warning px-3 px-md-4 py-2">
         Submit as Pending
     </button>
 
-    <button type="button" wire:click="submitReport('approved')" class="btn btn-success px-3 px-md-4 py-2" @disabled($violatorStatus !== 'found')>
+    <button type="button" wire:click="submitReport('approved')" class=" btn btn-success px-3 px-md-4 py-2" @disabled($violatorStatus !== 'found')>
         Submit as Approved
     </button>
 </div>
