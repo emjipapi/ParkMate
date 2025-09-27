@@ -8,6 +8,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use App\Models\User;
+use App\Models\Admin;
 class ReportController extends Controller
 {
     public function generateAttendanceReport(Request $request)

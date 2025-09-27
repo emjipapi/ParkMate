@@ -8,6 +8,7 @@ use App\Models\Violation;
 use App\Models\Vehicle;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 class ForEndorsementComponent extends Component
 {
     use WithPagination;
@@ -223,32 +224,83 @@ public function render()
         ->paginate($this->perPage);
 
     // Process violations for display
-    $violations->getCollection()->transform(function ($violation) {
-        // Populate missing violator_id from license_plate
-        if (empty($violation->violator_id) && !empty($violation->license_plate)) {
-            $match = $this->findViolatorByPlate($violation->license_plate);
-            if ($match) {
-                $violation->violator_id = $match['user_id'];
-                $violation->save();
+    $violations = $violationsQuery
+    ->orderBy('created_at', ($this->sortOrder ?? 'desc') === 'asc' ? 'asc' : 'desc')
+    ->paginate($this->perPage);
+
+// --- DEBUGGING + DEFENSIVE FALLBACK (paste this block) ---
+
+
+$violations->getCollection()->transform(function ($v) {
+    $rt = $v->reporter_type ?? '';
+    // Log a visible marker, length and whether PHP knows the class
+    Log::info('for-endorsement: reporter_type check', [
+        'violation_id' => $v->id,
+        'marker' => 'INSERT("' . $rt . '")',
+        'len' => is_string($rt) ? strlen($rt) : null,
+        'hex_bytes' => is_string($rt) ? implode(' ', array_map(fn($b) => sprintf('%02x', $b), unpack('C*', $rt))) : null,
+        'class_exists_exact' => is_string($rt) ? class_exists($rt) : false,
+    ]);
+
+    // Defensive: trim then try to safely load/report relation if relation missing
+    $trimmed = is_string($rt) ? trim($rt) : $rt;
+    if ($trimmed !== $rt) {
+        // update in-memory value (not DB) so later code uses trimmed version
+        $v->reporter_type = $trimmed;
+        Log::info('for-endorsement: trimmed reporter_type', [
+            'violation_id' => $v->id,
+            'before' => $rt,
+            'after' => $trimmed,
+        ]);
+    }
+
+    if (! $v->reporter && !empty($trimmed) && is_string($trimmed)) {
+        $class = $trimmed;
+
+        // If saved value is short key like 'admin' try App\Models\Admin
+        if (! class_exists($class)) {
+            $candidate = 'App\\Models\\' . ucfirst($class);
+            if (class_exists($candidate)) {
+                $class = $candidate;
             }
         }
 
-        // Populate missing license_plate from violator_id
-        if (!empty($violation->violator_id) && empty($violation->license_plate)) {
-            $match = $this->findPlatesByViolator($violation->violator_id);
-            if ($match && !empty($match['plates'])) {
-                $violation->license_plate = $match['plates'][0];
-                $violation->save();
+        if (class_exists($class)) {
+            try {
+                $modelQuery = method_exists($class, 'withTrashed') ? $class::withTrashed() : $class;
+                $found = $modelQuery::find($v->reporter_id);
+                if ($found) {
+                    // attach relation so blade can access properties safely
+                    $v->setRelation('reporter', $found);
+                    Log::info('for-endorsement: reporter fallback attached', [
+                        'violation_id' => $v->id,
+                        'attached_class' => $class,
+                        'reporter_id' => $v->reporter_id,
+                    ]);
+                } else {
+                    Log::info('for-endorsement: reporter fallback not found', [
+                        'violation_id' => $v->id,
+                        'tried_class' => $class,
+                        'reporter_id' => $v->reporter_id,
+                    ]);
+                }
+            } catch (\Throwable $e) {
+                Log::warning('for-endorsement: reporter fallback error', [
+                    'violation_id' => $v->id,
+                    'class' => $class,
+                    'error' => $e->getMessage(),
+                ]);
             }
+        } else {
+            Log::warning('for-endorsement: class does not exist', [
+                'violation_id' => $v->id,
+                'attempted' => [$trimmed, 'App\\Models\\'.ucfirst($trimmed)],
+            ]);
         }
+    }
 
-        // Add virtual property for the view
-        $violation->violator_name = $violation->violator
-            ? trim($violation->violator->firstname . ' ' . $violation->violator->lastname)
-            : 'Unknown';
-
-        return $violation;
-    });
+    return $v;
+});
 
     return view('livewire.admin.for-endorsement-component', [
         'violations' => $violations,
