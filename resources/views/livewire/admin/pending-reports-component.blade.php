@@ -259,36 +259,49 @@
                         </span>
                     </td>
 
-                    {{-- Actions --}}
-                    <td class="px-4 py-2 align-middle">
-                        <div class="d-flex flex-column gap-1">
-                            @if ($violation->status === 'approved')
-                            {{-- Locked Approved --}}
-                            <span class="badge bg-success d-inline-block w-100 text-center py-2">
-                                ✓ Approved
-                            </span>
-                            @elseif ($violation->status === 'rejected')
-                            {{-- Rejected but can still be approved later --}}
-                            <button wire:click="updateStatus({{ $violation->id }}, 'approved')"
-                                class="btn btn-sm btn-success w-100">
-                                Approve
-                            </button>
-                            <span class="badge bg-danger d-inline-block w-100 text-center py-2">
-                                ✓ Rejected
-                            </span>
-                            @else
-                            {{-- Pending --}}
-                            <button wire:click="updateStatus({{ $violation->id }}, 'approved')"
-                                class="btn btn-sm btn-success w-100">
-                                Approve
-                            </button>
-                            <button wire:click="updateStatus({{ $violation->id }}, 'rejected')"
-                                class="btn btn-sm btn-danger w-100">
-                                Reject
-                            </button>
-                            @endif
-                        </div>
-                    </td>
+{{-- Actions --}}
+<td class="px-4 py-2 align-middle">
+    <div class="d-flex flex-column gap-2 action-buttons">
+        @if ($violation->status === 'pending')
+            {{-- Approve Button Group --}}
+            <div class="btn-group w-100" role="group">
+                <button wire:click="updateStatus({{ $violation->id }}, 'approved')"
+                        class="btn btn-sm btn-success">
+                    Approve
+                </button>
+                <button class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split" 
+                        data-bs-toggle="dropdown" 
+                        aria-expanded="false">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" wire:click.prevent="approveWithMessage({{ $violation->id }})">
+                        Approve with Message
+                    </a></li>
+                </ul>
+            </div>
+
+            {{-- Reject Button Group --}}
+            <div class="btn-group w-100" role="group">
+                <button wire:click="updateStatus({{ $violation->id }}, 'rejected')"
+                        class="btn btn-sm btn-danger">
+                    Reject
+                </button>
+                <button class="btn btn-sm btn-danger dropdown-toggle dropdown-toggle-split" 
+                        data-bs-toggle="dropdown" 
+                        aria-expanded="false">
+                    <span class="visually-hidden">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="#" wire:click.prevent="rejectWithMessage({{ $violation->id }})">
+                        Reject with Message
+                    </a></li>
+                </ul>
+            </div>
+        @endif
+    </div>
+</td>
+
 
                 </tr>
                 @endforeach

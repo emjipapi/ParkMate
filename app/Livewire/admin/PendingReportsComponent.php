@@ -412,4 +412,13 @@ private function checkAndSendThresholdEmail($violatorId)
             'vehicles' => $this->vehicles,
         ]);
     }
+    public function approveWithMessage($violationId) {
+    $this->selectedViolationId = $violationId;
+    $this->showApproveMessageModal = true;
+}
+
+public function rejectWithMessage($violationId) {
+    $this->selectedViolationId = $violationId; 
+    $this->showRejectMessageModal = true;
+}
 }

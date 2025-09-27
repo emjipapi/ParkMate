@@ -479,7 +479,25 @@
                 touch-action: pan-x;
                 /* enable horizontal touch scrolling for table */
             }
+  .btn-group.w-100 .btn {
+    font-size: 1rem; /* bigger text */
+    padding: 10px 18px; /* more space to tap */
+  }
 
+  /* Ensure the button group takes full width of its container */
+  .btn-group.w-100 {
+    width: 100% !important;
+  }
+
+  /* Prevent tiny split dropdown buttons */
+  .btn-group .dropdown-toggle-split {
+    padding: 10px 14px;
+    min-width: 48px; /* ensures the toggle isn't too small */
+  }
+    td .btn-group .btn {
+    padding: 0.75rem 1.5rem; /* taller + wider tap area */
+    font-size: 0.95rem;
+  }
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
