@@ -148,8 +148,14 @@
                 <tr class="hover:bg-gray-50">
                     {{-- Reporter --}}
                     <td class="px-4 py-2 text-sm text-gray-800">
-                        {{ $violation->reporter->firstname ?? '' }} {{ $violation->reporter->lastname ?? '' }}
-                    </td>
+                        <div class="font-medium">
+                            {{-- # --}}
+                            {{ $violation->reporter ? $violation->reporter->getKey() : 'N/A' }}
+                        </div>
+                        <div class="text-gray-600">{{ $violation->reporter->firstname ?? '' }}
+                            {{ $violation->reporter->lastname ?? '' }}
+                        </div>
+                    </td>   
 
 
                     <!-- DATE cell (insert right after your Reporter cell) -->

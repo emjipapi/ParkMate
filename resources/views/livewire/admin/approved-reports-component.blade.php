@@ -75,8 +75,15 @@
             <tbody>
                 @forelse($violations as $violation)
                 <tr>
-                    <td>{{ $violation->reporter->firstname }} {{ $violation->reporter->lastname }}</td>
-                                        
+                    <td class="px-4 py-2 text-sm text-gray-800">
+                        <div class="font-medium">
+                            {{-- # --}}
+                            {{ $violation->reporter ? $violation->reporter->getKey() : 'N/A' }}
+                        </div>
+                        <div class="text-gray-600">{{ $violation->reporter->firstname ?? '' }}
+                            {{ $violation->reporter->lastname ?? '' }}
+                        </div>
+                    </td>                                        
 
                     <!-- DATE cell (insert right after your Reporter cell) -->
 <td class="px-3 py-2 text-sm text-gray-700">
