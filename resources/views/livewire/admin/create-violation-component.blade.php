@@ -60,7 +60,7 @@
         {{-- License Plate --}}
 <div class="mb-3 mb-md-4">
     <label class="form-label fw-bold">License Plate <span class="text-danger">*</span></label>
-    <input type="text" wire:model.live.debounce.500ms="license_plate" class="form-control mt-1 mt-md-2" placeholder="123ABC" required />
+    <input type="text" wire:model.live.debounce.50ms="license_plate" class="form-control mt-1 mt-md-2" placeholder="123ABC" required />
 
     {{-- Status text --}}
     <div class="text-xs mt-1" style="min-height:1.1em;">
@@ -74,14 +74,26 @@
     </div>
 </div>
 
-
-        {{-- Submit --}}
+{{-- Submit --}}
 <div class="mt-3 mt-md-4 d-flex gap-2">
-    <button type="button" wire:click="submitReport('pending')" class="btn btn-warning px-3 px-md-4 py-2">
+    <button
+        type="button"
+        wire:click="submitReport('pending')"
+        class="btn btn-warning px-3 px-md-4 py-2"
+        wire:loading.attr="disabled"
+        wire:target="license_plate,submitReport"
+    >
         Submit as Pending
     </button>
 
-    <button type="button" wire:click="submitReport('approved')" class=" btn btn-success px-3 px-md-4 py-2" @disabled($violatorStatus !== 'found')>
+    <button
+        type="button"
+        wire:click="submitReport('approved')"
+        class="btn btn-success px-3 px-md-4 py-2"
+        @disabled($violatorStatus !== 'found')
+        wire:loading.attr="disabled"
+        wire:target="license_plate,submitReport"
+    >
         Submit as Approved
     </button>
 </div>

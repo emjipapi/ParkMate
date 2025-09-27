@@ -7,6 +7,7 @@ use Livewire\WithFileUploads;
 use App\Models\Violation;
 use App\Models\ParkingArea;
 use App\Models\User;
+use App\Models\Vehicle;
 use App\Models\ActivityLog;
 use Intervention\Image\Laravel\Facades\Image;
 use Illuminate\Support\Facades\Storage;
@@ -16,15 +17,18 @@ class CreateViolationComponent extends Component
 {
     use WithFileUploads;
 
-    public $description;
+     public $description;
     public $otherDescription;
-    public $license_plate;
-    public $violator;
+    public $license_plate; // keep snake_case
+    public $violator;      // user id or null
 
-    public $areas = [];   // list of areas
-    public $area_id;      // selected area ID
+    public $areas = [];
+    public $area_id;
     public $evidence;
     public $compressedEvidence;
+
+    public $violatorStatus = null;
+    public $violatorName = null;
 
     public function mount()
     {
@@ -70,90 +74,110 @@ class CreateViolationComponent extends Component
     }
 
 
-public $violatorStatus = null;
-public $violatorName = null;
 public $violator_id = null;
 
-public function updatedLicensePlate($value)
-{
-    $this->violatorStatus = 'loading';
-    $this->violatorName = null;
-    $this->violator_id = null;
-
-    $licensePlate = trim($value);
-    if (empty($licensePlate)) {
-        $this->violatorStatus = null;
-        return;
-    }
-
-    $vehicle = \App\Models\Vehicle::where('license_plate', $licensePlate)
-        ->with('user')
-        ->first();
-
-    if ($vehicle && $vehicle->user) {
-        $this->violatorStatus = 'found';
-        $this->violatorName = trim($vehicle->user->firstname . ' ' . $vehicle->user->lastname);
-        $this->violator = $vehicle->user->id;
-    } else {
-        $this->violatorStatus = 'not_found';
+  public function updatedLicensePlate($value)
+    {
+        $this->violatorStatus = 'loading';
         $this->violatorName = null;
-        $this->violator_id = null;
+        $this->violator = null;
+
+        $plate = strtoupper(trim($value));
+        if ($plate === '') {
+            $this->violatorStatus = null;
+            return;
+        }
+
+        $vehicle = Vehicle::whereRaw('UPPER(license_plate) = ?', [$plate])
+            ->with('user')
+            ->first();
+
+        if ($vehicle && $vehicle->user) {
+            $this->violatorStatus = 'found';
+            $this->violatorName = trim($vehicle->user->firstname . ' ' . $vehicle->user->lastname);
+            $this->violator = $vehicle->user->id;
+        } else {
+            $this->violatorStatus = 'not_found';
+            $this->violatorName = null;
+            $this->violator = null;
+        }
     }
-}
 
-public function submitReport($status = 'approved')
-{
-    $this->validate([
-        'description' => 'required|string',
-        'area_id' => 'required|exists:parking_areas,id',
-        'evidence' => 'nullable|file|mimes:jpg,jpeg,png|max:10240',
-        'license_plate' => 'nullable|string|max:255',
-        'violator' => 'nullable|integer|exists:users,id',
-    ]);
+    public function submitReport($status = 'approved')
+    {
+        // Defensive: re-run lookup (synchronous, server-side) to avoid race conditions
+        $plate = strtoupper(trim($this->license_plate ?? ''));
+        $vehicle = null;
+        if ($plate !== '') {
+            $vehicle = Vehicle::whereRaw('UPPER(license_plate) = ?', [$plate])
+                              ->with('user')
+                              ->first();
+        }
 
-    // Move compressed evidence if exists
-    $evidencePath = null;
-    if ($this->compressedEvidence) {
-        $finalPath = str_replace('tmp/', 'reported/', $this->compressedEvidence);
-        Storage::disk('public')->move($this->compressedEvidence, $finalPath);
-        $evidencePath = $finalPath;
+        if ($vehicle && $vehicle->user) {
+            $this->violator = $vehicle->user->id;
+            $this->violatorStatus = 'found';
+        } else {
+            $this->violator = null;
+            $this->violatorStatus = 'not_found';
+        }
+
+        // If we require a found violator for 'approved' submissions, block it
+        if ($status !== 'pending' && $this->violator === null) {
+            session()->flash('error', 'No violator found for that license plate. Please check the plate or submit as pending.');
+            return;
+        }
+
+        // Validate (violator may be null for pending)
+        $this->validate([
+            'description' => 'required|string',
+            'area_id' => 'required|exists:parking_areas,id',
+            'evidence' => 'nullable|file|mimes:jpg,jpeg,png|max:10240',
+            'license_plate' => 'nullable|string|max:255',
+            'violator' => 'nullable|integer|exists:users,id',
+        ]);
+
+        // move compressed evidence if exists
+        $evidencePath = null;
+        if ($this->compressedEvidence) {
+            $finalPath = str_replace('tmp/', 'reported/', $this->compressedEvidence);
+            Storage::disk('public')->move($this->compressedEvidence, $finalPath);
+            $evidencePath = $finalPath;
+        }
+
+        $desc = $this->description === "Other" ? $this->otherDescription : $this->description;
+        $evidenceData = [
+            'reported' => $status === 'pending' ? $evidencePath : null,
+            'approved' => $status === 'approved' ? $evidencePath : null,
+        ];
+
+        $admin = Auth::guard('admin')->user();
+        if (! $admin) abort(403, 'Admin not authenticated');
+
+        $data = [
+            'description'   => $desc,
+            'evidence'      => $evidenceData,
+            'area_id'       => $this->area_id,
+            'license_plate' => $plate ?: null,
+            'violator_id'   => $this->violator,
+            'status'        => $status,
+            'submitted_at'  => now(),
+        ];
+
+        $violation = $admin->reportedViolations()->create($data);
+
+        ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id'   => $admin->getKey(),
+            'area_id'    => $this->area_id,
+            'action'     => 'report',
+            'details'    => "Admin {$admin->firstname} created a {$status} violation report" 
+                             . (!empty($this->license_plate) ? " for plate {$this->license_plate}" : '') . ".",
+            'created_at' => now(),
+        ]);
+
+        session()->flash('success', "Report submitted as {$status} successfully!");
     }
-
-    $desc = $this->description === "Other" ? $this->otherDescription : $this->description;
-
-    $evidenceData = [
-        'reported' => $status === 'pending' ? $evidencePath : null,
-        'approved' => $status === 'approved' ? $evidencePath : null,
-    ];
-
-    $admin = Auth::guard('admin')->user();
-    if (!$admin) abort(403, 'Admin not authenticated');
-
-    $data = [
-        'description'   => $desc,
-        'evidence'      => $evidenceData,
-        'area_id'       => $this->area_id,
-        'license_plate' => strtoupper(trim($this->license_plate)),
-        'violator_id'   => $this->violator,
-        'status'        => $status, // 👈 now dynamic
-        'submitted_at'  => now(),
-    ];
-
-    $violation = $admin->reportedViolations()->create($data);
-
-    ActivityLog::create([
-        'actor_type' => 'admin',
-        'actor_id'   => $admin->getKey(),
-        'area_id'    => $this->area_id,
-        'action'     => 'report',
-        'details'    => "Admin {$admin->firstname} created a {$status} violation report" 
-                         . (!empty($this->license_plate) ? " for plate {$this->license_plate}" : '') . ".",
-        'created_at' => now(),
-    ]);
-
-    session()->flash('success', "Report submitted as {$status} successfully!");
-}
-
 
     public function render()
     {
