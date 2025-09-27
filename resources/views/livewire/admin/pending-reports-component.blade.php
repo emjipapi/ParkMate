@@ -74,7 +74,7 @@
                     <td class="px-4 py-2 text-sm text-gray-800">
                         <div class="font-medium">
                             {{-- # --}}
-                            {{ $violation->reporter->id ?? 'N/A' }}
+                            {{ $violation->reporter ? $violation->reporter->getKey() : 'N/A' }}
                         </div>
                         <div class="text-gray-600">{{ $violation->reporter->firstname ?? '' }}
                             {{ $violation->reporter->lastname ?? '' }}
