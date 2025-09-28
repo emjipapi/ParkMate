@@ -77,18 +77,39 @@ class UserFormEdit extends Component
 }
 
 
-    public function updatedUseEmployeeId($value)
-    {
-        if ($value) { // just became an employee
-            $this->department = null;
-            $this->program = null;
-            $this->year_section = null;
+public function updatedUseEmployeeId($value)
+{
+    if ($value) {
+        // Becoming an employee: clear student-related UI + values
+        $this->useStudentId = false;
+        $this->student_id = null;
 
-            // also turn off student checkbox + value
-            $this->useStudentId = false;
-            $this->student_id = null;
-        }
+        // employee-specific defaults (clear student-only fields)
+        $this->department = null;
+        $this->program = null;
+        $this->year_section = null;
+
+        // also clear any validation errors for those fields if present
+        $this->resetValidation('student_id');
+    } else {
+        // Becoming NOT an employee (unchecked): clear employee id input
+        $this->employee_id = null;
+        $this->resetValidation('employee_id');
     }
+}
+public function updatedUseStudentId($value)
+{
+    if ($value) {
+        // Becoming a student: disable employee mode and clear employee id
+        $this->useEmployeeId = false;
+        $this->employee_id = null;
+        $this->resetValidation('employee_id');
+    } else {
+        // Becoming NOT a student (unchecked): clear student id input
+        $this->student_id = null;
+        $this->resetValidation('student_id');
+    }
+}
 
     // Vehicles - start with one empty vehicle row
     private function defaultVehicle()
