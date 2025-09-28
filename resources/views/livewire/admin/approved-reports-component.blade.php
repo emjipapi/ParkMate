@@ -66,6 +66,8 @@
                     <th>Reporter</th>
                     <th class="px-3 py-2 text-left text-sm font-semibold text-gray-700">Date</th>
                     <th>Area</th>
+                            <th>License Plate</th>
+        <th>Violator</th>
                     <th>Description</th>
                     <th>Evidence</th>
                     <th>Status</th>
@@ -102,6 +104,33 @@
 </td>
 
                     <td>{{ $violation->area->name ?? 'N/A' }}</td>
+                    <!-- NEW: License Plate -->
+        <td class="px-3 py-2 text-sm">
+            @php
+                // prefer the plate stored on the violation; otherwise try the violator's first vehicle
+                $plate = $violation->license_plate ?? null;
+                if (! $plate && $violation->violator) {
+                    // attempt to use first vehicle from the violator relation (may be null)
+                    $firstVehicle = $violation->violator->vehicles->first() ?? null;
+                    $plate = $firstVehicle ? $firstVehicle->license_plate : null;
+                }
+            @endphp
+
+            @if($plate)
+                <div class="font-medium">{{ $plate }}</div>
+            @else
+                <span class="text-muted">N/A</span>
+            @endif
+        </td>
+
+        <!-- NEW: Violator full name (from violator relation) -->
+        <td class="px-3 py-2 text-sm">
+            @if($violation->violator)
+                {{ trim($violation->violator->firstname . ' ' . $violation->violator->lastname) }}
+            @else
+                <span class="text-muted">N/A</span>
+            @endif
+        </td>
                     <td>{{ Str::limit($violation->description, 50) }}</td>
                     <td class="px-4 py-3 text-sm">
                         @php
