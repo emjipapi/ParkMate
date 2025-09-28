@@ -46,7 +46,6 @@
                 </select>
                 <span>entries</span>
             </div>
-
         </div>
 
     </div>
@@ -59,7 +58,7 @@
                     <th class="px-3 py-2 text-left text-sm font-semibold text-gray-700">Date</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Area</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">License Plate</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Violator</th>
+                    {{-- <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Violator</th> --}}
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Description</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Evidence</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Status</th>
@@ -150,10 +149,10 @@
 
 
                     {{-- Violator Input --}}
-                    <td class="px-2 py-2 text-sm">
+                    {{-- <td class="px-2 py-2 text-sm">
                         <div class="d-flex flex-column">
                             <div class="d-flex align-items-center">
-                                {{-- LEFT: small status icon (check / cross / loading) --}}
+                                LEFT: small status icon (check / cross / loading)
                                 <div class="text-xs me-2 d-flex align-items-center justify-content-center"
                                     style="width:22px;">
                                     @if(isset($violationStatuses[$violation->id]['violator_status']))
@@ -167,7 +166,7 @@
                                     @endif
                                 </div>
 
-                                {{-- RIGHT: input --}}
+                                RIGHT: input
                                 <input type="text"
                                     wire:model.live.debounce.500ms="violationInputs.{{ $violation->id }}.violator_id"
                                     placeholder="Enter User ID" {{ $violation->status === 'approved' ? 'disabled' : ''
@@ -176,7 +175,7 @@
                                 style="max-width: 150px;">
                             </div>
 
-                            {{-- status text below the input (user name / not found / searching) --}}
+                            status text below the input (user name / not found / searching)
                             <div class="text-xs mt-1" style="min-height:1.1em;">
                                 @if(isset($violationStatuses[$violation->id]['violator_status']))
                                 @if($violationStatuses[$violation->id]['violator_status'] === 'found')
@@ -195,7 +194,7 @@
                                 @endif
                             </div>
                         </div>
-                    </td>
+                    </td> --}}
 
 
                     {{-- Description --}}

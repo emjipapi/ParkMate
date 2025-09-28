@@ -92,62 +92,72 @@ public function updatedPerPage()
         }
     }
     
-    public function searchByPlate($violationId, $licensePlate)
-    {
-        if (empty(trim($licensePlate))) {
-            $this->violationStatuses[$violationId]['plate_status'] = null;
-            $this->violationStatuses[$violationId]['found_owner'] = '';
-            return;
-        }
-        
-        $this->violationStatuses[$violationId]['plate_status'] = 'loading';
-        
-        $result = $this->findViolatorByPlate(trim($licensePlate));
-        
-        if ($result && $result['user_id']) {
-            $this->violationInputs[$violationId]['violator_id'] = $result['user_id'];
-            $this->violationStatuses[$violationId]['plate_status'] = 'found';
-            $this->violationStatuses[$violationId]['found_owner'] = $result['owner_name'];
-            $this->violationStatuses[$violationId]['violator_status'] = 'found';
-            $this->violationStatuses[$violationId]['found_violator'] = $result['owner_name'];
-            
-            // Auto-save
-            $this->updateViolation($violationId, trim($licensePlate), $result['user_id']);
-        } else {
-            $this->violationStatuses[$violationId]['plate_status'] = 'not_found';
-            $this->violationStatuses[$violationId]['found_owner'] = '';
-        }
+public function searchByPlate($violationId, $licensePlate)
+{
+    if (empty(trim($licensePlate))) {
+        $this->violationStatuses[$violationId]['plate_status'] = null;
+        $this->violationStatuses[$violationId]['found_owner'] = '';
+        // Clear the suggested violator but keep the original license plate input
+        $this->violationStatuses[$violationId]['suggested_violator_id'] = null;
+        return;
     }
     
-    public function searchByViolator($violationId, $violatorId)
-    {
-        if (empty(trim($violatorId))) {
-            $this->violationStatuses[$violationId]['violator_status'] = null;
-            $this->violationStatuses[$violationId]['found_violator'] = '';
-            return;
-        }
+    $this->violationStatuses[$violationId]['plate_status'] = 'loading';
+    
+    $result = $this->findViolatorByPlate(trim($licensePlate));
+    
+    if ($result && $result['user_id']) {
+        // Store the found data temporarily - DO NOT auto-save to database
+        $this->violationStatuses[$violationId]['plate_status'] = 'found';
+        $this->violationStatuses[$violationId]['found_owner'] = $result['owner_name'];
+        $this->violationStatuses[$violationId]['violator_status'] = 'found';
+        $this->violationStatuses[$violationId]['found_violator'] = $result['owner_name'];
         
-        $this->violationStatuses[$violationId]['violator_status'] = 'loading';
+        // Store suggested violator ID temporarily (for when admin approves)
+        $this->violationStatuses[$violationId]['suggested_violator_id'] = $result['user_id'];
+        $this->violationStatuses[$violationId]['suggested_license_plate'] = $result['license_plate'];
         
-        $result = $this->findPlatesByViolator(trim($violatorId));
+        // Keep the original license plate input unchanged
+        // $this->violationInputs[$violationId]['license_plate'] remains as typed by reporter
         
-        if ($result && $result['user_data']) {
-            $this->violationStatuses[$violationId]['violator_status'] = 'found';
-            $this->violationStatuses[$violationId]['found_violator'] = $result['user_data']['full_name'];
-            $this->violationStatuses[$violationId]['plate_status'] = 'found';
-            $this->violationStatuses[$violationId]['found_owner'] = $result['user_data']['full_name'];
-            
-            if (!empty($result['plates'])) {
-                $this->violationInputs[$violationId]['license_plate'] = $result['plates'][0];
-                
-                // Auto-save
-                $this->updateViolation($violationId, $result['plates'][0], trim($violatorId));
-            }
-        } else {
-            $this->violationStatuses[$violationId]['violator_status'] = 'not_found';
-            $this->violationStatuses[$violationId]['found_violator'] = '';
-        }
+        // REMOVED: Auto-save line - changes are now temporary until approval
+        // $this->updateViolation($violationId, trim($licensePlate), $result['user_id']);
+    } else {
+        $this->violationStatuses[$violationId]['plate_status'] = 'not_found';
+        $this->violationStatuses[$violationId]['found_owner'] = '';
+        $this->violationStatuses[$violationId]['suggested_violator_id'] = null;
     }
+}
+    
+    // public function searchByViolator($violationId, $violatorId)
+    // {
+    //     if (empty(trim($violatorId))) {
+    //         $this->violationStatuses[$violationId]['violator_status'] = null;
+    //         $this->violationStatuses[$violationId]['found_violator'] = '';
+    //         return;
+    //     }
+        
+    //     $this->violationStatuses[$violationId]['violator_status'] = 'loading';
+        
+    //     $result = $this->findPlatesByViolator(trim($violatorId));
+        
+    //     if ($result && $result['user_data']) {
+    //         $this->violationStatuses[$violationId]['violator_status'] = 'found';
+    //         $this->violationStatuses[$violationId]['found_violator'] = $result['user_data']['full_name'];
+    //         $this->violationStatuses[$violationId]['plate_status'] = 'found';
+    //         $this->violationStatuses[$violationId]['found_owner'] = $result['user_data']['full_name'];
+            
+    //         if (!empty($result['plates'])) {
+    //             $this->violationInputs[$violationId]['license_plate'] = $result['plates'][0];
+                
+    //             // Auto-save
+    //             $this->updateViolation($violationId, $result['plates'][0], trim($violatorId));
+    //         }
+    //     } else {
+    //         $this->violationStatuses[$violationId]['violator_status'] = 'not_found';
+    //         $this->violationStatuses[$violationId]['found_violator'] = '';
+    //     }
+    // }
     
 public function updateStatus($violationId, $newStatus)
 {
@@ -166,16 +176,40 @@ public function updateStatus($violationId, $newStatus)
             'has_violator_id' => !empty($violation->violator_id)
         ]);
         
+        // If approving and we have suggested data, save it to the database
+        if ($newStatus === 'approved' && isset($this->violationStatuses[$violationId]['suggested_violator_id'])) {
+            $suggestedViolatorId = $this->violationStatuses[$violationId]['suggested_violator_id'];
+            $suggestedLicensePlate = $this->violationStatuses[$violationId]['suggested_license_plate'] ?? null;
+            
+            \Log::info("Applying suggested data on approval", [
+                'violation_id' => $violationId,
+                'suggested_violator_id' => $suggestedViolatorId,
+                'suggested_license_plate' => $suggestedLicensePlate
+            ]);
+            
+            // Apply the suggested changes
+            if ($suggestedViolatorId) {
+                $violation->violator_id = $suggestedViolatorId;
+            }
+            if ($suggestedLicensePlate) {
+                $violation->license_plate = $suggestedLicensePlate;
+            }
+        }
+        
         // Use model helper method for approved status
         if ($newStatus === 'approved') {
             $violation->markAsApproved();
         } elseif ($newStatus === 'rejected') {
             $violation->markAsRejected();
-        } 
+        }
+        
+        $violation->save(); // Save both status and suggested data changes
         
         \Log::info("Violation status updated", [
             'violation_id' => $violationId,
             'new_status' => $newStatus,
+            'final_violator_id' => $violation->violator_id,
+            'final_license_plate' => $violation->license_plate,
             'will_check_email' => ($newStatus === 'approved' && $violation->violator_id)
         ]);
         
@@ -257,53 +291,53 @@ private function checkAndSendThresholdEmail($violatorId)
         return null;
     }
 
-    public function findPlatesByViolator($input)
-    {
-        if (empty($input)) {
-            return null;
-        }
+    // public function findPlatesByViolator($input)
+    // {
+    //     if (empty($input)) {
+    //         return null;
+    //     }
         
-        $input = trim($input);
-        $user = null;
+    //     $input = trim($input);
+    //     $user = null;
         
-        if (is_numeric($input)) {
-            $user = User::find($input);
-        }
+    //     if (is_numeric($input)) {
+    //         $user = User::find($input);
+    //     }
         
-        if (!$user) {
-            $user = User::where(function($query) use ($input) {
-                $query->where('firstname', 'LIKE', '%' . $input . '%')
-                      ->orWhere('lastname', 'LIKE', '%' . $input . '%')
-                      ->orWhere('student_id', 'LIKE', '%' . $input . '%')
-                      ->orWhere('employee_id', 'LIKE', '%' . $input . '%')
-                      ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ['%' . $input . '%']);
-            })->first();
-        }
+    //     if (!$user) {
+    //         $user = User::where(function($query) use ($input) {
+    //             $query->where('firstname', 'LIKE', '%' . $input . '%')
+    //                   ->orWhere('lastname', 'LIKE', '%' . $input . '%')
+    //                   ->orWhere('student_id', 'LIKE', '%' . $input . '%')
+    //                   ->orWhere('employee_id', 'LIKE', '%' . $input . '%')
+    //                   ->orWhereRaw("CONCAT(firstname, ' ', lastname) LIKE ?", ['%' . $input . '%']);
+    //         })->first();
+    //     }
         
-        if ($user) {
-            $vehicles = Vehicle::where('user_id', $user->id)->get();
+    //     if ($user) {
+    //         $vehicles = Vehicle::where('user_id', $user->id)->get();
             
-            return [
-                'user_data' => [
-                    'id' => (string) $user->id,
-                    'full_name' => trim($user->firstname . ' ' . $user->lastname),
-                    'firstname' => $user->firstname,
-                    'lastname' => $user->lastname,
-                    'student_id' => $user->student_id ?? null,
-                    'employee_id' => $user->employee_id ?? null,
-                ],
-                'plates' => $vehicles->pluck('license_plate')->toArray(),
-                'vehicles' => $vehicles->map(function($vehicle) {
-                    return [
-                        'id' => $vehicle->id,
-                        'license_plate' => $vehicle->license_plate
-                    ];
-                })->toArray()
-            ];
-        }
+    //         return [
+    //             'user_data' => [
+    //                 'id' => (string) $user->id,
+    //                 'full_name' => trim($user->firstname . ' ' . $user->lastname),
+    //                 'firstname' => $user->firstname,
+    //                 'lastname' => $user->lastname,
+    //                 'student_id' => $user->student_id ?? null,
+    //                 'employee_id' => $user->employee_id ?? null,
+    //             ],
+    //             'plates' => $vehicles->pluck('license_plate')->toArray(),
+    //             'vehicles' => $vehicles->map(function($vehicle) {
+    //                 return [
+    //                     'id' => $vehicle->id,
+    //                     'license_plate' => $vehicle->license_plate
+    //                 ];
+    //             })->toArray()
+    //         ];
+    //     }
         
-        return null;
-    }
+    //     return null;
+    // }
 
     public function updateViolation($violationId, $licensePlate = null, $violatorId = null)
     {
@@ -452,61 +486,73 @@ public function rejectWithMessage($violationId)
     $this->dispatch('open-reject-modal');
 }
 public function sendApproveMessage()
-    {
-        $this->validate([
-            'selectedApproveMessage' => 'required|string',
-            'approveCustomMessage' => 'nullable|string|max:2000',
-        ]);
+{
+    $this->validate([
+        'selectedApproveMessage' => 'required|string',
+        'approveCustomMessage' => 'nullable|string|max:2000',
+    ]);
 
-        $messageKey = $this->selectedApproveMessage;
-        $message = $messageKey === 'other' ? trim($this->approveCustomMessage) : ($this->approveMessages[$messageKey] ?? null);
+    $messageKey = $this->selectedApproveMessage;
+    $message = $messageKey === 'other' ? trim($this->approveCustomMessage) : ($this->approveMessages[$messageKey] ?? null);
 
-        if (! $message) {
-            $this->addError('selectedApproveMessage', 'Please select or enter a message.');
-            return;
-        }
-
-        $violation = Violation::find($this->selectedViolationId);
-        if (! $violation) {
-            session()->flash('error', 'Violation not found.');
-            $this->dispatch('close-approve-modal');
-            return;
-        }
-
-        // Save action and status
-        // $violation->action_taken = $message;
-        $violation->markAsApproved();
-        $violation->save();
-
-        // create violation_message record
-        $admin = Auth::guard('admin')->user();
-        ViolationMessage::create([
-            'violation_id' => $violation->id,
-            'sender_id' => $admin ? $admin->getKey() : null,
-            'sender_type' => $admin ? get_class($admin) : null,
-            'message' => $message,
-            'type' => 'approval',
-            'created_at' => now(),
-        ]);
-
-        ActivityLog::create([
-            'actor_type' => 'admin',
-            'actor_id' => $admin ? $admin->getKey() : null,
-            'area_id' => $violation->area_id,
-            'action' => 'approve_with_message',
-            'details' => "Approved #{$violation->id} with message: {$message}",
-            'created_at' => now(),
-        ]);
-
-        session()->flash('success', 'Violation approved and message saved/sent.');
-        $this->dispatch('close-approve-modal');
-
-        // Reset modal state
-        $this->selectedViolationId = null;
-        $this->selectedApproveMessage = '';
-        $this->approveCustomMessage = '';
-        $this->resetPage();
+    if (! $message) {
+        $this->addError('selectedApproveMessage', 'Please select or enter a message.');
+        return;
     }
+
+    $violation = Violation::find($this->selectedViolationId);
+    if (! $violation) {
+        session()->flash('error', 'Violation not found.');
+        $this->dispatch('close-approve-modal');
+        return;
+    }
+
+    // Apply suggested data if available before approving
+    if (isset($this->violationStatuses[$this->selectedViolationId]['suggested_violator_id'])) {
+        $suggestedViolatorId = $this->violationStatuses[$this->selectedViolationId]['suggested_violator_id'];
+        $suggestedLicensePlate = $this->violationStatuses[$this->selectedViolationId]['suggested_license_plate'] ?? null;
+        
+        if ($suggestedViolatorId) {
+            $violation->violator_id = $suggestedViolatorId;
+        }
+        if ($suggestedLicensePlate) {
+            $violation->license_plate = $suggestedLicensePlate;
+        }
+    }
+
+    // Save action and status
+    $violation->markAsApproved();
+    $violation->save();
+
+    // create violation_message record
+    $admin = Auth::guard('admin')->user();
+    ViolationMessage::create([
+        'violation_id' => $violation->id,
+        'sender_id' => $admin ? $admin->getKey() : null,
+        'sender_type' => $admin ? get_class($admin) : null,
+        'message' => $message,
+        'type' => 'approval',
+        'created_at' => now(),
+    ]);
+
+    ActivityLog::create([
+        'actor_type' => 'admin',
+        'actor_id' => $admin ? $admin->getKey() : null,
+        'area_id' => $violation->area_id,
+        'action' => 'approve_with_message',
+        'details' => "Approved #{$violation->id} with message: {$message}",
+        'created_at' => now(),
+    ]);
+
+    session()->flash('success', 'Violation approved and message saved/sent.');
+    $this->dispatch('close-approve-modal');
+
+    // Reset modal state
+    $this->selectedViolationId = null;
+    $this->selectedApproveMessage = '';
+    $this->approveCustomMessage = '';
+    $this->resetPage();
+}
 
  public function sendRejectMessage()
     {
