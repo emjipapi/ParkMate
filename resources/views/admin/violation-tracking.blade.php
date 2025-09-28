@@ -620,6 +620,7 @@ function closeSidebar() {
     sidebar.classList.toggle('open');
 }
     </script>
+    <livewire:scripts />
 
 </body>
 

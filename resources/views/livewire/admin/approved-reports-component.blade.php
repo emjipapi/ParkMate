@@ -88,16 +88,19 @@
                     <!-- DATE cell (insert right after your Reporter cell) -->
 <td class="px-3 py-2 text-sm text-gray-700">
     @if($violation->created_at)
-        <span title="{{ $violation->created_at->toDayDateTimeString() }}">
-            {{ $violation->created_at->format('M j, Y H:i') }}
-        </span>
-        <div class="text-xs text-muted">
+<span 
+    title="Submitted on: {{ $violation->created_at->toDayDateTimeString() }}@if($violation->updated_at && $violation->updated_at != $violation->created_at)&#10;Approved on: {{ $violation->updated_at->toDayDateTimeString() }}@endif">
+    {{ $violation->created_at->format('M j, Y H:i') }}
+</span>
+
+        <div class="text-xs text-muted" class="cursor-pointer">
             ({{ $violation->created_at->diffForHumans() }})
         </div>
     @else
         <span class="text-muted">N/A</span>
     @endif
 </td>
+
                     <td>{{ $violation->area->name ?? 'N/A' }}</td>
                     <td>{{ Str::limit($violation->description, 50) }}</td>
                     <td class="px-4 py-3 text-sm">

@@ -159,18 +159,36 @@
 
 
                     <!-- DATE cell (insert right after your Reporter cell) -->
-                    <td class="px-3 py-2 text-sm text-gray-700">
-                        @if($violation->created_at)
-                        <span title="{{ $violation->created_at->toDayDateTimeString() }}">
-                            {{ $violation->created_at->format('M j, Y H:i') }}
-                        </span>
-                        <div class="text-xs text-muted">
-                            ({{ $violation->created_at->diffForHumans() }})
-                        </div>
-                        @else
-                        <span class="text-muted">N/A</span>
-                        @endif
-                    </td>
+<td class="px-3 py-2 text-sm text-gray-700">
+    @if($violation->created_at)
+        @php
+            $tooltip = "";
+            if ($violation->submitted_at) {
+                $tooltip .= "Submitted on: " . $violation->submitted_at->toDayDateTimeString();
+            }
+            if ($violation->approved_at) {
+                $tooltip .= ($tooltip ? "\n" : "") . "Approved on: " . $violation->approved_at->toDayDateTimeString();
+            }
+            if ($violation->endorsed_at) {
+                $tooltip .= ($tooltip ? "\n" : "") . "Endorsed on: " . $violation->endorsed_at->toDayDateTimeString();
+            }
+            if (!$tooltip) {
+                $tooltip = "No additional timestamps";
+            }
+        @endphp
+
+        <span title="{{ $tooltip }}" class="cursor-pointer">
+            {{ $violation->created_at->format('M j, Y H:i') }}
+        </span>
+        <div class="text-xs text-muted">
+            ({{ $violation->created_at->diffForHumans() }})
+        </div>
+    @else
+        <span class="text-muted">N/A</span>
+    @endif
+</td>
+
+
 
                     {{-- Area --}}
                     <td class="px-4 py-2 text-sm text-gray-800">

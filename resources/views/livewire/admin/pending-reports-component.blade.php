@@ -82,12 +82,12 @@
                     </td>
 
                     <!-- DATE cell (insert right after your Reporter cell) -->
-<td class="px-3 py-2 text-sm text-gray-700">
+<td class="px-3 py-2 text-sm text-gray-700" class="cursor-pointer">
     @if($violation->created_at)
-        <span title="{{ $violation->created_at->toDayDateTimeString() }}">
+        <span title="Submitted on: {{ $violation->submitted_at ? $violation->submitted_at->toDayDateTimeString() : 'No submission date' }}">
             {{ $violation->created_at->format('M j, Y H:i') }}
         </span>
-        <div class="text-xs text-muted">
+        <div class="text-xs text-muted" >
             ({{ $violation->created_at->diffForHumans() }})
         </div>
     @else
@@ -259,156 +259,158 @@
                         </span>
                     </td>
 
-{{-- Actions --}}
-<td class="px-4 py-2 align-middle">
-    <div class="d-flex flex-column gap-2 action-buttons">
-        @if ($violation->status === 'pending')
-            {{-- Approve Button Group --}}
-            <div class="btn-group w-100" role="group">
-                <button wire:click="updateStatus({{ $violation->id }}, 'approved')"
-                        class="btn btn-sm btn-success">
-                    Approve
-                </button>
-                <button class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split" 
-                        data-bs-toggle="dropdown" 
-                        aria-expanded="false">
-                    <span class="visually-hidden">Toggle Dropdown</span>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#" wire:click.prevent="approveWithMessage({{ $violation->id }})">
-                        Approve with Message
-                    </a></li>
-                </ul>
-            </div>
+                    {{-- Actions --}}
+                    <td class="px-4 py-2 align-middle">
+                        <div class="d-flex flex-column gap-2 action-buttons">
+                            @if ($violation->status === 'pending')
+                            {{-- Approve Button Group --}}
+                            <div class="btn-group w-100" role="group">
+                                <button wire:click="updateStatus({{ $violation->id }}, 'approved')"
+                                    class="btn btn-sm btn-success">
+                                    Approve
+                                </button>
+                                <button class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="visually-hidden">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"
+                                            wire:click.prevent="approveWithMessage({{ $violation->id }})">
+                                            Approve with Message
+                                        </a></li>
+                                </ul>
+                            </div>
 
-            {{-- Reject Button Group --}}
-            <div class="btn-group w-100" role="group">
-                <button wire:click="updateStatus({{ $violation->id }}, 'rejected')"
-                        class="btn btn-sm btn-danger">
-                    Reject
-                </button>
-                <button class="btn btn-sm btn-danger dropdown-toggle dropdown-toggle-split" 
-                        data-bs-toggle="dropdown" 
-                        aria-expanded="false">
-                    <span class="visually-hidden">Toggle Dropdown</span>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#" wire:click.prevent="rejectWithMessage({{ $violation->id }})">
-                        Reject with Message
-                    </a></li>
-                </ul>
-            </div>
-        @endif
-    </div>
-</td>
+                            {{-- Reject Button Group --}}
+                            <div class="btn-group w-100" role="group">
+                                <button wire:click="updateStatus({{ $violation->id }}, 'rejected')"
+                                    class="btn btn-sm btn-danger">
+                                    Reject
+                                </button>
+                                <button class="btn btn-sm btn-danger dropdown-toggle dropdown-toggle-split"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    <span class="visually-hidden">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"
+                                            wire:click.prevent="rejectWithMessage({{ $violation->id }})">
+                                            Reject with Message
+                                        </a></li>
+                                </ul>
+                            </div>
+                            @endif
+                        </div>
+                    </td>
 
 
                 </tr>
                 @endforeach
             </tbody>
         </table>
-{{-- Approve with Message Modal --}}
-<div wire:ignore.self class="modal fade" id="approveMessageModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Sending to Reporter — Approve</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+        {{-- Approve with Message Modal --}}
+        <div wire:ignore.self class="modal fade" id="approveMessageModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Sending to Reporter — Approve</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
 
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Choose message</label>
-          <select class="form-select" wire:model.live="selectedApproveMessage">
-            <option value="">-- Select a message --</option>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Choose message</label>
+                            <select class="form-select" wire:model.live="selectedApproveMessage">
+                                <option value="">-- Select a message --</option>
 
-            {{-- your canned messages --}}
-            @foreach($approveMessages as $key => $text)
-              <option value="{{ $key }}">{{ $text }}</option>
-            @endforeach
+                                {{-- your canned messages --}}
+                                @foreach($approveMessages as $key => $text)
+                                <option value="{{ $key }}">{{ $text }}</option>
+                                @endforeach
 
-            {{-- "Other" option that shows an input (same pattern you used before) --}}
-            <option value="other">Other</option>
-          </select>
-          @error('selectedApproveMessage') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                {{-- "Other" option that shows an input (same pattern you used before) --}}
+                                <option value="other">Other</option>
+                            </select>
+                            @error('selectedApproveMessage') <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        {{-- show input only when "Other" is selected (same pattern as your Description block) --}}
+                        @if($selectedApproveMessage === 'other')
+                        <div class="mb-3">
+                            <label class="form-label">Custom message</label>
+                            <input type="text" wire:model.live="approveCustomMessage" placeholder="Enter details"
+                                class="form-control mt-1 mt-md-2" required />
+                            @error('approveCustomMessage') <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        @endif
+
+                        <div class="small text-muted">Message will be saved in the log and used as action taken.</div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" wire:click="sendApproveMessage" class="btn btn-primary btn-sm"
+                            @if($selectedApproveMessage==='' || ($selectedApproveMessage==='other' &&
+                            trim($approveCustomMessage)==='' )) disabled @endif>
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        {{-- show input only when "Other" is selected (same pattern as your Description block) --}}
-        @if($selectedApproveMessage === 'other')
-          <div class="mb-3">
-            <label class="form-label">Custom message</label>
-            <input type="text" wire:model.live="approveCustomMessage" placeholder="Enter details"
-                   class="form-control mt-1 mt-md-2" required />
-            @error('approveCustomMessage') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
-          </div>
-        @endif
+        {{-- Reject with Message Modal --}}
+        <div wire:ignore.self class="modal fade" id="rejectMessageModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Sending to Reporter — Reject</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
 
-        <div class="small text-muted">Message will be saved in the log and used as action taken.</div>
-      </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Choose message</label>
+                            <select class="form-select" wire:model.live="selectedRejectMessage">
+                                <option value="">-- Select a message --</option>
 
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-        <button type="button"
-                wire:click="sendApproveMessage"
-                class="btn btn-primary btn-sm"
-                @if($selectedApproveMessage === '' || ($selectedApproveMessage === 'other' && trim($approveCustomMessage) === '')) disabled @endif>
-          Send
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+                                {{-- your canned reject messages --}}
+                                @foreach($rejectMessages as $key => $text)
+                                <option value="{{ $key }}">{{ $text }}</option>
+                                @endforeach
 
-{{-- Reject with Message Modal --}}
-<div wire:ignore.self class="modal fade" id="rejectMessageModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Sending to Reporter — Reject</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+                                {{-- "Other" option that shows an input just like your Description block --}}
+                                <option value="other">Other</option>
+                            </select>
+                            @error('selectedRejectMessage') <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-      <div class="modal-body">
-        <div class="mb-3">
-          <label class="form-label">Choose message</label>
-          <select class="form-select" wire:model.live="selectedRejectMessage">
-            <option value="">-- Select a message --</option>
+                        @if($selectedRejectMessage === 'other')
+                        <div class="mb-3">
+                            <label class="form-label">Custom message</label>
+                            <input type="text" wire:model.live="rejectCustomMessage" placeholder="Enter details"
+                                class="form-control mt-1 mt-md-2" required />
+                            @error('rejectCustomMessage') <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        @endif
 
-            {{-- your canned reject messages --}}
-            @foreach($rejectMessages as $key => $text)
-              <option value="{{ $key }}">{{ $text }}</option>
-            @endforeach
+                        <div class="small text-muted">Message will be saved in the log and used as action taken.</div>
+                    </div>
 
-            {{-- "Other" option that shows an input just like your Description block --}}
-            <option value="other">Other</option>
-          </select>
-          @error('selectedRejectMessage') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" wire:click="sendRejectMessage" class="btn btn-danger btn-sm"
+                            @if($selectedRejectMessage==='' || ($selectedRejectMessage==='other' &&
+                            trim($rejectCustomMessage)==='' )) disabled @endif>
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        @if($selectedRejectMessage === 'other')
-          <div class="mb-3">
-            <label class="form-label">Custom message</label>
-            <input type="text" wire:model.live="rejectCustomMessage" placeholder="Enter details"
-                   class="form-control mt-1 mt-md-2" required />
-            @error('rejectCustomMessage') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
-          </div>
-        @endif
-
-        <div class="small text-muted">Message will be saved in the log and used as action taken.</div>
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-        <button type="button"
-                wire:click="sendRejectMessage"
-                class="btn btn-danger btn-sm"
-                @if($selectedRejectMessage === '' || ($selectedRejectMessage === 'other' && trim($rejectCustomMessage) === '')) disabled @endif>
-          Send
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
 
 
     </div>
@@ -424,7 +426,7 @@
     {{ $violations->links() }}
 </div>
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function () {
     // open
     window.addEventListener('open-approve-modal', () => {
       const el = document.getElementById('approveMessageModal');
