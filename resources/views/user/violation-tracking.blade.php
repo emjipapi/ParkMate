@@ -413,6 +413,14 @@
             <span class="text-muted">Home > Violation Tracking</span>
         </div>
 
+        <div class="d-flex gap-2 ms-3">
+            <div href='/user-violation-tracking' wire:navigate>
+                <button type="button" class="btn-add btn btn-primary">
+                    Create Report
+                </button>
+            </div>
+        </div>
+
         <livewire:user.create-violation-component />
 
     </div>

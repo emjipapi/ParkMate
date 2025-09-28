@@ -484,10 +484,13 @@
             }
 
             .table-responsive {
-                touch-action: pan-x;
+                touch-action: pan-x pan-y;
                 /* enable horizontal touch scrolling for table */
             }
-
+          .content {
+            padding: 10px;
+            padding-bottom: 20px;
+        }
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">

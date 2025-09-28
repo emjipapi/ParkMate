@@ -476,7 +476,7 @@
             }
 
             .table-responsive {
-                touch-action: pan-x;
+                touch-action: pan-x pan-y;
                 /* enable horizontal touch scrolling for table */
             }
   .btn-group.w-100 .btn {
@@ -498,6 +498,10 @@
     padding: 0.75rem 1.5rem; /* taller + wider tap area */
     font-size: 0.95rem;
   }
+          .content {
+            padding: 10px;
+            padding-bottom: 20px;
+        }
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -568,7 +572,7 @@
             </div>
             <span class="text-muted">Home > Violation Tracking</span>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 ms-3">
             <div href='/create-report' wire:navigate>
                 <button type="button" class="btn-add-slot btn btn-primary">
                     Create Report

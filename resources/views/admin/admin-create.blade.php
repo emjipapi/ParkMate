@@ -407,6 +407,10 @@
                 max-width: 100% !important;
                 margin-left: 0%;
             }
+                      .content {
+            padding: 10px;
+            padding-bottom: 20px;
+        }
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">

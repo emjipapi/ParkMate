@@ -411,6 +411,10 @@
                 font-size: 0.8rem;
                 /* smaller breadcrumb text */
             }
+                      .content {
+            padding: 10px;
+            padding-bottom: 20px;
+        }
         }
     </style>
 
@@ -482,10 +486,12 @@
             </div>
             <span class="text-muted">Home > Slots</span>
         </div>
+        <div class="d-flex gap-2 ms-3">
         <button type="button" class="btn-add-slot btn btn-primary" data-bs-toggle="modal"
             data-bs-target="#createAreaModal">
             Add Parking Area
         </button>
+        </div>
 
         <div class="square-box">
             <livewire:admin.parking-slots-component />

@@ -357,6 +357,7 @@
                 min-width: 1000px;
                 /* force horizontal scroll if screen is too narrow */
             }
+            
         }
 
         @media (max-width: 768px) {
@@ -449,6 +450,10 @@
                 justify-content: flex-start !important;
                 /* toolbar aligns left on wrap */
             }
+                      .content {
+            padding: 10px;
+            padding-bottom: 20px;
+        }
 
         }
     </style>
@@ -521,7 +526,7 @@
             </div>
             <span class="text-muted">Home > Users</span>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 ms-3">
             <div href='/users/create-user' wire:navigate>
                 <button type="button" class="btn-add-slot btn btn-primary">
                     Create User
