@@ -307,6 +307,110 @@
                 @endforeach
             </tbody>
         </table>
+{{-- Approve with Message Modal --}}
+<div wire:ignore.self class="modal fade" id="approveMessageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Sending to Reporter — Approve</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Choose message</label>
+          <select class="form-select" wire:model.live="selectedApproveMessage">
+            <option value="">-- Select a message --</option>
+
+            {{-- your canned messages --}}
+            @foreach($approveMessages as $key => $text)
+              <option value="{{ $key }}">{{ $text }}</option>
+            @endforeach
+
+            {{-- "Other" option that shows an input (same pattern you used before) --}}
+            <option value="Other">Other</option>
+          </select>
+          @error('selectedApproveMessage') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+        </div>
+
+        {{-- show input only when "Other" is selected (same pattern as your Description block) --}}
+        @if($selectedApproveMessage === 'Other')
+          <div class="mb-3">
+            <label class="form-label">Custom message</label>
+            <input type="text" wire:model.live="approveCustomMessage" placeholder="Enter details"
+                   class="form-control mt-1 mt-md-2" required />
+            @error('approveCustomMessage') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+          </div>
+        @endif
+
+        <div class="small text-muted">Message will be saved in the log and used as action taken.</div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button"
+                wire:click="sendApproveMessage"
+                class="btn btn-primary btn-sm"
+                @if($selectedApproveMessage === '' || ($selectedApproveMessage === 'Other' && trim($approveCustomMessage) === '')) disabled @endif>
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{-- Reject with Message Modal --}}
+<div wire:ignore.self class="modal fade" id="rejectMessageModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Sending to Reporter — Reject</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <div class="mb-3">
+          <label class="form-label">Choose message</label>
+          <select class="form-select" wire:model.live="selectedRejectMessage">
+            <option value="">-- Select a message --</option>
+
+            {{-- your canned reject messages --}}
+            @foreach($rejectMessages as $key => $text)
+              <option value="{{ $key }}">{{ $text }}</option>
+            @endforeach
+
+            {{-- "Other" option that shows an input just like your Description block --}}
+            <option value="Other">Other</option>
+          </select>
+          @error('selectedRejectMessage') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+        </div>
+
+        @if($selectedRejectMessage === 'Other')
+          <div class="mb-3">
+            <label class="form-label">Custom message</label>
+            <input type="text" wire:model.live="rejectCustomMessage" placeholder="Enter details"
+                   class="form-control mt-1 mt-md-2" required />
+            @error('rejectCustomMessage') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+          </div>
+        @endif
+
+        <div class="small text-muted">Message will be saved in the log and used as action taken.</div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+        <button type="button"
+                wire:click="sendRejectMessage"
+                class="btn btn-danger btn-sm"
+                @if($selectedRejectMessage === '' || ($selectedRejectMessage === 'Other' && trim($rejectCustomMessage) === '')) disabled @endif>
+          Send
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
     </div>
 
     {{-- Empty state --}}
@@ -319,3 +423,34 @@
 
     {{ $violations->links() }}
 </div>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // open
+    window.addEventListener('open-approve-modal', () => {
+      const el = document.getElementById('approveMessageModal');
+      if (el) new bootstrap.Modal(el).show();
+    });
+
+    window.addEventListener('open-reject-modal', () => {
+      const el = document.getElementById('rejectMessageModal');
+      if (el) new bootstrap.Modal(el).show();
+    });
+
+    // close
+    window.addEventListener('close-approve-modal', () => {
+      const el = document.getElementById('approveMessageModal');
+      if (el) {
+        const m = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
+        m.hide();
+      }
+    });
+
+    window.addEventListener('close-reject-modal', () => {
+      const el = document.getElementById('rejectMessageModal');
+      if (el) {
+        const m = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
+        m.hide();
+      }
+    });
+  });
+</script>

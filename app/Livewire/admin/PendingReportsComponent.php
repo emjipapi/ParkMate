@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
+use App\Models\ActivityLog;
 class PendingReportsComponent extends Component
 {
     use WithPagination;
@@ -32,6 +33,26 @@ class PendingReportsComponent extends Component
     public $perPage = 15; // default
     public $perPageOptions = [15, 25, 50, 100];
     public $pageName = 'page';
+    // modal / message fields
+public $selectedViolationId = null;
+
+public $approveMessages = [
+    'warning' => 'Your report has been reviewed and approved. Thank you for helping us maintain parking discipline.',
+    'reminder' => 'Your report was approved. We appreciate your vigilance in reporting parking violations.',
+    'penalty' => 'Your report has been approved and necessary actions have been taken against the violator.',
+];
+
+public $rejectMessages = [
+    'lack_of_evidence' => 'Your report was not approved due to insufficient evidence.',
+    'wrong_location' => 'Your report was rejected because the violation location did not match the records.',
+    'duplicate' => 'Your report was not processed because it was a duplicate of an existing one.',
+];
+
+public $selectedApproveMessage = '';
+public $selectedRejectMessage = '';
+public $approveCustomMessage = '';
+public $rejectCustomMessage = '';
+
 
     // reset page when perPage changes
 public function updatedPerPage()
@@ -412,13 +433,112 @@ private function checkAndSendThresholdEmail($violatorId)
             'vehicles' => $this->vehicles,
         ]);
     }
-    public function approveWithMessage($violationId) {
+public function approveWithMessage($violationId)
+{
     $this->selectedViolationId = $violationId;
-    $this->showApproveMessageModal = true;
+    $this->selectedApproveMessage = '';
+    $this->approveCustomMessage = '';
+    // ask frontend to open modal
+    $this->dispatch('open-approve-modal');
 }
 
-public function rejectWithMessage($violationId) {
-    $this->selectedViolationId = $violationId; 
-    $this->showRejectMessageModal = true;
+public function rejectWithMessage($violationId)
+{
+    $this->selectedViolationId = $violationId;
+    $this->selectedRejectMessage = '';
+    $this->rejectCustomMessage = '';
+    $this->dispatch('open-reject-modal');
 }
+public function sendApproveMessage()
+{
+    $this->validate([
+        'selectedApproveMessage' => 'required|string',
+        'approveCustomMessage' => 'nullable|string|max:2000',
+    ]);
+
+    $messageKey = $this->selectedApproveMessage;
+    $message = $messageKey === 'other' ? trim($this->approveCustomMessage) : ($this->approveMessages[$messageKey] ?? null);
+
+    if (!$message) {
+        $this->addError('selectedApproveMessage', 'Please select or enter a message.');
+        return;
+    }
+
+    $violation = Violation::find($this->selectedViolationId);
+    if (! $violation) {
+        session()->flash('error', 'Violation not found.');
+        $this->dispatch('close-approve-modal');
+        return;
+    }
+
+    // set message and approve
+    $violation->action_taken = $message;
+    $violation->markAsApproved(); // existing helper
+    $violation->save();
+
+    // optional: activity log
+    ActivityLog::create([
+        'actor_type' => 'admin',
+        'actor_id' => optional(auth()->guard('admin')->user())->getKey(),
+        'area_id' => $violation->area_id,
+        'action' => 'approve_with_message',
+        'details' => "Approved #{$violation->id} with message: {$message}",
+        'created_at' => now(),
+    ]);
+
+    session()->flash('success', 'Violation approved and message sent.');
+    $this->dispatch('close-approve-modal');
+
+    // reset modal fields
+    $this->selectedViolationId = null;
+    $this->selectedApproveMessage = '';
+    $this->approveCustomMessage = '';
+    $this->resetPage(); // refresh list
+}
+
+public function sendRejectMessage()
+{
+    $this->validate([
+        'selectedRejectMessage' => 'required|string',
+        'rejectCustomMessage' => 'nullable|string|max:2000',
+    ]);
+
+    $messageKey = $this->selectedRejectMessage;
+    $message = $messageKey === 'other' ? trim($this->rejectCustomMessage) : ($this->rejectMessages[$messageKey] ?? null);
+
+    if (!$message) {
+        $this->addError('selectedRejectMessage', 'Please select or enter a message.');
+        return;
+    }
+
+    $violation = Violation::find($this->selectedViolationId);
+    if (! $violation) {
+        session()->flash('error', 'Violation not found.');
+        $this->dispatch('close-reject-modal');
+        return;
+    }
+
+    // set message and reject
+    $violation->action_taken = $message;
+    $violation->markAsRejected(); // existing helper
+    $violation->save();
+
+    ActivityLog::create([
+        'actor_type' => 'admin',
+        'actor_id' => optional(auth()->guard('admin')->user())->getKey(),
+        'area_id' => $violation->area_id,
+        'action' => 'reject_with_message',
+        'details' => "Rejected #{$violation->id} with message: {$message}",
+        'created_at' => now(),
+    ]);
+
+    session()->flash('success', 'Violation rejected and message sent.');
+    $this->dispatch('close-reject-modal');
+
+    $this->selectedViolationId = null;
+    $this->selectedRejectMessage = '';
+    $this->rejectCustomMessage = '';
+    $this->resetPage();
+}
+
 }
