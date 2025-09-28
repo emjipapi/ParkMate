@@ -6,6 +6,7 @@ use Livewire\Component;
 use App\Models\Violation;
 use App\Models\Vehicle;
 use App\Models\User;
+use App\Models\Admin;
 use App\Models\ViolationMessage;
 use Livewire\WithPagination;
 use App\Mail\ViolationThresholdReached;
@@ -384,27 +385,39 @@ private function checkAndSendThresholdEmail($violatorId)
             ->where('status', 'pending');
 
         // 🔍 SEARCH (license_plate, description, reporter name/id, violator name/id)
-        $violationsQuery->when(trim($this->search) !== '', function (Builder $q) {
-            $s = trim($this->search);
-            $q->where(function (Builder $sub) use ($s) {
-                $sub->where('license_plate', 'like', "%{$s}%")
-                    ->orWhere('description', 'like', "%{$s}%")
-                    ->orWhereHas('reporter', function (Builder $r) use ($s) {
-                        $r->where('firstname', 'like', "%{$s}%")
-                          ->orWhere('lastname', 'like', "%{$s}%")
-                          ->orWhere('student_id', 'like', "%{$s}%")
-                          ->orWhere('employee_id', 'like', "%{$s}%")
-                          ->orWhereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%{$s}%"]);
-                    })
-                    ->orWhereHas('violator', function (Builder $v) use ($s) {
-                        $v->where('firstname', 'like', "%{$s}%")
-                          ->orWhere('lastname', 'like', "%{$s}%")
-                          ->orWhere('student_id', 'like', "%{$s}%")
-                          ->orWhere('employee_id', 'like', "%{$s}%")
-                          ->orWhereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%{$s}%"]);
-                    });
+$violationsQuery->when(trim($this->search ?? '') !== '', function ($q) {
+    $s = trim($this->search);
+
+    $q->where(function ($sub) use ($s) {
+        $sub->where('license_plate', 'like', "%{$s}%")
+            ->orWhere('description', 'like', "%{$s}%")
+
+            // reporter models that have student_id / employee_id (example: User)
+            ->orWhereHasMorph('reporter', [User::class], function ($r) use ($s) {
+                $r->where('firstname', 'like', "%{$s}%")
+                  ->orWhere('lastname', 'like', "%{$s}%")
+                  ->orWhere('student_id', 'like', "%{$s}%")
+                  ->orWhere('employee_id', 'like', "%{$s}%")
+                  ->orWhereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%{$s}%"]);
+            })
+
+            // reporter models that DON'T have student_id / employee_id (example: Admin)
+            ->orWhereHasMorph('reporter', [Admin::class], function ($r) use ($s) {
+                $r->where('firstname', 'like', "%{$s}%")
+                  ->orWhere('lastname', 'like', "%{$s}%")
+                  ->orWhereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%{$s}%"]);
+            })
+
+            // violator (if violator is users table)
+            ->orWhereHas('violator', function ($v) use ($s) {
+                $v->where('firstname', 'like', "%{$s}%")
+                  ->orWhere('lastname', 'like', "%{$s}%")
+                  ->orWhere('student_id', 'like', "%{$s}%")
+                  ->orWhere('employee_id', 'like', "%{$s}%")
+                  ->orWhereRaw("CONCAT(firstname, ' ', lastname) like ?", ["%{$s}%"]);
             });
-        });
+    });
+});
 
         // 🎛 Reporter Type Filter (student / employee)
         $violationsQuery->when($this->reporterType === 'student', fn (Builder $q) =>
