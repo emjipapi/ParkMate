@@ -1,6 +1,7 @@
 <div class="flex-grow-1 d-flex justify-content-center align-items-center square-box">
 
-    <form wire:submit.prevent="submitReport" enctype="multipart/form-data" class="p-3 p-md-4 mx-auto" style="width: 85%; ">
+    <form wire:submit.prevent="submitReport" enctype="multipart/form-data" class="p-3 p-md-4 mx-auto"
+        style="width: 85%; ">
 
 
         {{-- Description --}}
@@ -35,7 +36,7 @@
         {{-- Evidence --}}
         <div class="mb-3 mb-md-4">
             <label class="form-label fw-bold">Evidence <span class="text-danger">*</span></label>
-            <input type="file" wire:model="evidence" class="form-control mt-1 mt-md-2" accept="image/*" required/>
+            <input type="file" wire:model="evidence" class="form-control mt-1 mt-md-2" accept="image/*" required />
             <div wire:loading wire:target="evidence" class="mt-2 text-muted">
                 <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
                 Uploading image…
@@ -58,45 +59,40 @@
         </div>
 
         {{-- License Plate --}}
-<div class="mb-3 mb-md-4">
-    <label class="form-label fw-bold">License Plate <span class="text-danger">*</span></label>
-    <input type="text" wire:model.live.debounce.50ms="license_plate" class="form-control mt-1 mt-md-2" placeholder="123ABC" required />
+        <div class="mb-3 mb-md-4">
+            <label class="form-label fw-bold">License Plate <span class="text-danger">*</span></label>
+            <input type="text" wire:model.live.debounce.50ms="license_plate" class="form-control mt-1 mt-md-2"
+                placeholder="123ABC" required />
 
-    {{-- Status text --}}
-    <div class="text-xs mt-1" style="min-height:1.1em;">
-        @if($violatorStatus === 'loading')
-            <span class="text-primary">Searching...</span>
-        @elseif($violatorStatus === 'found')
-            <span class="text-success">✓ {{ $violatorName }}</span>
-        @elseif($violatorStatus === 'not_found')
-            <span class="text-danger">✗ User not found</span>
-        @endif
-    </div>
-</div>
+            {{-- Status text --}}
+            <div class="text-xs mt-1" style="min-height:1.1em;">
+                @if($violatorStatus === 'loading')
+                <span class="text-primary">Searching...</span>
+                @elseif($violatorStatus === 'found')
+                <span class="text-success">✓ {{ $violatorName }}</span>
+                @elseif($violatorStatus === 'not_found')
+                <span class="text-danger">✗ User not found</span>
+                @endif
+            </div>
+        </div>
+        <div>
+            <i class="bi bi-info-circle text-muted" style="opacity: 0.6; font-size: 0.9rem;"></i>
+            <small class="text-muted" style="opacity: 0.6;"> You cannot send an approved report with invalid
+                data.</small>
+        </div>
+        {{-- Submit --}}
+        <div class="mt-3 mt-md-4 d-flex gap-2">
+            <button type="button" wire:click="submitReport('pending')" class="btn btn-warning px-3 px-md-4 py-2"
+                wire:loading.attr="disabled" wire:target="license_plate,submitReport">
+                Submit as Pending
+            </button>
 
-{{-- Submit --}}
-<div class="mt-3 mt-md-4 d-flex gap-2">
-    <button
-        type="button"
-        wire:click="submitReport('pending')"
-        class="btn btn-warning px-3 px-md-4 py-2"
-        wire:loading.attr="disabled"
-        wire:target="license_plate,submitReport"
-    >
-        Submit as Pending
-    </button>
-
-    <button
-        type="button"
-        wire:click="submitReport('approved')"
-        class="btn btn-success px-3 px-md-4 py-2"
-        @disabled($violatorStatus !== 'found')
-        wire:loading.attr="disabled"
-        wire:target="license_plate,submitReport"
-    >
-        Submit as Approved
-    </button>
-</div>
+            <button type="button" wire:click="submitReport('approved')" class="btn btn-success px-3 px-md-4 py-2"
+                @disabled($violatorStatus !=='found' ) wire:loading.attr="disabled"
+                wire:target="license_plate,submitReport">
+                Submit as Approved
+            </button>
+        </div>
 
         {{-- Success & Error Messages --}}
         @if (session()->has('success'))
