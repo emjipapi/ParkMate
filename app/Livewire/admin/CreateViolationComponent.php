@@ -177,7 +177,22 @@ public $violator_id = null;
         ]);
 
         session()->flash('success', "Report submitted as {$status} successfully!");
+        $this->resetFormInputs();
+
     }
+public function resetFormInputs()
+{
+    $this->description = null;
+    $this->otherDescription = null;
+    $this->license_plate = null;
+    $this->violator = null;
+    $this->area_id = null;
+    $this->evidence = null;
+    $this->compressedEvidence = null;
+    $this->violatorStatus = null;
+    $this->violatorName = null;
+    $this->violator_id = null;
+}
 
     public function render()
     {

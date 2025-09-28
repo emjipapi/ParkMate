@@ -151,8 +151,21 @@ ActivityLog::create([
 ]);
 
     session()->flash('success', 'Report submitted successfully!');
-    return redirect()->route('user.violation.tracking');
+    // return redirect()->route('user.violation.tracking');
+    $this->resetFormInputs();
+
 }
+public function resetFormInputs()
+{
+    $this->description = null;
+    $this->otherDescription = null;
+    $this->license_plate = null;
+    $this->violator = null;
+    $this->area_id = null;
+    $this->evidence = null;
+    $this->compressedEvidence = null;
+}
+
 
     public function render()
     {
