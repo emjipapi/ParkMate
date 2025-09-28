@@ -328,13 +328,13 @@
             @endforeach
 
             {{-- "Other" option that shows an input (same pattern you used before) --}}
-            <option value="Other">Other</option>
+            <option value="other">Other</option>
           </select>
           @error('selectedApproveMessage') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
         </div>
 
         {{-- show input only when "Other" is selected (same pattern as your Description block) --}}
-        @if($selectedApproveMessage === 'Other')
+        @if($selectedApproveMessage === 'other')
           <div class="mb-3">
             <label class="form-label">Custom message</label>
             <input type="text" wire:model.live="approveCustomMessage" placeholder="Enter details"
@@ -351,7 +351,7 @@
         <button type="button"
                 wire:click="sendApproveMessage"
                 class="btn btn-primary btn-sm"
-                @if($selectedApproveMessage === '' || ($selectedApproveMessage === 'Other' && trim($approveCustomMessage) === '')) disabled @endif>
+                @if($selectedApproveMessage === '' || ($selectedApproveMessage === 'other' && trim($approveCustomMessage) === '')) disabled @endif>
           Send
         </button>
       </div>
@@ -380,12 +380,12 @@
             @endforeach
 
             {{-- "Other" option that shows an input just like your Description block --}}
-            <option value="Other">Other</option>
+            <option value="other">Other</option>
           </select>
           @error('selectedRejectMessage') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
         </div>
 
-        @if($selectedRejectMessage === 'Other')
+        @if($selectedRejectMessage === 'other')
           <div class="mb-3">
             <label class="form-label">Custom message</label>
             <input type="text" wire:model.live="rejectCustomMessage" placeholder="Enter details"
@@ -402,7 +402,7 @@
         <button type="button"
                 wire:click="sendRejectMessage"
                 class="btn btn-danger btn-sm"
-                @if($selectedRejectMessage === '' || ($selectedRejectMessage === 'Other' && trim($rejectCustomMessage) === '')) disabled @endif>
+                @if($selectedRejectMessage === '' || ($selectedRejectMessage === 'other' && trim($rejectCustomMessage) === '')) disabled @endif>
           Send
         </button>
       </div>
