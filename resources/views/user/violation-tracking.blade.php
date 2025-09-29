@@ -294,6 +294,45 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+           .custom-table {
+            min-width: 1000px;
+            /* adjust based on how many columns you want visible */
+            table-layout: auto;
+            /* allow natural column widths */
+        }
+
+        .tabs-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            /* Hide scrollbars */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE/Edge */
+        }
+
+        .tabs-container::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
+        }
+
+        .nav-tabs {
+            min-width: max-content;
+            flex-wrap: nowrap;
+            display: flex;
+        }
+
+        .nav-tabs .nav-link {
+            cursor: pointer;
+        }
+
+        /* Hide table scrollbars too */
+        .table-responsive {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
 
         @media (max-width: 768px) {
             .cards-container {
@@ -362,6 +401,10 @@
                 font-size: 0.8rem;
                 /* smaller breadcrumb text */
             }
+                      .content {
+            padding: 10px;
+            padding-bottom: 20px;
+        }
         }
     </style>
 </head>
@@ -420,8 +463,9 @@
                 </button>
             </div>
         </div>
-
-        <livewire:user.create-violation-component />
+<div class="square-box">
+        <livewire:user.violation-user-component />
+</div>
 
     </div>
     <!-- Bottom Bar -->
