@@ -114,7 +114,7 @@
                 <label>Expiration Date</label>
                 <input type="date" wire:model="expiration_date"
                     class="form-control @error('expiration_date') is-invalid @enderror" onfocus="this.showPicker();"
-                    onmousedown="event.preventDefault(); this.showPicker();">
+                    onmousedown="event.preventDefault(); this.showPicker();" required>
 
                 @error('expiration_date')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -156,7 +156,7 @@
                             <label>Serial Number <span class="text-muted" style="font-size:0.75rem;">(Number
                                     only)</span></label>
                             <input type="text" wire:model="vehicles.{{ $index }}.serial_number" class="form-control"
-                                placeholder="123">
+                                placeholder="123" required>
 
                             <label>Type</label>
                             <select wire:model="vehicles.{{ $index }}.type" class="form-control" required>
