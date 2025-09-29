@@ -178,7 +178,7 @@
         .btn-add-slot {
             display: inline-block;
             width: auto;
-            background-color: var(--bg1);
+            background-color: var(--bg1) !important;
             color: white;
             border: none;
             padding: 6px 16px;
@@ -528,6 +528,10 @@
             padding: 10px;
             padding-bottom: 20px;
         }
+                .btn-add-slot:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">

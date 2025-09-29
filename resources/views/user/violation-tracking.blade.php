@@ -294,11 +294,32 @@
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-           .custom-table {
+        .custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: center;
             min-width: 1000px;
             /* adjust based on how many columns you want visible */
             table-layout: auto;
             /* allow natural column widths */
+        }
+
+
+        .custom-table th,
+        .custom-table td {
+            border: none;
+            padding: 10px;
+            background-color: white;
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .custom-table thead th {
+            font-weight: bold;
+        }
+
+        .custom-table tbody tr:nth-child(even) {
+            background-color: #f8f8f8;
         }
 
         .tabs-container {

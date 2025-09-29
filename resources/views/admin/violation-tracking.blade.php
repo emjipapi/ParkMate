@@ -202,7 +202,10 @@
             width: 100%;
             border-collapse: collapse;
             text-align: center;
-
+            min-width: 1000px;
+            /* adjust based on how many columns you want visible */
+            table-layout: auto;
+            /* allow natural column widths */
         }
 
 
@@ -328,18 +331,7 @@
             margin-right: 10px;
         }
 
-        .table-responsive {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
 
-
-        .custom-table {
-            min-width: 1000px;
-            /* adjust based on how many columns you want visible */
-            table-layout: auto;
-            /* allow natural column widths */
-        }
 
         .tabs-container {
             overflow-x: auto;
@@ -372,7 +364,6 @@
             overflow-x: auto;
             overflow-y: hidden;
             -webkit-overflow-scrolling: touch;
-
         }
 
         @media (max-width: 1200px) {

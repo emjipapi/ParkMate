@@ -48,5 +48,8 @@ class Vehicle extends Model
     {
         return $query->where('rfid_tag', $rfidTag);
     }
-    
+        public function violations()
+    {
+        return $this->hasMany(Violation::class, 'license_plate', 'license_plate');
+    }
 }

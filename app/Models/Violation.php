@@ -113,4 +113,8 @@ public function reporter()
     {
         return $query->where('status', 'rejected');
     }
+    public function vehicle()
+{
+    return $this->belongsTo(Vehicle::class, 'license_plate', 'license_plate');
+}
 }

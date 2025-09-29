@@ -21,7 +21,7 @@
     {{-- Tab Content --}}
     <div>
         @if ($activeTab === 'my_violations')
-            {{-- <livewire:user.my-violations-component /> --}}
+            <livewire:user.my-violations-component />
         @elseif ($activeTab === 'sent_reports')
             {{-- <livewire:user.sent-reports-component /> --}}
         @endif
