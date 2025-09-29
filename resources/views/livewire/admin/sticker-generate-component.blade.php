@@ -66,6 +66,10 @@
     <span wire:loading.remove wire:target="generateStickers">Generate Stickers</span>
     <span wire:loading wire:target="generateStickers">Queuing...</span>
 </button>
+                <button wire:click="togglePreview" class="btn-add-slot btn btn-primary" @if(!$selectedTemplateId)
+                    disabled @endif>
+                    {{ $preview ? 'Hide Preview' : 'Show Preview' }}
+                </button>
     @if($isGenerating)
         <div class="mt-2 text-sm text-muted">
             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
