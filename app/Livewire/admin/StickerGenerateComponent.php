@@ -8,6 +8,9 @@ use App\Models\StickerTemplate;
 use App\Models\User;
 use App\Services\StickerGeneratorService;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
+use App\Jobs\GenerateStickersJob;
 
 class StickerGenerateComponent extends Component
 {
@@ -21,6 +24,10 @@ class StickerGenerateComponent extends Component
     public $lastGeneratedZip = null;
 public $numberRange = ''; // e.g. "1,2,5-10"
     protected $stickerService;
+        public $generationKey = null;    // track the job key for polling
+    public $generationStartedAt = null;
+    public $progress = 0;
+public $total = 0;
 
     public function boot(StickerGeneratorService $stickerService)
     {
@@ -35,40 +42,88 @@ public function mount()
 }
 
 
-public function generateStickers()
-{
-    $this->validate([
-        'selectedTemplateId' => 'required|exists:sticker_templates,id',
-        'numberRange' => 'required|string'
-    ]);
+    public function generateStickers()
+    {
+        $this->validate([
+            'selectedTemplateId' => 'required|exists:sticker_templates,id',
+            'numberRange' => 'required|string'
+        ]);
 
-    $this->isGenerating = true;
-
-    try {
-        $template = StickerTemplate::find($this->selectedTemplateId);
-
-        // Parse numbers from input
         $numbers = $this->parseNumberRange($this->numberRange);
 
         if (empty($numbers)) {
             session()->flash('error', 'No valid numbers found.');
-            $this->isGenerating = false;
             return;
         }
 
-        // Generate stickers (no user model now)
-        $results = $this->stickerService->generateBatchFromNumbers($template, $numbers);
+        // create a unique generation key (used to poll cache)
+        $key = 'gen_' . Str::random(12);
+        $cacheKey = "sticker_generation:{$key}";
 
-        $zipPath = $this->stickerService->createStickerZip($results);
-        $this->lastGeneratedZip = $zipPath;
+        // mark pending in cache
+        Cache::put($cacheKey, 'pending', 60*60); // keep pending for 1 hour
 
-        session()->flash('success', "Generated " . count($results) . " stickers successfully!");
-    } catch (\Exception $e) {
-        session()->flash('error', 'Error generating stickers: ' . $e->getMessage());
+        // store generationKey so front-end can poll
+        $this->generationKey = $key;
+        $this->isGenerating = true;
+        $this->generationStartedAt = now();
+
+        // Dispatch queued job (will run async)
+        GenerateStickersJob::dispatch($this->selectedTemplateId, $numbers, $key, auth()->id())
+            ->onQueue('default');
+
+        // Let user know job was queued immediately
+        session()->flash('success', 'Sticker generation has started — this will run in background. You can download once ready.');
     }
 
-    $this->isGenerating = false;
+    /**
+     * Called by the front-end periodically (wire:poll) to check for completion.
+     */
+public function checkGenerationStatus()
+{
+    if (! $this->generationKey) {
+        return;
+    }
+
+    $progressKey = "stickers_progress_{$this->generationKey}";
+    $resultKey   = "sticker_generation:{$this->generationKey}";
+
+    // progress updates
+    $data = Cache::get($progressKey);
+    if ($data) {
+        $this->progress = $data['current'] ?? 0;
+        $this->total = $data['total'] ?? 0;
+    }
+
+    // check final result (zip or error)
+    $result = Cache::get($resultKey);
+    if ($result === null) {
+        return; // still pending
+    }
+
+    if (is_array($result) && isset($result['error'])) {
+        $this->isGenerating = false;
+        $this->lastGeneratedZip = null;
+        session()->flash('error', 'Sticker generation failed: ' . $result['error']);
+        Cache::forget($resultKey);
+        Cache::forget($progressKey);
+        $this->generationKey = null;
+        return;
+    }
+
+    if (is_array($result) && isset($result['zip'])) {
+        $this->isGenerating = false;
+        $this->lastGeneratedZip = $result['zip'];
+        // finalize progress if missing
+        $this->progress = $this->total ?: ($this->progress ?: 0);
+        // optionally remove cache entries after some time
+        // Cache::forget($resultKey);
+        // Cache::forget($progressKey);
+        $this->generationKey = null;
+        session()->flash('success', 'Stickers are ready for download.');
+    }
 }
+
 
 private function parseNumberRange($input)
 {
@@ -125,6 +180,7 @@ private function parseNumberRange($input)
 
         return $query->limit($this->quantity)->get();
     }
+    
 
     public function render()
     {

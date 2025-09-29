@@ -59,37 +59,40 @@
 
 
 
-            {{-- Action Buttons --}}
-            <div class="flex space-x-3 mb-3">
-                <button wire:click="generateStickers" wire:loading.attr="disabled" wire:target="generateStickers"
-                    class="btn-add-slot btn btn-primary" @if(!$selectedTemplateId) disabled @endif>
-                    <span wire:loading.remove wire:target="generateStickers">
-                        Generate Stickers
-                    </span>
-                    <span wire:loading wire:target="generateStickers">
-                        Generating...
-                    </span>
-                </button>
+            <!-- Generate button -->
+            <div class="mb-3">
+<button wire:click="generateStickers" wire:loading.attr="disabled" wire:target="generateStickers"
+    class="btn-add-slot btn btn-primary" @if(!$selectedTemplateId) disabled @elseif($isGenerating) disabled  @endif>
+    <span wire:loading.remove wire:target="generateStickers">Generate Stickers</span>
+    <span wire:loading wire:target="generateStickers">Queuing...</span>
+</button>
+    @if($isGenerating)
+        <div class="mt-2 text-sm text-muted">
+            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+            Generating stickers… this runs in background. This page will generate a download link.<br>
+            ⚠️ Please do not refresh or close this page until generation is complete.
+        </div>
+    @endif
+            </div>
 
-                <button wire:click="togglePreview" class="btn-add-slot btn btn-primary" @if(!$selectedTemplateId)
-                    disabled @endif>
-                    {{ $preview ? 'Hide Preview' : 'Show Preview' }}
+<!-- Polling area (poll only while a generationKey exists or isGenerating) -->
+<div @if($generationKey) wire:poll.3s="checkGenerationStatus" @endif>
+
+
+    @if($lastGeneratedZip)
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h4 class="font-medium text-green-800">Stickers Generated!</h4>
+                    <p class="text-sm text-green-600">Your stickers are ready for download.</p>
+                </div>
+                <button wire:click="downloadStickers" class="btn-add-slot btn btn-primary">
+                    Download ZIP
                 </button>
             </div>
-            {{-- Download Section --}}
-            @if($lastGeneratedZip)
-            <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h4 class="font-medium text-green-800">Stickers Generated!</h4>
-                        <p class="text-sm text-green-600">Your stickers are ready for download.</p>
-                    </div>
-                    <button wire:click="downloadStickers" class="btn-add-slot btn btn-primary">
-                        Download ZIP
-                    </button>
-                </div>
-            </div>
-            @endif
+        </div>
+    @endif
+</div>
         </div>
 
         {{-- Preview Panel - MATCHED TO TEMPLATE MANAGER ACCURACY --}}
