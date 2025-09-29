@@ -37,29 +37,29 @@ class GenerateStickersJob implements ShouldQueue
         $this->initiatorId = $initiatorId;
     }
 
-    public function handle(StickerGeneratorService $stickerService)
-    {
-        try {
-            $template = StickerTemplate::find($this->templateId);
-            if (! $template) {
-                Cache::put("sticker_generation:{$this->key}", ['error' => 'Template not found'], 60*60);
-                return;
-            }
-
-            // actual generation (use your service)
-            $results = $stickerService->generateBatchFromNumbers($template, $this->numbers);
-
-            // create zip (should return storage path like 'stickers/xyz.zip')
-            $zipPath = $stickerService->createStickerZip($results);
-
-            // store success result in cache (keep for 24 hours)
-            Cache::put("sticker_generation:{$this->key}", ['zip' => $zipPath], 24*60*60);
-        } catch (\Throwable $e) {
-            Log::error('GenerateStickersJob failed: ' . $e->getMessage(), [
-                'key' => $this->key, 'exception' => $e
-            ]);
-
-            Cache::put("sticker_generation:{$this->key}", ['error' => $e->getMessage()], 60*60);
+public function handle(StickerGeneratorService $stickerService)
+{
+    try {
+        $template = StickerTemplate::find($this->templateId);
+        if (!$template) {
+            Cache::put("sticker_generation:{$this->key}", ['error' => 'Template not found'], 60*60);
+            return;
         }
+
+        // Generate stickers
+        $results = $stickerService->generateBatchFromNumbers($template, $this->numbers);
+
+        // Create zip file on disk (NOT streamStickerZip!)
+        $zipPath = $stickerService->createStickerZip($results);
+
+        // Store success result in cache
+        Cache::put("sticker_generation:{$this->key}", ['zip' => $zipPath], 24*60*60);
+    } catch (\Throwable $e) {
+        Log::error('GenerateStickersJob failed: ' . $e->getMessage(), [
+            'key' => $this->key, 'exception' => $e
+        ]);
+
+        Cache::put("sticker_generation:{$this->key}", ['error' => $e->getMessage()], 60*60);
     }
+}
 }

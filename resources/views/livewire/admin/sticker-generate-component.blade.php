@@ -82,20 +82,20 @@
 <!-- Polling area (poll only while a generationKey exists or isGenerating) -->
 <div @if($generationKey) wire:poll.3s="checkGenerationStatus" @endif>
 
-
-    @if($lastGeneratedZip)
-        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h4 class="font-medium text-green-800">Stickers Generated!</h4>
-                    <p class="text-sm text-green-600">Your stickers are ready for download.</p>
-                </div>
-                <button wire:click="downloadStickers" class="btn-add-slot btn btn-primary">
-                    Download ZIP
-                </button>
+@if($lastGeneratedZip)
+    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
+        <div class="flex items-center justify-between">
+            <div>
+                <h4 class="font-medium text-green-800">Stickers Generated!</h4>
+                <p class="text-sm text-green-600">Your stickers are ready for download.</p>
             </div>
+            {{-- Change from wire:click to regular href --}}
+            <a href="{{ $this->downloadUrl }}" class="btn-add-slot btn btn-primary">
+                Download ZIP
+            </a>
         </div>
-    @endif
+    </div>
+@endif
 </div>
         </div>
 

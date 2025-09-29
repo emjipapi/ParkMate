@@ -146,14 +146,14 @@ private function parseNumberRange($input)
 }
 
 
-    public function downloadStickers()
-    {
-        if ($this->lastGeneratedZip && Storage::disk('public')->exists($this->lastGeneratedZip)) {
-            return response()->download(storage_path('app/public/' . $this->lastGeneratedZip));
-        }
-        
-        session()->flash('error', 'No stickers available for download.');
+public function getDownloadUrlProperty()
+{
+    if (!$this->lastGeneratedZip) {
+        return null;
     }
+    
+    return route('stickers.download', ['filename' => basename($this->lastGeneratedZip)]);
+}
 
     public function togglePreview()
     {

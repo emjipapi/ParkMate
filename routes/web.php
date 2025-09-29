@@ -11,7 +11,7 @@ use App\Http\Controllers\WebfontController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\StickerDownloadController;
 /*
 |--------------------------------------------------------------------------
 | Public / Login Routes
@@ -85,7 +85,8 @@ Route::get('/reports/attendance', [ReportController::class, 'generateAttendanceR
 
 Route::get('/reports/endorsement', [ReportController::class, 'endorsementReport'])
     ->name('reports.endorsement');
-
+Route::get('/stickers/download/{filename}', [StickerDownloadController::class, 'download'])
+    ->name('stickers.download');
 /*
 |--------------------------------------------------------------------------
 | Protected Admin Routes (all pages require admin login)
