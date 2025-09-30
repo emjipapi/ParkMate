@@ -39,27 +39,53 @@ class GenerateStickersJob implements ShouldQueue
 
 public function handle(StickerGeneratorService $stickerService)
 {
+    $lockKey = "sticker_processing:{$this->key}";
+
+    // Acquire lock: only one worker will succeed
+    if (! Cache::add($lockKey, true, 3600)) {
+        Log::warning("GenerateStickersJob skipped because lock exists: {$this->key}");
+        return;
+    }
+
     try {
+        Log::info("GenerateStickersJob started: {$this->key}", [
+            'numbers_count' => count($this->numbers),
+            'template_id'   => $this->templateId,
+        ]);
+
         $template = StickerTemplate::find($this->templateId);
-        if (!$template) {
-            Cache::put("sticker_generation:{$this->key}", ['error' => 'Template not found'], 60*60);
+        if (! $template) {
+            Cache::put("sticker_generation:{$this->key}", ['error' => 'Template not found'], 60 * 60);
             return;
         }
 
         // Generate stickers
         $results = $stickerService->generateBatchFromNumbers($template, $this->numbers);
 
-        // Create zip file on disk (NOT streamStickerZip!)
+        // Create zip file on disk
         $zipPath = $stickerService->createStickerZip($results);
 
         // Store success result in cache
-        Cache::put("sticker_generation:{$this->key}", ['zip' => $zipPath], 24*60*60);
+        Cache::put("sticker_generation:{$this->key}", ['zip' => $zipPath], 24 * 60 * 60);
+
+        Log::info("GenerateStickersJob finished: {$this->key}", [
+            'zip'            => $zipPath,
+            'generated_count'=> count($results),
+        ]);
     } catch (\Throwable $e) {
         Log::error('GenerateStickersJob failed: ' . $e->getMessage(), [
-            'key' => $this->key, 'exception' => $e
+            'key'       => $this->key,
+            'exception' => $e,
         ]);
 
-        Cache::put("sticker_generation:{$this->key}", ['error' => $e->getMessage()], 60*60);
+        Cache::put("sticker_generation:{$this->key}", ['error' => $e->getMessage()], 60 * 60);
+
+        // optional while debugging: rethrow to see full stack trace in the worker console
+        // throw $e;
+    } finally {
+        // Release lock no matter what
+        Cache::forget($lockKey);
     }
 }
+
 }

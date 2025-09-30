@@ -83,7 +83,7 @@
 <div @if($generationKey) wire:poll.3s="checkGenerationStatus" @endif>
 
 @if($lastGeneratedZip)
-    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3">
+    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3" style="max-width: 400px;">
         <div class="flex items-center justify-between">
             <div>
                 <h4 class="font-medium text-green-800">Stickers Generated!</h4>

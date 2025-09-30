@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 use App\Jobs\GenerateStickersJob;
-
+use Illuminate\Support\Facades\Log;
 class StickerGenerateComponent extends Component
 {
     public $selectedTemplateId;
@@ -28,7 +28,6 @@ public $numberRange = ''; // e.g. "1,2,5-10"
     public $generationStartedAt = null;
     public $progress = 0;
 public $total = 0;
-
     public function boot(StickerGeneratorService $stickerService)
     {
         $this->stickerService = $stickerService;
@@ -42,39 +41,53 @@ public function mount()
 }
 
 
-    public function generateStickers()
-    {
-        $this->validate([
-            'selectedTemplateId' => 'required|exists:sticker_templates,id',
-            'numberRange' => 'required|string'
-        ]);
+public function generateStickers()
+{
+    $this->lastGeneratedZip = null;
+$this->progress = 0;
+$this->total = 0;
+    $this->validate([
+        'selectedTemplateId' => 'required|exists:sticker_templates,id',
+        'numberRange'        => 'required|string'
+    ]);
 
-        $numbers = $this->parseNumberRange($this->numberRange);
+    $numbers = $this->parseNumberRange($this->numberRange);
 
-        if (empty($numbers)) {
-            session()->flash('error', 'No valid numbers found.');
-            return;
-        }
-
-        // create a unique generation key (used to poll cache)
-        $key = 'gen_' . Str::random(12);
-        $cacheKey = "sticker_generation:{$key}";
-
-        // mark pending in cache
-        Cache::put($cacheKey, 'pending', 60*60); // keep pending for 1 hour
-
-        // store generationKey so front-end can poll
-        $this->generationKey = $key;
-        $this->isGenerating = true;
-        $this->generationStartedAt = now();
-
-        // Dispatch queued job (will run async)
-        GenerateStickersJob::dispatch($this->selectedTemplateId, $numbers, $key, auth()->id())
-            ->onQueue('default');
-
-        // Let user know job was queued immediately
-        session()->flash('success', 'Sticker generation has started — this will run in background. You can download once ready.');
+    if (empty($numbers)) {
+        session()->flash('error', 'No valid numbers found.');
+        return;
     }
+
+    // Prevent accidental duplicate dispatches per user for 30s
+    $userId = auth()->id() ?: 'guest';
+    $userLockKey = "sticker_generation_lock:user:{$userId}";
+    if (! Cache::add($userLockKey, true, 2)) {
+        session()->flash('warning', 'Sticker generation already in progress. Please wait a moment.');
+        return;
+    }
+
+    $key = 'gen_' . Str::random(12);
+    $cacheKey = "sticker_generation:{$key}";
+    Cache::put($cacheKey, 'pending', 60*60);
+
+    $this->generationKey = $key;
+    $this->isGenerating = true;
+    $this->generationStartedAt = now();
+
+    Log::info('Dispatching GenerateStickersJob', [
+        'key'           => $key,
+        'template_id'   => $this->selectedTemplateId,
+        'numbers_count' => count($numbers),
+        'initiator'     => $userId,
+    ]);
+
+    GenerateStickersJob::dispatch($this->selectedTemplateId, $numbers, $key, $userId)
+        ->onQueue('default');
+
+    session()->flash('success', 'Sticker generation has started — this will run in background.');
+}
+
+
 
     /**
      * Called by the front-end periodically (wire:poll) to check for completion.
