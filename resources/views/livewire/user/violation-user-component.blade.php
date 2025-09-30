@@ -23,7 +23,7 @@
         @if ($activeTab === 'my_violations')
             <livewire:user.my-violations-component />
         @elseif ($activeTab === 'sent_reports')
-            {{-- <livewire:user.sent-reports-component /> --}}
+            <livewire:user.sent-violations-component />
         @endif
     </div>
 </div>

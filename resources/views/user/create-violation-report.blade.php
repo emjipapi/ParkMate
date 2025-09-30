@@ -13,6 +13,7 @@
     <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+        <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
     <livewire:styles />
     <style>
         :root {
@@ -354,6 +355,23 @@
             overflow-y: hidden;
             -webkit-overflow-scrolling: touch;
         }
+                @media (max-width: 1200px) {
+            body {
+                overflow-x: auto;
+                /* allow scrollable content */
+            }
+
+            .table-responsive {
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .custom-table {
+                min-width: 1000px;
+                /* force horizontal scroll if screen is too narrow */
+            }
+        }
 
         @media (max-width: 768px) {
             .cards-container {
@@ -474,19 +492,17 @@
                 <h3 class="mb-0 me-3">Ano ilalagay</h3>
                 <h6 class="mb-0">ko otid</h6>
             </div>
-            <span class="text-muted">Home > Violation Tracking</span>
+            <span class="text-muted">Home > Violation Tracking > Create Report</span>
         </div>
+        <div class="position-absolute m-3 d-none d-md-block">
+            <a href="/violation-tracking" wire:navigate
+                class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
+                style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+        </div>
+        <livewire:user.create-violation-component />
 
-        <div class="d-flex gap-2 ms-3">
-            <div href='/user-create-report' wire:navigate>
-                <button type="button" class="btn-add btn btn-primary">
-                    Create Report
-                </button>
-            </div>
-        </div>
-<div class="square-box">
-        <livewire:user.violation-user-component />
-</div>
 
     </div>
     <!-- Bottom Bar -->

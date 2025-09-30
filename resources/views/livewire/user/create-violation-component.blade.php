@@ -1,6 +1,7 @@
 <div class="flex-grow-1 d-flex justify-content-center align-items-center square-box">
 
-    <form wire:submit.prevent="submitReport" enctype="multipart/form-data" class="w-100 p-3 p-md-4">
+    <form wire:submit.prevent="submitReport" enctype="multipart/form-data" class="p-3 p-md-4 mx-auto"
+        style="width: 85%;">
 
         {{-- Description --}}
         <div class="mb-3 mb-md-4">

@@ -142,8 +142,8 @@ Route::middleware(['auth'])->group(function () {
         return view('user.dashboard'); // normal user dashboard
     })->name('user.dashboard');
     Route::view('/user-parking-slots', 'user.parking-slots')->name('parking.slots');
-    Route::view('/user-violation-tracking', 'user.violation-tracking')
-        ->name('user.violation.tracking');
+    Route::view('/user-violation-tracking', 'user.violation-tracking');
+    Route::view('/user-create-report', 'user.create-violation-report');
     Route::view('/user-settings', 'user.settings')->name('user.settings');
     // Route::post('/evidence/upload', [EvidenceController::class, 'store'])->name('evidence.upload');
 });
