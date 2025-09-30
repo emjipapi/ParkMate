@@ -205,7 +205,7 @@
         .custom-table {
             width: 100%;
             border-collapse: collapse;
-            text-align: center;
+            
 
         }
 
@@ -338,12 +338,6 @@
         }
 
 
-        .custom-table {
-            min-width: 1000px;
-            /* adjust based on how many columns you want visible */
-            table-layout: auto;
-            /* allow natural column widths */
-        }
 
         .tabs-container {
             overflow-x: auto;
@@ -378,7 +372,10 @@
             -webkit-overflow-scrolling: touch;
 
         }
-
+        .btn-add-slot:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
         @media (max-width: 1200px) {
             body {
                 overflow-x: auto;
@@ -391,15 +388,8 @@
                 -webkit-overflow-scrolling: touch;
             }
 
-            .custom-table {
-                min-width: 1000px;
-                /* force horizontal scroll if screen is too narrow */
-            }
         }
-        .btn-add-slot:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
+
 
 
         @media (max-width: 768px) {
@@ -487,9 +477,16 @@
                 touch-action: pan-x pan-y;
                 /* enable horizontal touch scrolling for table */
             }
-          .content {
+                      .content {
             padding: 10px;
             padding-bottom: 20px;
+        }
+        .custom-table {
+            width: 100%;
+        }
+                .square-box {
+            padding: 10px;
+
         }
         }
     </style>

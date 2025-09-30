@@ -296,31 +296,7 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         .custom-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: center;
-            min-width: 1000px;
-            /* adjust based on how many columns you want visible */
-            table-layout: auto;
-            /* allow natural column widths */
-        }
-
-
-        .custom-table th,
-        .custom-table td {
-            border: none;
-            padding: 10px;
-            background-color: white;
-            vertical-align: middle;
-            text-align: center;
-        }
-
-        .custom-table thead th {
-            font-weight: bold;
-        }
-
-        .custom-table tbody tr:nth-child(even) {
-            background-color: #f8f8f8;
+            width: 85%;
         }
 
         .tabs-container {
@@ -367,10 +343,6 @@
                 -webkit-overflow-scrolling: touch;
             }
 
-            .custom-table {
-                min-width: 1000px;
-                /* force horizontal scroll if screen is too narrow */
-            }
         }
 
         @media (max-width: 768px) {
@@ -444,9 +416,12 @@
             padding: 10px;
             padding-bottom: 20px;
         }
-                  .content {
+        .custom-table {
+            width: 100%;
+        }
+                .square-box {
             padding: 10px;
-            padding-bottom: 20px;
+
         }
         }
     </style>
