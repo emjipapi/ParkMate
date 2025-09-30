@@ -444,6 +444,10 @@
             padding: 10px;
             padding-bottom: 20px;
         }
+                  .content {
+            padding: 10px;
+            padding-bottom: 20px;
+        }
         }
     </style>
 </head>

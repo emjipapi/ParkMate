@@ -345,6 +345,10 @@
                 font-size: 0.8rem;
                 /* smaller breadcrumb text */
             }
+                      .content {
+            padding: 10px;
+            padding-bottom: 20px;
+        }
         }
     </style>
 </head>
