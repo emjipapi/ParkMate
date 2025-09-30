@@ -478,8 +478,8 @@
         </div>
 
         <div class="d-flex gap-2 ms-3">
-            <div href='/user-create-report' wire:navigate>
-                <button type="button" class="btn-add btn btn-primary">
+            <div onclick="window.location='{{ url('/user-create-report') }}'">
+                <button type="button" class="btn-add btn btn-primary" >
                     Create Report
                 </button>
             </div>

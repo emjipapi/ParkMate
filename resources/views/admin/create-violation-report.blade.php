@@ -203,10 +203,7 @@
         }
 
         .custom-table {
-            width: 100%;
-            border-collapse: collapse;
-            
-
+            width: 85%;
         }
 
 
