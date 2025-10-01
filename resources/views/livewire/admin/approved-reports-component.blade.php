@@ -165,11 +165,27 @@
                         <span class="text-muted">N/A</span>
                         @endif
                     </td>
-                    <td>
-                        <span class="badge {{ $violation->status === 'resolved' ? 'bg-secondary' : 'bg-success' }}">
-                            {{ ucfirst($violation->status) }}
-                        </span>
-                    </td>
+<td class="px-4 py-2 text-sm">
+    @php
+        $status = $violation->status ?? 'unknown';
+        $statusText = ucfirst(str_replace('_', ' ', $status));
+
+        $statusMap = [
+            'pending'         => 'bg-warning text-dark',
+            'rejected'        => 'bg-danger text-white',
+            'approved'        => 'bg-success text-white',
+            'for_endorsement' => 'bg-primary text-white',
+            'resolved'        => 'bg-success text-white',
+        ];
+
+        $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
+    @endphp
+
+    <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}" aria-label="Status: {{ $statusText }}">
+        {{ $statusText }}
+    </span>
+</td>
+
                     <td>
                         <div class="d-flex flex-column gap-1">
                             <div style="max-width: 100%;">

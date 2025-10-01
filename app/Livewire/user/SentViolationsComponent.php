@@ -53,7 +53,7 @@ class SentViolationsComponent extends Component
             abort(403, 'User not authenticated');
         }
 
-        $violationsQuery = Violation::with('vehicle')
+        $violationsQuery = Violation::with(['vehicle', 'latestMessage'])
             ->where('reporter_id', $user->getKey());
 
         // date range filters on submitted_at

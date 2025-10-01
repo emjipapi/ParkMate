@@ -16,7 +16,7 @@ class ViolationMessage extends Model
     // Relationship to violation
     public function violation()
     {
-        return $this->belongsTo(Violation::class);
+        return $this->belongsTo(Violation::class, 'violation_id', 'id');
     }
 
     // Polymorphic sender (Admin or User)
@@ -24,4 +24,5 @@ class ViolationMessage extends Model
     {
         return $this->morphTo(null, 'sender_type', 'sender_id');
     }
+    
 }

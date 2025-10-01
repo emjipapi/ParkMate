@@ -268,9 +268,27 @@
                 </td>
 
                 {{-- Status --}}
-                <td class="px-4 py-2 text-sm">
-                    <span class="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">For Endorsement</span>
-                </td>
+<td class="px-4 py-2 text-sm">
+    @php
+        $status = $violation->status ?? 'unknown';
+        $statusText = ucfirst(str_replace('_', ' ', $status));
+
+        $statusMap = [
+            'pending'         => 'bg-warning text-dark',
+            'rejected'        => 'bg-danger text-white',
+            'approved'        => 'bg-success text-white',
+            'for_endorsement' => 'bg-primary text-white',
+            'resolved'        => 'bg-success text-white',
+        ];
+
+        $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
+    @endphp
+
+    <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}" aria-label="Status: {{ $statusText }}">
+        {{ $statusText }}
+    </span>
+</td>
+
             </tr>
             @empty
             <tr>

@@ -243,20 +243,27 @@
 
 
                     {{-- Status --}}
-                    <td class="px-4 py-2 text-sm">
-                        @php
-                        $statusColors = [
-                        'pending' => 'bg-yellow-100 text-yellow-800',
-                        'approved' => 'bg-green-100 text-green-800',
-                        'rejected' => 'bg-red-100 text-red-800',
-                        'resolved' => 'bg-blue-100 text-blue-800',
-                        ];
-                        @endphp
-                        <span
-                            class="px-2 py-1 rounded-full text-xs font-medium {{ $statusColors[$violation->status] ?? 'bg-gray-100 text-gray-800' }}">
-                            {{ ucfirst($violation->status) }}
-                        </span>
-                    </td>
+<td class="px-4 py-2 text-sm">
+    @php
+        $status = $violation->status ?? 'unknown';
+        $statusText = ucfirst(str_replace('_', ' ', $status));
+
+        $statusMap = [
+            'pending'         => 'bg-warning text-dark',
+            'rejected'        => 'bg-danger text-white',
+            'approved'        => 'bg-success text-white',
+            'for_endorsement' => 'bg-primary text-white',
+            'resolved'        => 'bg-success text-white',
+        ];
+
+        $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
+    @endphp
+
+    <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}" aria-label="Status: {{ $statusText }}">
+        {{ $statusText }}
+    </span>
+</td>
+
 
                     {{-- Actions --}}
                     <td class="px-4 py-2 align-middle">

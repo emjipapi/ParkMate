@@ -43,17 +43,18 @@
 
     <div class="table-responsive">
         <table class="table table-striped custom-table">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Description</th>
-                    <th class="px-3 py-2 text-left text-sm font-semibold text-gray-700">License Plate</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Action Taken</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Filed On</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Resolved On</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Evidence</th>
-                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Status</th>
-                </tr>
-            </thead>
+<thead class="bg-gray-100">
+    <tr>
+        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Description</th>
+        <th class="px-3 py-2 text-left text-sm font-semibold text-gray-700">Message</th> {{-- new --}}
+        <th class="px-3 py-2 text-left text-sm font-semibold text-gray-700">License Plate</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Action Taken</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Filed On</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Resolved On</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Evidence</th>
+        <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Status</th>
+    </tr>
+</thead>
 
             <tbody>
                 @forelse($violations as $violation)
@@ -61,7 +62,10 @@
                         <td class="px-4 py-2 text-sm text-gray-800">
                             {{ Str::limit($violation->description, 120) }}
                         </td>
-
+<td class="px-3 py-2 text-sm text-gray-800">
+    {{-- show the latest message (if any), limit to 120 chars --}}
+    {{ Str::limit($violation->latestMessage->message ?? '—', 120) }}
+</td>
                         <td class="px-3 py-2 text-sm text-gray-800">
                             {{ $violation->license_plate ?? 'N/A' }}
                             @if($violation->vehicle)
@@ -127,15 +131,32 @@
                             </div>
                         </td>
 
-                        <td class="px-4 py-2 text-sm">
-                            <span class="px-2 py-1 rounded-full text-xs font-medium {{ $violation->status === 'resolved' ? 'bg-success text-white' : 'bg-warning text-dark' }}">
-                                {{ ucfirst(str_replace('_', ' ', $violation->status)) }}
-                            </span>
-                        </td>
+<td class="px-4 py-2 text-sm">
+    @php
+        $status = $violation->status ?? 'unknown';
+        $statusText = ucfirst(str_replace('_', ' ', $status));
+
+        $statusMap = [
+            'pending'         => 'bg-warning text-dark',
+            'rejected'        => 'bg-danger text-white',
+            'approved'        => 'bg-success text-white',
+            'for_endorsement' => 'bg-primary text-white',
+            'resolved'        => 'bg-success text-white',
+        ];
+
+        $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
+    @endphp
+
+    <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}" aria-label="Status: {{ $statusText }}">
+        {{ $statusText }}
+    </span>
+</td>
+
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7" class="px-4 py-3 text-center text-gray-500">Wow, such empty.</td>
+                        <td colspan="8" class="px-4 py-3 text-center text-gray-500">Wow, such empty.</td>
+
                     </tr>
                 @endforelse
             </tbody>

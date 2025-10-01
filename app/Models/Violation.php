@@ -117,4 +117,13 @@ public function reporter()
 {
     return $this->belongsTo(Vehicle::class, 'license_plate', 'license_plate');
 }
+    public function latestMessage()
+    {
+        return $this->hasOne(ViolationMessage::class, 'violation_id', 'id')->latestOfMany();
+    }
+        public function messages()
+    {
+        return $this->hasMany(ViolationMessage::class, 'violation_id', 'id');
+    }
+
 }
