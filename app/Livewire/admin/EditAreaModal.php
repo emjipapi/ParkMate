@@ -27,7 +27,11 @@ class EditAreaModal extends Component
     // track if this area originally had car slots (to determine if prefix is editable)
     public $originallyHadCarSlots = false;
 
-    protected $listeners = ['openEditAreaModal' => 'loadArea'];
+   protected $listeners = [
+    'openEditAreaModal' => 'loadArea',
+    'confirmDeleteArea' => 'deleteArea', // new: triggered by Livewire.emit in blade
+];
+
 
     public function loadArea($areaId)
     {
@@ -316,7 +320,52 @@ class EditAreaModal extends Component
 
         // If count is the same, do nothing (preserve all existing data)
     }
+public function deleteArea()
+{
+    // Ensure areaId is set and area exists
+    $area = ParkingArea::with(['carSlots', 'motorcycleCount'])->find($this->areaId);
+    if (! $area) {
+        $this->addError('area', 'Parking area not found.');
+        return;
+    }
 
+    // 1) Check occupied car slots
+    $occupiedCars = $area->carSlots()->where('occupied', 1)->count();
+
+    // 2) Check occupied motorcycles (if motorcycleCount exists)
+    $mc = $area->motorcycleCount()->first();
+    $occupiedMotorcycles = 0;
+    if ($mc) {
+        $occupiedMotorcycles = max(0, (int)$mc->total_available - (int)$mc->available_count);
+    }
+
+    if ($occupiedCars > 0 || $occupiedMotorcycles > 0) {
+        $this->addError('delete', "Cannot delete area. {$occupiedCars} car(s) and {$occupiedMotorcycles} motorcycle(s) are currently parked.");
+        return;
+    }
+
+    $deletedId = $area->id;
+
+    // delete the area (foreign keys / cascading will remove related rows if configured)
+    $area->delete();
+
+    // Notify and emit so parent/list can refresh
+    $this->dispatch('notify', [
+        'type' => 'success',
+        'message' => 'Parking area deleted successfully!',
+    ]);
+
+    $this->dispatch('areaDeleted', $deletedId);
+
+    // Hide the modal (same JS pattern you already use)
+    $this->js("
+        const modalEl = document.getElementById('editAreaModal');
+        if (modalEl) {
+            const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            bsModal.hide();
+        }
+    ");
+}
     public function render()
     {
         return view('livewire.admin.edit-area-modal');

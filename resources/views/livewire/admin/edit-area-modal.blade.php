@@ -103,6 +103,15 @@
             </div>
 
             <div class="modal-footer">
+<button
+    type="button"
+    class="btn btn-danger me-auto"
+    wire:click="deleteArea"
+    wire:confirm="Are you sure you want to DELETE this parking area? This action cannot be undone."
+>
+    Delete
+</button>
+
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" wire:click="updateArea">Save Changes</button>
             </div>
