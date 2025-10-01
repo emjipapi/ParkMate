@@ -167,70 +167,89 @@ public function updateStatus($violationId, $newStatus)
         'new_status' => $newStatus,
         'timestamp' => now()
     ]);
-    
+
     $violation = Violation::find($violationId);
-    if ($violation) {
-        \Log::info("Violation found", [
-            'violation_id' => $violationId,
-            'current_status' => $violation->status,
-            'violator_id' => $violation->violator_id,
-            'has_violator_id' => !empty($violation->violator_id)
-        ]);
-        
-        // If approving and we have suggested data, save it to the database
-        if ($newStatus === 'approved' && isset($this->violationStatuses[$violationId]['suggested_violator_id'])) {
-            $suggestedViolatorId = $this->violationStatuses[$violationId]['suggested_violator_id'];
-            $suggestedLicensePlate = $this->violationStatuses[$violationId]['suggested_license_plate'] ?? null;
-            
-            \Log::info("Applying suggested data on approval", [
-                'violation_id' => $violationId,
-                'suggested_violator_id' => $suggestedViolatorId,
-                'suggested_license_plate' => $suggestedLicensePlate
-            ]);
-            
-            // Apply the suggested changes
-            if ($suggestedViolatorId) {
-                $violation->violator_id = $suggestedViolatorId;
-            }
-            if ($suggestedLicensePlate) {
-                $violation->license_plate = $suggestedLicensePlate;
-            }
-        }
-        
-        // Use model helper method for approved status
-        if ($newStatus === 'approved') {
-            $violation->markAsApproved();
-        } elseif ($newStatus === 'rejected') {
-            $violation->markAsRejected();
-        }
-        
-        $violation->save(); // Save both status and suggested data changes
-        
-        \Log::info("Violation status updated", [
-            'violation_id' => $violationId,
-            'new_status' => $newStatus,
-            'final_violator_id' => $violation->violator_id,
-            'final_license_plate' => $violation->license_plate,
-            'will_check_email' => ($newStatus === 'approved' && $violation->violator_id)
-        ]);
-        
-        // Send email if violation was approved and user now has 3+ violations
-        if ($newStatus === 'approved' && $violation->violator_id) {
-            \Log::info("Calling checkAndSendThresholdEmail", ['violator_id' => $violation->violator_id]);
-            $this->checkAndSendThresholdEmail($violation->violator_id);
-        } else {
-            \Log::info("Email check skipped", [
-                'reason' => $newStatus !== 'approved' ? 'not approved' : 'no violator_id',
-                'status' => $newStatus,
-                'violator_id' => $violation->violator_id
-            ]);
-        }
-    } else {
+    if (! $violation) {
         \Log::warning("Violation not found", ['violation_id' => $violationId]);
+        return;
     }
-    
+
+    \Log::info("Violation found", [
+        'violation_id' => $violationId,
+        'current_status' => $violation->status,
+        'violator_id' => $violation->violator_id,
+        'has_violator_id' => !empty($violation->violator_id)
+    ]);
+
+    // If approving and we have suggested data, apply it to the model first
+    if ($newStatus === 'approved' && isset($this->violationStatuses[$violationId]['suggested_violator_id'])) {
+        $suggestedViolatorId = $this->violationStatuses[$violationId]['suggested_violator_id'];
+        $suggestedLicensePlate = $this->violationStatuses[$violationId]['suggested_license_plate'] ?? null;
+
+        \Log::info("Applying suggested data on approval", [
+            'violation_id' => $violationId,
+            'suggested_violator_id' => $suggestedViolatorId,
+            'suggested_license_plate' => $suggestedLicensePlate
+        ]);
+
+        if ($suggestedViolatorId) {
+            $violation->violator_id = $suggestedViolatorId;
+        }
+        if ($suggestedLicensePlate) {
+            $violation->license_plate = $suggestedLicensePlate;
+        }
+    }
+
+    // Determine the final violator id we'll be working with (may be null)
+    $finalViolatorId = $violation->violator_id;
+
+    // Count how many approved/for_endorsement this user already has BEFORE this approval.
+    // This implements your condition: if this count == 0 => send the mail when approving.
+    $previousApprovedOrEndorseCount = 0;
+    if ($finalViolatorId) {
+        $previousApprovedOrEndorseCount = Violation::where('violator_id', $finalViolatorId)
+            ->whereIn('status', ['approved', 'for_endorsement'])
+            ->count();
+    }
+
+    // Use model helper method for approved status
+    if ($newStatus === 'approved') {
+        $violation->markAsApproved();
+    } elseif ($newStatus === 'rejected') {
+        $violation->markAsRejected();
+    }
+
+    // Save suggested data + status change
+    $violation->save(); // Save both status and suggested data changes
+
+    \Log::info("Violation status updated", [
+        'violation_id' => $violationId,
+        'new_status' => $newStatus,
+        'final_violator_id' => $violation->violator_id,
+        'final_license_plate' => $violation->license_plate,
+        'will_check_email' => ($newStatus === 'approved' && $violation->violator_id)
+    ]);
+
+    // Side effects when approved
+    if ($newStatus === 'approved' && $violation->violator_id) {
+        \Log::info("Handling approval side effects", [
+            'violator_id' => $violation->violator_id,
+            'previousApprovedOrEndorseCount' => $previousApprovedOrEndorseCount,
+        ]);
+
+        $this->handleApprovalSideEffects($violation->violator_id, $previousApprovedOrEndorseCount);
+    } else {
+        \Log::info("Email check skipped", [
+            'reason' => $newStatus !== 'approved' ? 'not approved' : 'no violator_id',
+            'status' => $newStatus,
+            'violator_id' => $violation->violator_id
+        ]);
+    }
+
     $this->resetPage();
 }
+
+
     
 private function checkAndSendThresholdEmail($violatorId)
     {
@@ -533,11 +552,20 @@ public function sendApproveMessage()
         }
     }
 
-    // Save action and status
+    // compute previous count BEFORE changing status
+    $finalViolatorId = $violation->violator_id;
+    $previousApprovedOrEndorseCount = 0;
+    if ($finalViolatorId) {
+        $previousApprovedOrEndorseCount = Violation::where('violator_id', $finalViolatorId)
+            ->whereIn('status', ['approved', 'for_endorsement'])
+            ->count();
+    }
+
+    // Approve and save
     $violation->markAsApproved();
     $violation->save();
 
-    // create violation_message record
+    // Always create violation_message record (store preset or custom)
     $admin = Auth::guard('admin')->user();
     ViolationMessage::create([
         'violation_id' => $violation->id,
@@ -556,6 +584,11 @@ public function sendApproveMessage()
         'details' => "Approved #{$violation->id} with message: {$message}",
         'created_at' => now(),
     ]);
+
+    // Handle emails & threshold checks
+    if ($finalViolatorId) {
+        $this->handleApprovalSideEffects($finalViolatorId, $previousApprovedOrEndorseCount);
+    }
 
     session()->flash('success', 'Violation approved and message saved/sent.');
     $this->dispatch('close-approve-modal');
@@ -620,5 +653,105 @@ public function sendApproveMessage()
         $this->rejectCustomMessage = '';
         $this->resetPage();
     }
+/**
+ * Handle post-approval side effects:
+ *  - If user had 0 approved|for_endorsement BEFORE this approval -> send ViolationThresholdReached email.
+ *  - Also call existing threshold check (which you already use) to send the 3+ notification.
+ *
+ * @param int $violatorId
+ * @param int $previousApprovedOrEndorseCount
+ */
+private function handleApprovalSideEffects(int $violatorId, int $previousApprovedOrEndorseCount): void
+{
+    // load user
+    $user = User::find($violatorId);
+    if (! $user || empty($user->email)) {
+        \Log::info("handleApprovalSideEffects: user not found or no email", ['violator_id' => $violatorId]);
+        return;
+    }
+
+    try {
+        // If previously had none (your condition) -> send the mailable
+        if ($previousApprovedOrEndorseCount === 0) {
+            \Log::info("Sending initial approval notification email (previous count == 0)", ['violator_id' => $violatorId]);
+
+            // NOTE: your ViolationThresholdReached expects a User in constructor
+            // Use ->queue(...) if you want this to be queued instead of blocking.
+            Mail::to($user->email)->send(new ViolationThresholdReached($user));
+        }
+
+        // Keep your existing threshold check (3+ approved) — call your method to evaluate that
+        // (it will re-check counts and send if >= 3)
+        if (method_exists($this, 'checkAndSendThresholdEmail')) {
+            $this->checkAndSendThresholdEmail($violatorId);
+        }
+
+    } catch (\Throwable $ex) {
+        \Log::error("Error sending approval emails", [
+            'violator_id' => $violatorId,
+            'error' => $ex->getMessage(),
+        ]);
+    }
+}
+
+public function approveWithMessageConfirm()
+{
+    $violationId = $this->selectedViolationId;
+    if (! $violationId) {
+        return;
+    }
+
+    $violation = Violation::find($violationId);
+    if (! $violation) {
+        return;
+    }
+
+    // Optionally store message to violation_messages table
+    if (! empty($this->approveCustomMessage)) {
+        \DB::table('violation_messages')->insert([
+            'violation_id' => $violation->id,
+            'sender_id' => auth()->id(),
+            'sender_type' => get_class(auth()->user()), // adjust if you use polymorphic
+            'message' => $this->approveCustomMessage,
+            'type' => 'approval',
+            'created_at' => now(),
+        ]);
+    }
+
+    // Apply suggested data (if any) same as updateStatus flow
+    if (isset($this->violationStatuses[$violationId]['suggested_violator_id'])) {
+        $suggestedViolatorId = $this->violationStatuses[$violationId]['suggested_violator_id'];
+        $suggestedLicensePlate = $this->violationStatuses[$violationId]['suggested_license_plate'] ?? null;
+        if ($suggestedViolatorId) $violation->violator_id = $suggestedViolatorId;
+        if ($suggestedLicensePlate) $violation->license_plate = $suggestedLicensePlate;
+    }
+
+    // compute previous count BEFORE changing status
+    $finalViolatorId = $violation->violator_id;
+    $previousApprovedOrEndorseCount = 0;
+    if ($finalViolatorId) {
+        $previousApprovedOrEndorseCount = Violation::where('violator_id', $finalViolatorId)
+            ->whereIn('status', ['approved', 'for_endorsement'])
+            ->count();
+    }
+
+    // Approve and save
+    $violation->markAsApproved();
+    $violation->save();
+
+    // Handle emails & threshold checks
+    if ($finalViolatorId) {
+        $this->handleApprovalSideEffects($finalViolatorId, $previousApprovedOrEndorseCount);
+    }
+
+    // close modal and notify (same pattern you used)
+    $this->dispatch('notify', [
+        'type' => 'success',
+        'message' => 'Violation approved and message saved.',
+    ]);
+    $this->dispatch('close-approve-modal'); // wire this up to close the approve modal on frontend if needed
+    $this->resetPage();
+}
+
 
 }
