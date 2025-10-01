@@ -222,33 +222,36 @@ class EditAreaModal extends Component
         ");
     }
 
-    private function validateCarSlotsChange($area)
-    {
-        $targetCount = (int) $this->carSlots;
-        $currentSlots = $area->carSlots()->orderBy('label')->get();
-        $currentCount = $currentSlots->count();
+ private function validateCarSlotsChange($area)
+{
+    $targetCount = (int) $this->carSlots;
+    $currentSlots = $area->carSlots()->orderBy('label')->get();
+    $currentCount = $currentSlots->count();
 
-        if ($targetCount < $currentCount) {
-            // Check if any slots that would be removed are occupied
-            $slotsToRemove = $currentCount - $targetCount;
-            $occupiedSlotsInRange = $area->carSlots()
-                ->orderBy('label', 'desc')
-                ->limit($slotsToRemove)
-                ->where('occupied', 1)
-                ->get();
+    if ($targetCount < $currentCount) {
+        // start position for numeric part (prefix is one letter in your UI)
+        $substrPos = strlen($this->slotPrefix) + 1; // usually 2
 
-            if ($occupiedSlotsInRange->count() > 0) {
-                $occupiedLabels = $occupiedSlotsInRange->pluck('label')->join(', ');
+        // Find any occupied slots whose numeric suffix > targetCount
+        $occupiedSlotsInRange = $area->carSlots()
+            ->whereRaw("CAST(SUBSTRING(label, {$substrPos}) AS UNSIGNED) > ?", [$targetCount])
+            ->where('occupied', 1)
+            ->orderByRaw("CAST(SUBSTRING(label, {$substrPos}) AS UNSIGNED) DESC")
+            ->get();
 
-                return [
-                    'valid' => false,
-                    'message' => "Cannot reduce car slots. These slots are currently occupied: {$occupiedLabels}",
-                ];
-            }
+        if ($occupiedSlotsInRange->count() > 0) {
+            $occupiedLabels = $occupiedSlotsInRange->pluck('label')->join(', ');
+
+            return [
+                'valid' => false,
+                'message' => "Cannot reduce car slots. These slots are currently occupied: {$occupiedLabels}",
+            ];
         }
-
-        return ['valid' => true];
     }
+
+    return ['valid' => true];
+}
+
 
     private function validateMotorcycleSlotsChange($area)
     {
@@ -303,13 +306,13 @@ class EditAreaModal extends Component
             \DB::table('car_slots')->insert($newSlots); // Adjust table name as needed
 
         } elseif ($targetCount < $currentCount) {
-            // Remove excess slots (remove from the end, preserve lower numbers)
-            $slotsToRemove = $currentCount - $targetCount;
-            $area->carSlots()
-                ->orderBy('label', 'desc')
-                ->limit($slotsToRemove)
-                ->delete();
-        }
+    // Remove slots whose numeric index is greater than targetCount
+    $substrPos = strlen($this->slotPrefix) + 1;
+
+    $area->carSlots()
+        ->whereRaw("CAST(SUBSTRING(label, {$substrPos}) AS UNSIGNED) > ?", [$targetCount])
+        ->delete();
+}
 
         // If count is the same, do nothing (preserve all existing data)
     }
