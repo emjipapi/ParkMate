@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
+use App\Jobs\SendFirstViolationWarningEmail;
 class PendingReportsComponent extends Component
 {
     use WithPagination;
@@ -251,43 +252,43 @@ public function updateStatus($violationId, $newStatus)
 
 
     
-private function checkAndSendThresholdEmail($violatorId)
-    {
-        try {
-            $user = User::find($violatorId);
-            if (!$user) {
-                Log::warning("User not found for violator_id: {$violatorId}");
-                return;
-            }
+// private function checkAndSendThresholdEmail($violatorId)
+//     {
+//         try {
+//             $user = User::find($violatorId);
+//             if (!$user) {
+//                 Log::warning("User not found for violator_id: {$violatorId}");
+//                 return;
+//             }
             
-            $approvedCount = DB::table('violations')
-                ->where('violator_id', $user->id)
-                ->where('status', 'approved')
-                ->count();
+//             $approvedCount = DB::table('violations')
+//                 ->where('violator_id', $user->id)
+//                 ->where('status', 'approved')
+//                 ->count();
             
-            // Debug logging
-            Log::info("Checking violation threshold for user {$user->id}", [
-                'user_email' => $user->email,
-                'approved_count' => $approvedCount,
-                'will_send_email' => $approvedCount === 3
-            ]);
+//             // Debug logging
+//             Log::info("Checking violation threshold for user {$user->id}", [
+//                 'user_email' => $user->email,
+//                 'approved_count' => $approvedCount,
+//                 'will_send_email' => $approvedCount === 3
+//             ]);
             
-            // Send email if they just hit exactly 3 violations
-            if ($approvedCount === 3) {
-                Mail::to($user->email)
-                    ->send(new ViolationThresholdReached($user));
+//             // Send email if they just hit exactly 3 violations
+//             if ($approvedCount === 3) {
+//                 Mail::to($user->email)
+//                     ->send(new ViolationThresholdReached($user));
                 
-                // Log that we sent the email
-                Log::info("Sent violation threshold email to user {$user->id} ({$user->email})");
-            }
+//                 // Log that we sent the email
+//                 Log::info("Sent violation threshold email to user {$user->id} ({$user->email})");
+//             }
             
-        } catch (\Exception $e) {
-            Log::error("Failed to send violation threshold email: " . $e->getMessage(), [
-                'violator_id' => $violatorId,
-                'trace' => $e->getTraceAsString()
-            ]);
-        }
-    }
+//         } catch (\Exception $e) {
+//             Log::error("Failed to send violation threshold email: " . $e->getMessage(), [
+//                 'violator_id' => $violatorId,
+//                 'trace' => $e->getTraceAsString()
+//             ]);
+//         }
+//     }
     
     public function findViolatorByPlate($licensePlate)
     {
@@ -653,46 +654,41 @@ public function sendApproveMessage()
         $this->rejectCustomMessage = '';
         $this->resetPage();
     }
-/**
- * Handle post-approval side effects:
- *  - If user had 0 approved|for_endorsement BEFORE this approval -> send ViolationThresholdReached email.
- *  - Also call existing threshold check (which you already use) to send the 3+ notification.
- *
- * @param int $violatorId
- * @param int $previousApprovedOrEndorseCount
- */
 private function handleApprovalSideEffects(int $violatorId, int $previousApprovedOrEndorseCount): void
 {
-    // load user
+    \Log::info("=== handleApprovalSideEffects START ===", [
+        'violator_id' => $violatorId,
+        'previous_count' => $previousApprovedOrEndorseCount
+    ]);
+
     $user = User::find($violatorId);
     if (! $user || empty($user->email)) {
-        \Log::info("handleApprovalSideEffects: user not found or no email", ['violator_id' => $violatorId]);
+        \Log::warning("handleApprovalSideEffects: user not found or no email", [
+            'violator_id' => $violatorId,
+        ]);
         return;
     }
 
-    try {
-        // If previously had none (your condition) -> send the mailable
-        if ($previousApprovedOrEndorseCount === 0) {
-            \Log::info("Sending initial approval notification email (previous count == 0)", ['violator_id' => $violatorId]);
-
-            // NOTE: your ViolationThresholdReached expects a User in constructor
-            // Use ->queue(...) if you want this to be queued instead of blocking.
-            Mail::to($user->email)->send(new ViolationThresholdReached($user));
-        }
-
-        // Keep your existing threshold check (3+ approved) — call your method to evaluate that
-        // (it will re-check counts and send if >= 3)
-        if (method_exists($this, 'checkAndSendThresholdEmail')) {
-            $this->checkAndSendThresholdEmail($violatorId);
-        }
-
-    } catch (\Throwable $ex) {
-        \Log::error("Error sending approval emails", [
+    // If previously they had 0 approved/for_endorsement, this approval made it their first —
+    // dispatch job now.
+    if ($previousApprovedOrEndorseCount === 0) {
+        \Log::info("CONDITION MET - Dispatching job now", [
             'violator_id' => $violatorId,
-            'error' => $ex->getMessage(),
+            'user_email' => $user->email,
+            'queue_connection' => config('queue.default')
+        ]);
+        SendFirstViolationWarningEmail::dispatch($user);
+        \Log::info("Job dispatched successfully");
+    } else {
+        \Log::info("NOT sending email - user already had violations", [
+            'violator_id' => $violatorId,
+            'previous_count' => $previousApprovedOrEndorseCount
         ]);
     }
+
+    \Log::info("=== handleApprovalSideEffects END ===");
 }
+
 
 public function approveWithMessageConfirm()
 {
