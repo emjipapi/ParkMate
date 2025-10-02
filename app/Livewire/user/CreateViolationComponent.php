@@ -33,30 +33,38 @@ public function updatedEvidence()
 {
     if ($this->evidence instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
         try {
-            \Log::info('📥 File upload detected — starting compression process...');
+            \Log::info('📥 File upload detected — dispatching compression job (user)...');
 
-            $hash = substr(md5(uniqid(rand(), true)), 0, 8);
-            $filename = 'evidence_' . auth()->id() . '_' . $hash . '.jpg';
+            // Generate deterministic filename
+            $hash = substr(md5(uniqid((string)rand(), true)), 0, 8);
+            $userId = auth()->id();
+            $filename = 'evidence_user_' . $userId . '_' . $hash . '.jpg';
 
-            \Log::info('⚙️ Compression activated. Processing image: ' . $this->evidence->getClientOriginalName());
+            // Store original to local disk temporarily
+            $tmpOriginalPath = 'evidence/uploads/originals/' . $filename;
+            $this->evidence->storeAs('evidence/uploads/originals', $filename, 'local');
 
-            $image = Image::read($this->evidence->getPathname())
-                ->scaleDown(1200, 1200)
-                ->toJpeg(90);
+            // Set expected compressed path
+            $compressedPath = 'evidence/tmp/' . $filename;
+            $this->compressedEvidence = $compressedPath;
 
-            $path = 'evidence/tmp/' . $filename;
-            Storage::disk('public')->put($path, $image);
+            \Log::info('⚙️ Compression job dispatched. Input: '.$tmpOriginalPath.' Output: '.$compressedPath);
 
-            // ✅ store compressed file path separately
-            $this->compressedEvidence = $path;
-            // DON'T set $this->evidence = null - this breaks Livewire's upload tracking
+            // Dispatch job
+            \App\Jobs\ProcessEvidenceImage::dispatch(
+                'local',                 // input disk
+                $tmpOriginalPath,        // input path
+                'public',                // output disk
+                [$compressedPath],       // output paths array
+                1200,                    // maxWidth
+                1200,                    // maxHeight
+                90                       // quality
+            );
 
-            \Log::info('✅ Compression finished successfully. Saved to: ' . $path);
         } catch (\Exception $e) {
-            \Log::error('❌ Failed to process evidence image on upload: ' . $e->getMessage());
+            \Log::error('❌ Failed to dispatch compression job: ' . $e->getMessage());
             session()->flash('error', 'Failed to process the uploaded image. Please try again.');
             $this->compressedEvidence = null;
-            // DON'T set $this->evidence = null here either
         }
     } else {
         \Log::warning('⚠️ updatedEvidence() called, but $this->evidence is not a TemporaryUploadedFile.');
@@ -85,7 +93,7 @@ public function updatedLicensePlate()
 }
 public function submitReport()
 {
-    // Validate FIRST, before processing files
+    // Validate FIRST
     $this->validate([
         'description' => 'required|string',
         'area_id' => 'required|exists:parking_areas,id',
@@ -95,65 +103,58 @@ public function submitReport()
 
     // Process the evidence file AFTER validation
     $evidencePath = null;
-if ($this->compressedEvidence) {
-    $finalPath = str_replace('tmp/', 'reported/', $this->compressedEvidence);
-    Storage::disk('public')->move($this->compressedEvidence, $finalPath);
-    $evidencePath = $finalPath;
-}
+    if ($this->compressedEvidence) {
+        // Check if file exists (job may still be processing)
+        if (Storage::disk('public')->exists($this->compressedEvidence)) {
+            $finalPath = str_replace('tmp/', 'reported/', $this->compressedEvidence);
+            Storage::disk('public')->move($this->compressedEvidence, $finalPath);
+            $evidencePath = $finalPath;
+        } else {
+            \Log::warning('Compressed evidence not ready yet', [
+                'expected_path' => $this->compressedEvidence
+            ]);
+            session()->flash('error', 'Image is still processing. Please wait a moment and try again.');
+            return;
+        }
+    }
 
-
-
-    // Get the correct description
+    // Rest of your existing code...
     $desc = $this->description === "Other" ? $this->otherDescription : $this->description;
     
     $evidenceData = [
-        'reported' => $evidencePath, // your uploaded file
-        'approved' => null,           // will be set later when approved
+        'reported' => $evidencePath,
+        'approved' => null,
     ];
 
-// defensive: current user must be present
-$user = auth()->user();
-if (! $user) {
-    abort(403, 'User not authenticated');
-}
-
-// payload for Violation (polymorphic reporter will be filled by the relation)
-$data = [
-    'description'   => $desc,
-    'evidence'      => $evidenceData,
-    'area_id'       => $this->area_id,
-    'license_plate' => strtoupper(trim($this->license_plate)),
-    'violator_id'   => $this->violator,
-    'status'        => 'pending',
-    'submitted_at'  => now(),
-];
-
-// create via user relation — sets reporter_type = App\Models\User and reporter_id = $user->getKey()
-$violation = $user->reportedViolations()->create($data);
-
-    // Build details string
-    $userName = auth()->user()->firstname . ' ' . auth()->user()->lastname;
-    $details = "User {$userName} submitted a violation report";
-    if (!empty($this->license_plate)) {
-        $details .= " for plate {$this->license_plate}";
+    $user = auth()->user();
+    if (! $user) {
+        abort(403, 'User not authenticated');
     }
-    $details .= ".";
 
-// log activity as user (use user primary key)
-$userName = trim(($user->firstname ?? '') . ' ' . ($user->lastname ?? ''));
-ActivityLog::create([
-    'actor_type' => 'user',
-    'actor_id'   => $user->getKey(),
-    'area_id'    => $this->area_id,
-    'action'     => 'report',
-    'details'    => "User {$userName} submitted a violation report" . (!empty($this->license_plate) ? " for plate {$this->license_plate}" : '') . ".",
-    'created_at' => now(),
-]);
+    $data = [
+        'description'   => $desc,
+        'evidence'      => $evidenceData,
+        'area_id'       => $this->area_id,
+        'license_plate' => strtoupper(trim($this->license_plate)),
+        'violator_id'   => $this->violator,
+        'status'        => 'pending',
+        'submitted_at'  => now(),
+    ];
+
+    $violation = $user->reportedViolations()->create($data);
+
+    $userName = trim(($user->firstname ?? '') . ' ' . ($user->lastname ?? ''));
+    ActivityLog::create([
+        'actor_type' => 'user',
+        'actor_id'   => $user->getKey(),
+        'area_id'    => $this->area_id,
+        'action'     => 'report',
+        'details'    => "User {$userName} submitted a violation report" . (!empty($this->license_plate) ? " for plate {$this->license_plate}" : '') . ".",
+        'created_at' => now(),
+    ]);
 
     session()->flash('success', 'Report submitted successfully!');
-    // return redirect()->route('user.violation.tracking');
     $this->resetFormInputs();
-
 }
 public function resetFormInputs()
 {
