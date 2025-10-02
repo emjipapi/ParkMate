@@ -204,7 +204,6 @@ public function updatedProofs($value, $name)
     \Log::info('updatedProofs called', [
         'raw_name' => $name,
         'value_type' => is_object($value) ? get_class($value) : gettype($value),
-        'value_preview' => is_object($value) && method_exists($value, 'getClientOriginalName') ? $value->getClientOriginalName() : null,
     ]);
 
     // Get violation id: support "51" or "proofs.51"
@@ -216,14 +215,12 @@ public function updatedProofs($value, $name)
         $violationId = null;
     }
 
-    \Log::info('updatedProofs: extracted violationId', ['violationId' => $violationId]);
-
     if (! $violationId) {
         \Log::warning('updatedProofs: could not determine violationId', ['name' => $name]);
         return;
     }
 
-    // Prefer the incoming $value (Livewire often passes the TemporaryUploadedFile as $value)
+    // Get the file object
     $file = null;
     if (is_object($value) && method_exists($value, 'getPathname')) {
         $file = $value;
@@ -232,41 +229,46 @@ public function updatedProofs($value, $name)
     }
 
     if (! $file) {
-        \Log::warning("updatedProofs: no usable upload object found for violation {$violationId}", [
-            'proofs_exists' => isset($this->proofs[$violationId]),
-            'proofs_entry_type' => isset($this->proofs[$violationId]) ? gettype($this->proofs[$violationId]) : null,
-        ]);
+        \Log::warning("updatedProofs: no usable upload object found for violation {$violationId}");
         return;
     }
 
     try {
-        \Log::info("📥 Proof upload detected for violation {$violationId} — starting compression...", [
-            'original_name' => method_exists($file, 'getClientOriginalName') ? $file->getClientOriginalName() : null,
-            'original_size' => method_exists($file, 'getSize') ? $file->getSize() : null,
-        ]);
+        \Log::info("📥 Proof upload detected for violation {$violationId} — dispatching compression job...");
 
+        // Generate deterministic filename
         $hash = substr(md5(uniqid((string) mt_rand(), true)), 0, 8);
         $filename = "proof_{$violationId}_{$hash}.jpg";
 
-        $image = Image::read($file->getPathname())
-            ->scaleDown(1200, 1200)
-            ->toJpeg(90);
+        // Store original to local disk temporarily
+        $tmpOriginalPath = 'evidence/uploads/originals/' . $filename;
+        $file->storeAs('evidence/uploads/originals', $filename, 'local');
 
-        $path = "evidence/tmp/{$filename}";
-        Storage::disk('public')->put($path, $image);
+        // Set expected compressed path
+        $compressedPath = 'evidence/tmp/' . $filename;
+        $this->compressedProofs[$violationId] = $compressedPath;
 
-        $afterSize = Storage::disk('public')->size($path);
-
-        $this->compressedProofs[$violationId] = $path;
-
-        \Log::info("✅ Compression finished for violation {$violationId}. Saved to: {$path}", [
-            'compressed_size_bytes' => $afterSize,
+        \Log::info('⚙️ Compression job dispatched', [
+            'violation_id' => $violationId,
+            'input' => $tmpOriginalPath,
+            'output' => $compressedPath
         ]);
+
+        // Dispatch job
+        \App\Jobs\ProcessEvidenceImage::dispatch(
+            'local',              // input disk
+            $tmpOriginalPath,     // input path
+            'public',             // output disk
+            [$compressedPath],    // output paths array
+            1200,                 // maxWidth
+            1200,                 // maxHeight
+            90                    // quality
+        );
+
     } catch (\Exception $e) {
-        \Log::error("❌ Failed to compress proof for violation {$violationId}: " . $e->getMessage(), [
-            'exception' => $e,
-        ]);
+        \Log::error("❌ Failed to dispatch proof compression job for violation {$violationId}: " . $e->getMessage());
         $this->compressedProofs[$violationId] = null;
+        session()->flash('error', 'Failed to process the uploaded image. Please try again.');
     }
 }
 
@@ -301,21 +303,20 @@ public function updatedProofs($value, $name)
         }
 
         // If there's an uploaded approved image for this violation, store it
-        if (! empty($this->compressedProofs[$violationId])) {
-            try {
-                $finalPath = str_replace('tmp/', 'approved/', $this->compressedProofs[$violationId]);
-                Storage::disk('public')->move($this->compressedProofs[$violationId], $finalPath);
-
-                $evidence['approved'] = $finalPath;
-
-                \Log::info("📦 Compressed proof moved to final location: {$finalPath}");
-            } catch (\Exception $e) {
-                \Log::error("❌ Failed to compressed approved proof for violation {$violationId}: ".$e->getMessage());
-                $this->dispatchBrowserEvent('notify', ['type' => 'error', 'message' => 'Failed to store approved image.']);
-
-                return;
-            }
-        }
+if (! empty($this->compressedProofs[$violationId])) {
+    $tmpPath = $this->compressedProofs[$violationId];
+    
+    // Wait a moment and check if file exists
+    if (Storage::disk('public')->exists($tmpPath)) {
+        $finalPath = str_replace('tmp/', 'approved/', $tmpPath);
+        Storage::disk('public')->move($tmpPath, $finalPath);
+        $evidence['approved'] = $finalPath;
+    } else {
+        \Log::warning("Compressed proof not ready yet for violation {$violationId}");
+        session()->flash('error', 'Image is still processing. Please wait a moment and try again.');
+        return;
+    }
+}
 
         // Save action taken if provided
         $actionTaken = $this->violationsActionTaken[$violationId] ?? null;
