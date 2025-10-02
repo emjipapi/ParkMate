@@ -25,7 +25,10 @@
     <div onclick="window.location='{{ url('/activity-log?activeTab=entry/exit') }}'" class="card card-3"
         style="cursor:pointer;">
         <div class="card-body">
-            <h2 class="card-title">Campus Activity</h2>
+            <h2 class="card-title" 
+    style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+    Campus Activity
+</h2>
 
             <p class="mb-1">
                 <strong>{{ $currentlyInside }}</strong> Currently Inside Campus
@@ -43,20 +46,20 @@
      style="cursor:pointer;" 
      onclick="window.location='{{ url('/create-report') }}'">
     <div class="card-body d-flex flex-column justify-content-center align-items-center">
-        <i class="fas fa-plus-circle" style="font-size: 5rem; color: white;"></i>
+        <i class="bi bi-plus-circle-fill" style="font-size: 5rem; color: white;"></i>
         <p class="card-text mt-2 mb-1 fw-bold">Make Report</p>
     </div>
 </div>
 
-    {{-- Analytics Dashboard --}}
-    <div class="card card-5" style="cursor:pointer;">
-        <a href="{{ url('/dashboard/analytics-dashboard') }}" style="text-decoration: none; color: white;">
-            <div class="card-body">
-                <h1 class="card-title">Analytics Dashboard</h1>
-                <p class="card-text">Wala pang design.</p>
-            </div>
-        </a>
+{{-- Analytics Dashboard --}}
+<div onclick="window.location='{{ url('/dashboard/analytics-dashboard') }}'" class="card card-5 d-flex flex-column"
+    style="cursor:pointer;">
+    <div class="card-body d-flex flex-column justify-content-center align-items-center" style="padding: 0.5rem;">
+        <i class="bi bi-bar-chart" style="font-size: 5rem; color: white; line-height: 1; display: block;"></i>
+        <h1 style="margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold;">Analytics Dashboard</h1>
     </div>
+    <div class="card-footer">More Info ➜</div>
+</div>
 
     {{-- Activity Logs --}}
     <div class="card card-4">
