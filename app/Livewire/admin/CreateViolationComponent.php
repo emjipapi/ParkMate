@@ -40,38 +40,52 @@ class CreateViolationComponent extends Component
         $this->areas = ParkingArea::all();
     }
 
-    public function updatedEvidence()
-    {
-        if ($this->evidence instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-            try {
-                \Log::info('📥 File upload detected — starting compression process (admin)...');
+public function updatedEvidence()
+{
+    // livewire temporary uploaded file detection
+    if ($this->evidence instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
+        try {
+            \Log::info('📥 File upload detected — dispatching compression job (admin)...');
 
-                $hash = substr(md5(uniqid(rand(), true)), 0, 8);
-                $adminId = Auth::guard('admin')->id();
-                $filename = 'evidence_admin_' . $adminId . '_' . $hash . '.jpg';
+            // deterministic filename so we can set $this->compressedEvidence right away
+            $hash = substr(md5(uniqid((string)rand(), true)), 0, 8);
+            $adminId = Auth::guard('admin')->id();
+            $filename = 'evidence_admin_' . $adminId . '_' . $hash . '.jpg';
 
-                \Log::info('⚙️ Compression activated. Processing image: ' . $this->evidence->getClientOriginalName());
+            // store original uploaded file to local disk (not public)
+            // you can use 'local' disk which points to storage/app/
+            $tmpOriginalPath = 'evidence/uploads/originals/' . $filename;
+            // Livewire TemporaryUploadedFile has storeAs() helper
+            $this->evidence->storeAs('evidence/uploads/originals', $filename, 'local');
 
-                $image = Image::read($this->evidence->getPathname())
-                    ->scaleDown(1200, 1200)
-                    ->toJpeg(90);
+            // set the expected compressed path (what the job will write to 'public' disk)
+            $compressedPath = 'evidence/tmp/' . $filename;
+            $this->compressedEvidence = $compressedPath;
 
-                $path = 'evidence/tmp/' . $filename;
-                Storage::disk('public')->put($path, $image);
+            \Log::info('⚙️ Compression job dispatched. Input: '.$tmpOriginalPath.' Output: '.$compressedPath);
 
-                // store compressed file path separately (tmp)
-                $this->compressedEvidence = $path;
+            // Dispatch job: read from 'local' input, write processed image(s) to 'public' disk
+            // If you want multiple write locations, pass multiple output paths in the array.
+            \App\Jobs\ProcessEvidenceImage::dispatch(
+                'local',                 // input disk
+                $tmpOriginalPath,        // input path
+                'public',                // output disk
+                [$compressedPath],       // output paths array (you can add others here)
+                1200,                    // maxWidth
+                1200,                    // maxHeight
+                90                       // quality
+            );
 
-                \Log::info('✅ Compression finished successfully. Saved to: ' . $path);
-            } catch (\Exception $e) {
-                \Log::error('❌ Failed to process evidence image on upload (admin): ' . $e->getMessage());
-                session()->flash('error', 'Failed to process the uploaded image. Please try again.');
-                $this->compressedEvidence = null;
-            }
-        } else {
-            \Log::warning('⚠️ updatedEvidence() called, but $this->evidence is not a TemporaryUploadedFile.');
+        } catch (\Exception $e) {
+            \Log::error('❌ Failed to dispatch compression job: ' . $e->getMessage());
+            session()->flash('error', 'Failed to process the uploaded image. Please try again.');
+            $this->compressedEvidence = null;
         }
+    } else {
+        \Log::warning('⚠️ updatedEvidence() called, but $this->evidence is not a TemporaryUploadedFile.');
     }
+}
+
 
 public $violator_id = null;
 
