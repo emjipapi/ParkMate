@@ -73,7 +73,6 @@ class CreateViolationComponent extends Component
         }
     }
 
-
 public $violator_id = null;
 
   public function updatedLicensePlate($value)

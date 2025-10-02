@@ -17,7 +17,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
-use App\Jobs\SendFirstViolationWarningEmail;
+use App\Jobs\SendViolationWarningEmail;
+
 class PendingReportsComponent extends Component
 {
     use WithPagination;
@@ -665,29 +666,82 @@ private function handleApprovalSideEffects(int $violatorId, int $previousApprove
     if (! $user || empty($user->email)) {
         \Log::warning("handleApprovalSideEffects: user not found or no email", [
             'violator_id' => $violatorId,
+            'user_found' => $user ? 'yes' : 'no',
+            'email_empty' => $user ? empty($user->email) : 'n/a'
         ]);
         return;
     }
 
-    // If previously they had 0 approved/for_endorsement, this approval made it their first —
-    // dispatch job now.
-    if ($previousApprovedOrEndorseCount === 0) {
-        \Log::info("CONDITION MET - Dispatching job now", [
+    // compute the new count after this approval
+    $currentCountAfterSave = $previousApprovedOrEndorseCount + 1;
+
+    // Decide which stage (1,2,3,...) the user just hit (configurable)
+    $stages = config('violations.stages', [
+        1 => ['threshold' => 1],
+        2 => ['threshold' => 2],
+        3 => ['threshold' => 3],
+    ]);
+
+    $sendStage = null;
+    foreach ($stages as $stage => $meta) {
+        if (!empty($meta['threshold']) && $meta['threshold'] === $currentCountAfterSave) {
+            $sendStage = (int) $stage;
+            break;
+        }
+    }
+
+    if (! $sendStage) {
+        \Log::info("No stage matched for this approval", [
             'violator_id' => $violatorId,
-            'user_email' => $user->email,
-            'queue_connection' => config('queue.default')
+            'previous_count' => $previousApprovedOrEndorseCount,
+            'current_count_after_save' => $currentCountAfterSave
         ]);
-        SendFirstViolationWarningEmail::dispatch($user);
-        \Log::info("Job dispatched successfully");
-    } else {
-        \Log::info("NOT sending email - user already had violations", [
+        \Log::info("=== handleApprovalSideEffects END ===");
+        return;
+    }
+
+    \Log::info("Stage matched - dispatch decision", [
+        'violator_id' => $violatorId,
+        'sendStage' => $sendStage
+    ]);
+
+    try {
+        // If you have a `violation_notifications` table (recommended), try insertOrIgnore()
+        // to avoid duplicate dispatches under concurrency. If the table doesn't exist,
+        // fall back to dispatching the job (your job is defensive and re-checks thresholds).
+        $schema = DB::getSchemaBuilder();
+        if ($schema->hasTable('violation_notifications')) {
+            $inserted = DB::table('violation_notifications')->insertOrIgnore([
+                'user_id'    => $user->id,
+                'stage'      => $sendStage,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            if ($inserted) {
+                \App\Jobs\SendViolationWarningEmail::dispatch($user->id, $sendStage);
+                \Log::info("Dispatched SendViolationWarningEmail job (via violation_notifications)", ['user_id' => $user->id, 'stage' => $sendStage]);
+            } else {
+                \Log::info("Notification already exists; skipping dispatch", ['user_id' => $user->id, 'stage' => $sendStage]);
+            }
+        } else {
+            // Table doesn't exist — warn, but still dispatch (job checks the DB itself).
+            \Log::warning("violation_notifications table missing — dispatching without DB guard", ['user_id' => $user->id, 'stage' => $sendStage]);
+            \App\Jobs\SendViolationWarningEmail::dispatch($user->id, $sendStage);
+            \Log::info("Dispatched SendViolationWarningEmail job (no notification table)", ['user_id' => $user->id, 'stage' => $sendStage]);
+        }
+    } catch (\Throwable $ex) {
+        \Log::error("Error handling approval side-effects / dispatching job", [
             'violator_id' => $violatorId,
-            'previous_count' => $previousApprovedOrEndorseCount
+            'error' => $ex->getMessage(),
+            'trace' => $ex->getTraceAsString()
         ]);
     }
 
     \Log::info("=== handleApprovalSideEffects END ===");
 }
+
+
 
 
 public function approveWithMessageConfirm()
