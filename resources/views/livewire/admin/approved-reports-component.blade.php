@@ -226,7 +226,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center text-muted py-4">
+                    <td colspan="9" class="text-center text-muted py-4">
                         No approved violations found.
                     </td>
                 </tr>

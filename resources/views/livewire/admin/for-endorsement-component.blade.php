@@ -6,7 +6,7 @@
             data-bs-target="#endorsementReportModal">
             Generate Report
         </button>
-        <div class="d-flex align-items-center gap-1">
+        {{-- <div class="d-flex align-items-center gap-1">
             <span>Show</span>
             <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
                 @foreach($perPageOptions as $option)
@@ -14,7 +14,7 @@
                 @endforeach
             </select>
             <span>entries</span>
-        </div>
+        </div> --}}
     </div>
     <div class="d-flex w-100 flex-wrap justify-content-between gap-2 mb-3 align-items-center">
 
@@ -53,7 +53,7 @@
         </div>
 
         <!-- RIGHT: per-page + pagination (anchored to far right) -->
-        {{-- <div class="d-flex align-items-center gap-2 ms-auto">
+        <div class="d-flex align-items-center gap-2 ms-auto">
             <div class="d-flex align-items-center gap-1">
                 <span>Show</span>
                 <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
@@ -63,7 +63,7 @@
                 </select>
                 <span>entries</span>
             </div>
-        </div> --}}
+        </div>
 
     </div>
     <!-- Report Modal -->
