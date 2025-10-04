@@ -177,40 +177,53 @@ class EditAreaModal extends Component
 
         // Handle motorcycle counts
 
-        if ($this->motorcycleEnabled && $this->motorcycleSlots > 0) {
-            $mc = $area->motorcycleCount()->first();
-            $target = (int) $this->motorcycleSlots;
+// Handle motorcycle counts
+if ($this->motorcycleEnabled && $this->motorcycleSlots > 0) {
+    $mc = $area->motorcycleCount()->first();
+    $target = (int) $this->motorcycleSlots;
 
-            if ($mc) {
-                $oldTotal = (int) $mc->total_available;
-                $oldAvailable = (int) $mc->available_count;
-                $occupied = $oldTotal - $oldAvailable;
+    if ($mc) {
+        $oldTotal = (int) $mc->total_available;
+        $oldAvailable = (int) $mc->available_count;
+        $occupied = $oldTotal - $oldAvailable;
 
-                // Safety: don't allow target below currently occupied (should be caught earlier)
-                if ($target < $occupied) {
-                    $this->addError('motorcycleSlots', "Cannot set total available to {$target}. Currently {$occupied} motorcycle(s) are parked.");
-
-                    return;
-                }
-
-                // Compute new available by preserving occupied motorcycles
-                $newAvailable = $target - $occupied;
-                if ($newAvailable < 0) {
-                    $newAvailable = 0;
-                }
-
-                $mc->update([
-                    'total_available' => $target,
-                    'available_count' => $newAvailable,
-                ]);
-            } else {
-                // create fresh motorcycleCount record
-                $area->motorcycleCount()->create([
-                    'total_available' => $target,
-                    'available_count' => $target,
-                ]);
-            }
+        if ($target < $occupied) {
+            $this->addError('motorcycleSlots', "Cannot set total available to {$target}. Currently {$occupied} motorcycle(s) are parked.");
+            return;
         }
+
+        $newAvailable = $target - $occupied;
+        if ($newAvailable < 0) {
+            $newAvailable = 0;
+        }
+
+        $mc->update([
+            'total_available' => $target,
+            'available_count' => $newAvailable,
+        ]);
+    } else {
+        $area->motorcycleCount()->create([
+            'total_available' => $target,
+            'available_count' => $target,
+        ]);
+    }
+} else {
+    // Disabled or zero target: remove motorcycleCount record (if safe)
+    $mc = $area->motorcycleCount()->first();
+    if ($mc) {
+        $occupied = max(0, (int)$mc->total_available - (int)$mc->available_count);
+
+        if ($occupied > 0) {
+            // Prevent disabling if motorcycles are parked
+            $this->addError('motorcycleEnabled', "Cannot disable motorcycle parking. {$occupied} motorcycle(s) are currently parked.");
+            return;
+        }
+
+        // safe to delete (or you could set totals to 0 instead)
+        $mc->delete();
+    }
+}
+
 
         $this->dispatch('notify', [
             'type' => 'success',
