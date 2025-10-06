@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StickerDownloadController;
+// new \App\Mail\ViolationThresholdReached;
 /*
 |--------------------------------------------------------------------------
 | Public / Login Routes
@@ -58,21 +59,21 @@ Route::post('/admin/login', [AdminAuthController::class, 'login'])
     ->name('admin.login.submit');
 
 Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
-Route::get('/test-email/{userId}', function ($userId) {
-    try {
-        $user = \App\Models\User::find($userId);
-        if (! $user) {
-            return 'User not found';
-        }
+// Route::get('/test-email/{userId}', function ($userId) {
+//     try {
+//         $user = \App\Models\User::find($userId);
+//         if (! $user) {
+//             return 'User not found';
+//         }
 
-        \Illuminate\Support\Facades\Mail::to($user->email)
-            ->send(new \App\Mail\ViolationThresholdReached($user));
+//         \Illuminate\Support\Facades\Mail::to($user->email)
+//             ->send(new ViolationThresholdReached($user));
 
-        return "Email sent to {$user->email}";
-    } catch (\Exception $e) {
-        return 'Error: '.$e->getMessage();
-    }
-});
+//         return "Email sent to {$user->email}";
+//     } catch (\Exception $e) {
+//         return 'Error: '.$e->getMessage();
+//     }
+// });
 Route::view('/live-attendance', 'live-attendance-mode');
 // Profile pictures
 Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
@@ -122,6 +123,7 @@ Route::middleware(['admin'])->group(function () {
     Route::view('/create-report', 'admin.create-violation-report');
     Route::view('/activity-log', 'admin.activity-log');
     Route::view('/parking-slots', 'admin.parking-slots')->name('parking.slots');
+    Route::view('/map-manager', 'admin.map-template-editor')->name('parking.slots');
     // routes/web.php
     Route::get('/dashboard/analytics-dashboard', function () {
         $chart = new AnalyticsChart;
