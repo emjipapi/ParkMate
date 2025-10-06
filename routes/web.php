@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StickerDownloadController;
 // new \App\Mail\ViolationThresholdReached;
+use App\Models\ParkingMap;
 /*
 |--------------------------------------------------------------------------
 | Public / Login Routes
@@ -124,6 +125,9 @@ Route::middleware(['admin'])->group(function () {
     Route::view('/activity-log', 'admin.activity-log');
     Route::view('/parking-slots', 'admin.parking-slots')->name('parking.slots');
     Route::view('/map-manager', 'admin.map-template-editor')->name('parking.slots');
+    Route::get('/map/{map}', function (ParkingMap $map) {
+    return view('admin.parking-map', ['map' => $map]);
+})->name('parking-map.live');;
     // routes/web.php
     Route::get('/dashboard/analytics-dashboard', function () {
         $chart = new AnalyticsChart;
