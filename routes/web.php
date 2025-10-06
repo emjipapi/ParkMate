@@ -128,6 +128,63 @@ Route::middleware(['admin'])->group(function () {
     Route::get('/map/{map}', function (ParkingMap $map) {
     return view('admin.parking-map', ['map' => $map]);
 })->name('parking-map.live');;
+Route::get('/api/parking-map/{map}/statuses', function (ParkingMap $map) {
+    $areaConfig = (array) ($map->area_config ?? []);
+    $areaStatuses = [];
+    
+    foreach ($areaConfig as $areaKey => $cfg) {
+        $enabled = !empty($cfg['enabled']);
+        $parkingAreaId = $cfg['parking_area_id'] ?? null;
+        
+        $totalCarSlots = 0;
+        $occupiedCarSlots = 0;
+        $availableMotorcycleCount = null;
+        
+        if ($parkingAreaId) {
+            $totalCarSlots = \App\Models\CarSlot::where('area_id', $parkingAreaId)->count();
+            $occupiedCarSlots = \App\Models\CarSlot::where('area_id', $parkingAreaId)->where('occupied', 1)->count();
+            
+            $mc = \App\Models\MotorcycleCount::where('area_id', $parkingAreaId)->first();
+            $availableMotorcycleCount = $mc?->available_count ?? null;
+        }
+        
+        $availableCarSlots = max(0, $totalCarSlots - $occupiedCarSlots);
+        
+        // Determine state - exact same logic as Livewire component
+        $state = 'unknown';
+        if (!$enabled) {
+            $state = 'disabled';
+        } elseif ($totalCarSlots > 0 && $availableCarSlots > 0) {
+            $state = 'available';
+        } elseif ($totalCarSlots > 0 && $availableCarSlots === 0) {
+            if ($availableMotorcycleCount === null) {
+                $state = 'full';
+            } elseif ((int)$availableMotorcycleCount > 0) {
+                $state = 'moto_only';
+            } else {
+                $state = 'full';
+            }
+        } else {
+            if ($availableMotorcycleCount !== null && (int)$availableMotorcycleCount > 0) {
+                $state = 'available';
+            } elseif ($availableMotorcycleCount === 0) {
+                $state = 'full';
+            } else {
+                $state = 'unknown';
+            }
+        }
+        
+        $areaStatuses[$areaKey] = [
+            'state' => $state,
+            'total' => (int)$totalCarSlots,
+            'occupied' => (int)$occupiedCarSlots,
+            'available_cars' => (int)$availableCarSlots,
+            'motorcycle_available' => $availableMotorcycleCount !== null ? (int)$availableMotorcycleCount : null,
+        ];
+    }
+    
+    return response()->json(['areaStatuses' => $areaStatuses]);
+});
     // routes/web.php
     Route::get('/dashboard/analytics-dashboard', function () {
         $chart = new AnalyticsChart;
