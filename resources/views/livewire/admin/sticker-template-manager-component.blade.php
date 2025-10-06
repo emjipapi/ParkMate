@@ -93,22 +93,7 @@
                             {{ $selectedTemplate->height }}px ({{ $selectedTemplate->aspect_ratio }} ratio)
                         </p>
                     </div>
-                    {{-- <div class="flex space-x-2">
-                        @if($isEditing)
-                        <button wire:click="updateTemplate"
-                            class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm">
-                            Save Changes
-                        </button>
-                        <button wire:click="$set('isEditing', false)"
-                            class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md text-sm">
-                            Cancel
-                        </button>
-                        @else
-                        <button wire:click="startEditing" class="btn-add-slot btn btn-primary">
-                            Edit Template
-                        </button>
-                        @endif
-                    </div> --}}
+                
                 </div>
 
                 {{-- WORKING Template Preview (always rendered on page load) --}}
@@ -196,21 +181,6 @@
                             Save Positions
                         </button>
                     </div>
-
-                    {{-- Preview Sample Data --}}
-                    {{-- <div class="mb-4 p-3 bg-gray-50 rounded">
-                        <h5 class="text-sm font-medium text-gray-700 mb-2">Sample Preview Data</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <input type="text" wire:model.live="previewData.user_id" placeholder="User ID"
-                                class="px-2 py-1 border rounded text-sm">
-                            <input type="text" wire:model.live="previewData.name" placeholder="Full Name"
-                                class="px-2 py-1 border rounded text-sm">
-                            <input type="text" wire:model.live="previewData.department" placeholder="Department"
-                                class="px-2 py-1 border rounded text-sm">
-                            <input type="text" wire:model.live="previewData.expiry" placeholder="Expiry Date"
-                                class="px-2 py-1 border rounded text-sm">
-                        </div>
-                    </div> --}}
 
                     {{-- Position and Style Controls --}}
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -327,40 +297,7 @@
                         @endforeach
                     </div>
 
-                    {{-- Global Layout Presets --}}
-                    {{-- <div class="mt-6 p-3 bg-blue-50 rounded">
-                        <h5 class="text-sm font-medium text-gray-700 mb-3">Layout Presets</h5>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
-                            <button
-                                wire:click="setQuickPosition('user_id', 'top_left'); setQuickPosition('name', 'center_left'); setQuickPosition('department', 'center_left'); setQuickPosition('expiry', 'bottom_left')"
-                                class="text-xs px-3 py-2 bg-white border rounded hover:bg-gray-100 text-left"
-                                type="button">
-                                📄 Vertical Left<br>
-                                <small class="text-gray-500">All left aligned</small>
-                            </button>
-                            <button
-                                wire:click="setQuickPosition('user_id', 'top_right'); setQuickPosition('name', 'center_right'); setQuickPosition('department', 'center_right'); setQuickPosition('expiry', 'bottom_right')"
-                                class="text-xs px-3 py-2 bg-white border rounded hover:bg-gray-100 text-left"
-                                type="button">
-                                📄 Vertical Right<br>
-                                <small class="text-gray-500">All right aligned</small>
-                            </button>
-                            <button
-                                wire:click="setQuickPosition('user_id', 'top_left'); setQuickPosition('name', 'top_right'); setQuickPosition('department', 'bottom_left'); setQuickPosition('expiry', 'bottom_right')"
-                                class="text-xs px-3 py-2 bg-white border rounded hover:bg-gray-100 text-left"
-                                type="button">
-                                ⊞ Four Corners<br>
-                                <small class="text-gray-500">Distributed layout</small>
-                            </button>
-                            <button
-                                wire:click="setQuickPosition('user_id', 'top_center'); setQuickPosition('name', 'center'); setQuickPosition('department', 'center'); setQuickPosition('expiry', 'bottom_center')"
-                                class="text-xs px-3 py-2 bg-white border rounded hover:bg-gray-100 text-left"
-                                type="button">
-                                ⊙ Centered<br>
-                                <small class="text-gray-500">All center aligned</small>
-                            </button>
-                        </div>
-                    </div> --}}
+                  
                 </div>
             </div>
             @else
