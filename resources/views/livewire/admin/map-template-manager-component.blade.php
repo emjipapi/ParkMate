@@ -111,9 +111,10 @@
                             @php
                             $x = $config['x_percent'] ?? 50;
                             $y = $config['y_percent'] ?? 50;
-                            $markerSize = $config['marker_size'] ?? 40;
-                            $markerColor = $config['color'] ?? '#3b82f6';
+                            $markerSize = $config['marker_size'] ?? 24;
+                            $markerColor = '#6b7280'; // Neutral gray color
                             $label = $config['label'] ?? 'Area';
+                            $showLabelLetter = $config['show_label_letter'] ?? true;
                             
                             // Get parking area details if linked
                             $parkingArea = null;
@@ -142,10 +143,12 @@
                                     display: flex;
                                     align-items: center;
                                     justify-content: center;
-                                    font-size: 12px;
+                                    font-size: 10px;
                                     font-weight: bold;
                                     color: white;">
+                                @if($showLabelLetter)
                                 {{ substr($label, 0, 1) }}
+                                @endif
                             </div>
 
                             {{-- Area label --}}
@@ -197,7 +200,7 @@
                     {{-- Parking Area Cards --}}
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                         @foreach($areaConfig as $areaKey => $config)
-                        <div class="border rounded p-3 bg-gray-50">
+                        <div class="border rounded p-3 bg-gray-50 mb-3">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="flex items-center">
                                     <input type="checkbox" wire:model="areaConfig.{{ $areaKey }}.enabled" class="mr-2"
@@ -253,19 +256,23 @@
                                     </div>
 
                                     {{-- Marker Settings --}}
-                                    <div class="grid grid-cols-2 gap-2">
+                                    <div class="grid grid-cols-1 gap-2">
                                         <div>
                                             <label class="block text-xs font-medium text-gray-600">Marker Size (px)</label>
                                             <input type="number"
-                                                wire:model.live="areaConfig.{{ $areaKey }}.marker_size" min="20"
-                                                max="80" step="5"
+                                                wire:model.live="areaConfig.{{ $areaKey }}.marker_size" min="16"
+                                                max="60" step="2"
                                                 class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
                                         </div>
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-600">Marker Color</label>
-                                            <input type="color" wire:model.live="areaConfig.{{ $areaKey }}.marker_color"
-                                                class="w-full h-8 border rounded cursor-pointer">
-                                        </div>
+                                    </div>
+
+                                    {{-- Show Letter Inside Marker --}}
+                                    <div class="flex items-center">
+                                        <input type="checkbox" wire:model.live="areaConfig.{{ $areaKey }}.show_label_letter" 
+                                            class="mr-2" id="show-letter-{{ $areaKey }}">
+                                        <label for="show-letter-{{ $areaKey }}" class="text-xs text-gray-700">
+                                            Show first letter inside marker
+                                        </label>
                                     </div>
 
                                     {{-- Quick Position Buttons --}}

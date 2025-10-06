@@ -124,8 +124,9 @@ class MapTemplateManagerComponent extends Component
             'parking_area_id' => null,
             'label' => 'New Area',
             'enabled' => true,
-            'marker_size' => 40,
-            'marker_color' => '#3b82f6'
+            'marker_size' => 24,
+            'marker_color' => '#3b82f6',
+            'show_label_letter' => true
         ];
     }
 
@@ -241,8 +242,8 @@ class MapTemplateManagerComponent extends Component
                 'parking_area_id' => null,
                 'label' => 'Parking Area 1',
                 'enabled' => true,
-                'marker_size' => 40,
-                'marker_color' => '#3b82f6'
+                'marker_size' => 24,
+                'show_label_letter' => true
             ]
         ];
     }
