@@ -197,89 +197,107 @@
                         </div>
                     </div>
 
-                    {{-- Parking Area Cards --}}
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        @foreach($areaConfig as $areaKey => $config)
-                        <div class="border rounded p-3 bg-gray-50 mb-3">
-                            <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center">
-                                    <input type="checkbox" wire:model="areaConfig.{{ $areaKey }}.enabled" class="mr-2"
-                                        wire:click="saveAreaPositions">
-                                    <label class="text-sm font-medium text-gray-700">Enable this area</label>
-                                </div>
-                                <button wire:click="removeParkingArea('{{ $areaKey }}')" 
-                                    class="btn btn-sm btn-outline-danger"
-                                    onclick="return confirm('Remove this parking area?')">
-                                    <i class="bi bi-trash"></i>
-                                </button>
-                            </div>
-                            
-                            <div class="{{ empty($config['enabled']) ? 'opacity-50 pointer-events-none' : '' }}">
-                                <div class="space-y-3">
-                                    {{-- Label & Parking Area Selection --}}
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-600">Area Label</label>
-                                            <input type="text"
-                                                wire:model.live="areaConfig.{{ $areaKey }}.label"
-                                                class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500"
-                                                placeholder="Area name">
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-600">Link to Parking Area</label>
-                                            <select wire:model.live="areaConfig.{{ $areaKey }}.parking_area_id"
-                                                class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
-                                                <option value="">-- Select Area --</option>
-                                                @foreach($availableParkingAreas as $parkingArea)
-                                                <option value="{{ $parkingArea->id }}">{{ $parkingArea->name }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    </div>
+{{-- Parking Area Cards --}}
+<div class="row g-4">
+    @foreach($areaConfig as $areaKey => $config)
+    <div class="col-12 col-lg-6">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="form-check">
+                        <input type="checkbox" 
+                               class="form-check-input" 
+                               wire:model="areaConfig.{{ $areaKey }}.enabled" 
+                               wire:click="saveAreaPositions" 
+                               id="enable-area-{{ $areaKey }}">
+                        <label class="form-check-label fw-semibold" for="enable-area-{{ $areaKey }}">
+                            Enable this area
+                        </label>
+                    </div>
+                    <button wire:click="removeParkingArea('{{ $areaKey }}')" 
+                        class="btn btn-sm btn-outline-danger"
+                        onclick="return confirm('Remove this parking area?')">
+                        <i class="bi bi-trash"></i> Remove
+                    </button>
+                </div>
 
-                                    {{-- Position --}}
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-600">X Position (%)</label>
-                                            <input type="number"
-                                                wire:model.live="areaConfig.{{ $areaKey }}.x_percent" min="0"
-                                                max="100" step="0.1"
-                                                class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-600">Y Position (%)</label>
-                                            <input type="number"
-                                                wire:model.live="areaConfig.{{ $areaKey }}.y_percent" min="0"
-                                                max="100" step="0.1"
-                                                class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
-                                        </div>
-                                    </div>
-
-                                    {{-- Marker Settings --}}
-                                    <div class="grid grid-cols-1 gap-2">
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-600">Marker Size (px)</label>
-                                            <input type="number"
-                                                wire:model.live="areaConfig.{{ $areaKey }}.marker_size" min="16"
-                                                max="60" step="2"
-                                                class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
-                                        </div>
-                                    </div>
-
-                                    {{-- Show Letter Inside Marker --}}
-                                    <div class="flex items-center">
-                                        <input type="checkbox" wire:model.live="areaConfig.{{ $areaKey }}.show_label_letter" 
-                                            class="mr-2" id="show-letter-{{ $areaKey }}">
-                                        <label for="show-letter-{{ $areaKey }}" class="text-xs text-gray-700">
-                                            Show first letter inside marker
-                                        </label>
-                                    </div>
-
-                                </div>
+                <div class="{{ empty($config['enabled']) ? 'opacity-50 pointer-events-none' : '' }}">
+                    <div class="row gy-3">
+                        {{-- Label & Parking Area Selection --}}
+                        <div class="col-12 col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Area Label</label>
+                                <input type="text"
+                                    wire:model.live="areaConfig.{{ $areaKey }}.label"
+                                    class="form-control form-control-sm"
+                                    placeholder="Area name">
                             </div>
                         </div>
-                        @endforeach
+                        <div class="col-12 col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Link to Parking Area</label>
+                                <select wire:model.live="areaConfig.{{ $areaKey }}.parking_area_id"
+                                    class="form-select form-select-sm">
+                                    <option value="">-- Select Area --</option>
+                                    @foreach($availableParkingAreas as $parkingArea)
+                                    <option value="{{ $parkingArea->id }}">{{ $parkingArea->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        {{-- Position --}}
+                        <div class="col-12 col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">X Position (%)</label>
+                                <input type="number"
+                                    wire:model.live="areaConfig.{{ $areaKey }}.x_percent" 
+                                    min="0" max="100" step="0.1"
+                                    class="form-control form-control-sm">
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Y Position (%)</label>
+                                <input type="number"
+                                    wire:model.live="areaConfig.{{ $areaKey }}.y_percent" 
+                                    min="0" max="100" step="0.1"
+                                    class="form-control form-control-sm">
+                            </div>
+                        </div>
+
+                        {{-- Marker Settings --}}
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label class="form-label small fw-semibold">Marker Size (px)</label>
+                                <input type="number"
+                                    wire:model.live="areaConfig.{{ $areaKey }}.marker_size" 
+                                    min="16" max="60" step="2"
+                                    class="form-control form-control-sm">
+                            </div>
+                        </div>
+
+                        {{-- Show Letter Inside Marker --}}
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input type="checkbox" 
+                                    class="form-check-input" 
+                                    wire:model.live="areaConfig.{{ $areaKey }}.show_label_letter" 
+                                    id="show-letter-{{ $areaKey }}">
+                                <label class="form-check-label small" for="show-letter-{{ $areaKey }}">
+                                    Show first letter inside marker
+                                </label>
+                            </div>
+                        </div>
+
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endforeach
+</div>
+
                                                 <button wire:click="addParkingArea" class="btn-add-slot btn btn-primary">
                                 <i class="bi bi-plus-circle"></i> Add Area
                             </button>

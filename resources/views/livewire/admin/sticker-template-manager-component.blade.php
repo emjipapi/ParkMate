@@ -182,120 +182,116 @@
                         </button>
                     </div>
 
-                    {{-- Position and Style Controls --}}
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        @foreach($elementConfig as $element => $config)
-                        <div class="border rounded p-3 ">
-                            <div class="flex items-center mb-2">
-                                <input type="checkbox" wire:model="elementConfig.{{ $element }}.enabled" class="mr-2"
-                                    wire:click="saveElementPositions">
-                                <label class="text-sm text-gray-700">Enable this element</label>
+                    <div class="card-body">
+                <div class="row g-4">
+                    @foreach($elementConfig as $element => $config)
+                    <div class="col-12 col-lg-6">
+                        <div class="border rounded p-3 h-100">
+                            <div class="form-check mb-2">
+                                <input type="checkbox" 
+                                       class="form-check-input" 
+                                       wire:model="elementConfig.{{ $element }}.enabled" 
+                                       wire:click="saveElementPositions" 
+                                       id="enable-{{ $element }}">
+                                <label class="form-check-label small fw-semibold" for="enable-{{ $element }}">
+                                    Enable this element
+                                </label>
                             </div>
+
                             <div class="{{ empty($config['enabled']) ? 'opacity-50 pointer-events-none' : '' }}">
-                                <h5 class="font-medium text-gray-700 mb-2 capitalize">
+                                <h6 class="fw-semibold text-capitalize mb-3">
                                     {{ str_replace('_', ' ', $element) }} Settings
-                                </h5>
+                                </h6>
 
-                                <div class="space-y-3">
-                                    {{-- Position --}}
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-600">X Position
-                                                (%)</label>
-                                            <input type="number"
-                                                wire:model.live="elementConfig.{{ $element }}.x_percent" min="0"
-                                                max="100" step="0.1"
-                                                class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
-                                            <small class="text-gray-500 text-xs">
-                                                @if($config['x_percent'] <= 15) Left aligned
-                                                    @elseif($config['x_percent']>= 85) Right aligned
-                                                    @else Center aligned @endif
-                                            </small>
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-600">Y Position
-                                                (%)</label>
-                                            <input type="number"
-                                                wire:model.live="elementConfig.{{ $element }}.y_percent" min="0"
-                                                max="100" step="0.1"
-                                                class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
-                                        </div>
+                                <div class="row g-3">
+                                    {{-- X/Y Position --}}
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold">X Position (%)</label>
+                                        <input type="number" 
+                                               class="form-control form-control-sm" 
+                                               min="0" max="100" step="0.1" 
+                                               wire:model.live="elementConfig.{{ $element }}.x_percent">
+                                        <small class="text-muted">
+                                            @if($config['x_percent'] <= 15) Left aligned
+                                            @elseif($config['x_percent'] >= 85) Right aligned
+                                            @else Center aligned @endif
+                                        </small>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold">Y Position (%)</label>
+                                        <input type="number" 
+                                               class="form-control form-control-sm" 
+                                               min="0" max="100" step="0.1" 
+                                               wire:model.live="elementConfig.{{ $element }}.y_percent">
                                     </div>
 
-                                    {{-- Font Size and Color --}}
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-600">Font Size
-                                                (px)</label>
-                                            <input type="number"
-                                                wire:model.live="elementConfig.{{ $element }}.font_size" min="8"
-                                                max="72" step="1"
-                                                class="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-blue-500">
-                                        </div>
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-600">Text Color</label>
-                                            <input type="color" wire:model.live="elementConfig.{{ $element }}.color"
-                                                class="w-full h-8 border rounded cursor-pointer">
-                                        </div>
+                                    {{-- Font Size & Color --}}
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold">Font Size (px)</label>
+                                        <input type="number" 
+                                               class="form-control form-control-sm" 
+                                               min="8" max="72" step="1" 
+                                               wire:model.live="elementConfig.{{ $element }}.font_size">
                                     </div>
+                                    <div class="col-6">
+                                        <label class="form-label small fw-semibold">Text Color</label>
+                                        <input type="color" 
+                                               class="form-control form-control-color" 
+                                               wire:model.live="elementConfig.{{ $element }}.color">
+                                    </div>
+                                </div>
 
-                                    {{-- Quick Position Buttons --}}
-                                    <div class="mt-2">
-                                        <label class="block text-xs font-medium text-gray-600 mb-1">Quick
-                                            Positions</label>
-                                        <div class="grid grid-cols-3 gap-1 text-xs">
-                                            <button wire:click="setQuickPosition('{{ $element }}', 'top_left')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
-                                                type="button">
-                                                ↖ Top Left
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $element }}', 'top_center')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
-                                                type="button">
-                                                ↑ Top Center
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $element }}', 'top_right')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
-                                                type="button">
-                                                ↗ Top Right
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $element }}', 'center_left')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
-                                                type="button">
-                                                ← Left
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $element }}', 'center')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
-                                                type="button">
-                                                ⊙ Center
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $element }}', 'center_right')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
-                                                type="button">
-                                                → Right
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $element }}', 'bottom_left')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
-                                                type="button">
-                                                ↙ Bottom Left
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $element }}', 'bottom_center')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
-                                                type="button">
-                                                ↓ Bottom Center
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $element }}', 'bottom_right')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
-                                                type="button">
-                                                ↘ Bottom Right
-                                            </button>
+                                {{-- Quick Position Buttons --}}
+                                <div class="mt-3">
+                                    <label class="form-label small d-block mb-1 fw-semibold">Quick Positions</label>
+                                    <div class="row g-1">
+                                        <div class="col-4">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 text-start" 
+                                                wire:click="setQuickPosition('{{ $element }}', 'top_left')">↖ Top Left</button>
+                                        </div>
+                                        <div class="col-4">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 text-center" 
+                                                wire:click="setQuickPosition('{{ $element }}', 'top_center')">↑ Top Center</button>
+                                        </div>
+                                        <div class="col-4">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 text-end" 
+                                                wire:click="setQuickPosition('{{ $element }}', 'top_right')">↗ Top Right</button>
+                                        </div>
+
+                                        <div class="col-4">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 text-start" 
+                                                wire:click="setQuickPosition('{{ $element }}', 'center_left')">← Left</button>
+                                        </div>
+                                        <div class="col-4">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 text-center" 
+                                                wire:click="setQuickPosition('{{ $element }}', 'center')">⊙ Center</button>
+                                        </div>
+                                        <div class="col-4">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 text-end" 
+                                                wire:click="setQuickPosition('{{ $element }}', 'center_right')">→ Right</button>
+                                        </div>
+
+                                        <div class="col-4">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 text-start" 
+                                                wire:click="setQuickPosition('{{ $element }}', 'bottom_left')">↙ Bottom Left</button>
+                                        </div>
+                                        <div class="col-4">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 text-center" 
+                                                wire:click="setQuickPosition('{{ $element }}', 'bottom_center')">↓ Bottom Center</button>
+                                        </div>
+                                        <div class="col-4">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm w-100 text-end" 
+                                                wire:click="setQuickPosition('{{ $element }}', 'bottom_right')">↘ Bottom Right</button>
                                         </div>
                                     </div>
                                 </div>
+
                             </div>
                         </div>
-                        @endforeach
                     </div>
+                    @endforeach
+                </div>
+            </div>
 
                   
                 </div>
