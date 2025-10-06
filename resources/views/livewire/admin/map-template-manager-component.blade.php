@@ -275,57 +275,6 @@
                                         </label>
                                     </div>
 
-                                    {{-- Quick Position Buttons --}}
-                                    {{-- <div class="mt-2">
-                                        <label class="block text-xs font-medium text-gray-600 mb-1">Quick Positions</label>
-                                        <div class="grid grid-cols-3 gap-1 text-xs">
-                                            <button wire:click="setQuickPosition('{{ $areaKey }}', 'top_left')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
-                                                type="button">
-                                                ↖ Top Left
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $areaKey }}', 'top_center')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
-                                                type="button">
-                                                ↑ Top Center
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $areaKey }}', 'top_right')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
-                                                type="button">
-                                                ↗ Top Right
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $areaKey }}', 'center_left')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
-                                                type="button">
-                                                ← Left
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $areaKey }}', 'center')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
-                                                type="button">
-                                                ⊙ Center
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $areaKey }}', 'center_right')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
-                                                type="button">
-                                                → Right
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $areaKey }}', 'bottom_left')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-left"
-                                                type="button">
-                                                ↙ Bottom Left
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $areaKey }}', 'bottom_center')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-center"
-                                                type="button">
-                                                ↓ Bottom Center
-                                            </button>
-                                            <button wire:click="setQuickPosition('{{ $areaKey }}', 'bottom_right')"
-                                                class="px-2 py-1 bg-white border rounded hover:bg-blue-50 text-right"
-                                                type="button">
-                                                ↘ Bottom Right
-                                            </button>
-                                        </div>
-                                    </div> --}}
                                 </div>
                             </div>
                         </div>
