@@ -180,6 +180,7 @@ Route::get('/api/parking-map/{map}/statuses', function (ParkingMap $map) {
             'occupied' => (int)$occupiedCarSlots,
             'available_cars' => (int)$availableCarSlots,
             'motorcycle_available' => $availableMotorcycleCount !== null ? (int)$availableMotorcycleCount : null,
+            'motorcycle_total' => $motorcycleTotal !== null ? (int)$motorcycleTotal : null,
         ];
     }
     

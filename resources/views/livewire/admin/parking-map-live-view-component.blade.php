@@ -2,27 +2,52 @@
     // Initial data computation - matching Livewire component logic
     $mapData = $map;
     $areaConfig = (array) ($map->area_config ?? []);
-    
-    // Compute initial statuses
+
+    // Collect all referenced parking_area_ids so we can query counts in bulk (avoids N+1)
+    $parkingAreaIds = array_values(array_filter(array_map(function($c) {
+        return $c['parking_area_id'] ?? null;
+    }, $areaConfig)));
+
+    // Bulk car slot stats: total and occupied (SUM(occupied) returns number of occupied slots)
+    $carStats = \App\Models\CarSlot::selectRaw('area_id, COUNT(*) as total, SUM(occupied) as occupied')
+        ->whereIn('area_id', $parkingAreaIds ?: [0])
+        ->groupBy('area_id')
+        ->get()
+        ->keyBy('area_id');
+
+    // Bulk motorcycle counts
+    $motoRows = \App\Models\MotorcycleCount::whereIn('area_id', $parkingAreaIds ?: [0])
+        ->get()
+        ->keyBy('area_id');
+
+    // Compute statuses using the pre-fetched data
     $areaStatuses = [];
     foreach ($areaConfig as $areaKey => $cfg) {
         $enabled = !empty($cfg['enabled']);
         $parkingAreaId = $cfg['parking_area_id'] ?? null;
-        
+
         $totalCarSlots = 0;
         $occupiedCarSlots = 0;
         $availableMotorcycleCount = null;
-        
+        $motorcycleTotal = null;
+
         if ($parkingAreaId) {
-            $totalCarSlots = \App\Models\CarSlot::where('area_id', $parkingAreaId)->count();
-            $occupiedCarSlots = \App\Models\CarSlot::where('area_id', $parkingAreaId)->where('occupied', 1)->count();
-            
-            $mc = \App\Models\MotorcycleCount::where('area_id', $parkingAreaId)->first();
-            $availableMotorcycleCount = $mc?->available_count ?? null;
+            $cs = $carStats[$parkingAreaId] ?? null;
+            if ($cs) {
+                $totalCarSlots = (int) $cs->total;
+                // SUM(occupied) may return null if no rows; cast to int
+                $occupiedCarSlots = (int) $cs->occupied;
+            }
+
+            $mc = $motoRows[$parkingAreaId] ?? null;
+            if ($mc) {
+                $availableMotorcycleCount = $mc->available_count !== null ? (int)$mc->available_count : null;
+                $motorcycleTotal = $mc->total_available !== null ? (int)$mc->total_available : null;
+            }
         }
-        
+
         $availableCarSlots = max(0, $totalCarSlots - $occupiedCarSlots);
-        
+
         // Determine state - exact same logic as Livewire
         $state = 'unknown';
         if (!$enabled) {
@@ -46,16 +71,18 @@
                 $state = 'unknown';
             }
         }
-        
+
         $areaStatuses[$areaKey] = [
             'state' => $state,
             'total' => (int)$totalCarSlots,
             'occupied' => (int)$occupiedCarSlots,
             'available_cars' => (int)$availableCarSlots,
             'motorcycle_available' => $availableMotorcycleCount !== null ? (int)$availableMotorcycleCount : null,
+            'motorcycle_total' => $motorcycleTotal !== null ? (int)$motorcycleTotal : null, // <-- added
         ];
     }
 @endphp
+
 
 <div x-data="parkingMap(@js($mapData), @js($areaConfig), @js($areaStatuses))" x-init="init()">
     @if(!$map)
@@ -78,7 +105,7 @@
                 position: relative;
                 height: 100vh;
                 width: 100vw;
-                overflow: hidden;
+                overflow: visible; /* Changed from hidden to allow labels to overflow */
                 background: #ffffff;
                 display: flex;
                 align-items: center;
@@ -127,18 +154,59 @@
                 pointer-events: none; /* change if you want clicks */
             }
 
-            .map-label {
-                position: absolute;
-                transform: translateX(-50%);
-                z-index: 19;
-                background: rgba(0,0,0,0.7);
-                color: #fff;
-                padding: 6px 10px;
-                border-radius: 6px;
-                font-size: 13px;
-                white-space: nowrap;
-                pointer-events: none;
-            }
+/* map-label: side position and compact sizing */
+.map-label {
+  position: absolute;
+  z-index: 19;
+  background: rgba(0,0,0,0.78);
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+  pointer-events: none;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  max-width: 280px;
+  /* don't translate here; JS will set transform for vertical centering */
+}
+
+/* left column: fixed narrow width + truncation */
+.map-label .label-col {
+  flex: 0 0 56px;       /* fixed width */
+  max-width: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* right column: stacked counts centered vertically */
+.map-label .counts-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* keep counts compact; use center if you prefer */
+  justify-content: center;
+  gap: 3px;
+}
+
+/* caption + value styles */
+.map-label .caption {
+  font-size: 11px;
+  color: #d1d5db;
+  line-height: 1;
+}
+.map-label .value {
+  font-weight: 600;
+  line-height: 1;
+}
+
+
         </style>
 
         <div class="live-map-viewport" id="live-map-viewport">
@@ -151,36 +219,57 @@
                     <template x-if="cfg.enabled">
                         <div>
                             <div
-                                class="map-marker"
-                                :data-area="areaKey"
-                                :data-x="cfg.x_percent || 50"
-                                :data-y="cfg.y_percent || 50"
-                                :data-size="cfg.marker_size || 28"
-                                :style="{
-                                    width: (cfg.marker_size || 28) + 'px',
-                                    height: (cfg.marker_size || 28) + 'px',
-                                    background: getMarkerColor(areaKey),
-                                    fontSize: '10px'
-                                }">
-                                <span x-show="cfg.show_label_letter !== false" x-text="(cfg.label || 'A').substring(0, 1)"></span>
-                            </div>
+  class="map-marker"
+  :data-area="areaKey"
+  :data-x="cfg.x_percent || 50"
+  :data-y="cfg.y_percent || 50"
+  :data-size="cfg.marker_size || 28"
+  :style="{
+    width: (cfg.marker_size || 28) + 'px',
+    height: (cfg.marker_size || 28) + 'px',
+    background: getMarkerColor(areaKey),
+    fontSize: '10px',
+    fontWeight: 'bold'
+  }">
+  <span x-show="cfg.show_label_letter !== false" x-text="(cfg.label || 'A').substring(0, 1)"></span>
+</div>
 
-                            <div class="map-label" :data-area="areaKey">
-                                <strong x-text="cfg.label || 'A'"></strong>
-                                <template x-if="areaStatuses[areaKey]">
-                                    <div style="font-size:11px; opacity:0.9; margin-top:6px;">
-                                        <template x-if="areaStatuses[areaKey].total > 0">
-                                            <span x-text="areaStatuses[areaKey].occupied + '/' + areaStatuses[areaKey].total + ' occupied'"></span>
-                                        </template>
-                                        <template x-if="areaStatuses[areaKey].total === 0">
-                                            <span>Cars: -</span>
-                                        </template>
-                                        <template x-if="areaStatuses[areaKey].motorcycle_available !== null">
-                                            <span x-text="' • M: ' + areaStatuses[areaKey].motorcycle_available"></span>
-                                        </template>
-                                    </div>
-                                </template>
-                            </div>
+
+<div class="map-label"
+     :data-area="areaKey">
+  <div class="label-col" :title="cfg.label || ''">
+    <strong x-text="cfg.label || 'A'"></strong>
+  </div>
+
+  <div class="counts-col">
+    <div>
+      <div class="caption">Motorcycles</div>
+      <div class="value"
+           x-text="areaStatuses[areaKey]
+                   ? (
+                       (areaStatuses[areaKey].motorcycle_available !== null && areaStatuses[areaKey].motorcycle_available !== undefined
+                         ? areaStatuses[areaKey].motorcycle_available
+                         : '—')
+                       + ' Available / ' +
+                       (areaStatuses[areaKey].motorcycle_total !== null && areaStatuses[areaKey].motorcycle_total !== undefined
+                         ? areaStatuses[areaKey].motorcycle_total + ' Total'
+                         : '-')
+                     )
+                   : '—'"></div>
+    </div>
+
+    <div>
+      <div class="caption">Car Slots</div>
+      <div class="value"
+           x-text="areaStatuses[areaKey]
+                   ? ((areaStatuses[areaKey].occupied ?? 0) + ' Occupied / ' + (areaStatuses[areaKey].total ?? 0)) + ' Total'
+                   : '-'"></div>
+    </div>
+  </div>
+</div>
+
+
+
                         </div>
                     </template>
                 </template>
@@ -279,21 +368,44 @@
 
                         const labels = container.querySelectorAll('.map-label');
                         labels.forEach(label => {
-                            const area = label.dataset.area;
-                            const marker = container.querySelector('.map-marker[data-area="' + area + '"]');
-                            if (!marker) return;
+    const area = label.dataset.area;
+    const marker = container.querySelector('.map-marker[data-area="' + area + '"]');
+    if (!marker) return;
 
-                            const mRect = marker.getBoundingClientRect();
-                            const cont = container.getBoundingClientRect();
-                            const mLeft = mRect.left - cont.left + mRect.width / 2;
-                            const mTop = mRect.top - cont.top + mRect.height / 2;
+    const mRect = marker.getBoundingClientRect();
+    const cont = container.getBoundingClientRect();
 
-                            label.style.left = Math.round(mLeft) + 'px';
-                            label.style.top = Math.round(mTop + (mRect.height / 2) + 8) + 'px';
-                            label.style.transform = 'translateX(-50%)';
+    // marker center coords relative to container
+    const mLeft = mRect.left - cont.left + mRect.width / 2;
+    const mTop  = mRect.top  - cont.top  + mRect.height / 2;
 
-                            label.classList.add('visible');
-                        });
+    // desired offset to the right of marker (pixels)
+    const gap = 10; // px gap between marker edge and label
+
+    // measure label width (best effort - using getBoundingClientRect)
+    // Temporarily position off-screen to measure if needed
+    let labelWidth = label.offsetWidth;
+    if (!labelWidth) {
+        // force measurement by making it visible then hiding again
+        label.style.visibility = 'hidden';
+        label.style.left = '0px';
+        label.style.top = '0px';
+        labelWidth = label.getBoundingClientRect().width || 120;
+    }
+
+    // compute left: marker right edge + gap
+    const leftPx = Math.round(mLeft + (mRect.width / 2) + gap);
+
+    // compute top: marker center (vertical centering)
+    const topPx = Math.round(mTop);
+
+    // set position and vertically center using translateY(-50%)
+    label.style.left = leftPx + 'px';
+    label.style.top  = topPx + 'px';
+    label.style.transform = 'translateY(-50%)'; // vertically center
+    label.classList.add('visible');
+});
+
 
                         setTimeout(() => {
                             container.querySelectorAll('.map-marker, .map-label').forEach(el => el.classList.add('visible'));

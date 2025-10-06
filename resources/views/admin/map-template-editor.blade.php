@@ -8,7 +8,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>ParkMate - Sticker Generator</title>
+    <title>ParkMate - Map Template Manager</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap 5 CDN -->
@@ -600,12 +600,11 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Generate</h3>
-                <h6 class="mb-0">Sticker</h6>
+                <h3 class="mb-0 me-3">Modify</h3>
+                <h6 class="mb-0">Map</h6>
             </div>
-            <span class="text-muted">Home > Sticker Generator</span>
+            <span class="text-muted">Home > Live Map Template Manager</span>
         </div>
-
 
         <div class="square-box">
             <livewire:admin.map-template-manager-component />
