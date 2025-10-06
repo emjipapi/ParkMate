@@ -8,6 +8,9 @@
             </div>
 
             <div class="modal-body">
+                    <div class="mb-2">
+        <strong>Parking Area ID:</strong> {{ $areaId }}
+    </div>
                 <div class="mb-3">
                     <label class="form-label">Area Name</label>
                     <!-- defer syncing until Save (reduces network calls) -->
