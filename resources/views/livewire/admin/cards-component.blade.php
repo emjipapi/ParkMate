@@ -3,9 +3,9 @@
     {{-- Car Slots --}}
     <div onclick="window.location='{{ url('/parking-slots') }}'" class="card card-1" style="cursor:pointer;">
         <div class="card-body">
-            <h1 class="card-title">{{ $totalCarSlots }}</h1>
-            <p class="card-text">Total Car Slots</p>
-            <small>{{ $totalCarOccupied }} Occupied</small>
+            <h1 class="card-title">{{ $totalCarOccupied }}</h1>
+            <p class="card-text">Occupied Car Slots</p>
+            <small>{{ $totalCarSlots }} Total Motorcycle Slots</small>
         </div>
         <div class="card-footer">More Info ➜</div>
     </div>
@@ -13,9 +13,9 @@
     {{-- Motorcycle Slots --}}
     <div onclick="window.location='{{ url('/parking-slots') }}'" class="card card-2" style="cursor:pointer;">
         <div class="card-body">
-            <h1 class="card-title">{{ $totalMotoSlots }}</h1>
-            <p class="card-text">Total Motorcycle Slots</p>
-            <small>{{ $totalMotoOccupied }} Occupied</small>
+            <h1 class="card-title">{{ $totalMotoOccupied }}</h1>
+            <p class="card-text">Occupied Motorcycle Slots</p>
+            <small>{{ $totalMotoSlots }} Total Motorcycle Slots</small>
 
         </div>
         <div class="card-footer">More Info ➜</div>
