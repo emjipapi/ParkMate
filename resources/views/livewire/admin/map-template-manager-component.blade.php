@@ -349,9 +349,15 @@
 <script>
 (function () {
     let __mapTimer = null;
+    // store { obs: MutationObserver, wrapper: Element } per mapId
     const wrapperObservers = new Map();
 
+    function log(...args) {
+        console.log.apply(console, ['[ParkingMap]', ...args]);
+    }
+
     function initAllImages() {
+        log('initAllImages() called', new Date().toISOString());
         const imgs = Array.from(document.querySelectorAll('img[id^="map-image-"]'));
         imgs.forEach(img => {
             const m = img.id.match(/^map-image-(.+)$/);
@@ -363,26 +369,65 @@
     }
 
     function attachHandlers(img, mapId) {
+        // always ensure the wrapper observer is installed for this image's wrapper
+        ensureWrapperObserver(mapId, img.parentElement);
+
+        // always try to position (handles re-selected templates)
         if (img.dataset.mapInit === '1') {
+            log('attachHandlers: already inited, calling positionMarkers for', mapId);
             positionMarkers(img, mapId);
             return;
         }
         img.dataset.mapInit = '1';
-        img.addEventListener('load', () => positionMarkers(img, mapId));
-        if (img.complete) setTimeout(() => positionMarkers(img, mapId), 30);
+        log('attachHandlers: adding load listener for', mapId);
+        img.addEventListener('load', () => {
+            log('image load event for', mapId);
+            // ensure observer still present (in case wrapper replaced between scheduling)
+            ensureWrapperObserver(mapId, img.parentElement);
+            positionMarkers(img, mapId);
+        });
+        if (img.complete) setTimeout(() => {
+            log('image.complete initial position for', mapId);
+            ensureWrapperObserver(mapId, img.parentElement);
+            positionMarkers(img, mapId);
+        }, 30);
     }
 
     function ensureWrapperObserver(mapId, wrapper) {
-        if (!wrapper || wrapperObservers.has(mapId)) return;
-        const obs = new MutationObserver(() => {
+        if (!wrapper) return;
+
+        const existing = wrapperObservers.get(mapId);
+        // If an observer exists but the wrapper element changed, disconnect & recreate
+        if (existing) {
+            if (existing.wrapper !== wrapper) {
+                try { existing.obs.disconnect(); } catch (e) { /* ignore */ }
+                wrapperObservers.delete(mapId);
+                log('ensureWrapperObserver: previous observer replaced for map', mapId);
+            } else {
+                // already observing the correct wrapper
+                return;
+            }
+        }
+
+        const obs = new MutationObserver((mutations) => {
+            // minor debounce to coalesce many mutations
             clearTimeout(wrapper._parkingDeb);
             wrapper._parkingDeb = setTimeout(() => {
                 const img = wrapper.querySelector('#map-image-' + mapId);
-                if (img) positionMarkers(img, mapId);
+                if (img) {
+                    log('MutationObserver: changes detected in wrapper for map', mapId, '— repositioning');
+                    positionMarkers(img, mapId);
+                } else {
+                    log('MutationObserver: wrapper changed and image not found for', mapId);
+                }
             }, 40);
         });
+
+        // Observe childList+subtree; attributes retained for style/class changes
         obs.observe(wrapper, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
-        wrapperObservers.set(mapId, obs);
+
+        wrapperObservers.set(mapId, { obs, wrapper });
+        log('MutationObserver attached for map', mapId);
     }
 
     function readPercent(value) {
@@ -392,14 +437,23 @@
     }
 
     function tryLater(fn, img, mapId, attempt = 0) {
-        if (attempt > 8) return;
+        if (attempt > 10) {
+            log('tryLater: giving up', fn.name, mapId, attempt);
+            return;
+        }
         setTimeout(() => fn(img, mapId, attempt + 1), 40 + attempt * 30);
     }
 
     function positionMarkers(img, mapId, attempt = 0) {
         try {
-            if (!img || !document.body.contains(img)) return;
-            if (!img.naturalWidth || !img.naturalHeight) return tryLater(positionMarkers, img, mapId, attempt);
+            if (!img || !document.body.contains(img)) {
+                log('positionMarkers: image missing from DOM for', mapId);
+                return;
+            }
+            if (!img.naturalWidth || !img.naturalHeight) {
+                log('positionMarkers: image natural size not ready for', mapId, '→ retry');
+                return tryLater(positionMarkers, img, mapId, attempt);
+            }
 
             const wrapper = img.parentElement;
             if (!wrapper) return tryLater(positionMarkers, img, mapId, attempt);
@@ -409,49 +463,81 @@
             const imgWidth = img.offsetWidth;
             const imgHeight = img.offsetHeight;
 
-            if (!imgWidth || !imgHeight || wrapperRect.width === 0)
+            if (!imgWidth || !imgHeight || wrapperRect.width === 0) {
+                log('positionMarkers: bad dims → retry', { imgWidth, imgHeight, wrapperWidth: wrapperRect.width });
                 return tryLater(positionMarkers, img, mapId, attempt);
+            }
 
             const offsetX = imgRect.left - wrapperRect.left;
             const offsetY = imgRect.top - wrapperRect.top;
 
-            if (window.Livewire?.emit) {
-                Livewire.emit('setPreviewDimensions', img.naturalWidth, img.naturalHeight);
-            }
+            // emit natural dims to Livewire if present
+            if (window.Livewire?.emit) Livewire.emit('setPreviewDimensions', img.naturalWidth, img.naturalHeight);
 
-            // Position markers
-            document.querySelectorAll('.area-marker-' + mapId).forEach(el => {
+            // position markers (pixel-space)
+            const markerEls = Array.from(wrapper.querySelectorAll('.area-marker-' + mapId));
+            log('markers found', markerEls.length, 'for', mapId);
+            markerEls.forEach(el => {
                 const xPercent = readPercent(el.getAttribute('data-x'));
                 const yPercent = readPercent(el.getAttribute('data-y'));
+                const markerSize = parseFloat(el.getAttribute('data-marker-size')) || parseFloat(el.style.width) || 24;
+
+                const centerX = offsetX + ((isFinite(xPercent) ? xPercent : 50) / 100) * imgWidth;
+                const centerY = offsetY + ((isFinite(yPercent) ? yPercent : 50) / 100) * imgHeight;
+
                 el.style.position = 'absolute';
-                el.style.left = (isNaN(xPercent) ? 50 : xPercent) + '%';
-                el.style.top = (isNaN(yPercent) ? 50 : yPercent) + '%';
+                el.style.left = Math.round(centerX) + 'px';
+                el.style.top = Math.round(centerY) + 'px';
+                el.style.width = Math.round(markerSize) + 'px';
+                el.style.height = Math.round(markerSize) + 'px';
                 el.style.transform = 'translate(-50%, -50%)';
+                el.classList.add('visible');
+
+                // store computed center for debugging if needed
+                el.dataset._centerX = Math.round(centerX);
+                el.dataset._centerY = Math.round(centerY);
             });
 
-            // Position labels
-            const labels = document.querySelectorAll('.area-label-' + mapId);
-            if (!labels.length) return;
-
+            // position labels relative to markers; fallback to computing from data-x/y if marker not found
+            const labels = Array.from(wrapper.querySelectorAll('.area-label-' + mapId));
+            log('labels found', labels.length, 'for', mapId);
             let anyInvalid = false;
             labels.forEach(el => {
+                const area = el.getAttribute('data-area');
                 const pos = (el.getAttribute('data-position') || 'right').toLowerCase();
                 const xPercent = readPercent(el.getAttribute('data-x'));
                 const yPercent = readPercent(el.getAttribute('data-y'));
                 const markerSize = parseFloat(el.getAttribute('data-marker-size')) || 24;
 
-                const centerX = offsetX + ((isFinite(xPercent) ? xPercent : 50) / 100) * imgWidth;
-                const centerY = offsetY + ((isFinite(yPercent) ? yPercent : 50) / 100) * imgHeight;
+                // try to find the placed marker first (scoped to wrapper)
+                let markerEl = null;
+                if (area) {
+                    markerEl = wrapper.querySelector('.area-marker-' + mapId + '[data-area="' + area + '"]');
+                }
 
-                if (!isFinite(centerX) || !isFinite(centerY)) {
-                    anyInvalid = true;
-                    return;
+                let centerX, centerY;
+                if (markerEl && markerEl.getBoundingClientRect) {
+                    const mRect = markerEl.getBoundingClientRect();
+                    centerX = mRect.left - wrapperRect.left + mRect.width / 2;
+                    centerY = mRect.top - wrapperRect.top + mRect.height / 2;
+                    log('label', area, 'found markerEl -> using its bounding rect', { mLeft: mRect.left, mTop: mRect.top });
+                } else {
+                    // fallback to computing from percent values (same as marker math)
+                    if (!isFinite(xPercent) || !isFinite(yPercent)) {
+                        anyInvalid = true;
+                        return;
+                    }
+                    centerX = offsetX + (xPercent / 100) * imgWidth;
+                    centerY = offsetY + (yPercent / 100) * imgHeight;
+                    log('label', area, 'markerEl not found — computed center from percents', { centerX: Math.round(centerX), centerY: Math.round(centerY) });
                 }
 
                 const gap = 8;
                 const markerRadius = markerSize / 2;
+                let leftPx = centerX;
+                let topPx = centerY;
+                let transform = 'translate(-50%, -50%)';
 
-                let leftPx = centerX, topPx = centerY, transform;
                 switch (pos) {
                     case 'left':
                         leftPx = Math.round(centerX - markerRadius - gap);
@@ -480,26 +566,110 @@
                 el.style.left = leftPx + 'px';
                 el.style.top = topPx + 'px';
                 el.style.transform = transform;
+                el.classList.add('visible');
+
+                // store for debug
+                el.dataset._leftPx = leftPx;
+                el.dataset._topPx = topPx;
             });
 
-            if (anyInvalid && attempt < 8) tryLater(positionMarkers, img, mapId, attempt);
-        } catch {
-            if (attempt < 4) tryLater(positionMarkers, img, mapId, attempt);
+            if (anyInvalid && attempt < 8) {
+                log('positionMarkers: some invalid label coords, retrying', mapId, attempt);
+                tryLater(positionMarkers, img, mapId, attempt);
+            } else {
+                log('positionMarkers completed for', mapId);
+            }
+        } catch (err) {
+            console.error('[ParkingMap] positionMarkers error', err);
+            if (attempt < 6) tryLater(positionMarkers, img, mapId, attempt);
         }
     }
 
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => initAllImages(), 30);
-    });
+    // ---- waitForImageThenPosition & click handling (keeps your working logic) ----
+    function waitForImageThenPosition(mapId, opts = {}) {
+        const intervalMs = opts.interval || 50;
+        const timeoutMs  = opts.timeout  || 2000;
+        const deadline = Date.now() + timeoutMs;
+        let tries = 0;
+
+        return new Promise((resolve) => {
+            const id = setInterval(() => {
+                tries++;
+                const img = document.querySelector('#map-image-' + mapId);
+                if (img) {
+                    clearInterval(id);
+                    log('waitForImageThenPosition: found image after', tries, 'tries for mapId', mapId);
+                    // ensure it's attached, observer installed and positioned
+                    ensureWrapperObserver(mapId, img.parentElement);
+                    if (img.dataset.mapInit !== '1') {
+                        attachHandlers(img, mapId);
+                    } else {
+                        positionMarkers(img, mapId);
+                    }
+                    resolve(true);
+                    return;
+                }
+                if (Date.now() > deadline) {
+                    clearInterval(id);
+                    log('waitForImageThenPosition: timed out waiting for image for mapId', mapId);
+                    resolve(false);
+                }
+            }, intervalMs);
+        });
+    }
+
+    function onDocumentClick(e) {
+        // detect elements with wire:click attribute (capture)
+        const clicked = e.target.closest('[wire\\:click]');
+        if (!clicked) return;
+        const attr = clicked.getAttribute('wire:click') || '';
+        const m = attr.match(/selectMap\((\d+)\)/);
+        if (!m) return;
+        const mapId = m[1];
+        log('selectMap click detected for mapId', mapId, ' — scheduling waitForImageThenPosition');
+
+        // immediate attempt if img exists already
+        const immediateImg = document.querySelector('#map-image-' + mapId);
+        if (immediateImg) {
+            log('selectMap: image already present — immediate reposition for', mapId);
+            ensureWrapperObserver(mapId, immediateImg.parentElement);
+            positionMarkers(immediateImg, mapId);
+        } else {
+            log('selectMap: image not present yet — will poll for it', mapId);
+        }
+
+        // poll for image and position (robust)
+        waitForImageThenPosition(mapId, { interval: 50, timeout: 2000 })
+            .then(found => {
+                if (!found) log('selectMap: image still not found after timeout for', mapId);
+                else log('selectMap: finished positioning for', mapId);
+            });
+    }
+
+    // make sure click listener is not duplicated (use capture true to detect wire:click early)
+    try { document.removeEventListener('click', onDocumentClick, true); } catch (e) { /* ignore */ }
+    document.addEventListener('click', onDocumentClick, true);
+
+    // ---- lifecycle wiring ----
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initAllImages, 30));
 
     document.addEventListener('livewire:update', () => {
         clearTimeout(__mapTimer);
         __mapTimer = setTimeout(initAllImages, 80);
     });
-
     document.addEventListener('livewire:navigated', () => {
         clearTimeout(__mapTimer);
         __mapTimer = setTimeout(initAllImages, 80);
+    });
+
+    // IMPORTANT: run after Livewire processed a message (fires after DOM patch finishes)
+    // this ensures initAllImages runs when Livewire replaces the preview wrapper
+    document.addEventListener('livewire:message.processed', () => {
+        clearTimeout(__mapTimer);
+        __mapTimer = setTimeout(() => {
+            log('livewire:message.processed -> initAllImages');
+            initAllImages();
+        }, 30);
     });
 
     window.addEventListener('resize', () => {
@@ -508,6 +678,10 @@
     });
 })();
 </script>
+
+
+
+
 
 
 
