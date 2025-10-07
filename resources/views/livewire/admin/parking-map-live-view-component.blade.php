@@ -166,7 +166,7 @@
                 .map-label {
                     position: absolute;
                     z-index: 19;
-                    background: rgba(0, 0, 0, 0.78);
+                    /* background: rgba(0, 0, 0, 0.78); */
                     color: #fff;
                     padding: 6px 8px;
                     border-radius: 8px;
@@ -240,7 +240,12 @@
                                 </div>
 
 
-                                <div class="map-label" :data-area="areaKey" :data-position="cfg.label_position || 'right'">
+                                <div class="map-label" 
+     :data-area="areaKey" 
+     :data-position="cfg.label_position || 'right'"
+     :style="{
+         background: 'rgba(0, 0, 0, ' + (cfg.label_opacity ?? 0.78) + ')'
+     }">
                                     <div class="label-col" :title="cfg.label || ''">
                                         <strong x-text="cfg.label || 'A'"></strong>
                                     </div>
@@ -279,219 +284,193 @@
             </div>
 
             <script>
-                function parkingMap(mapData, initialAreaConfig, initialAreaStatuses) {
-                    return {
-                        map: mapData,
-                        areaConfig: initialAreaConfig,
-                        areaStatuses: initialAreaStatuses,
-                        pollInterval: null,
-                        positioningSetup: false,
+    function parkingMap(mapData, initialAreaConfig, initialAreaStatuses) {
+        return {
+            map: mapData,
+            areaConfig: initialAreaConfig,
+            areaStatuses: initialAreaStatuses,
+            pollInterval: null,
+            positioningSetup: false,
 
-                        init() {
-                            // Start polling every 1000ms (matching wire:poll.1000ms)
-                            this.pollInterval = setInterval(() => {
-                                this.refreshStatuses();
-                            }, 2000);
+            init() {
+                this.pollInterval = setInterval(() => {
+                    this.refreshStatuses();
+                }, 2000);
 
-                            // Setup positioning
-                            this.$nextTick(() => {
-                                setTimeout(() => this.setupPositioning(), 100);
-                            });
-                        },
+                this.$nextTick(() => {
+                    setTimeout(() => this.setupPositioning(), 100);
+                });
+            },
 
-                        async refreshStatuses() {
-                            if (!this.map || !this.map.id) return;
-
-                            try {
-                                const response = await fetch(`/api/parking-map/${this.map.id}/statuses`);
-                                const data = await response.json();
-                                this.areaStatuses = data.areaStatuses;
-                            } catch (error) {
-                                console.error('Error refreshing statuses:', error);
-                            }
-                        },
-
-                        getMarkerColor(areaKey) {
-                            const status = this.areaStatuses[areaKey]?.state || 'unknown';
-                            const colorMap = {
-                                'full': '#dc2626',
-                                'available': '#16a34a',
-                                'moto_only': '#f59e0b',
-                                'disabled': '#94a3b8'
-                            };
-                            return colorMap[status] || '#6b7280';
-                        },
-
-                        setupPositioning() {
-                            if (this.positioningSetup) return;
-                            this.positioningSetup = true;
-
-                            const image = document.getElementById('live-map-image');
-                            const container = document.getElementById('live-map-container');
-
-                            if (!image || !container) {
-                                setTimeout(() => this.setupPositioning(), 100);
-                                return;
-                            }
-
-                            // single positioning function
-                            function positionOverlays() {
-                                if (!image.naturalWidth || !image.naturalHeight) {
-                                    setTimeout(positionOverlays, 60);
-                                    return;
-                                }
-
-                                const imgRect = image.getBoundingClientRect();
-                                const contRect = container.getBoundingClientRect();
-                                const imgWidth = image.offsetWidth;
-                                const imgHeight = image.offsetHeight;
-                                const offsetLeft = imgRect.left - contRect.left;
-                                const offsetTop = imgRect.top - contRect.top;
-
-                                const markers = container.querySelectorAll('.map-marker');
-                                if (!markers.length) return;
-
-                                markers.forEach((marker) => {
-                                    const xPercent = parseFloat(marker.dataset.x) || 50;
-                                    const yPercent = parseFloat(marker.dataset.y) || 50;
-                                    const size = parseFloat(marker.dataset.size) || 28;
-
-                                    const x = offsetLeft + (xPercent / 100) * imgWidth;
-                                    const y = offsetTop + (yPercent / 100) * imgHeight;
-
-                                    marker.style.left = Math.round(x) + 'px';
-                                    marker.style.top = Math.round(y) + 'px';
-                                    marker.style.width = Math.round(size) + 'px';
-                                    marker.style.height = Math.round(size) + 'px';
-                                    marker.style.transform = 'translate(-50%, -50%)';
-
-                                    marker.classList.add('visible');
-                                });
-
-                                const labels = container.querySelectorAll('.map-label');
-labels.forEach(label => {
-    const area = label.dataset.area;
-    const marker = container.querySelector('.map-marker[data-area="' + area + '"]');
-    if (!marker) return;
-
-    const mRect = marker.getBoundingClientRect();
-    const cont = container.getBoundingClientRect();
-
-    // marker center coords relative to container
-    const mLeft = mRect.left - cont.left + mRect.width / 2;
-    const mTop  = mRect.top  - cont.top  + mRect.height / 2;
-
-    const gap = 10; // px gap between marker edge and label
-    const markerRadius = mRect.width / 2;
-
-    // Get label position preference from Alpine.js data
-    const areaKey = area;
-    const labelPosition = window.Alpine ? 
-        (Alpine.$data(document.querySelector('[x-data*="parkingMap"]'))?.areaConfig?.[areaKey]?.label_position || 'right') 
-        : 'right';
-
-    // Measure label dimensions
-    let labelWidth = label.offsetWidth;
-    let labelHeight = label.offsetHeight;
-    if (!labelWidth) {
-        label.style.visibility = 'hidden';
-        label.style.left = '0px';
-        label.style.top = '0px';
-        labelWidth = label.getBoundingClientRect().width || 120;
-        labelHeight = label.getBoundingClientRect().height || 40;
+            async refreshStatuses() {
+    if (!this.map || !this.map.id) return;
+    
+    try {
+        const response = await fetch(`/api/parking-map/${this.map.id}/statuses`);
+        const data = await response.json();
+        
+        this.areaStatuses = data.areaStatuses;
+        
+        if (data.areaConfig) {
+            this.areaConfig = data.areaConfig;
+            
+            // Wait longer for Alpine to finish DOM updates
+            this.$nextTick(() => {
+                setTimeout(() => {
+                    setTimeout(() => this.repositionElements(), 100);
+                }, 100);
+            });
+        }
+    } catch (error) {
+        console.error('Error refreshing statuses:', error);
     }
+},
 
-    let leftPx, topPx, transform;
+            repositionElements() {
+                const image = document.getElementById('live-map-image');
+                const container = document.getElementById('live-map-container');
+                
+                if (!image || !container || !image.naturalWidth) return;
+                
+                const imgRect = image.getBoundingClientRect();
+                const contRect = container.getBoundingClientRect();
+                const imgWidth = image.offsetWidth;
+                const imgHeight = image.offsetHeight;
+                const offsetLeft = imgRect.left - contRect.left;
+                const offsetTop = imgRect.top - contRect.top;
 
-    switch(labelPosition) {
-        case 'right':
-            leftPx = Math.round(mLeft + markerRadius + gap);
-            topPx = Math.round(mTop);
-            transform = 'translateY(-50%)';
-            break;
-        case 'left':
-            leftPx = Math.round(mLeft - markerRadius - gap);
-            topPx = Math.round(mTop);
-            transform = 'translate(-100%, -50%)';
-            break;
-        case 'top':
-            leftPx = Math.round(mLeft);
-            topPx = Math.round(mTop - markerRadius - gap);
-            transform = 'translate(-50%, -100%)';
-            break;
-        case 'bottom':
-            leftPx = Math.round(mLeft);
-            topPx = Math.round(mTop + markerRadius + gap);
-            transform = 'translateX(-50%)';
-            break;
-        default:
-            leftPx = Math.round(mLeft + markerRadius + gap);
-            topPx = Math.round(mTop);
-            transform = 'translateY(-50%)';
-    }
+                // Position markers
+                const markers = container.querySelectorAll('.map-marker');
+                markers.forEach((marker) => {
+                    const xPercent = parseFloat(marker.dataset.x) || 50;
+                    const yPercent = parseFloat(marker.dataset.y) || 50;
+                    const size = parseFloat(marker.dataset.size) || 28;
 
-    label.style.left = leftPx + 'px';
-    label.style.top = topPx + 'px';
-    label.style.transform = transform;
-    label.classList.add('visible');
-});
+                    const x = offsetLeft + (xPercent / 100) * imgWidth;
+                    const y = offsetTop + (yPercent / 100) * imgHeight;
 
+                    marker.style.left = Math.round(x) + 'px';
+                    marker.style.top = Math.round(y) + 'px';
+                    marker.style.width = Math.round(size) + 'px';
+                    marker.style.height = Math.round(size) + 'px';
+                    marker.style.transform = 'translate(-50%, -50%)';
+                    marker.classList.add('visible');
+                });
 
-                                setTimeout(() => {
-                                    container.querySelectorAll('.map-marker, .map-label').forEach(el => el.classList.add('visible'));
-                                }, 120);
-                            }
+                // Position labels
+                const labels = container.querySelectorAll('.map-label');
+                labels.forEach(label => {
+                    const areaKey = label.dataset.area;
+                    const marker = container.querySelector('.map-marker[data-area="' + areaKey + '"]');
+                    if (!marker) return;
 
-                            let posTimer = null;
-                            function schedulePosition() {
-                                clearTimeout(posTimer);
-                                posTimer = setTimeout(positionOverlays, 60);
-                            }
+                    const mRect = marker.getBoundingClientRect();
+                    const mLeft = mRect.left - contRect.left + mRect.width / 2;
+                    const mTop = mRect.top - contRect.top + mRect.height / 2;
+                    const markerRadius = mRect.width / 2;
+                    const gap = 10;
 
-                            if (image.complete) {
-                                schedulePosition();
-                            } else {
-                                image.addEventListener('load', schedulePosition);
-                            }
+                    const labelPosition = this.areaConfig[areaKey]?.label_position || 'right';
+                    let leftPx, topPx, transform;
 
-                            window.addEventListener('resize', () => {
-                                clearTimeout(posTimer);
-                                posTimer = setTimeout(positionOverlays, 120);
-                            });
+                    switch(labelPosition) {
+                        case 'right':
+                            leftPx = Math.round(mLeft + markerRadius + gap);
+                            topPx = Math.round(mTop);
+                            transform = 'translateY(-50%)';
+                            break;
+                        case 'left':
+                            leftPx = Math.round(mLeft - markerRadius - gap);
+                            topPx = Math.round(mTop);
+                            transform = 'translate(-100%, -50%)';
+                            break;
+                        case 'top':
+                            leftPx = Math.round(mLeft);
+                            topPx = Math.round(mTop - markerRadius - gap);
+                            transform = 'translate(-50%, -100%)';
+                            break;
+                        case 'bottom':
+                            leftPx = Math.round(mLeft);
+                            topPx = Math.round(mTop + markerRadius + gap);
+                            transform = 'translateX(-50%)';
+                            break;
+                        default:
+                            leftPx = Math.round(mLeft + markerRadius + gap);
+                            topPx = Math.round(mTop);
+                            transform = 'translateY(-50%)';
+                    }
 
-                            const mo = new MutationObserver((mutations) => {
-                                let should = false;
-                                for (const m of mutations) {
-                                    if (m.addedNodes.length || m.removedNodes.length || m.type === 'attributes') {
-                                        should = true;
-                                        break;
-                                    }
-                                }
-                                if (should) schedulePosition();
-                            });
-                            mo.observe(container, { childList: true, subtree: true, attributes: true });
+                    label.style.left = leftPx + 'px';
+                    label.style.top = topPx + 'px';
+                    label.style.transform = transform;
+                    label.classList.add('visible');
+                });
+            },
 
-                            let attempts = 0;
-                            const bootInterval = setInterval(() => {
-                                attempts++;
-                                positionOverlays();
-                                if (attempts > 10) clearInterval(bootInterval);
-                            }, 300);
+            getMarkerColor(areaKey) {
+                const status = this.areaStatuses[areaKey]?.state || 'unknown';
+                const colorMap = {
+                    'full': '#dc2626',
+                    'available': '#16a34a',
+                    'moto_only': '#f59e0b',
+                    'disabled': '#94a3b8'
+                };
+                return colorMap[status] || '#6b7280';
+            },
 
-                            window.addEventListener('beforeunload', () => {
-                                mo.disconnect();
-                                clearInterval(bootInterval);
-                                clearTimeout(posTimer);
-                            });
-                        },
+            setupPositioning() {
+                if (this.positioningSetup) return;
+                this.positioningSetup = true;
 
-                        destroy() {
-                            if (this.pollInterval) {
-                                clearInterval(this.pollInterval);
-                            }
-                        }
-                    };
+                const image = document.getElementById('live-map-image');
+                const container = document.getElementById('live-map-container');
+
+                if (!image || !container) {
+                    setTimeout(() => this.setupPositioning(), 100);
+                    return;
                 }
-            </script>
+
+                const self = this; // Capture 'this' context
+
+                if (image.complete) {
+                    setTimeout(() => self.repositionElements(), 60);
+                } else {
+                    image.addEventListener('load', () => self.repositionElements());
+                }
+
+                let resizeTimer = null;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => self.repositionElements(), 120);
+                });
+
+                const mo = new MutationObserver(() => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => self.repositionElements(), 60);
+                });
+                mo.observe(container, { childList: true, subtree: true, attributes: true });
+
+                let attempts = 0;
+                const bootInterval = setInterval(() => {
+                    attempts++;
+                    self.repositionElements();
+                    if (attempts > 10) clearInterval(bootInterval);
+                }, 300);
+
+                window.addEventListener('beforeunload', () => {
+                    mo.disconnect();
+                    clearInterval(bootInterval);
+                    clearTimeout(resizeTimer);
+                });
+            },
+
+            destroy() {
+                if (this.pollInterval) {
+                    clearInterval(this.pollInterval);
+                }
+            }
+        };
+    }
+</script>
     @endif
 </div>

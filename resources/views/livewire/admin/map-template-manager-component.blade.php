@@ -152,27 +152,28 @@
                             </div>
 
                             {{-- Area label --}}
-                            <div class="area-label-{{ $selectedMap->id }}" 
-                                data-area="{{ $areaKey }}"
-                                data-x="{{ $x }}"
-                                data-y="{{ $y }}"
-                                data-marker-size="{{ $markerSize }}"
-                                style="position:absolute;
-                                    left: {{ $x }}%;
-                                    top: calc({{ $y }}% + {{ $markerSize/2 + 5 }}px);
-                                    transform: translateX(-50%);
-                                    background: rgba(0,0,0,0.75);
-                                    color: white;
-                                    padding: 4px 8px;
-                                    border-radius: 4px;
-                                    font-size: 11px;
-                                    white-space: nowrap;
-                                    z-index: 19;">
-                                {{ $label }}
-                                @if($parkingArea)
-                                <br><small>({{ $parkingArea->name }})</small>
-                                @endif
-                            </div>
+{{-- Area label (no inline left/top; JS will position it) --}}
+<div class="area-label-{{ $selectedMap->id }}"
+     data-area="{{ $areaKey }}"
+     data-x="{{ $x }}"
+     data-y="{{ $y }}"
+     data-marker-size="{{ $markerSize }}"
+     data-position="{{ $config['label_position'] ?? 'right' }}"
+     style="position:absolute;
+            background: rgba(0,0,0,{{ $config['label_opacity'] ?? 0.78 }});
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 19;">
+    {{ $label }}
+    @if($parkingArea)
+        <br><small>({{ $parkingArea->name }})</small>
+    @endif
+</div>
+
+
                             @endif
                             @endforeach
                         </div>
@@ -276,7 +277,7 @@
                                     class="form-control form-control-sm">
                             </div>
                         </div>
-                        
+                        {{-- Label Position --}}
                         <div class="col-12">
     <div class="mb-3">
         <label class="form-label small fw-semibold">Label Position</label>
@@ -289,6 +290,25 @@
         </select>
     </div>
 </div>
+{{-- Background Opacity --}}
+<div class="col-12">
+    <div class="mb-3">
+        <label class="form-label small fw-semibold">
+            Label Background Opacity
+            <span class="text-muted">({{ number_format(($config['label_opacity'] ?? 0.78) * 100, 0) }}%)</span>
+        </label>
+
+        <input type="range"
+            wire:model.live="areaConfig.{{ $areaKey }}.label_opacity"
+            min="0" max="1" step="0.05"
+            class="form-range">
+        <div class="d-flex justify-content-between">
+            <small class="text-muted">Transparent</small>
+            <small class="text-muted">Opaque</small>
+        </div>
+    </div>
+</div>
+
 
                         {{-- Show Letter Inside Marker --}}
                         <div class="col-12">
@@ -327,97 +347,171 @@
 
 {{-- Positioning script --}}
 <script>
-    (function () {
-        if (!window.__parkingMapInit) window.__parkingMapInit = { inited: true };
-        let __mapTimer = null;
+(function () {
+    let __mapTimer = null;
+    const wrapperObservers = new Map();
 
-        function initAllImages() {
-            document.querySelectorAll('img[id^="map-image-"]').forEach(img => {
-                const idMatch = img.id.match(/^map-image-(.+)$/);
-                if (!idMatch) return;
-                const mapId = idMatch[1];
-                attachHandlers(img, mapId);
-            });
+    function initAllImages() {
+        const imgs = Array.from(document.querySelectorAll('img[id^="map-image-"]'));
+        imgs.forEach(img => {
+            const m = img.id.match(/^map-image-(.+)$/);
+            if (!m) return;
+            const mapId = m[1];
+            attachHandlers(img, mapId);
+            ensureWrapperObserver(mapId, img.parentElement);
+        });
+    }
+
+    function attachHandlers(img, mapId) {
+        if (img.dataset.mapInit === '1') {
+            positionMarkers(img, mapId);
+            return;
         }
+        img.dataset.mapInit = '1';
+        img.addEventListener('load', () => positionMarkers(img, mapId));
+        if (img.complete) setTimeout(() => positionMarkers(img, mapId), 30);
+    }
 
-        function attachHandlers(img, mapId) {
-            if (img.dataset.mapInit === '1') {
-                positionMarkers(img, mapId);
-                return;
-            }
-            img.dataset.mapInit = '1';
+    function ensureWrapperObserver(mapId, wrapper) {
+        if (!wrapper || wrapperObservers.has(mapId)) return;
+        const obs = new MutationObserver(() => {
+            clearTimeout(wrapper._parkingDeb);
+            wrapper._parkingDeb = setTimeout(() => {
+                const img = wrapper.querySelector('#map-image-' + mapId);
+                if (img) positionMarkers(img, mapId);
+            }, 40);
+        });
+        obs.observe(wrapper, { childList: true, subtree: true, attributes: true, attributeFilter: ['class', 'style'] });
+        wrapperObservers.set(mapId, obs);
+    }
 
-            img.addEventListener('load', () => positionMarkers(img, mapId));
-            if (img.complete) setTimeout(() => positionMarkers(img, mapId), 30);
-        }
+    function readPercent(value) {
+        if (value === null || value === undefined) return NaN;
+        const n = parseFloat(value);
+        return isFinite(n) ? n : NaN;
+    }
 
-        function positionMarkers(img, mapId) {
+    function tryLater(fn, img, mapId, attempt = 0) {
+        if (attempt > 8) return;
+        setTimeout(() => fn(img, mapId, attempt + 1), 40 + attempt * 30);
+    }
+
+    function positionMarkers(img, mapId, attempt = 0) {
+        try {
             if (!img || !document.body.contains(img)) return;
+            if (!img.naturalWidth || !img.naturalHeight) return tryLater(positionMarkers, img, mapId, attempt);
 
-            if (!img.naturalWidth || !img.naturalHeight) {
-                setTimeout(() => positionMarkers(img, mapId), 60);
-                return;
-            }
-
-            const container = img.parentElement;
-            if (!container) return;
+            const wrapper = img.parentElement;
+            if (!wrapper) return tryLater(positionMarkers, img, mapId, attempt);
 
             const imgRect = img.getBoundingClientRect();
-            const containerRect = container.getBoundingClientRect();
+            const wrapperRect = wrapper.getBoundingClientRect();
             const imgWidth = img.offsetWidth;
             const imgHeight = img.offsetHeight;
 
-            const offsetX = imgRect.left - containerRect.left;
-            const offsetY = imgRect.top - containerRect.top;
+            if (!imgWidth || !imgHeight || wrapperRect.width === 0)
+                return tryLater(positionMarkers, img, mapId, attempt);
 
-            // Emit dimensions to Livewire
-            if (window.Livewire && typeof Livewire.emit === 'function') {
+            const offsetX = imgRect.left - wrapperRect.left;
+            const offsetY = imgRect.top - wrapperRect.top;
+
+            if (window.Livewire?.emit) {
                 Livewire.emit('setPreviewDimensions', img.naturalWidth, img.naturalHeight);
             }
 
-            // Position area markers
+            // Position markers
             document.querySelectorAll('.area-marker-' + mapId).forEach(el => {
-                const xPercent = parseFloat(el.dataset.x) || 50;
-                const yPercent = parseFloat(el.dataset.y) || 50;
-
-                const x = offsetX + (xPercent / 100) * imgWidth;
-                const y = offsetY + (yPercent / 100) * imgHeight;
-
-                el.style.left = Math.round(x) + 'px';
-                el.style.top = Math.round(y) + 'px';
+                const xPercent = readPercent(el.getAttribute('data-x'));
+                const yPercent = readPercent(el.getAttribute('data-y'));
+                el.style.position = 'absolute';
+                el.style.left = (isNaN(xPercent) ? 50 : xPercent) + '%';
+                el.style.top = (isNaN(yPercent) ? 50 : yPercent) + '%';
+                el.style.transform = 'translate(-50%, -50%)';
             });
 
-            // Position area labels
-            document.querySelectorAll('.area-label-' + mapId).forEach(el => {
-                const xPercent = parseFloat(el.dataset.x) || 50;
-                const yPercent = parseFloat(el.dataset.y) || 50;
-                const markerSize = parseFloat(el.dataset.markerSize) || 40;
+            // Position labels
+            const labels = document.querySelectorAll('.area-label-' + mapId);
+            if (!labels.length) return;
 
-                const x = offsetX + (xPercent / 100) * imgWidth;
-                const y = offsetY + (yPercent / 100) * imgHeight + (markerSize/2 + 5);
+            let anyInvalid = false;
+            labels.forEach(el => {
+                const pos = (el.getAttribute('data-position') || 'right').toLowerCase();
+                const xPercent = readPercent(el.getAttribute('data-x'));
+                const yPercent = readPercent(el.getAttribute('data-y'));
+                const markerSize = parseFloat(el.getAttribute('data-marker-size')) || 24;
 
-                el.style.left = Math.round(x) + 'px';
-                el.style.top = Math.round(y) + 'px';
+                const centerX = offsetX + ((isFinite(xPercent) ? xPercent : 50) / 100) * imgWidth;
+                const centerY = offsetY + ((isFinite(yPercent) ? yPercent : 50) / 100) * imgHeight;
+
+                if (!isFinite(centerX) || !isFinite(centerY)) {
+                    anyInvalid = true;
+                    return;
+                }
+
+                const gap = 8;
+                const markerRadius = markerSize / 2;
+
+                let leftPx = centerX, topPx = centerY, transform;
+                switch (pos) {
+                    case 'left':
+                        leftPx = Math.round(centerX - markerRadius - gap);
+                        transform = 'translate(-100%, -50%)';
+                        break;
+                    case 'top':
+                        topPx = Math.round(centerY - markerRadius - gap);
+                        transform = 'translate(-50%, -100%)';
+                        break;
+                    case 'bottom':
+                        topPx = Math.round(centerY + markerRadius + gap);
+                        transform = 'translateX(-50%)';
+                        break;
+                    default: // right
+                        leftPx = Math.round(centerX + markerRadius + gap);
+                        transform = 'translateY(-50%)';
+                        break;
+                }
+
+                if (!isFinite(leftPx) || !isFinite(topPx)) {
+                    anyInvalid = true;
+                    return;
+                }
+
+                el.style.position = 'absolute';
+                el.style.left = leftPx + 'px';
+                el.style.top = topPx + 'px';
+                el.style.transform = transform;
             });
+
+            if (anyInvalid && attempt < 8) tryLater(positionMarkers, img, mapId, attempt);
+        } catch {
+            if (attempt < 4) tryLater(positionMarkers, img, mapId, attempt);
         }
+    }
 
-        // Initial run
-        document.addEventListener('DOMContentLoaded', () => setTimeout(initAllImages, 30));
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => initAllImages(), 30);
+    });
 
-        // Re-run after Livewire patches
-        document.addEventListener('livewire:update', () => {
-            clearTimeout(__mapTimer);
-            __mapTimer = setTimeout(initAllImages, 80);
-        });
-        document.addEventListener('livewire:navigated', () => {
-            clearTimeout(__mapTimer);
-            __mapTimer = setTimeout(initAllImages, 80);
-        });
+    document.addEventListener('livewire:update', () => {
+        clearTimeout(__mapTimer);
+        __mapTimer = setTimeout(initAllImages, 80);
+    });
 
-        // Window resize
-        window.addEventListener('resize', () => {
-            clearTimeout(__mapTimer);
-            __mapTimer = setTimeout(initAllImages, 140);
-        });
-    })();
+    document.addEventListener('livewire:navigated', () => {
+        clearTimeout(__mapTimer);
+        __mapTimer = setTimeout(initAllImages, 80);
+    });
+
+    window.addEventListener('resize', () => {
+        clearTimeout(__mapTimer);
+        __mapTimer = setTimeout(initAllImages, 140);
+    });
+})();
 </script>
+
+
+
+
+
+
+

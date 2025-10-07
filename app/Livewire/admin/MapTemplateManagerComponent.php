@@ -244,7 +244,8 @@ class MapTemplateManagerComponent extends Component
                 'enabled' => true,
                 'marker_size' => 24,
                 'show_label_letter' => true,
-                'label_position' => 'right'
+                'label_position' => 'right',
+                'label_opacity' => 0.78
             ]
         ];
     }
