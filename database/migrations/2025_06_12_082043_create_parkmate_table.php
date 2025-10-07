@@ -8,15 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Admins Table
-        Schema::create('admins', function (Blueprint $table) {
-            $table->id('admin_id');
-            $table->string('username', 30);
-            $table->string('firstname', 50);
-            $table->string('middlename', 50);
-            $table->string('lastname', 50);
-            $table->string('password', 20);
-        });
+
 
         // Login Sessions Table
         Schema::create('login_sessions', function (Blueprint $table) {
@@ -39,13 +31,14 @@ return new class extends Migration
             $table->id();
             $table->string('student_id', 10)->nullable();
             $table->string('employee_id', 10)->nullable();
-            $table->string('rfid_tag', 10);
-            $table->string('firstname', 50);
-            $table->string('middlename', 50);
-            $table->string('lastname', 50);
-            $table->string('program', 50);
-            $table->string('department', 50);
-            $table->string('license_number', 13);
+            $table->string('email')->nullable();
+            $table->string('password')->nullable();
+            $table->string('firstname', 50)->nullable();
+            $table->string('middlename', 50)->nullable();
+            $table->string('lastname', 50)->nullable();
+            $table->string('program', 50)->nullable();
+            $table->string('department', 50)->nullable();
+            $table->string('license_number', 11)->nullable();
         });
     }
 

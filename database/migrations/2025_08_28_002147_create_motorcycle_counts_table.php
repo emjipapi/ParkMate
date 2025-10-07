@@ -9,7 +9,7 @@ return new class extends Migration {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('area_id');
             $table->unsignedInteger('available_count')->default(0);
-            $table->unsignedInteger('total_available')->default(0);
+
             $table->timestamps();
 
             $table->foreign('area_id')->references('id')->on('parking_areas')->onDelete('cascade');
