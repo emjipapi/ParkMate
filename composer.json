@@ -12,6 +12,7 @@
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
         "barryvdh/laravel-snappy": "^1.0",
+        "choowx/rasterize-svg": "^0.1.2",
         "consoletvs/charts": "^6.8",
         "intervention/image-laravel": "^1.5",
         "laravel/framework": "^12.0",
