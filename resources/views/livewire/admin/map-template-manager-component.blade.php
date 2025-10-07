@@ -193,7 +193,7 @@
                         <h4 class="font-medium text-gray-700">Parking Areas Configuration</h4>
                         <div class="flex gap-2">
                             <button wire:click="saveAreaPositions" class="btn-add-slot btn btn-primary">
-                                Save Positions
+                                Save Changes
                             </button>
                         </div>
                     </div>
