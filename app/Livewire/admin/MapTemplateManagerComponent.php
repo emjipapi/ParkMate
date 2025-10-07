@@ -186,14 +186,16 @@ class MapTemplateManagerComponent extends Component
                 'status' => 'active',
                 'area_config' => $this->getDefaultAreaConfig()
             ]);
+            
 
             // Select the newly created map
-            $this->selectedMapId = $map->id;
-            $this->loadAreaConfig();
-            $this->showPreview = true;
+            // $this->selectedMapId = $map->id;
+            // $this->loadAreaConfig();
+            // $this->showPreview = true;
 
             $this->reset(['mapFile', 'mapName']);
             session()->flash('success', 'Parking map uploaded successfully!');
+            
         }
     }
 
@@ -215,6 +217,7 @@ class MapTemplateManagerComponent extends Component
     public function deleteMap($mapId)
     {
         $map = ParkingMap::find($mapId);
+        
         if ($map) {
             Storage::disk('public')->delete($map->file_path);
             $map->delete();
