@@ -276,6 +276,19 @@
                                     class="form-control form-control-sm">
                             </div>
                         </div>
+                        
+                        <div class="col-12">
+    <div class="mb-3">
+        <label class="form-label small fw-semibold">Label Position</label>
+        <select wire:model.live="areaConfig.{{ $areaKey }}.label_position" 
+                class="form-select form-select-sm">
+            <option value="right">Right</option>
+            <option value="left">Left</option>
+            <option value="top">Top</option>
+            <option value="bottom">Bottom</option>
+        </select>
+    </div>
+</div>
 
                         {{-- Show Letter Inside Marker --}}
                         <div class="col-12">

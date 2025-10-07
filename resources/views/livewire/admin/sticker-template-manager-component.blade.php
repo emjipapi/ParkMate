@@ -240,7 +240,6 @@
                                                wire:model.live="elementConfig.{{ $element }}.color">
                                     </div>
                                 </div>
-
                                 {{-- Quick Position Buttons --}}
                                 <div class="mt-3">
                                     <label class="form-label small d-block mb-1 fw-semibold">Quick Positions</label>

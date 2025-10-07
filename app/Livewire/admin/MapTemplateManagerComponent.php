@@ -243,7 +243,8 @@ class MapTemplateManagerComponent extends Component
                 'label' => 'Parking Area 1',
                 'enabled' => true,
                 'marker_size' => 24,
-                'show_label_letter' => true
+                'show_label_letter' => true,
+                'label_position' => 'right'
             ]
         ];
     }

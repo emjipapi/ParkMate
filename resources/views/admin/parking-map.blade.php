@@ -47,7 +47,6 @@
     <main class="live-map-viewport" role="main">
         <div class="livewire-component-wrapper" id="livewire-map-root">
             {{-- your Livewire component — exact tag you asked for --}}
-            {{-- <livewire:admin.parking-map-live-view-component /> --}}
            
                 <livewire:admin.parking-map-live-view-component :map-id="$map->id" />
            
