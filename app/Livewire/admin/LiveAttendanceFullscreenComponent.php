@@ -1,12 +1,12 @@
 <?php
-namespace App\Livewire;
+namespace App\Livewire\Admin;
 
 use App\Models\ActivityLog;
 use Livewire\Component;
 use Illuminate\Support\Facades\Cache;
 use Carbon\Carbon;
 
-class LiveAttendanceComponentCopy extends Component
+class LiveAttendanceFullscreenComponent extends Component
 {
     public $scans = [];
     private $cooldownSeconds = 5;
@@ -89,6 +89,6 @@ class LiveAttendanceComponentCopy extends Component
 
     public function render()
     {
-        return view('livewire.live-attendance-component-copy');
+        return view('livewire.admin.live-attendance-fullscreen-component');
     }
 }

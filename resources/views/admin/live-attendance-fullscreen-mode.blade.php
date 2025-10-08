@@ -12,6 +12,7 @@
     <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
     <style>
         :root {
             --bg1: #56ca8b;
@@ -101,6 +102,36 @@
             padding: 0 20px;
             font-weight: 500;
         }
+                .live-btn-bar {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border-radius: 4px;
+            overflow: hidden;
+            height: 30px;
+        }
+
+        .live-btn-bar input[type="text"] {
+            border: none;
+            padding: 4px 10px;
+            font-size: 0.9rem;
+            outline: none;
+            width: 180px;
+        }
+
+        .live-btn {
+            background-color: var(--bg3);
+            color: white;
+            border: none;
+            padding: 0 12px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .live-btn:hover {
+            background-color: var(--bg1);
+        }
     </style>
 </head>
 
@@ -111,20 +142,34 @@
     <div class="top-bar">
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
+                <div class="live-btn-bar">
+            <a href="{{ url('/live-attendance') }}" style="text-decoration: none;">
+                <button class="live-btn">
+                    Live Attendance Mode
+                </button>
+            </a>
+        </div>
     </div>
     <!-- Main Content -->
     <div class="content">
         <!-- Header stays at the top -->
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Attendance</h3>
-                <h6 class="mb-0">Live Attendance Mode</h6>
+                <h3 class="mb-0 me-3">Live Attendance</h3>
+            </div>
+            <div>
+                <a href="{{ url('/admin-dashboard/live-attendance-mode') }}" style="text-decoration: none;">
+                    <button type="button" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-fullscreen-exit"></i>
+                        Exit Full Screen
+                    </button>
+                </a>
             </div>
         </div>
 
         <!-- Centering only this section -->
         <div class="flex-grow-1 d-flex justify-content-center align-items-center">
-            <livewire:live-attendance-component-copy />
+            <livewire:admin.live-attendance-fullscreen-component />
         </div>
     </div>
 

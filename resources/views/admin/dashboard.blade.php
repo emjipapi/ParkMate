@@ -449,7 +449,7 @@
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
         <div class="live-btn-bar">
-            <a href="{{ url('/admin-dashboard/live-attendance-mode') }}" style="text-decoration: none;">
+            <a href="{{ url('/live-attendance') }}" style="text-decoration: none;">
                 <button class="live-btn">
                     Live Attendance Mode
                 </button>

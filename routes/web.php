@@ -75,7 +75,7 @@ Route::post('/admin/logout', [AdminAuthController::class, 'logout'])->name('admi
 //         return 'Error: '.$e->getMessage();
 //     }
 // });
-Route::view('/live-attendance', 'live-attendance-mode');
+
 // Profile pictures
 Route::get('/profile-picture/{filename}', [ProfilePictureController::class, 'show'])
     ->name('profile.picture');
@@ -126,9 +126,9 @@ Route::middleware(['admin'])->group(function () {
     Route::view('/parking-slots', 'admin.parking-slots')->name('parking.slots');
     Route::view('/map-manager', 'admin.map-template-editor')->name('parking.slots');
     Route::get('/map/{map}', function (ParkingMap $map) {
-    return view('admin.parking-map', ['map' => $map]);
-})->name('parking-map.live');;
-
+        return view('admin.parking-map', ['map' => $map]);
+    })->name('parking-map.live');;
+    Route::view('/live-attendance', 'admin.live-attendance-fullscreen-mode');
     // routes/web.php
     Route::get('/dashboard/analytics-dashboard', function () {
         $chart = new AnalyticsChart;

@@ -222,7 +222,7 @@
 
 
         <div class="live-btn-bar">
-            <a style="text-decoration: none;">
+            <a href="{{ url('/live-attendance') }}" style="text-decoration: none;">
                 <button class="live-btn">
                     Live Attendance Mode
                 </button>
