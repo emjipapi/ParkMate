@@ -226,7 +226,8 @@
             background: #6c63ff;
             color: #fff;
         }
-                .card-6 {
+
+        .card-6 {
             grid-column: 3;
             grid-row: 2;
             /* same row as card-3 */
@@ -234,8 +235,8 @@
             /* stick to top of this cell */
             z-index: 1;
             /* sit above card-3 */
-           
-                        border: 0px;
+
+            border: 0px;
             border-radius: 0px;
             background-color: #03ca6aff;
             color: white;
@@ -385,7 +386,8 @@
                 font-size: 0.8rem;
                 /* smaller breadcrumb text */
             }
-                        .cards-container .card-6 {
+
+            .cards-container .card-6 {
                 order: -1;
                 /* first on mobile */
             }
@@ -448,9 +450,9 @@
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
         <div id="clock" style="font-size: 1rem;" class="d-none d-md-block"></div>
         <span style="flex: 1;"></span>
-                <div class="live-btn-bar me-1">
-            <a href="{{ url('/live-attendance') }}" style="text-decoration: none;">
-                <button class="live-btn">
+        <div class="live-btn-bar me-1">
+            <a style="text-decoration: none;">
+                 <button type="button" class="live-btn" data-bs-toggle="modal" data-bs-target="#openMapModal">
                     Open Map
                 </button>
             </a>
@@ -475,6 +477,33 @@
         </div>
 
         <livewire:admin.cards-component />
+
+        {{-- Open Map Modal --}}
+<div wire:ignore.self class="modal fade" id="openMapModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Open Parking Map</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        {{-- Livewire component that renders thumbnails --}}
+        <livewire:admin.parking-maps-modal />
+      </div>
+
+<div class="modal-footer d-flex justify-content-between">
+    <a href="{{ url('/parking-slots/map-manager') }}" class="btn btn-outline-primary">
+        Manage Maps
+    </a>
+    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+</div>
+
+    </div>
+  </div>
+</div>
+
+
 
     </div>
     <!-- Bottom Bar -->
@@ -501,12 +530,16 @@
     const sidebar = document.querySelector('.sidebar');
     sidebar.classList.toggle('open');
 }
-function closeSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    sidebar.classList.toggle('open');
-}
     </script>
-
+{{-- close modal when the Livewire component dispatches 'close-open-map-modal' --}}
+<script>
+  window.addEventListener('close-open-map-modal', () => {
+    const modalEl = document.getElementById('openMapModal');
+    if (!modalEl) return;
+    const instance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+    instance.hide();
+  });
+</script>
 </body>
 
 </html>
