@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\activity-log-component.blade.php --}}
 <div class="container mt-4">
 
     {{-- Tabs with horizontal scroll on mobile --}}
@@ -22,11 +23,11 @@
     <div>
         {{-- Pending Reports --}}
         @if ($activeTab === 'system')
-        <livewire:admin.activity-log-system-component />
+            <livewire:admin.activity-log-system-component />
 
-        {{-- Approved Reports --}}
+            {{-- Approved Reports --}}
         @elseif ($activeTab === 'entry/exit')
-        <livewire:admin.activity-log-entry-exit-component />
+            <livewire:admin.activity-log-entry-exit-component />
 
         @endif
     </div>

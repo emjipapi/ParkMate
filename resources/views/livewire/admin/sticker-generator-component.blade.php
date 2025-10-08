@@ -1,5 +1,4 @@
 {{-- resources/views/livewire/admin/sticker-generator-component.blade.php --}}
-
 <div class="container mx-auto p-6">
     {{-- Tabs with horizontal scroll on mobile --}}
     <div class="tabs-container mb-4">
@@ -23,11 +22,11 @@
     <div>
         {{-- Generate Stickers Tab --}}
         @if ($activeTab === 'generate')
-        <livewire:admin.sticker-generate-component />
+            <livewire:admin.sticker-generate-component />
 
-        {{-- Manage Templates Tab --}}
+            {{-- Manage Templates Tab --}}
         @elseif ($activeTab === 'manage')
-        <livewire:admin.sticker-template-manager-component />
+            <livewire:admin.sticker-template-manager-component />
         @endif
     </div>
 </div>

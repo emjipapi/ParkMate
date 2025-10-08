@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\edit-area-modal.blade.php --}}
 <div wire:ignore.self class="modal fade" id="editAreaModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -8,9 +9,9 @@
             </div>
 
             <div class="modal-body">
-                    <div class="mb-2">
-        <strong>Parking Area ID:</strong> {{ $areaId }}
-    </div>
+                <div class="mb-2">
+                    <strong>Parking Area ID:</strong> {{ $areaId }}
+                </div>
                 <div class="mb-3">
                     <label class="form-label">Area Name</label>
                     <!-- defer syncing until Save (reduces network calls) -->
@@ -106,14 +107,10 @@
             </div>
 
             <div class="modal-footer">
-<button
-    type="button"
-    class="btn btn-danger me-auto"
-    wire:click="deleteArea"
-    wire:confirm="Are you sure you want to DELETE this parking area? This action cannot be undone."
->
-    Delete
-</button>
+                <button type="button" class="btn btn-danger me-auto" wire:click="deleteArea"
+                    wire:confirm="Are you sure you want to DELETE this parking area? This action cannot be undone.">
+                    Delete
+                </button>
 
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" wire:click="updateArea">Save Changes</button>

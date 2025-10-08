@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\admins-table.blade.php --}}
 <div x-data="{
         check2: false,
         selectedIds: [],

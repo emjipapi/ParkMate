@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\activity-log-entry-exit-component.blade.php --}}
 <div>
     <!-- Generate Report Button -->
     <button type="button" class="btn-add-slot btn btn-primary mb-3" data-bs-toggle="modal"
@@ -44,7 +45,7 @@
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                             @php
                             // disable when using custom range but dates are missing
-                            $disabled = ($reportType === 'range' && (empty($reportStartDate) || empty($reportEndDate)));
+                                $disabled = ($reportType === 'range' && (empty($reportStartDate) || empty($reportEndDate)));
                             @endphp
 
                             <button type="submit" class="btn btn-success" @if($disabled) disabled
@@ -72,7 +73,7 @@
             <span>Show</span>
             <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
                 @foreach($perPageOptions as $option)
-                <option value="{{ $option }}">{{ $option }}</option>
+                    <option value="{{ $option }}">{{ $option }}</option>
                 @endforeach
             </select>
             <span>entries</span>

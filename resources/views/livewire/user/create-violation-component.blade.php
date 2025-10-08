@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\user\create-violation-component.blade.php --}}
 <div class="flex-grow-1 d-flex justify-content-center align-items-center square-box">
 
     <form wire:submit.prevent="submitReport" enctype="multipart/form-data" class="p-3 p-md-4 mx-auto custom-table">
@@ -25,8 +26,8 @@
                 </select>
 
                 @if($description === 'Other')
-                <input type="text" wire:model="otherDescription" placeholder="Enter details"
-                    class="form-control mt-1 mt-md-2" required />
+                    <input type="text" wire:model="otherDescription" placeholder="Enter details"
+                        class="form-control mt-1 mt-md-2" required />
                 @endif
             </div>
             @error('description') <span class="text-danger">{{ $message }}</span> @enderror
@@ -51,7 +52,7 @@
             <select wire:model="area_id" class="form-control mt-1 mt-md-2" required>
                 <option value="">Select Area</option>
                 @foreach($areas as $area)
-                <option value="{{ $area->id }}">{{ $area->name }}</option>
+                    <option value="{{ $area->id }}">{{ $area->name }}</option>
                 @endforeach
             </select>
             @error('area_id') <span class="text-danger">{{ $message }}</span> @enderror
@@ -72,15 +73,15 @@
         </div>
         {{-- Success & Error Messages --}}
         @if (session()->has('success'))
-        <div class="alert alert-success mt-3">{{ session('success') }}</div>
+            <div class="alert alert-success mt-3">{{ session('success') }}</div>
         @endif
 
         @if ($errors->any())
-        <div class="alert alert-danger mt-3">
-            @foreach ($errors->all() as $error)
-            <div>{{ $error }}</div>
-            @endforeach
-        </div>
+            <div class="alert alert-danger mt-3">
+                @foreach ($errors->all() as $error)
+                    <div>{{ $error }}</div>
+                @endforeach
+            </div>
         @endif
     </form>
 </div>

@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\admin-form.blade.php --}}
 <div class="flex-grow-1 d-flex justify-content-center align-items-center square-box">
     <form wire:submit.prevent="save">
         @csrf

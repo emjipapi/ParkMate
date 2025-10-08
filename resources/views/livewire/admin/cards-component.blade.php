@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\cards-component.blade.php --}}
 <div wire:poll.5s class="cards-container align-items-end">
 
     {{-- Car Slots --}}
@@ -25,10 +26,9 @@
     <div onclick="window.location='{{ url('/activity-log?activeTab=entry/exit') }}'" class="card card-3"
         style="cursor:pointer;">
         <div class="card-body">
-            <h2 class="card-title" 
-    style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-    Campus Activity
-</h2>
+            <h2 class="card-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                Campus Activity
+            </h2>
 
             <p class="mb-1">
                 <strong>{{ $currentlyInside }}</strong> Currently Inside Campus
@@ -42,24 +42,23 @@
         </div>
         <div class="card-footer">More Info ➜</div>
     </div>
-<div class="card card-6 text-center d-flex flex-column justify-content-center align-items-center" 
-     style="cursor:pointer;" 
-     onclick="window.location='{{ url('/create-report') }}'">
-    <div class="card-body d-flex flex-column justify-content-center align-items-center">
-        <i class="bi bi-plus-circle-fill" style="font-size: 5rem; color: white;"></i>
-        <p class="card-text mt-2 mb-1 fw-bold">Make Report</p>
+    <div class="card card-6 text-center d-flex flex-column justify-content-center align-items-center"
+        style="cursor:pointer;" onclick="window.location='{{ url('/create-report') }}'">
+        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+            <i class="bi bi-plus-circle-fill" style="font-size: 5rem; color: white;"></i>
+            <p class="card-text mt-2 mb-1 fw-bold">Make Report</p>
+        </div>
     </div>
-</div>
 
-{{-- Analytics Dashboard --}}
-<div onclick="window.location='{{ url('/dashboard/analytics-dashboard') }}'" class="card card-5 d-flex flex-column"
-    style="cursor:pointer;">
-    <div class="card-body d-flex flex-column justify-content-center align-items-center" style="padding: 0.5rem;">
-        <i class="bi bi-bar-chart" style="font-size: 5rem; color: white; line-height: 1; display: block;"></i>
-        <h1 style="margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold;">Analytics Dashboard</h1>
+    {{-- Analytics Dashboard --}}
+    <div onclick="window.location='{{ url('/dashboard/analytics-dashboard') }}'" class="card card-5 d-flex flex-column"
+        style="cursor:pointer;">
+        <div class="card-body d-flex flex-column justify-content-center align-items-center" style="padding: 0.5rem;">
+            <i class="bi bi-bar-chart" style="font-size: 5rem; color: white; line-height: 1; display: block;"></i>
+            <h1 style="margin: 0.5rem 0 0 0; font-size: 1.5rem; font-weight: bold;">Analytics Dashboard</h1>
+        </div>
+        <div class="card-footer">More Info ➜</div>
     </div>
-    <div class="card-footer">More Info ➜</div>
-</div>
 
     {{-- Activity Logs --}}
     <div class="card card-4">

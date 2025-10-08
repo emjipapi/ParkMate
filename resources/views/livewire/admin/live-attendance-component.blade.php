@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\live-attendance-component.blade.php --}}
 <div wire:poll.500ms="pollEpc"
     class="d-flex flex-column justify-content-center align-items-center w-100 h-100 gap-4 p-4 overflow-auto">
 

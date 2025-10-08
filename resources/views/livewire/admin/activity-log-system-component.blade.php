@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\activity-log-system-component.blade.php --}}
 <div>
     <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-3">
         {{-- 🔍 Search Box --}}

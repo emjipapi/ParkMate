@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\user\cards-component.blade.php --}}
 <div wire:poll.5s class="cards-container align-items-end">
 
     {{-- Car Slots --}}
@@ -30,14 +31,13 @@
         <div class="card-footer">More Info ➜</div>
     </div>
 
-<div class="card card-5 text-center d-flex flex-column justify-content-center align-items-center" 
-     style="cursor:pointer;" 
-     onclick="window.location='{{ url('/create-report') }}'">
-    <div class="card-body d-flex flex-column justify-content-center align-items-center">
-        <i class="bi bi-plus-circle-fill" style="font-size: 5rem; color: white;"></i>
-        <p class="card-text mt-2 mb-1 fw-bold">Make Report</p>
+    <div class="card card-5 text-center d-flex flex-column justify-content-center align-items-center"
+        style="cursor:pointer;" onclick="window.location='{{ url('/create-report') }}'">
+        <div class="card-body d-flex flex-column justify-content-center align-items-center">
+            <i class="bi bi-plus-circle-fill" style="font-size: 5rem; color: white;"></i>
+            <p class="card-text mt-2 mb-1 fw-bold">Make Report</p>
+        </div>
     </div>
-</div>
 
     {{-- Activity Logs --}}
     <div class="card card-4">
@@ -45,11 +45,11 @@
             <div class="card-body">
                 <h5>Recent Activity</h5>
                 @forelse ($recentActivities as $activity)
-                <div class="recent-activity-item mb-2">
-                    {{ $activity->details }}
-                </div>
+                    <div class="recent-activity-item mb-2">
+                        {{ $activity->details }}
+                    </div>
                 @empty
-                <p>No recent activity.</p>
+                    <p>No recent activity.</p>
                 @endforelse
             </div>
         </a>

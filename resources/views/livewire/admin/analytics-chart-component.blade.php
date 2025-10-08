@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\analytics-chart-component.blade.php --}}
 <div class="w-full" style="max-width: 1200px; margin: auto;">
     <div class="w-full" style="max-width: 1200px; margin: auto;">
         <!-- Filters Row -->

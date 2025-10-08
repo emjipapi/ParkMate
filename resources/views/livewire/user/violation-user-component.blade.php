@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\user\violation-user-component.blade.php --}}
 <div class="container mt-4">
 
     {{-- Tabs --}}

@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\create-area-modal.blade.php --}}
 <div wire:ignore.self class="modal fade" id="createAreaModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">

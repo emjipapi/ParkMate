@@ -1,295 +1,296 @@
+{{-- resources\views\livewire\admin\parking-map-live-view-component.blade.php --}}
 @php
-// Initial data computation - matching Livewire component logic
-$mapData = $map;
-$areaConfig = (array) ($map->area_config ?? []);
+    // Initial data computation - matching Livewire component logic
+    $mapData = $map;
+    $areaConfig = (array) ($map->area_config ?? []);
 
-// Collect all referenced parking_area_ids so we can query counts in bulk (avoids N+1)
-$parkingAreaIds = array_values(array_filter(array_map(function ($c) {
-return $c['parking_area_id'] ?? null;
-}, $areaConfig)));
+    // Collect all referenced parking_area_ids so we can query counts in bulk (avoids N+1)
+    $parkingAreaIds = array_values(array_filter(array_map(function ($c) {
+        return $c['parking_area_id'] ?? null;
+    }, $areaConfig)));
 
-// Bulk car slot stats: total and occupied (SUM(occupied) returns number of occupied slots)
-$carStats = \App\Models\CarSlot::selectRaw('area_id, COUNT(*) as total, SUM(occupied) as occupied')
-->whereIn('area_id', $parkingAreaIds ?: [0])
-->groupBy('area_id')
-->get()
-->keyBy('area_id');
+    // Bulk car slot stats: total and occupied (SUM(occupied) returns number of occupied slots)
+    $carStats = \App\Models\CarSlot::selectRaw('area_id, COUNT(*) as total, SUM(occupied) as occupied')
+        ->whereIn('area_id', $parkingAreaIds ?: [0])
+        ->groupBy('area_id')
+        ->get()
+        ->keyBy('area_id');
 
-// Bulk motorcycle counts
-$motoRows = \App\Models\MotorcycleCount::whereIn('area_id', $parkingAreaIds ?: [0])
-->get()
-->keyBy('area_id');
+    // Bulk motorcycle counts
+    $motoRows = \App\Models\MotorcycleCount::whereIn('area_id', $parkingAreaIds ?: [0])
+        ->get()
+        ->keyBy('area_id');
 
-// Compute statuses using the pre-fetched data
-$areaStatuses = [];
-foreach ($areaConfig as $areaKey => $cfg) {
-$enabled = !empty($cfg['enabled']);
-$parkingAreaId = $cfg['parking_area_id'] ?? null;
+    // Compute statuses using the pre-fetched data
+    $areaStatuses = [];
+    foreach ($areaConfig as $areaKey => $cfg) {
+        $enabled = !empty($cfg['enabled']);
+        $parkingAreaId = $cfg['parking_area_id'] ?? null;
 
-$totalCarSlots = 0;
-$occupiedCarSlots = 0;
-$availableMotorcycleCount = null;
-$motorcycleTotal = null;
+        $totalCarSlots = 0;
+        $occupiedCarSlots = 0;
+        $availableMotorcycleCount = null;
+        $motorcycleTotal = null;
 
-if ($parkingAreaId) {
-$cs = $carStats[$parkingAreaId] ?? null;
-if ($cs) {
-$totalCarSlots = (int) $cs->total;
-// SUM(occupied) may return null if no rows; cast to int
-$occupiedCarSlots = (int) $cs->occupied;
-}
+        if ($parkingAreaId) {
+            $cs = $carStats[$parkingAreaId] ?? null;
+            if ($cs) {
+                $totalCarSlots = (int) $cs->total;
+                // SUM(occupied) may return null if no rows; cast to int
+                $occupiedCarSlots = (int) $cs->occupied;
+            }
 
-$mc = $motoRows[$parkingAreaId] ?? null;
-if ($mc) {
-$availableMotorcycleCount = $mc->available_count !== null ? (int) $mc->available_count : null;
-$motorcycleTotal = $mc->total_available !== null ? (int) $mc->total_available : null;
-}
-}
+            $mc = $motoRows[$parkingAreaId] ?? null;
+            if ($mc) {
+                $availableMotorcycleCount = $mc->available_count !== null ? (int) $mc->available_count : null;
+                $motorcycleTotal = $mc->total_available !== null ? (int) $mc->total_available : null;
+            }
+        }
 
-$availableCarSlots = max(0, $totalCarSlots - $occupiedCarSlots);
+        $availableCarSlots = max(0, $totalCarSlots - $occupiedCarSlots);
 
-// Determine state - exact same logic as Livewire
-$state = 'unknown';
-if (!$enabled) {
-$state = 'disabled';
-} elseif ($totalCarSlots > 0 && $availableCarSlots > 0) {
-$state = 'available';
-} elseif ($totalCarSlots > 0 && $availableCarSlots === 0) {
-if ($availableMotorcycleCount === null) {
-$state = 'full';
-} elseif ((int) $availableMotorcycleCount > 0) {
-$state = 'moto_only';
-} else {
-$state = 'full';
-}
-} else {
-if ($availableMotorcycleCount !== null && (int) $availableMotorcycleCount > 0) {
-$state = 'available';
-} elseif ($availableMotorcycleCount === 0) {
-$state = 'full';
-} else {
-$state = 'unknown';
-}
-}
+        // Determine state - exact same logic as Livewire
+        $state = 'unknown';
+        if (!$enabled) {
+            $state = 'disabled';
+        } elseif ($totalCarSlots > 0 && $availableCarSlots > 0) {
+            $state = 'available';
+        } elseif ($totalCarSlots > 0 && $availableCarSlots === 0) {
+            if ($availableMotorcycleCount === null) {
+                $state = 'full';
+            } elseif ((int) $availableMotorcycleCount > 0) {
+                $state = 'moto_only';
+            } else {
+                $state = 'full';
+            }
+        } else {
+            if ($availableMotorcycleCount !== null && (int) $availableMotorcycleCount > 0) {
+                $state = 'available';
+            } elseif ($availableMotorcycleCount === 0) {
+                $state = 'full';
+            } else {
+                $state = 'unknown';
+            }
+        }
 
 
-$areaStatuses[$areaKey] = [
-'state' => $state,
-'total' => (int) $totalCarSlots,
-'occupied' => (int) $occupiedCarSlots,
-'available_cars' => (int) $availableCarSlots,
-'motorcycle_available' => $availableMotorcycleCount !== null ? (int) $availableMotorcycleCount : null,
-'motorcycle_total' => $motorcycleTotal !== null ? (int) $motorcycleTotal : null,
-];
-}
+        $areaStatuses[$areaKey] = [
+            'state' => $state,
+            'total' => (int) $totalCarSlots,
+            'occupied' => (int) $occupiedCarSlots,
+            'available_cars' => (int) $availableCarSlots,
+            'motorcycle_available' => $availableMotorcycleCount !== null ? (int) $availableMotorcycleCount : null,
+            'motorcycle_total' => $motorcycleTotal !== null ? (int) $motorcycleTotal : null,
+        ];
+    }
 @endphp
 <div x-data="parkingMap(@js($mapData), @js($areaConfig), @js($areaStatuses))" x-init="init()">
     @if(!$map)
-    <div style="height:100vh; display:flex; align-items:center; justify-content:center;">
-        <div class="text-center text-muted">
-            <h3>No map found</h3>
-            <p>Select or upload a parking map first in the manager.</p>
+        <div style="height:100vh; display:flex; align-items:center; justify-content:center;">
+            <div class="text-center text-muted">
+                <h3>No map found</h3>
+                <p>Select or upload a parking map first in the manager.</p>
+            </div>
         </div>
-    </div>
     @else
 
-    <style>
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            background: #fefefe;
-        }
+        <style>
+            html,
+            body {
+                height: 100%;
+                margin: 0;
+                background: #fefefe;
+            }
 
-        /* viewport covering whole page; centers the image */
-        .live-map-viewport {
-            position: relative;
-            height: 100vh;
-            width: 100vw;
-            overflow: visible;
-            /* Changed from hidden to allow labels to overflow */
-            background: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            box-sizing: border-box;
-        }
+            /* viewport covering whole page; centers the image */
+            .live-map-viewport {
+                position: relative;
+                height: 100vh;
+                width: 100vw;
+                overflow: visible;
+                /* Changed from hidden to allow labels to overflow */
+                background: #ffffff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0;
+                box-sizing: border-box;
+            }
 
-        /* container is the positioning reference for overlays */
-        .live-map-container {
-            position: relative;
-            display: inline-block;
-            /* CRITICAL: inline-block for accurate positioning */
-        }
+            /* container is the positioning reference for overlays */
+            .live-map-container {
+                position: relative;
+                display: inline-block;
+                /* CRITICAL: inline-block for accurate positioning */
+            }
 
-        /* image: as large as possible while preserving aspect ratio */
-        .live-map-container img {
-            display: block;
-            width: auto;
-            height: 95vh;
-            /* larger than template manager's 600px */
-            max-width: 95vw;
-            user-select: none;
-            -webkit-user-drag: none;
-        }
+            /* image: as large as possible while preserving aspect ratio */
+            .live-map-container img {
+                display: block;
+                width: auto;
+                height: 95vh;
+                /* larger than template manager's 600px */
+                max-width: 95vw;
+                user-select: none;
+                -webkit-user-drag: none;
+            }
 
-        /* hide until positioned to avoid wrong initial placement */
-        .map-marker,
-        .map-label {
-            visibility: hidden;
-        }
+            /* hide until positioned to avoid wrong initial placement */
+            .map-marker,
+            .map-label {
+                visibility: hidden;
+            }
 
-        .map-marker.visible,
-        .map-label.visible {
-            visibility: visible;
-        }
+            .map-marker.visible,
+            .map-label.visible {
+                visibility: visible;
+            }
 
-        .map-marker {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            border: 2px solid #fff;
-            border-radius: 50%;
-            z-index: 20;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
-            color: #fff;
-            font-weight: 600;
-            user-select: none;
-            pointer-events: none;
-            /* change if you want clicks */
-        }
+            .map-marker {
+                position: absolute;
+                transform: translate(-50%, -50%);
+                border: 2px solid #fff;
+                border-radius: 50%;
+                z-index: 20;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+                color: #fff;
+                font-weight: 600;
+                user-select: none;
+                pointer-events: none;
+                /* change if you want clicks */
+            }
 
-        /* map-label: side position and compact sizing */
-        .map-label {
-            position: absolute;
-            z-index: 19;
-            /* background: rgba(0, 0, 0, 0.78); */
-            color: #fff;
-            padding: 6px 8px;
-            border-radius: 8px;
-            font-size: 13px;
-            pointer-events: none;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            box-sizing: border-box;
-            max-width: 280px;
-            /* don't translate here; JS will set transform for vertical centering */
-        }
+            /* map-label: side position and compact sizing */
+            .map-label {
+                position: absolute;
+                z-index: 19;
+                /* background: rgba(0, 0, 0, 0.78); */
+                color: #fff;
+                padding: 6px 8px;
+                border-radius: 8px;
+                font-size: 13px;
+                pointer-events: none;
+                white-space: nowrap;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                box-sizing: border-box;
+                max-width: 280px;
+                /* don't translate here; JS will set transform for vertical centering */
+            }
 
-        /* left column: fixed narrow width + truncation */
-        .map-label .label-col {
-            flex: 0 0 56px;
-            /* fixed width */
-            max-width: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+            /* left column: fixed narrow width + truncation */
+            .map-label .label-col {
+                flex: 0 0 56px;
+                /* fixed width */
+                max-width: 56px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                text-align: center;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
 
-        /* right column: stacked counts centered vertically */
-        .map-label .counts-col {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            /* keep counts compact; use center if you prefer */
-            justify-content: center;
-            gap: 3px;
-        }
+            /* right column: stacked counts centered vertically */
+            .map-label .counts-col {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                /* keep counts compact; use center if you prefer */
+                justify-content: center;
+                gap: 3px;
+            }
 
-        /* caption + value styles */
-        .map-label .caption {
-            font-size: 11px;
-            color: #d1d5db;
-            line-height: 1;
-        }
+            /* caption + value styles */
+            .map-label .caption {
+                font-size: 11px;
+                color: #d1d5db;
+                line-height: 1;
+            }
 
-        .map-label .value {
-            font-weight: 600;
-            line-height: 1;
-        }
-    </style>
+            .map-label .value {
+                font-weight: 600;
+                line-height: 1;
+            }
+        </style>
 
-    <div class="live-map-viewport" id="live-map-viewport">
-        <div id="live-map-container" class="live-map-container">
-            {{-- full-size image (keeps aspect ratio) --}}
-            <img src="{{ asset('storage/' . $map->file_path) }}" id="live-map-image" alt="{{ $map->name }}">
+        <div class="live-map-viewport" id="live-map-viewport">
+            <div id="live-map-container" class="live-map-container">
+                {{-- full-size image (keeps aspect ratio) --}}
+                <img src="{{ asset('storage/' . $map->file_path) }}" id="live-map-image" alt="{{ $map->name }}">
 
-            <template x-for="(cfg, areaKey) in areaConfig" :key="areaKey">
-                <template x-if="cfg.enabled">
-                    <div>
-    <div class="map-marker" :data-area="areaKey" :data-x="cfg.x_percent || 50"
-        :data-y="cfg.y_percent || 50" :data-size="cfg.marker_size || 28" :style="{
-            width: (cfg.marker_size || 28) + 'px',
-            height: (cfg.marker_size || 28) + 'px',
-            background: getMarkerColor(areaKey),
-            border: '3px solid #fff',
-            borderRadius: '50%',
-            fontSize: '10px',
-            fontWeight: 'bold',
-            color: 'white'
-        }">
-        <span x-show="cfg.show_label_letter !== false"
-            x-text="(cfg.label || 'A').substring(0, 1)"></span>
-    </div>
+                <template x-for="(cfg, areaKey) in areaConfig" :key="areaKey">
+                    <template x-if="cfg.enabled">
+                        <div>
+                            <div class="map-marker" :data-area="areaKey" :data-x="cfg.x_percent || 50"
+                                :data-y="cfg.y_percent || 50" :data-size="cfg.marker_size || 28" :style="{
+                width: (cfg.marker_size || 28) + 'px',
+                height: (cfg.marker_size || 28) + 'px',
+                background: getMarkerColor(areaKey),
+                border: '3px solid #fff',
+                borderRadius: '50%',
+                fontSize: '10px',
+                fontWeight: 'bold',
+                color: 'white'
+            }">
+                                <span x-show="cfg.show_label_letter !== false"
+                                    x-text="(cfg.label || 'A').substring(0, 1)"></span>
+                            </div>
 
-    <div class="map-label" :data-area="areaKey" :data-position="cfg.label_position || 'right'"
-        :style="{
-            background: 'rgba(0, 0, 0, ' + (cfg.label_opacity ?? 0.78) + ')'
-        }">
-        <div class="label-col" :title="cfg.label || ''">
-            <strong x-text="cfg.label || 'A'"></strong>
-        </div>
+                            <div class="map-label" :data-area="areaKey" :data-position="cfg.label_position || 'right'"
+                                :style="{
+                background: 'rgba(0, 0, 0, ' + (cfg.label_opacity ?? 0.78) + ')'
+            }">
+                                <div class="label-col" :title="cfg.label || ''">
+                                    <strong x-text="cfg.label || 'A'"></strong>
+                                </div>
 
-        <div class="counts-col">
-            <!-- Show Motorcycles only if there are NO car slots OR if there ARE motorcycles -->
-            <template x-if="areaStatuses[areaKey] && 
-                           (areaStatuses[areaKey].total === 0 || 
-                            (areaStatuses[areaKey].motorcycle_available !== null && 
-                             areaStatuses[areaKey].motorcycle_available !== undefined))">
-                <div>
-                    <div class="caption">Motorcycles</div>
-                    <div class="value" x-text="areaStatuses[areaKey]
-                        ? (
-                            (areaStatuses[areaKey].motorcycle_available !== null && areaStatuses[areaKey].motorcycle_available !== undefined
-                              ? areaStatuses[areaKey].motorcycle_available
-                              : '—')
-                            + ' Available / ' +
-                            (areaStatuses[areaKey].motorcycle_total !== null && areaStatuses[areaKey].motorcycle_total !== undefined
-                              ? areaStatuses[areaKey].motorcycle_total + ' Total'
-                              : '-')
-                          )
-                        : '—'"></div>
-                </div>
-            </template>
+                                <div class="counts-col">
+                                    <!-- Show Motorcycles only if there are NO car slots OR if there ARE motorcycles -->
+                                    <template x-if="areaStatuses[areaKey] && 
+                               (areaStatuses[areaKey].total === 0 || 
+                                (areaStatuses[areaKey].motorcycle_available !== null && 
+                                 areaStatuses[areaKey].motorcycle_available !== undefined))">
+                                        <div>
+                                            <div class="caption">Motorcycles</div>
+                                            <div class="value" x-text="areaStatuses[areaKey]
+                            ? (
+                                (areaStatuses[areaKey].motorcycle_available !== null && areaStatuses[areaKey].motorcycle_available !== undefined
+                                  ? areaStatuses[areaKey].motorcycle_available
+                                  : '—')
+                                + ' Available / ' +
+                                (areaStatuses[areaKey].motorcycle_total !== null && areaStatuses[areaKey].motorcycle_total !== undefined
+                                  ? areaStatuses[areaKey].motorcycle_total + ' Total'
+                                  : '-')
+                              )
+                            : '—'"></div>
+                                        </div>
+                                    </template>
 
-            <!-- Show Car Slots only if there ARE car slots -->
-            <template x-if="areaStatuses[areaKey] && areaStatuses[areaKey].total > 0">
-                <div>
-                    <div class="caption">Car Slots</div>
-                    <div class="value" x-text="areaStatuses[areaKey]
-                        ? ((areaStatuses[areaKey].occupied ?? 0) + ' Occupied / ' + (areaStatuses[areaKey].total ?? 0)) + ' Total'
-                        : '-'"></div>
-                </div>
-            </template>
-        </div>
-    </div>
-</div>
+                                    <!-- Show Car Slots only if there ARE car slots -->
+                                    <template x-if="areaStatuses[areaKey] && areaStatuses[areaKey].total > 0">
+                                        <div>
+                                            <div class="caption">Car Slots</div>
+                                            <div class="value" x-text="areaStatuses[areaKey]
+                            ? ((areaStatuses[areaKey].occupied ?? 0) + ' Occupied / ' + (areaStatuses[areaKey].total ?? 0)) + ' Total'
+                            : '-'"></div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
                 </template>
-            </template>
+            </div>
         </div>
-    </div>
 
-    <script>
-        function parkingMap(mapData, initialAreaConfig, initialAreaStatuses) {
+        <script>
+            function parkingMap(mapData, initialAreaConfig, initialAreaStatuses) {
                 return {
                     map: mapData,
                     areaConfig: initialAreaConfig,
@@ -476,6 +477,6 @@ $areaStatuses[$areaKey] = [
                     }
                 };
             }
-    </script>
+        </script>
     @endif
 </div>

@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\for-endorsement-component.blade.php --}}
 <div>
 
     <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-3">
@@ -132,323 +133,334 @@
     </div>
 
     <!-- Table -->
-<!-- Responsive: Desktop table (hidden on xs) -->
-<div class="table-responsive d-none d-sm-block hidden sm:block">
-    <table class="table table-striped custom-table">
-        <thead class="bg-gray-100">
-            <tr>
-                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Reporter</th>
-                <th class="px-3 py-2 text-left text-sm font-semibold text-gray-700">Date</th>
-                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Area</th>
-                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">License Plate</th>
-                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Violator</th>
-                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Description</th>
-                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Evidence</th>
-                <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Status</th>
-            </tr>
-        </thead>
+    <!-- Responsive: Desktop table (hidden on xs) -->
+    <div class="table-responsive d-none d-sm-block hidden sm:block">
+        <table class="table table-striped custom-table">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Reporter</th>
+                    <th class="px-3 py-2 text-left text-sm font-semibold text-gray-700">Date</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Area</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">License Plate</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Violator</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Description</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Evidence</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Status</th>
+                </tr>
+            </thead>
 
-        <tbody class="bg-white divide-y divide-gray-200">
-            @forelse ($violations as $violation)
-            <tr class="hover:bg-gray-50">
-                {{-- Reporter --}}
-                <td class="px-4 py-2 text-sm text-gray-800">
-                    <div class="font-medium">
-                        {{ $violation->reporter ? $violation->reporter->getKey() : 'N/A' }}
-                    </div>
-                    <div class="text-gray-600">{{ $violation->reporter->firstname ?? '' }}
-                        {{ $violation->reporter->lastname ?? '' }}
-                    </div>
-                </td>
+            <tbody class="bg-white divide-y divide-gray-200">
+                @forelse ($violations as $violation)
+                <tr class="hover:bg-gray-50">
+                    {{-- Reporter --}}
+                    <td class="px-4 py-2 text-sm text-gray-800">
+                        <div class="font-medium">
+                            {{ $violation->reporter ? $violation->reporter->getKey() : 'N/A' }}
+                        </div>
+                        <div class="text-gray-600">{{ $violation->reporter->firstname ?? '' }}
+                            {{ $violation->reporter->lastname ?? '' }}
+                        </div>
+                    </td>
 
-                <!-- Date -->
-                <td class="px-3 py-2 text-sm text-gray-700">
-                    @if($violation->created_at)
-                    @php
-                    $tooltip = "";
-                    if ($violation->submitted_at) {
+                    <!-- Date -->
+                    <td class="px-3 py-2 text-sm text-gray-700">
+                        @if($violation->created_at)
+                        @php
+                        $tooltip = "";
+                        if ($violation->submitted_at) {
                         $tooltip .= "Submitted on: " . $violation->submitted_at->toDayDateTimeString();
-                    }
-                    if ($violation->approved_at) {
-                        $tooltip .= ($tooltip ? "\n" : "") . "Approved on: " . $violation->approved_at->toDayDateTimeString();
-                    }
-                    if ($violation->endorsed_at) {
-                        $tooltip .= ($tooltip ? "\n" : "") . "Endorsed on: " . $violation->endorsed_at->toDayDateTimeString();
-                    }
-                    if (!$tooltip) {
+                        }
+                        if ($violation->approved_at) {
+                        $tooltip .= ($tooltip ? "\n" : "") . "Approved on: " .
+                        $violation->approved_at->toDayDateTimeString();
+                        }
+                        if ($violation->endorsed_at) {
+                        $tooltip .= ($tooltip ? "\n" : "") . "Endorsed on: " .
+                        $violation->endorsed_at->toDayDateTimeString();
+                        }
+                        if (!$tooltip) {
                         $tooltip = "No additional timestamps";
-                    }
-                    @endphp
+                        }
+                        @endphp
 
-                    <span title="{{ $tooltip }}" class="cursor-pointer">
-                        {{ $violation->created_at->format('M j, Y H:i') }}
-                    </span>
-                    <div class="text-xs text-muted">
-                        ({{ $violation->created_at->diffForHumans() }})
-                    </div>
-                    @else
-                    <span class="text-muted">N/A</span>
-                    @endif
-                </td>
+                        <span title="{{ $tooltip }}" class="cursor-pointer">
+                            {{ $violation->created_at->format('M j, Y H:i') }}
+                        </span>
+                        <div class="text-xs text-muted">
+                            ({{ $violation->created_at->diffForHumans() }})
+                        </div>
+                        @else
+                        <span class="text-muted">N/A</span>
+                        @endif
+                    </td>
 
-                {{-- Area --}}
-                <td class="px-4 py-2 text-sm text-gray-800">
-                    {{ $violation->area->name ?? 'N/A' }}
-                </td>
+                    {{-- Area --}}
+                    <td class="px-4 py-2 text-sm text-gray-800">
+                        {{ $violation->area->name ?? 'N/A' }}
+                    </td>
 
-                {{-- License Plate --}}
-                <td class="px-4 py-2 text-sm">
-                    @php
-                    $plate = $violation->license_plate ?? null;
-                    if (!$plate && $violation->violator && isset($violation->violator->vehicles)) {
+                    {{-- License Plate --}}
+                    <td class="px-4 py-2 text-sm">
+                        @php
+                        $plate = $violation->license_plate ?? null;
+                        if (!$plate && $violation->violator && isset($violation->violator->vehicles)) {
                         $firstVehicle = $violation->violator->vehicles->first() ?? null;
                         $plate = $firstVehicle ? $firstVehicle->license_plate : null;
-                    }
-                    @endphp
+                        }
+                        @endphp
 
-                    @if($plate)
-                    <div class="font-medium">{{ $plate }}</div>
-                    @else
-                    <span class="text-muted">N/A</span>
-                    @endif
-                </td>
+                        @if($plate)
+                        <div class="font-medium">{{ $plate }}</div>
+                        @else
+                        <span class="text-muted">N/A</span>
+                        @endif
+                    </td>
 
-                {{-- Violator --}}
-                <td class="px-4 py-2 text-sm">
-                    @if($violation->violator)
-                    {{ trim($violation->violator->firstname . ' ' . $violation->violator->lastname) }}
-                    @else
-                    <span class="text-muted">N/A</span>
-                    @endif
-                </td>
+                    {{-- Violator --}}
+                    <td class="px-4 py-2 text-sm">
+                        @if($violation->violator)
+                        {{ trim($violation->violator->firstname . ' ' . $violation->violator->lastname) }}
+                        @else
+                        <span class="text-muted">N/A</span>
+                        @endif
+                    </td>
 
-                {{-- Description --}}
-                <td class="px-4 py-2 text-sm text-gray-800">
-                    <div class="max-w-xs truncate" title="{{ $violation->description }}">
-                        {{ Str::limit($violation->description, 80) }}
-                    </div>
-                </td>
+                    {{-- Description --}}
+                    <td class="px-4 py-2 text-sm text-gray-800">
+                        <div class="max-w-xs truncate" title="{{ $violation->description }}">
+                            {{ Str::limit($violation->description, 80) }}
+                        </div>
+                    </td>
 
-                {{-- Evidence --}}
-                <td class="px-4 py-3 text-sm">
-                    @php
-                    $raw = $violation->evidence;
-                    if (is_array($raw)) {
+                    {{-- Evidence --}}
+                    <td class="px-4 py-3 text-sm">
+                        @php
+                        $raw = $violation->evidence;
+                        if (is_array($raw)) {
                         $evidence = $raw;
-                    } elseif (is_string($raw) && $raw !== '') {
+                        } elseif (is_string($raw) && $raw !== '') {
                         $decoded = @json_decode($raw, true);
-                        $evidence = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : ['reported' => $raw];
-                    } else {
+                        $evidence = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded :
+                        ['reported' => $raw];
+                        } else {
                         $evidence = [];
-                    }
+                        }
 
-                    $makeUrl = function ($path) {
-                        return $path ? (preg_match('#^https?://#i', $path) ? $path : \Illuminate\Support\Facades\Storage::url($path)) : null;
-                    };
+                        $makeUrl = function ($path) {
+                        return $path ? (preg_match('#^https?://#i', $path) ? $path :
+                        \Illuminate\Support\Facades\Storage::url($path)) : null;
+                        };
 
-                    $reportedUrl = $makeUrl($evidence['reported'] ?? null);
-                    $approvedUrl = $makeUrl($evidence['approved'] ?? null);
-                    @endphp
+                        $reportedUrl = $makeUrl($evidence['reported'] ?? null);
+                        $approvedUrl = $makeUrl($evidence['approved'] ?? null);
+                        @endphp
 
-                    <div class="d-flex flex-column gap-1">
-                        @if($reportedUrl)
-                        <a href="{{ $reportedUrl }}" target="_blank" class="text-decoration-underline text-primary">View Reported Evidence</a>
-                        @else
-                        <span class="text-muted">Reported N/A</span>
-                        @endif
+                        <div class="d-flex flex-column gap-1">
+                            @if($reportedUrl)
+                            <a href="{{ $reportedUrl }}" target="_blank"
+                                class="text-decoration-underline text-primary">View Reported Evidence</a>
+                            @else
+                            <span class="text-muted">Reported N/A</span>
+                            @endif
 
-                        @if($approvedUrl)
-                        <a href="{{ $approvedUrl }}" target="_blank" class="text-decoration-underline text-primary">View Approval Evidence</a>
-                        @else
-                        <span class="text-muted">Approval N/A</span>
-                        @endif
-                    </div>
-                </td>
+                            @if($approvedUrl)
+                            <a href="{{ $approvedUrl }}" target="_blank"
+                                class="text-decoration-underline text-primary">View Approval Evidence</a>
+                            @else
+                            <span class="text-muted">Approval N/A</span>
+                            @endif
+                        </div>
+                    </td>
 
-                {{-- Status --}}
-                <td class="px-4 py-2 text-sm">
-                    @php
-                    $status = $violation->status ?? 'unknown';
-                    $statusText = ucfirst(str_replace('_', ' ', $status));
-                    $statusMap = [
+                    {{-- Status --}}
+                    <td class="px-4 py-2 text-sm">
+                        @php
+                        $status = $violation->status ?? 'unknown';
+                        $statusText = ucfirst(str_replace('_', ' ', $status));
+                        $statusMap = [
                         'pending' => 'bg-warning text-dark',
                         'rejected' => 'bg-danger text-white',
                         'approved' => 'bg-success text-white',
                         'for_endorsement' => 'bg-primary text-white',
                         'resolved' => 'bg-success text-white',
-                    ];
-                    $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
-                    @endphp
+                        ];
+                        $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
+                        @endphp
 
-                    <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}" aria-label="Status: {{ $statusText }}">
-                        {{ $statusText }}
-                    </span>
-                </td>
-            </tr>
-            @empty
-            <tr>
-                <td colspan="8" class="text-center text-gray-500 py-6">
-                    <div class="flex flex-col items-center">
-                        <i class="bi bi-inbox text-3xl mb-2 text-gray-400"></i>
-                        <h6 class="font-medium">No Reports</h6>
-                        <p class="text-sm text-gray-400">There are currently no reports to display.</p>
+                        <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}"
+                            aria-label="Status: {{ $statusText }}">
+                            {{ $statusText }}
+                        </span>
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="8" class="text-center text-gray-500 py-6">
+                        <div class="flex flex-col items-center">
+                            <i class="bi bi-inbox text-3xl mb-2 text-gray-400"></i>
+                            <h6 class="font-medium">No Reports</h6>
+                            <p class="text-sm text-gray-400">There are currently no reports to display.</p>
+                        </div>
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+    <!-- Mobile: Card list (visible only on xs) -->
+    <div class="mobile-cards d-block d-sm-none">
+        @forelse ($violations as $violation)
+        <article class="bg-white border rounded p-3 shadow-sm mb-3">
+            <header class="d-flex justify-content-between align-items-start">
+                <div>
+                    <div class="small text-muted">Reporter</div>
+                    <div class="fw-medium small text-dark">
+                        {{ $violation->reporter ? $violation->reporter->getKey() : 'N/A' }}
                     </div>
-                </td>
-            </tr>
-            @endforelse
-        </tbody>
-    </table>
-</div>
-<!-- Mobile: Card list (visible only on xs) -->
-<div class="mobile-cards d-block d-sm-none">
-    @forelse ($violations as $violation)
-    <article class="bg-white border rounded p-3 shadow-sm mb-3">
-        <header class="d-flex justify-content-between align-items-start">
-            <div>
-                <div class="small text-muted">Reporter</div>
-                <div class="fw-medium small text-dark">
-                    {{ $violation->reporter ? $violation->reporter->getKey() : 'N/A' }}
+                    <div class="small text-muted">
+                        {{ $violation->reporter->firstname ?? '' }}
+                        {{ $violation->reporter->lastname ?? '' }}
+                    </div>
                 </div>
-                <div class="small text-muted">
-                    {{ $violation->reporter->firstname ?? '' }}
-                    {{ $violation->reporter->lastname ?? '' }}
-                </div>
-            </div>
 
-            {{-- status badge --}}
-            @php
-            $status = $violation->status ?? 'unknown';
-            $statusText = ucfirst(str_replace('_', ' ', $status));
-            $statusMap = [
+                {{-- status badge --}}
+                @php
+                $status = $violation->status ?? 'unknown';
+                $statusText = ucfirst(str_replace('_', ' ', $status));
+                $statusMap = [
                 'pending' => 'bg-warning text-dark',
                 'rejected' => 'bg-danger text-white',
                 'approved' => 'bg-success text-white',
                 'for_endorsement' => 'bg-primary text-white',
                 'resolved' => 'bg-success text-white',
-            ];
-            $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
-            @endphp
-            <div class="ms-auto">
-                <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}">
-                    {{ $statusText }}
-                </span>
-            </div>
-        </header>
+                ];
+                $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
+                @endphp
+                <div class="ms-auto">
+                    <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}">
+                        {{ $statusText }}
+                    </span>
+                </div>
+            </header>
 
-        <div class="mt-3 small text-muted">Date</div>
-        <div class="small text-dark">
-            @if($violation->created_at)
-            @php
-            $tooltip = "";
-            if ($violation->submitted_at) {
-                $tooltip .= "Submitted on: " . $violation->submitted_at->toDayDateTimeString();
-            }
-            if ($violation->approved_at) {
-                $tooltip .= ($tooltip ? "\n" : "") . "Approved on: " . $violation->approved_at->toDayDateTimeString();
-            }
-            if ($violation->endorsed_at) {
-                $tooltip .= ($tooltip ? "\n" : "") . "Endorsed on: " . $violation->endorsed_at->toDayDateTimeString();
-            }
-            if (!$tooltip) {
-                $tooltip = "No additional timestamps";
-            }
-            @endphp
-
-            <span title="{{ $tooltip }}" style="cursor: pointer;">
-                {{ $violation->created_at->format('M j, Y H:i') }}
-            </span>
-            <div class="small text-muted">
-                ({{ $violation->created_at->diffForHumans() }})
-            </div>
-            @else
-            <span class="text-muted">N/A</span>
-            @endif
-        </div>
-
-        <div class="mt-2 row g-3 small">
-            <div class="col-6">
-                <div class="small text-muted">Area</div>
-                <div class="text-dark">{{ $violation->area->name ?? 'N/A' }}</div>
-            </div>
-
-            <div class="col-6">
-                <div class="small text-muted">License Plate</div>
+            <div class="mt-3 small text-muted">Date</div>
+            <div class="small text-dark">
+                @if($violation->created_at)
                 @php
-                $plate = $violation->license_plate ?? null;
-                if (!$plate && $violation->violator && isset($violation->violator->vehicles)) {
-                    $firstVehicle = $violation->violator->vehicles->first() ?? null;
-                    $plate = $firstVehicle ? $firstVehicle->license_plate : null;
+                $tooltip = "";
+                if ($violation->submitted_at) {
+                $tooltip .= "Submitted on: " . $violation->submitted_at->toDayDateTimeString();
+                }
+                if ($violation->approved_at) {
+                $tooltip .= ($tooltip ? "\n" : "") . "Approved on: " . $violation->approved_at->toDayDateTimeString();
+                }
+                if ($violation->endorsed_at) {
+                $tooltip .= ($tooltip ? "\n" : "") . "Endorsed on: " . $violation->endorsed_at->toDayDateTimeString();
+                }
+                if (!$tooltip) {
+                $tooltip = "No additional timestamps";
                 }
                 @endphp
-                <div class="text-dark">
-                    {{ $plate ?? 'N/A' }}
+
+                <span title="{{ $tooltip }}" style="cursor: pointer;">
+                    {{ $violation->created_at->format('M j, Y H:i') }}
+                </span>
+                <div class="small text-muted">
+                    ({{ $violation->created_at->diffForHumans() }})
+                </div>
+                @else
+                <span class="text-muted">N/A</span>
+                @endif
+            </div>
+
+            <div class="mt-2 row g-3 small">
+                <div class="col-6">
+                    <div class="small text-muted">Area</div>
+                    <div class="text-dark">{{ $violation->area->name ?? 'N/A' }}</div>
+                </div>
+
+                <div class="col-6">
+                    <div class="small text-muted">License Plate</div>
+                    @php
+                    $plate = $violation->license_plate ?? null;
+                    if (!$plate && $violation->violator && isset($violation->violator->vehicles)) {
+                    $firstVehicle = $violation->violator->vehicles->first() ?? null;
+                    $plate = $firstVehicle ? $firstVehicle->license_plate : null;
+                    }
+                    @endphp
+                    <div class="text-dark">
+                        {{ $plate ?? 'N/A' }}
+                    </div>
+                </div>
+
+                <div class="col-6">
+                    <div class="small text-muted">Violator</div>
+                    <div class="text-dark">
+                        @if($violation->violator)
+                        {{ trim($violation->violator->firstname . ' ' . $violation->violator->lastname) }}
+                        @else
+                        N/A
+                        @endif
+                    </div>
+                </div>
+
+                <div class="col-6">
+                    <div class="small text-muted">Description</div>
+                    <div class="text-dark text-truncate" title="{{ $violation->description }}">
+                        {{ Str::limit($violation->description, 80) }}
+                    </div>
                 </div>
             </div>
 
-            <div class="col-6">
-                <div class="small text-muted">Violator</div>
-                <div class="text-dark">
-                    @if($violation->violator)
-                    {{ trim($violation->violator->firstname . ' ' . $violation->violator->lastname) }}
+            {{-- Evidence section --}}
+            <div class="mt-3 small">
+                @php
+                $raw = $violation->evidence;
+                if (is_array($raw)) {
+                $evidence = $raw;
+                } elseif (is_string($raw) && $raw !== '') {
+                $decoded = @json_decode($raw, true);
+                $evidence = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : ['reported' =>
+                $raw];
+                } else {
+                $evidence = [];
+                }
+
+                $makeUrl = function ($path) {
+                return $path ? (preg_match('#^https?://#i', $path) ? $path :
+                \Illuminate\Support\Facades\Storage::url($path)) : null;
+                };
+
+                $reportedUrl = $makeUrl($evidence['reported'] ?? null);
+                $approvedUrl = $makeUrl($evidence['approved'] ?? null);
+                @endphp
+
+                <div class="small text-muted">Evidence</div>
+                <div class="mt-1 d-flex flex-column" style="gap: 0.25rem;">
+                    @if($reportedUrl)
+                    <a href="{{ $reportedUrl }}" target="_blank"
+                        class="text-decoration-underline text-primary small">View Reported Evidence</a>
                     @else
-                    N/A
+                    <span class="text-muted small">Reported N/A</span>
+                    @endif
+
+                    @if($approvedUrl)
+                    <a href="{{ $approvedUrl }}" target="_blank"
+                        class="text-decoration-underline text-primary small">View Approval Evidence</a>
+                    @else
+                    <span class="text-muted small">Approval N/A</span>
                     @endif
                 </div>
             </div>
-
-            <div class="col-6">
-                <div class="small text-muted">Description</div>
-                <div class="text-dark text-truncate" title="{{ $violation->description }}">
-                    {{ Str::limit($violation->description, 80) }}
-                </div>
-            </div>
+        </article>
+        @empty
+        <div class="text-center py-4">
+            <i class="bi bi-inbox fs-1 mb-2 text-muted"></i>
+            <h6 class="fw-medium">No Reports</h6>
+            <p class="small text-muted">There are currently no reports to display.</p>
         </div>
-
-        {{-- Evidence section --}}
-        <div class="mt-3 small">
-            @php
-            $raw = $violation->evidence;
-            if (is_array($raw)) {
-                $evidence = $raw;
-            } elseif (is_string($raw) && $raw !== '') {
-                $decoded = @json_decode($raw, true);
-                $evidence = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : ['reported' => $raw];
-            } else {
-                $evidence = [];
-            }
-
-            $makeUrl = function ($path) {
-                return $path ? (preg_match('#^https?://#i', $path) ? $path : \Illuminate\Support\Facades\Storage::url($path)) : null;
-            };
-
-            $reportedUrl = $makeUrl($evidence['reported'] ?? null);
-            $approvedUrl = $makeUrl($evidence['approved'] ?? null);
-            @endphp
-
-            <div class="small text-muted">Evidence</div>
-            <div class="mt-1 d-flex flex-column" style="gap: 0.25rem;">
-                @if($reportedUrl)
-                <a href="{{ $reportedUrl }}" target="_blank" class="text-decoration-underline text-primary small">View Reported Evidence</a>
-                @else
-                <span class="text-muted small">Reported N/A</span>
-                @endif
-
-                @if($approvedUrl)
-                <a href="{{ $approvedUrl }}" target="_blank" class="text-decoration-underline text-primary small">View Approval Evidence</a>
-                @else
-                <span class="text-muted small">Approval N/A</span>
-                @endif
-            </div>
-        </div>
-    </article>
-    @empty
-    <div class="text-center py-4">
-        <i class="bi bi-inbox fs-1 mb-2 text-muted"></i>
-        <h6 class="fw-medium">No Reports</h6>
-        <p class="small text-muted">There are currently no reports to display.</p>
+        @endforelse
     </div>
-    @endforelse
-</div>
 
 
 

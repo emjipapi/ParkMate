@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\violation-admin-component.blade.php --}}
 <div class="container mt-4">
 
     {{-- Search Bar --}}
@@ -7,13 +8,13 @@
 
         {{-- Dynamic Dropdown --}}
         @if(!empty($searchResults))
-        <ul class="list-group position-absolute" style="max-height: 200px; overflow-y: auto; z-index: 50; width: 100%;">
-            @foreach($searchResults as $result)
-            <li class="list-group-item list-group-item-action" wire:click="selectResult({{ $result->id }})">
-                {{ $result->user_id }} — {{ $result->license_plate }}
-            </li>
-            @endforeach
-        </ul>
+            <ul class="list-group position-absolute" style="max-height: 200px; overflow-y: auto; z-index: 50; width: 100%;">
+                @foreach($searchResults as $result)
+                    <li class="list-group-item list-group-item-action" wire:click="selectResult({{ $result->id }})">
+                        {{ $result->user_id }} — {{ $result->license_plate }}
+                    </li>
+                @endforeach
+            </ul>
         @endif
     </div>
 
@@ -45,15 +46,15 @@
     <div>
         {{-- Pending Reports --}}
         @if ($activeTab === 'pending')
-        <livewire:admin.pending-reports-component />
+            <livewire:admin.pending-reports-component />
 
-        {{-- Approved Reports --}}
+            {{-- Approved Reports --}}
         @elseif ($activeTab === 'approved')
-        <livewire:admin.approved-reports-component />
+            <livewire:admin.approved-reports-component />
 
-        {{-- Resolved Reports --}}
+            {{-- Resolved Reports --}}
         @elseif ($activeTab === 'endorsement')
-        <livewire:admin.for-endorsement-component />
+            <livewire:admin.for-endorsement-component />
         @endif
     </div>
 </div>

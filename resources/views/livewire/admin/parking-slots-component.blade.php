@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\parking-slots-component.blade.php --}}
 <div class="container py-4">
     <div class="d-flex align-items-center justify-content-between mb-4">
         <h4 class="mb-0">Parking Slots</h4>

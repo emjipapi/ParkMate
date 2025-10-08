@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\user\my-violations-component.blade.php --}}
 <div>
     <div class="d-flex w-100 flex-wrap justify-content-between gap-2 mb-3 align-items-center">
         <!-- LEFT: filters -->

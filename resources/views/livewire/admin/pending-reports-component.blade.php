@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\pending-reports-component.blade.php --}}
 <div>
     <div class="d-flex w-100 flex-wrap justify-content-between gap-2 mb-3 align-items-center">
 
@@ -50,8 +51,8 @@
 
     </div>
 
-<div class="table-responsive d-none d-sm-block hidden sm:block">
-    <table class="table table-striped custom-table">
+    <div class="table-responsive d-none d-sm-block hidden sm:block">
+        <table class="table table-striped custom-table">
             <thead class="bg-gray-100">
                 <tr>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Reporter ID & Name</th>
@@ -272,33 +273,32 @@
                         <div class="d-flex flex-column gap-2 action-buttons">
                             @if ($violation->status === 'pending')
                             {{-- Approve Button Group --}}
-<div class="btn-group w-100" role="group">
-    <button wire:click="updateStatus({{ $violation->id }}, 'approved')"
-        class="btn btn-sm btn-success"
-        @if(!isset($violationStatuses[$violation->id]['plate_status']) || 
-            $violationStatuses[$violation->id]['plate_status'] !== 'found')
-            disabled
-            title="Enter a valid license plate to approve"
-        @endif>
-        Approve
-    </button>
-    <button class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split"
-        data-bs-toggle="dropdown" 
-        aria-expanded="false"
-        @if(!isset($violationStatuses[$violation->id]['plate_status']) || 
-            $violationStatuses[$violation->id]['plate_status'] !== 'found')
-            disabled
-            title="Enter a valid license plate to approve"
-        @endif>
-        <span class="visually-hidden">Toggle Dropdown</span>
-    </button>
-    <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="#"
-                wire:click.prevent="approveWithMessage({{ $violation->id }})">
-                Approve with Message
-            </a></li>
-    </ul>
-</div>
+                            <div class="btn-group w-100" role="group">
+                                <button wire:click="updateStatus({{ $violation->id }}, 'approved')"
+                                    class="btn btn-sm btn-success"
+                                    @if(!isset($violationStatuses[$violation->id]['plate_status']) ||
+                                    $violationStatuses[$violation->id]['plate_status'] !== 'found')
+                                    disabled
+                                    title="Enter a valid license plate to approve"
+                                    @endif>
+                                    Approve
+                                </button>
+                                <button class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split"
+                                    data-bs-toggle="dropdown" aria-expanded="false"
+                                    @if(!isset($violationStatuses[$violation->id]['plate_status']) ||
+                                    $violationStatuses[$violation->id]['plate_status'] !== 'found')
+                                    disabled
+                                    title="Enter a valid license plate to approve"
+                                    @endif>
+                                    <span class="visually-hidden">Toggle Dropdown</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"
+                                            wire:click.prevent="approveWithMessage({{ $violation->id }})">
+                                            Approve with Message
+                                        </a></li>
+                                </ul>
+                            </div>
 
                             {{-- Reject Button Group --}}
                             <div class="btn-group w-100" role="group">
@@ -326,304 +326,308 @@
         </table>
     </div>
     <!-- Mobile: Card list (visible only on xs) -->
-<div class="mobile-cards d-block d-sm-none">
-    @forelse ($violations as $violation)
-    <article class="bg-white border rounded p-3 shadow-sm mb-3">
-        <!-- Status Badge -->
-        <div class="mb-3 d-flex justify-content-end">
-            @php
+    <div class="mobile-cards d-block d-sm-none">
+        @forelse ($violations as $violation)
+        <article class="bg-white border rounded p-3 shadow-sm mb-3">
+            <!-- Status Badge -->
+            <div class="mb-3 d-flex justify-content-end">
+                @php
                 $status = $violation->status ?? 'unknown';
                 $statusText = ucfirst(str_replace('_', ' ', $status));
                 $statusMap = [
-                    'pending' => 'bg-warning text-dark',
-                    'rejected' => 'bg-danger text-white',
-                    'approved' => 'bg-success text-white',
-                    'for_endorsement' => 'bg-primary text-white',
-                    'resolved' => 'bg-success text-white',
+                'pending' => 'bg-warning text-dark',
+                'rejected' => 'bg-danger text-white',
+                'approved' => 'bg-success text-white',
+                'for_endorsement' => 'bg-primary text-white',
+                'resolved' => 'bg-success text-white',
                 ];
                 $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
-            @endphp
-            <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}">{{ $statusText }}</span>
-        </div>
-
-        <!-- 2-Column Details -->
-        <div class="small">
-            <!-- Reporter -->
-            <div class="d-flex mb-2">
-                <div class="fw-bold text-muted" style="min-width: 110px; flex-shrink: 0;">Reporter:</div>
-                <div class="text-dark">
-                    <div class="fw-medium">{{ $violation->reporter ? $violation->reporter->getKey() : 'N/A' }}</div>
-                    <div class="small text-muted">
-                        {{ $violation->reporter->firstname ?? '' }} {{ $violation->reporter->lastname ?? '' }}
-                    </div>
-                </div>
+                @endphp
+                <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}">{{ $statusText
+                    }}</span>
             </div>
 
-            <!-- Date -->
-            <div class="d-flex mb-2">
-                <div class="fw-bold text-muted" style="min-width: 110px; flex-shrink: 0;">Date:</div>
-                <div class="text-dark">
-                    @if($violation->created_at)
-                        <span title="Submitted on: {{ $violation->submitted_at ? $violation->submitted_at->toDayDateTimeString() : 'No submission date' }}">
+            <!-- 2-Column Details -->
+            <div class="small">
+                <!-- Reporter -->
+                <div class="d-flex mb-2">
+                    <div class="fw-bold text-muted" style="min-width: 110px; flex-shrink: 0;">Reporter:</div>
+                    <div class="text-dark">
+                        <div class="fw-medium">{{ $violation->reporter ? $violation->reporter->getKey() : 'N/A' }}</div>
+                        <div class="small text-muted">
+                            {{ $violation->reporter->firstname ?? '' }} {{ $violation->reporter->lastname ?? '' }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Date -->
+                <div class="d-flex mb-2">
+                    <div class="fw-bold text-muted" style="min-width: 110px; flex-shrink: 0;">Date:</div>
+                    <div class="text-dark">
+                        @if($violation->created_at)
+                        <span
+                            title="Submitted on: {{ $violation->submitted_at ? $violation->submitted_at->toDayDateTimeString() : 'No submission date' }}">
                             {{ $violation->created_at->format('M j, Y H:i') }}
                         </span>
                         <div class="small text-muted">({{ $violation->created_at->diffForHumans() }})</div>
-                    @else
+                        @else
                         <span class="text-muted">N/A</span>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Area -->
-            <div class="d-flex mb-2">
-                <div class="fw-bold text-muted" style="min-width: 110px; flex-shrink: 0;">Area:</div>
-                <div class="text-dark">{{ $violation->area->name ?? 'N/A' }}</div>
-            </div>
-
-            <!-- License Plate -->
-            <div class="d-flex mb-2">
-                <div class="fw-bold text-muted" style="min-width: 110px; flex-shrink: 0;">License Plate:</div>
-                <div class="flex-grow-1">
-                    <div class="d-flex align-items-center mb-1">
-                        {{-- Status icon --}}
-                        <div class="small me-2 d-flex align-items-center justify-content-center" style="width:22px;">
-                            @if(isset($violationStatuses[$violation->id]['plate_status']))
-                                @if($violationStatuses[$violation->id]['plate_status'] === 'found')
-                                    <span class="text-success fw-medium" aria-hidden="true">✓</span>
-                                @elseif($violationStatuses[$violation->id]['plate_status'] === 'not_found')
-                                    <span class="text-danger" aria-hidden="true">✗</span>
-                                @elseif($violationStatuses[$violation->id]['plate_status'] === 'loading')
-                                    <span class="text-primary" aria-hidden="true">⏳</span>
-                                @endif
-                            @endif
-                        </div>
-                        
-                        {{-- Input --}}
-                        <input type="text"
-                            wire:model.live.debounce.50ms="violationInputs.{{ $violation->id }}.license_plate"
-                            placeholder="Enter plate"
-                            {{ $violation->status === 'approved' ? 'disabled' : '' }}
-                            class="form-control form-control-sm">
-                    </div>
-                    
-                    {{-- Status text --}}
-                    <div class="small" style="min-height:1.1em;">
-                        @if(isset($violationStatuses[$violation->id]['plate_status']))
-                            @if($violationStatuses[$violation->id]['plate_status'] === 'found')
-                                <span class="text-success fw-medium">
-                                    ✓ {{ $violationStatuses[$violation->id]['found_owner'] ?? '' }}
-                                </span>
-                            @elseif($violationStatuses[$violation->id]['plate_status'] === 'not_found')
-                                <span class="text-danger">✗ Plate not found</span>
-                            @elseif($violationStatuses[$violation->id]['plate_status'] === 'loading')
-                                <span class="text-primary">Searching...</span>
-                            @endif
                         @endif
                     </div>
                 </div>
-            </div>
 
-            <!-- Description -->
-            <div class="d-flex mb-2">
-                <div class="fw-bold text-muted" style="min-width: 110px; flex-shrink: 0;">Description:</div>
-                <div class="text-dark text-break" title="{{ $violation->description }}">
-                    {{ Str::limit($violation->description, 50) }}
+                <!-- Area -->
+                <div class="d-flex mb-2">
+                    <div class="fw-bold text-muted" style="min-width: 110px; flex-shrink: 0;">Area:</div>
+                    <div class="text-dark">{{ $violation->area->name ?? 'N/A' }}</div>
                 </div>
-            </div>
 
-            <!-- Evidence -->
-            <div class="d-flex mb-2">
-                <div class="fw-bold text-muted" style="min-width: 110px; flex-shrink: 0;">Evidence:</div>
-                <div class="text-dark">
-                    @php
+                <!-- License Plate -->
+                <div class="d-flex mb-2">
+                    <div class="fw-bold text-muted" style="min-width: 110px; flex-shrink: 0;">License Plate:</div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-1">
+                            {{-- Status icon --}}
+                            <div class="small me-2 d-flex align-items-center justify-content-center"
+                                style="width:22px;">
+                                @if(isset($violationStatuses[$violation->id]['plate_status']))
+                                @if($violationStatuses[$violation->id]['plate_status'] === 'found')
+                                <span class="text-success fw-medium" aria-hidden="true">✓</span>
+                                @elseif($violationStatuses[$violation->id]['plate_status'] === 'not_found')
+                                <span class="text-danger" aria-hidden="true">✗</span>
+                                @elseif($violationStatuses[$violation->id]['plate_status'] === 'loading')
+                                <span class="text-primary" aria-hidden="true">⏳</span>
+                                @endif
+                                @endif
+                            </div>
+
+                            {{-- Input --}}
+                            <input type="text"
+                                wire:model.live.debounce.50ms="violationInputs.{{ $violation->id }}.license_plate"
+                                placeholder="Enter plate" {{ $violation->status === 'approved' ? 'disabled' : '' }}
+                            class="form-control form-control-sm">
+                        </div>
+
+                        {{-- Status text --}}
+                        <div class="small" style="min-height:1.1em;">
+                            @if(isset($violationStatuses[$violation->id]['plate_status']))
+                            @if($violationStatuses[$violation->id]['plate_status'] === 'found')
+                            <span class="text-success fw-medium">
+                                ✓ {{ $violationStatuses[$violation->id]['found_owner'] ?? '' }}
+                            </span>
+                            @elseif($violationStatuses[$violation->id]['plate_status'] === 'not_found')
+                            <span class="text-danger">✗ Plate not found</span>
+                            @elseif($violationStatuses[$violation->id]['plate_status'] === 'loading')
+                            <span class="text-primary">Searching...</span>
+                            @endif
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="d-flex mb-2">
+                    <div class="fw-bold text-muted" style="min-width: 110px; flex-shrink: 0;">Description:</div>
+                    <div class="text-dark text-break" title="{{ $violation->description }}">
+                        {{ Str::limit($violation->description, 50) }}
+                    </div>
+                </div>
+
+                <!-- Evidence -->
+                <div class="d-flex mb-2">
+                    <div class="fw-bold text-muted" style="min-width: 110px; flex-shrink: 0;">Evidence:</div>
+                    <div class="text-dark">
+                        @php
                         $raw = $violation->evidence;
                         if (is_array($raw)) {
-                            $evidence = $raw;
+                        $evidence = $raw;
                         } elseif (is_string($raw) && $raw !== '') {
-                            $decoded = @json_decode($raw, true);
-                            $evidence = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded : ['reported' => $raw];
+                        $decoded = @json_decode($raw, true);
+                        $evidence = (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) ? $decoded :
+                        ['reported' => $raw];
                         } else {
-                            $evidence = [];
+                        $evidence = [];
                         }
                         $path = $evidence['reported'] ?? $evidence['approved'] ?? null;
-                        $url = $path ? (preg_match('#^https?://#i', $path) ? $path : \Illuminate\Support\Facades\Storage::url($path)) : null;
-                    @endphp
-                    
-                    @if($url)
-                        <a href="{{ $url }}" target="_blank" class="text-decoration-underline text-primary small">View Evidence</a>
-                    @else
+                        $url = $path ? (preg_match('#^https?://#i', $path) ? $path :
+                        \Illuminate\Support\Facades\Storage::url($path)) : null;
+                        @endphp
+
+                        @if($url)
+                        <a href="{{ $url }}" target="_blank" class="text-decoration-underline text-primary small">View
+                            Evidence</a>
+                        @else
                         <span class="text-muted">N/A</span>
-                    @endif
+                        @endif
+                    </div>
                 </div>
             </div>
+
+            <!-- Actions (mobile) -->
+            @if ($violation->status === 'pending')
+            <footer class="mt-3 pt-3 border-top">
+                <div class="d-flex flex-column" style="gap: 0.5rem;">
+                    {{-- Approve Button Group --}}
+                    <div class="btn-group w-100" role="group">
+                        <button wire:click="updateStatus({{ $violation->id }}, 'approved')"
+                            class="btn btn-sm btn-success"
+                            @if(!isset($violationStatuses[$violation->id]['plate_status']) ||
+                            $violationStatuses[$violation->id]['plate_status'] !== 'found')
+                            disabled
+                            title="Enter a valid license plate to approve"
+                            @endif>
+                            Approve
+                        </button>
+                        <button class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split"
+                            data-bs-toggle="dropdown" aria-expanded="false"
+                            @if(!isset($violationStatuses[$violation->id]['plate_status']) ||
+                            $violationStatuses[$violation->id]['plate_status'] !== 'found')
+                            disabled
+                            title="Enter a valid license plate to approve"
+                            @endif>
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#"
+                                    wire:click.prevent="approveWithMessage({{ $violation->id }})">
+                                    Approve with Message
+                                </a></li>
+                        </ul>
+                    </div>
+
+                    {{-- Reject Button Group --}}
+                    <div class="btn-group w-100" role="group">
+                        <button wire:click="updateStatus({{ $violation->id }}, 'rejected')"
+                            class="btn btn-sm btn-danger">
+                            Reject
+                        </button>
+                        <button class="btn btn-sm btn-danger dropdown-toggle dropdown-toggle-split"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <span class="visually-hidden">Toggle Dropdown</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#"
+                                    wire:click.prevent="rejectWithMessage({{ $violation->id }})">
+                                    Reject with Message
+                                </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </footer>
+            @endif
+        </article>
+        @empty
+        <div class="text-center py-4">
+            <i class="bi bi-inbox fs-1 mb-2 text-muted"></i>
+            <h6 class="fw-medium">No Reports</h6>
+            <p class="small text-muted">There are currently no reports to display.</p>
         </div>
-
-        <!-- Actions (mobile) -->
-        @if ($violation->status === 'pending')
-        <footer class="mt-3 pt-3 border-top">
-            <div class="d-flex flex-column" style="gap: 0.5rem;">
-                {{-- Approve Button Group --}}
-<div class="btn-group w-100" role="group">
-    <button wire:click="updateStatus({{ $violation->id }}, 'approved')"
-        class="btn btn-sm btn-success"
-        @if(!isset($violationStatuses[$violation->id]['plate_status']) || 
-            $violationStatuses[$violation->id]['plate_status'] !== 'found')
-            disabled
-            title="Enter a valid license plate to approve"
-        @endif>
-        Approve
-    </button>
-    <button class="btn btn-sm btn-success dropdown-toggle dropdown-toggle-split"
-        data-bs-toggle="dropdown" 
-        aria-expanded="false"
-        @if(!isset($violationStatuses[$violation->id]['plate_status']) || 
-            $violationStatuses[$violation->id]['plate_status'] !== 'found')
-            disabled
-            title="Enter a valid license plate to approve"
-        @endif>
-        <span class="visually-hidden">Toggle Dropdown</span>
-    </button>
-    <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="#"
-                wire:click.prevent="approveWithMessage({{ $violation->id }})">
-                Approve with Message
-            </a></li>
-    </ul>
-</div>
-
-                {{-- Reject Button Group --}}
-                <div class="btn-group w-100" role="group">
-                    <button wire:click="updateStatus({{ $violation->id }}, 'rejected')"
-                        class="btn btn-sm btn-danger">
-                        Reject
-                    </button>
-                    <button class="btn btn-sm btn-danger dropdown-toggle dropdown-toggle-split"
-                        data-bs-toggle="dropdown" aria-expanded="false">
-                        <span class="visually-hidden">Toggle Dropdown</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#"
-                                wire:click.prevent="rejectWithMessage({{ $violation->id }})">
-                                Reject with Message
-                            </a></li>
-                    </ul>
-                </div>
-            </div>
-        </footer>
-        @endif
-    </article>
-    @empty
-    <div class="text-center py-4">
-        <i class="bi bi-inbox fs-1 mb-2 text-muted"></i>
-        <h6 class="fw-medium">No Reports</h6>
-        <p class="small text-muted">There are currently no reports to display.</p>
+        @endforelse
     </div>
-    @endforelse
-</div>
-        {{-- Approve with Message Modal --}}
-        <div wire:ignore.self class="modal fade" id="approveMessageModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Sending to Reporter — Approve</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    {{-- Approve with Message Modal --}}
+    <div wire:ignore.self class="modal fade" id="approveMessageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sending to Reporter — Approve</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Choose message</label>
+                        <select class="form-select" wire:model.live="selectedApproveMessage">
+                            <option value="">-- Select a message --</option>
+
+                            {{-- your canned messages --}}
+                            @foreach($approveMessages as $key => $text)
+                            <option value="{{ $key }}">{{ $text }}</option>
+                            @endforeach
+
+                            {{-- "Other" option that shows an input (same pattern you used before) --}}
+                            <option value="other">Other</option>
+                        </select>
+                        @error('selectedApproveMessage') <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Choose message</label>
-                            <select class="form-select" wire:model.live="selectedApproveMessage">
-                                <option value="">-- Select a message --</option>
-
-                                {{-- your canned messages --}}
-                                @foreach($approveMessages as $key => $text)
-                                <option value="{{ $key }}">{{ $text }}</option>
-                                @endforeach
-
-                                {{-- "Other" option that shows an input (same pattern you used before) --}}
-                                <option value="other">Other</option>
-                            </select>
-                            @error('selectedApproveMessage') <div class="text-danger small mt-1">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        {{-- show input only when "Other" is selected (same pattern as your Description block) --}}
-                        @if($selectedApproveMessage === 'other')
-                        <div class="mb-3">
-                            <label class="form-label">Custom message</label>
-                            <input type="text" wire:model.live="approveCustomMessage" placeholder="Enter details"
-                                class="form-control mt-1 mt-md-2" required />
-                            @error('approveCustomMessage') <div class="text-danger small mt-1">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        @endif
-
-                        <div class="small text-muted">Message will be saved in the log and used as action taken.</div>
+                    {{-- show input only when "Other" is selected (same pattern as your Description block) --}}
+                    @if($selectedApproveMessage === 'other')
+                    <div class="mb-3">
+                        <label class="form-label">Custom message</label>
+                        <input type="text" wire:model.live="approveCustomMessage" placeholder="Enter details"
+                            class="form-control mt-1 mt-md-2" required />
+                        @error('approveCustomMessage') <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
                     </div>
+                    @endif
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" wire:click="sendApproveMessage" class="btn btn-primary btn-sm"
-                            @if($selectedApproveMessage==='' || ($selectedApproveMessage==='other' &&
-                            trim($approveCustomMessage)==='' )) disabled @endif>
-                            Send
-                        </button>
-                    </div>
+                    <div class="small text-muted">Message will be saved in the log and used as action taken.</div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" wire:click="sendApproveMessage" class="btn btn-primary btn-sm"
+                        @if($selectedApproveMessage==='' || ($selectedApproveMessage==='other' &&
+                        trim($approveCustomMessage)==='' )) disabled @endif>
+                        Send
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
 
-        {{-- Reject with Message Modal --}}
-        <div wire:ignore.self class="modal fade" id="rejectMessageModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Sending to Reporter — Reject</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    {{-- Reject with Message Modal --}}
+    <div wire:ignore.self class="modal fade" id="rejectMessageModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sending to Reporter — Reject</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Choose message</label>
+                        <select class="form-select" wire:model.live="selectedRejectMessage">
+                            <option value="">-- Select a message --</option>
+
+                            {{-- your canned reject messages --}}
+                            @foreach($rejectMessages as $key => $text)
+                            <option value="{{ $key }}">{{ $text }}</option>
+                            @endforeach
+
+                            {{-- "Other" option that shows an input just like your Description block --}}
+                            <option value="other">Other</option>
+                        </select>
+                        @error('selectedRejectMessage') <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Choose message</label>
-                            <select class="form-select" wire:model.live="selectedRejectMessage">
-                                <option value="">-- Select a message --</option>
-
-                                {{-- your canned reject messages --}}
-                                @foreach($rejectMessages as $key => $text)
-                                <option value="{{ $key }}">{{ $text }}</option>
-                                @endforeach
-
-                                {{-- "Other" option that shows an input just like your Description block --}}
-                                <option value="other">Other</option>
-                            </select>
-                            @error('selectedRejectMessage') <div class="text-danger small mt-1">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        @if($selectedRejectMessage === 'other')
-                        <div class="mb-3">
-                            <label class="form-label">Custom message</label>
-                            <input type="text" wire:model.live="rejectCustomMessage" placeholder="Enter details"
-                                class="form-control mt-1 mt-md-2" required />
-                            @error('rejectCustomMessage') <div class="text-danger small mt-1">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        @endif
-
-                        <div class="small text-muted">Message will be saved in the log and used as action taken.</div>
+                    @if($selectedRejectMessage === 'other')
+                    <div class="mb-3">
+                        <label class="form-label">Custom message</label>
+                        <input type="text" wire:model.live="rejectCustomMessage" placeholder="Enter details"
+                            class="form-control mt-1 mt-md-2" required />
+                        @error('rejectCustomMessage') <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
                     </div>
+                    @endif
 
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" wire:click="sendRejectMessage" class="btn btn-danger btn-sm"
-                            @if($selectedRejectMessage==='' || ($selectedRejectMessage==='other' &&
-                            trim($rejectCustomMessage)==='' )) disabled @endif>
-                            Send
-                        </button>
-                    </div>
+                    <div class="small text-muted">Message will be saved in the log and used as action taken.</div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" wire:click="sendRejectMessage" class="btn btn-danger btn-sm"
+                        @if($selectedRejectMessage==='' || ($selectedRejectMessage==='other' &&
+                        trim($rejectCustomMessage)==='' )) disabled @endif>
+                        Send
+                    </button>
                 </div>
             </div>
         </div>
+    </div>
     {{-- Empty state --}}
     @if($violations->isEmpty())
     <div class="text-center py-8">
