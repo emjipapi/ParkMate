@@ -1,38 +1,50 @@
 {{-- resources\views\livewire\admin\analytics-chart-component.blade.php --}}
 <div class="w-full" style="max-width: 1200px; margin: auto;">
     <div class="w-full" style="max-width: 1200px; margin: auto;">
-        <!-- Filters Row -->
-        <div class="d-flex justify-content-start gap-2 mb-3" wire:loading.class="opacity-50">
-            <!-- Date Selector -->
-            <label for="dateSelect" class="block text-sm font-medium text-gray-700 mb-2">
-                Date:
-            </label>
-            <input type="date" id="dateSelect" wire:model.live="selectedDate" class="form-control form-control-sm w-auto d-inline 
-           focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 
-           sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed" wire:loading.attr="disabled"
-                wire:target="selectedDate,chartType" min="{{ min($dates) }}" max="{{ max($dates) }}"
-                onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
+<!-- Filters Row -->
+<div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3 mb-3" wire:loading.class="opacity-50">
+    <!-- Date Selector -->
+    <div class="d-flex flex-column">
+        <label for="dateSelect" class="form-label mb-1 text-sm">Date:</label>
+        <input 
+            type="date" 
+            id="dateSelect" 
+            wire:model.change="selectedDate" 
+            class="form-control form-control-sm w-100 w-md-auto"
+            wire:loading.attr="disabled"
+            wire:target="selectedDate,chartType"
+            min="{{ min($dates) }}" 
+            max="{{ max($dates) }}"
+            onfocus="this.showPicker();" 
+            onmousedown="event.preventDefault(); this.showPicker();">
+    </div>
 
-            <!-- Chart Type Selector -->
-            <div class="flex-1 min-w-48">
-                <label for="chartType" class="block text-sm font-medium text-gray-700 mb-2">
-                    Chart Type:
-                </label>
-                <select id="chartType" wire:model.live="chartType"
-                    class="form-control form-control-sm w-auto d-inline focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
-                    wire:loading.attr="disabled" wire:target="selectedDate,chartType">
-                    <option value="entries">Peak Entry Hours</option>
-                    <option value="duration">Average Duration of Stays</option>
-                    <option value="logins">User Logins</option>
-                    <option value="admin_logins">Admin Logins</option>
-                </select>
-            </div>
-        </div>
+    <!-- Chart Type Selector -->
+    <div class="d-flex flex-column flex-grow-1">
+        <label for="chartType" class="form-label mb-1 text-sm">Chart Type:</label>
+        <select 
+            id="chartType" 
+            wire:model.change="chartType"
+            class="form-select form-select-sm w-100 w-md-auto"
+            style="max-width: 200px;"
+            wire:loading.attr="disabled" 
+            wire:target="selectedDate,chartType">
+            <option value="entries">Peak Entry Hours</option>
+            <option value="duration">Average Duration of Stays</option>
+            <option value="logins">User Logins</option>
+            <option value="admin_logins">Admin Logins</option>
+        </select>
+    </div>
+</div>
+
 
         <!-- Chart Container -->
         <div class="h-96 w-full" style="height: 500px;">
             <canvas x-data="chartComponent()" x-ref="canvas" wire:ignore></canvas>
         </div>
+        <p class="text-muted text-center d-block d-md-none mt-2" style="font-size: 0.9rem;">
+    📊 Best viewed on desktop for full chart details.
+</p>
     </div>
 
     <script>

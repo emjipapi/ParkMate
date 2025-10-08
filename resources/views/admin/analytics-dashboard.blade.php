@@ -317,6 +317,73 @@
             opacity: 1;
             pointer-events: auto;
         }
+        .mobile-menu-btn {
+            display: none;
+            /* hidden on desktop */
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: white;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 768px) {
+
+            .mobile-menu-btn {
+                display: inline-block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                /* hidden */
+                z-index: 1000;
+                transition: transform 0.3s ease-in-out;
+
+            }
+
+            .sidebar .mt-auto {
+                margin-top: 0 !important;
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                /* slide in */
+            }
+
+            .content,
+            .top-bar,
+            .bottom-bar {
+                margin-left: 0;
+                /* full width on mobile */
+            }
+
+            .bottom-bar {
+                left: 0;
+                width: 100%;
+                position: relative;
+                /* or fixed if you want it always at bottom */
+                padding: 0 10px;
+                /* optional: less padding for mobile */
+                flex-direction: column;
+                /* optional: stack items vertically if needed */
+                gap: 5px;
+            }
+
+
+
+            .table-responsive {
+                touch-action: pan-x pan-y;
+                /* enable horizontal touch scrolling for table */
+            }
+                      .content {
+            padding: 10px;
+            padding-bottom: 20px;
+        }
+                .btn-add-slot:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
@@ -329,6 +396,7 @@
         <div class="admin-header">
             <h4>Admin</h4>
         </div>
+        <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
         <div class="btn-wrapper mt-3">
             <a href="{{ url('/admin-dashboard') }}" style="text-decoration: none;">
                 <button class="btn active">Dashboard</button>
@@ -369,6 +437,7 @@
     </div>
 
     <div class="top-bar">
+        <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
     </div>
@@ -377,13 +446,13 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Manage</h3>
+                <h3 class="mb-0 me-3">View</h3>
                 <h6 class="mb-0">Statistcs</h6>
             </div>
             <span class="text-muted">Home > Dashboard > Analytics Dashboard</span>
         </div>
 
-        <div class="position-absolute m-3 d-none d-md-block">
+        <div class=" m-3 d-none d-md-block">
             <a href="/admin-dashboard" wire:navigate
                 class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
                 style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
@@ -418,6 +487,12 @@
     </script>
     @livewireScripts
     <script src="{{ asset('js/chart.js') }}"></script>
+        <script>
+        function openSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    sidebar.classList.toggle('open');
+}
+    </script>
 </body>
 
 </html>
