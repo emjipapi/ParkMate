@@ -225,67 +225,70 @@
                 <img src="{{ asset('storage/' . $map->file_path) }}" id="live-map-image" alt="{{ $map->name }}">
 
                 <template x-for="(cfg, areaKey) in areaConfig" :key="areaKey">
-                    <template x-if="cfg.enabled">
+    <template x-if="cfg.enabled">
+        <div>
+            <div class="map-marker" :data-area="areaKey" :data-x="cfg.x_percent || 50"
+                :data-y="cfg.y_percent || 50" :data-size="cfg.marker_size || 28" :style="{
+                    width: (cfg.marker_size || 28) + 'px',
+                    height: (cfg.marker_size || 28) + 'px',
+                    background: getMarkerColor(areaKey),
+                    border: '3px solid #fff',
+                    borderRadius: '50%',
+                    fontSize: '10px',
+                    fontWeight: 'bold',
+                    color: 'white'
+                }">
+                <span x-show="cfg.show_label_letter !== false"
+                    x-text="(cfg.label || 'A').substring(0, 1)"></span>
+            </div>
+
+            <div class="map-label" :data-area="areaKey" :data-position="cfg.label_position || 'right'"
+                :style="{
+                    background: 'rgba(0, 0, 0, ' + (cfg.label_opacity ?? 0.78) + ')'
+                }">
+                <div class="label-col" :title="cfg.label || ''">
+                    <strong x-text="cfg.label || 'A'"></strong>
+                </div>
+
+                <div class="counts-col">
+                    <!-- Show Motorcycles only if motorcycle_total > 0 AND (no car slots OR has motorcycle data) -->
+                    <template x-if="areaStatuses[areaKey] && 
+                        (areaStatuses[areaKey].motorcycle_total !== null && 
+                         areaStatuses[areaKey].motorcycle_total !== undefined &&
+                         areaStatuses[areaKey].motorcycle_total > 0) &&
+                        (areaStatuses[areaKey].total === 0 || 
+                        (areaStatuses[areaKey].motorcycle_available !== null && 
+                         areaStatuses[areaKey].motorcycle_available !== undefined))">
                         <div>
-                            <div class="map-marker" :data-area="areaKey" :data-x="cfg.x_percent || 50"
-                                :data-y="cfg.y_percent || 50" :data-size="cfg.marker_size || 28" :style="{
-                width: (cfg.marker_size || 28) + 'px',
-                height: (cfg.marker_size || 28) + 'px',
-                background: getMarkerColor(areaKey),
-                border: '3px solid #fff',
-                borderRadius: '50%',
-                fontSize: '10px',
-                fontWeight: 'bold',
-                color: 'white'
-            }">
-                                <span x-show="cfg.show_label_letter !== false"
-                                    x-text="(cfg.label || 'A').substring(0, 1)"></span>
-                            </div>
-
-                            <div class="map-label" :data-area="areaKey" :data-position="cfg.label_position || 'right'"
-                                :style="{
-                background: 'rgba(0, 0, 0, ' + (cfg.label_opacity ?? 0.78) + ')'
-            }">
-                                <div class="label-col" :title="cfg.label || ''">
-                                    <strong x-text="cfg.label || 'A'"></strong>
-                                </div>
-
-                                <div class="counts-col">
-                                    <!-- Show Motorcycles only if there are NO car slots OR if there ARE motorcycles -->
-                                    <template x-if="areaStatuses[areaKey] && 
-                               (areaStatuses[areaKey].total === 0 || 
-                                (areaStatuses[areaKey].motorcycle_available !== null && 
-                                 areaStatuses[areaKey].motorcycle_available !== undefined))">
-                                        <div>
-                                            <div class="caption">Motorcycles</div>
-                                            <div class="value" x-text="areaStatuses[areaKey]
-                            ? (
-                                (areaStatuses[areaKey].motorcycle_available !== null && areaStatuses[areaKey].motorcycle_available !== undefined
-                                  ? areaStatuses[areaKey].motorcycle_available
-                                  : '—')
-                                + ' Available / ' +
-                                (areaStatuses[areaKey].motorcycle_total !== null && areaStatuses[areaKey].motorcycle_total !== undefined
-                                  ? areaStatuses[areaKey].motorcycle_total + ' Total'
-                                  : '-')
-                              )
-                            : '—'"></div>
-                                        </div>
-                                    </template>
-
-                                    <!-- Show Car Slots only if there ARE car slots -->
-                                    <template x-if="areaStatuses[areaKey] && areaStatuses[areaKey].total > 0">
-                                        <div>
-                                            <div class="caption">Car Slots</div>
-                                            <div class="value" x-text="areaStatuses[areaKey]
-                            ? ((areaStatuses[areaKey].occupied ?? 0) + ' Occupied / ' + (areaStatuses[areaKey].total ?? 0)) + ' Total'
-                            : '-'"></div>
-                                        </div>
-                                    </template>
-                                </div>
-                            </div>
+                            <div class="caption">Motorcycles</div>
+                            <div class="value" x-text="areaStatuses[areaKey]
+                                ? (
+                                    (areaStatuses[areaKey].motorcycle_available !== null && areaStatuses[areaKey].motorcycle_available !== undefined
+                                      ? areaStatuses[areaKey].motorcycle_available
+                                      : '—')
+                                    + ' Available / ' +
+                                    (areaStatuses[areaKey].motorcycle_total !== null && areaStatuses[areaKey].motorcycle_total !== undefined
+                                      ? areaStatuses[areaKey].motorcycle_total + ' Total'
+                                      : '-')
+                                  )
+                                : '—'"></div>
                         </div>
                     </template>
-                </template>
+
+                    <!-- Show Car Slots only if total > 0 -->
+                    <template x-if="areaStatuses[areaKey] && areaStatuses[areaKey].total > 0">
+                        <div>
+                            <div class="caption">Car Slots</div>
+                            <div class="value" x-text="areaStatuses[areaKey]
+                                ? ((areaStatuses[areaKey].occupied ?? 0) + ' Occupied / ' + (areaStatuses[areaKey].total ?? 0)) + ' Total'
+                                : '-'"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </template>
+</template>
             </div>
         </div>
 
