@@ -183,40 +183,42 @@
             }
 
             /* left column: fixed narrow width + truncation */
-            .map-label .label-col {
-                flex: 0 0 56px;
-                /* fixed width */
-                max-width: 56px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                text-align: center;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                white-space: nowrap;
-            }
+               /* left column: flexible width that grows with content */
+    .map-label .label-col {
+        flex: 0 0 auto;
+        /* flexible width based on content */
+        min-width: 56px;
+        /* minimum width */
+        max-width: 150px;
+        /* maximum width to prevent it from getting too large */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 0 4px;
+        /* add some padding */
+    }
 
-            /* right column: stacked counts centered vertically */
-            .map-label .counts-col {
-                display: flex;
-                flex-direction: column;
-                align-items: flex-start;
-                /* keep counts compact; use center if you prefer */
-                justify-content: center;
-                gap: 3px;
-            }
+    /* right column: stacked counts centered vertically */
+    .map-label .counts-col {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 3px;
+    }
 
-            /* caption + value styles */
-            .map-label .caption {
-                font-size: 11px;
-                color: #d1d5db;
-                line-height: 1;
-            }
+    /* caption + value styles */
+    .map-label .caption {
+        font-size: 11px;
+        color: #d1d5db;
+        line-height: 1;
+    }
 
-            .map-label .value {
-                font-weight: 600;
-                line-height: 1;
-            }
+    .map-label .value {
+        font-weight: 600;
+        line-height: 1;
+    }
         </style>
 
         <div class="live-map-viewport" id="live-map-viewport">
