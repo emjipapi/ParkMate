@@ -16,6 +16,12 @@
                     Entry/Exit Logs
                 </a>
             </li>
+            <li class="flex-shrink-0">
+                <a class="nav-link px-4 py-2 cursor-pointer no-underline text-black whitespace-nowrap {{ $activeTab === 'unknown' ? 'active font-semibold border-b-2 border-blue-500 text-black' : 'text-gray-600' }}"
+                    wire:click="setActiveTab('unknown')">
+                    Unknown Tags
+                </a>
+            </li>
         </ul>
     </div>
 
@@ -23,12 +29,13 @@
     <div>
         {{-- Pending Reports --}}
         @if ($activeTab === 'system')
-            <livewire:admin.activity-log-system-component />
+        <livewire:admin.activity-log-system-component />
 
-            {{-- Approved Reports --}}
+        {{-- Approved Reports --}}
         @elseif ($activeTab === 'entry/exit')
-            <livewire:admin.activity-log-entry-exit-component />
-
+        <livewire:admin.activity-log-entry-exit-component />
+        @elseif ($activeTab === 'unknown')
+        <livewire:admin.unknown-tags-component />
         @endif
     </div>
 </div>
