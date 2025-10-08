@@ -124,7 +124,7 @@ Route::middleware(['admin'])->group(function () {
     Route::view('/create-report', 'admin.create-violation-report');
     Route::view('/activity-log', 'admin.activity-log');
     Route::view('/parking-slots', 'admin.parking-slots')->name('parking.slots');
-    Route::view('/map-manager', 'admin.map-template-editor')->name('parking.slots');
+    Route::view('/parking-slots/map-manager', 'admin.map-template-editor')->name('parking.slots');
     Route::get('/map/{map}', function (ParkingMap $map) {
         return view('admin.parking-map', ['map' => $map]);
     })->name('parking-map.live');;

@@ -446,8 +446,15 @@
 
     <div class="top-bar">
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
-        <div id="clock" style="font-size: 1rem;"></div>
+        <div id="clock" style="font-size: 1rem;" class="d-none d-md-block"></div>
         <span style="flex: 1;"></span>
+                <div class="live-btn-bar me-1">
+            <a href="{{ url('/live-attendance') }}" style="text-decoration: none;">
+                <button class="live-btn">
+                    Open Map
+                </button>
+            </a>
+        </div>
         <div class="live-btn-bar">
             <a href="{{ url('/live-attendance') }}" style="text-decoration: none;">
                 <button class="live-btn">

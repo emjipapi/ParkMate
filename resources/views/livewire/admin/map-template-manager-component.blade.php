@@ -7,7 +7,13 @@
         {{ session('success') }}
     </div>
     @endif
-
+        <div class=" d-none d-md-block">
+            <a href="/parking-slots" wire:navigate
+                class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
+                style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+        </div>
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {{-- Map List --}}
         <div class="xl:col-span-1 space-y-4">

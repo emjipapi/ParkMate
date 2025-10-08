@@ -486,6 +486,11 @@
             data-bs-target="#createAreaModal">
             Add Parking Area
         </button>
+            <div href='/parking-slots/map-manager' wire:navigate>
+                <button type="button" class="btn-add-slot btn btn-primary">
+                    Manage Maps
+                </button>
+            </div>
         </div>
 
         <div class="square-box">

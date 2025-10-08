@@ -595,8 +595,8 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Modify</h3>
-                <h6 class="mb-0">Map</h6>
+                <h3 class="mb-0 me-3">Manage</h3>
+                <h6 class="mb-0">Maps</h6>
             </div>
             <span class="text-muted">Home > Live Map Template Manager</span>
         </div>
