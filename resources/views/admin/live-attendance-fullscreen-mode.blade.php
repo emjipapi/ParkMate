@@ -142,13 +142,6 @@
     <div class="top-bar">
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
-                <div class="live-btn-bar">
-            <a href="{{ url('/live-attendance') }}" style="text-decoration: none;">
-                <button class="live-btn">
-                    Live Attendance Mode
-                </button>
-            </a>
-        </div>
     </div>
     <!-- Main Content -->
     <div class="content">

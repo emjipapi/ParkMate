@@ -371,11 +371,6 @@
     <div class="top-bar">
         <div id="clock" style="font-size: 1rem;"></div>
         <span style="flex: 1;"></span>
-        <div href='/admin-dashboard/live-attendance-mode' wire:navigate class="live-btn-bar">
-            <button class="live-btn">
-                Live Attendance Mode
-            </button>
-        </div>
     </div>
 
     <!-- Main Content -->
