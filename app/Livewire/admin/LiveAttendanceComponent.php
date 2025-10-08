@@ -9,7 +9,6 @@ use Carbon\Carbon;
 class LiveAttendanceComponent extends Component
 {
     public $scans = [];
-    private $cooldownSeconds = 5;
 
     public function mount()
     {
@@ -22,43 +21,43 @@ class LiveAttendanceComponent extends Component
         $this->loadLatestScans();
     }
 
-   public function loadLatestScans()
-    {
-        $this->scans = ActivityLog::with('user')
-            ->where(function($query) {
-                $query->where('actor_type', 'user')                           // regular user scans
-                      ->whereIn('action', ['entry', 'exit'])
-                      ->orWhere(function($subQuery) {
-                          $subQuery->where('actor_type', 'system')             // system denied entries
-                                   ->where('action', 'denied_entry');
-                      });
+public function loadLatestScans()
+{
+    $this->scans = ActivityLog::with('user')
+        ->where(function ($q) {
+            $q->where(function ($sub) {
+                $sub->where('actor_type', 'user')
+                    ->whereIn('action', ['entry', 'exit'])
+                    ->whereNotNull('details')
+                    ->where('details', 'like', '%main gate%');
             })
-            ->latest()
-            ->take(3)
-            ->get()
-            ->map(function ($log) {
-                // Now we can use the user relationship for all types since actor_id contains the user ID
-                $user = $log->user;
+            ->orWhere(function ($sub2) {
+                $sub2->where('actor_type', 'system')
+                     ->where('action', 'denied_entry')
+                     ->whereNotNull('details')
+                     ->where('details', 'like', '%main gate%');
+            });
+        })
+        ->orderBy('created_at', 'desc')
+        ->take(3)
+        ->get()
+        ->map(function ($log) {
+            $user = $log->user;
 
-                // Determine status based on action
-                if ($log->action === 'denied_entry') {
-                    $status = 'DENIED';
-                } elseif ($log->action === 'entry') {
-                    $status = 'IN';
-                } else {
-                    $status = 'OUT';
-                }
+            $status = $log->action === 'denied_entry' ? 'DENIED' : ($log->action === 'entry' ? 'IN' : 'OUT');
 
-                return [
-                    'name' => "{$user->lastname}, {$user->firstname}",
-                    'status' => $status,
-                    'picture' => $user->profile_picture
-                        ? route('profile.picture', ['filename' => $user->profile_picture])
-                        : asset('images/placeholder.jpg'),
-                ];
-            })
-            ->toArray();
-    }
+            return [
+                'name'    => $user ? "{$user->lastname}, {$user->firstname}" : 'Unknown',
+                'status'  => $status,
+                'picture' => $user && $user->profile_picture
+                    ? route('profile.picture', ['filename' => $user->profile_picture])
+                    : asset('images/placeholder.jpg'),
+                'time'    => optional($log->created_at)->toDateTimeString(),
+            ];
+        })
+        ->toArray();
+}
+
 
     public function render()
     {
