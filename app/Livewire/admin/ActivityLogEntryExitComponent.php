@@ -110,12 +110,15 @@ public function updatedPerPage()
             ->when($this->startDate, fn (Builder $q) =>
                 $q->where('created_at', '>=', Carbon::parse($this->startDate)->startOfDay())
             )
-            ->when($this->endDate, fn (Builder $q) =>
-                $q->where('created_at', '<=', Carbon::parse($this->endDate)->endOfDay())
-            )
+          ->when($this->endDate, fn (Builder $q) =>
+    $q->where('created_at', '<=', Carbon::parse($this->endDate)->endOfDay())
+);
 
-            ->orderBy('created_at', $this->sortOrder)
-            ->paginate($this->perPage, ['*'], $this->pageName); // 👈 custom page name
+$secondaryDirection = $this->sortOrder === 'desc' ? 'desc' : 'asc';
+
+$logs = $logs->orderBy('created_at', $this->sortOrder)
+             ->orderBy('id', $secondaryDirection)
+             ->paginate($this->perPage, ['*'], $this->pageName);
 
         return view('livewire.admin.activity-log-entry-exit-component', [
             'activityLogs' => $logs,
