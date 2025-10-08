@@ -164,12 +164,38 @@
             padding: 0 20px;
             font-weight: 500;
         }
+                .mobile-warning {
+    display: none;
+}
+@media (max-width: 768px) {
+    .desktop-content {
+        display: none !important;
+    }
+    .mobile-warning {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: #f8f9fa;
+        color: #333;
+        text-align: center;
+    }
+}
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body>
+        <!-- Show this message only on mobile -->
+    <div class="mobile-warning">
+        <div class="text-center p-5">
+            <h3>This page is only available on desktop</h3>
+            <p>Please use a larger screen to view this page.</p>
+        </div>
+    </div>
 
+    <!-- Main page content -->
+    <div class="desktop-content">
     <!-- Sidebar -->
     <div class="sidebar d-flex flex-column">
         <div class="admin-header">
@@ -229,6 +255,7 @@
             </a>
         </div>
     </div>
+
     <!-- Main Content -->
     <div class="content">
         <!-- Header stays at the top -->
@@ -251,6 +278,7 @@
     <div class="bottom-bar">
         <span>Copyright © 2025 - 2025 All rights reserved</span>
         <span>ParkMate</span>
+    </div>
     </div>
 
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>

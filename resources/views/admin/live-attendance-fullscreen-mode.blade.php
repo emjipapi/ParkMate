@@ -132,49 +132,68 @@
         .live-btn:hover {
             background-color: var(--bg1);
         }
+        .mobile-warning {
+    display: none;
+}
+@media (max-width: 768px) {
+    .desktop-content {
+        display: none !important;
+    }
+    .mobile-warning {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background: #f8f9fa;
+        color: #333;
+        text-align: center;
+    }
+}
     </style>
 </head>
 
 <body>
-
-
-
-    <div class="top-bar">
-        <div id="clock" style="font-size: 1rem;"></div>
-        <span style="flex: 1;"></span>
-    </div>
-    <!-- Main Content -->
-    <div class="content">
-        <!-- Header stays at the top -->
-        <div class="d-flex align-items-baseline justify-content-between mb-3">
-            <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Live Attendance</h3>
-            </div>
-            <div>
-                <a href="{{ url('/admin-dashboard/live-attendance-mode') }}" style="text-decoration: none;">
-                    <button type="button" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-fullscreen-exit"></i>
-                        Exit Full Screen
-                    </button>
-                </a>
-            </div>
-        </div>
-
-        <!-- Centering only this section -->
-        <div class="flex-grow-1 d-flex justify-content-center align-items-center">
-            <livewire:admin.live-attendance-fullscreen-component />
+    <!-- Show this message only on mobile -->
+    <div class="mobile-warning">
+        <div class="text-center p-5">
+            <h3>This page is only available on desktop</h3>
+            <p>Please use a larger screen to view this page.</p>
         </div>
     </div>
 
+    <!-- Main page content -->
+    <div class="desktop-content">
+        <div class="top-bar">
+            <div id="clock" style="font-size: 1rem;"></div>
+            <span style="flex: 1;"></span>
+        </div>
 
-    <!-- Bottom Bar -->
-    <div class="bottom-bar">
-        <span>Copyright © 2025 - 2025 All rights reserved</span>
-        <span>ParkMate</span>
+        <div class="content">
+            <div class="d-flex align-items-baseline justify-content-between mb-3">
+                <div class="d-flex align-items-baseline">
+                    <h3 class="mb-0 me-3">Live Attendance</h3>
+                </div>
+                <div>
+                    <a href="{{ url('/admin-dashboard/live-attendance-mode') }}" style="text-decoration: none;">
+                        <button type="button" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-fullscreen-exit"></i>
+                            Exit Full Screen
+                        </button>
+                    </a>
+                </div>
+            </div>
+
+            <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+                <livewire:admin.live-attendance-fullscreen-component />
+            </div>
+        </div>
+
+        <div class="bottom-bar">
+            <span>Copyright © 2025 - 2025 All rights reserved</span>
+            <span>ParkMate</span>
+        </div>
     </div>
-
-    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
-    <script>
+        <script>
         function updateClock() {
         const now = new Date();
         const hours = String(now.getHours()).padStart(2, '0');
@@ -189,5 +208,6 @@
     updateClock(); // run once immediately
     </script>
 </body>
+
 
 </html>
