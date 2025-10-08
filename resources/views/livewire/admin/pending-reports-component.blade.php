@@ -35,7 +35,10 @@
                     wire:click="$set('sortOrder', 'asc')">Oldest</button>
             </div>
         </div>
-
+        <button type="button" class="btn btn-outline-secondary btn-sm" wire:click="$refresh">
+            <i class="bi bi-arrow-clockwise"></i>
+            Refresh
+        </button>
         <!-- RIGHT: per-page + pagination (anchored to far right) -->
         <div class="d-flex align-items-center gap-2 ms-auto">
             <div class="d-flex align-items-center gap-1">
