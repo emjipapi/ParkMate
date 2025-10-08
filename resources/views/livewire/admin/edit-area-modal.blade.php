@@ -1,4 +1,3 @@
-{{-- resources\views\livewire\admin\edit-area-modal.blade.php --}}
 <div wire:ignore.self class="modal fade" id="editAreaModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -102,6 +101,13 @@
                         <small class="text-muted">Enable to add motorcycle parking for this area.</small>
                         @endif
                     </div>
+
+                    {{-- explicit validation hint when both are disabled --}}
+                    @if(!$carSlotsEnabled && !$motorcycleEnabled)
+                        <div class="mt-2">
+                            <small class="text-danger">@if($errors->has('area_flags')){{ $errors->first('area_flags') }}@else Please enable at least one slot type: Car Slots or Motorcycles. @endif</small>
+                        </div>
+                    @endif
                 </div>
 
             </div>
@@ -113,7 +119,14 @@
                 </button>
 
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" wire:click="updateArea">Save Changes</button>
+
+                {{-- Save disabled if both types are unchecked --}}
+                <button type="button"
+                        class="btn btn-primary @if(!$carSlotsEnabled && !$motorcycleEnabled) disabled cursor-not-allowed @endif"
+                        wire:click="updateArea"
+                        @if(!$carSlotsEnabled && !$motorcycleEnabled) disabled aria-disabled="true" title="Enable at least one slot type to save changes" @endif>
+                    Save Changes
+                </button>
             </div>
 
         </div>
