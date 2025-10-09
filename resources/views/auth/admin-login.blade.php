@@ -13,7 +13,7 @@
   <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
-
+<link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
   <style>
     body,
     html {
@@ -62,39 +62,40 @@
 
 <body>
   <div class="d-flex flex-column justify-content-center align-items-center vh-100 offset-up">
-    <h2 class="mb-4">Welcome to ParkMate</h2>
-    <div class="center-box">
+  <h2 class="mb-4">Welcome to ParkMate</h2>
+  <div class="center-box position-relative">
+    <a href="{{ url('/') }}" class="position-absolute text-decoration-none text-secondary" style="top: 15px; left: 15px; z-index: 10;">
+      <i class="bi bi-arrow-left fs-5"></i>
+    </a>
 
-      <p class="text-center mb-4">Sign in to start your session.</p>
+    <p class="text-center mb-4">Sign in to start your session.</p>
 
-
-      <!-- Display errors -->
-      @if ($errors->any())
-      <div class="alert alert-danger">
-        <ul class="mb-0">
-          @foreach ($errors->all() as $error)
-          {{ $error }}
-          @endforeach
-        </ul>
-      </div>
-      @endif
-
-      <form method="POST" action="{{ route('admin.login.submit') }}">
-        @csrf
-        <div class="mb-3">
-          <input type="text" name="username" class="form-control" placeholder="Username" required />
-
-        </div>
-        <div class="input-group mb-3">
-          <input type="password" name="password" class="form-control" placeholder="Password" required />
-          <span class="input-group-text bg-white border-start-0">
-            <i class="fas fa-lock text-secondary"></i>
-          </span>
-        </div>
-        <div class="d-flex justify-content-end mt-3">
-          <button type="submit" class="btn-signin">Sign In</button>
-        </div>
-      </form>
+    <!-- Display errors -->
+    @if ($errors->any())
+    <div class="alert alert-danger">
+      <ul class="mb-0">
+        @foreach ($errors->all() as $error)
+        {{ $error }}
+        @endforeach
+      </ul>
     </div>
+    @endif
+
+    <form method="POST" action="{{ route('admin.login.submit') }}">
+      @csrf
+      <div class="mb-3">
+        <input type="text" name="username" class="form-control" placeholder="Username" required />
+      </div>
+      <div class="input-group mb-3">
+        <input type="password" name="password" class="form-control" placeholder="Password" required />
+        <span class="input-group-text bg-white border-start-0">
+          <i class="fas fa-lock text-secondary"></i>
+        </span>
+      </div>
+      <div class="d-flex justify-content-end mt-3">
+        <button type="submit" class="btn-signin">Sign In</button>
+      </div>
+    </form>
   </div>
+</div>
 </body>

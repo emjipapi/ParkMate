@@ -13,7 +13,7 @@
   <link href="{{ asset('css/fonts.css') }}" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="{{ asset('css/all.min.css') }}" rel="stylesheet">
-
+<link rel="stylesheet" href="{{ asset('bootstrap-icons.css') }}">
   <style>
     body,
     html {
@@ -63,8 +63,10 @@
 <body>
   <div class="d-flex flex-column justify-content-center align-items-center vh-100 offset-up">
     <h2 class="mb-4">Welcome to ParkMate</h2>
-    <div class="center-box">
-
+    <div class="center-box position-relative">
+    <a href="{{ url('/') }}" class="position-absolute text-decoration-none text-secondary" style="top: 15px; left: 15px; z-index: 10;">
+      <i class="bi bi-arrow-left fs-5"></i>
+    </a>
       <p class="text-center mb-4">Sign in to start your session.</p>
 
 
