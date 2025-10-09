@@ -299,11 +299,9 @@
                 @empty
                 <tr>
                     <td colspan="8" class="text-center text-gray-500 py-6">
-                        <div class="flex flex-col items-center">
-                            <i class="bi bi-inbox text-3xl mb-2 text-gray-400"></i>
-                            <h6 class="font-medium">No Reports</h6>
-                            <p class="text-sm text-gray-400">There are currently no reports to display.</p>
-                        </div>
+    <div class="text-center py-8">
+        <div class="text-gray-500 text-lg mb-2">There are currently no reports to be display.</div>
+    </div>
                     </td>
                 </tr>
                 @endforelse
@@ -457,11 +455,9 @@
             </div>
         </article>
         @empty
-        <div class="text-center py-4">
-            <i class="bi bi-inbox fs-1 mb-2 text-muted"></i>
-            <h6 class="fw-medium">No Reports</h6>
-            <p class="small text-muted">There are currently no reports to display.</p>
-        </div>
+    <div class="text-center py-8">
+        <div class="text-gray-500 text-lg mb-2">No approved violations found</div>
+    </div>
         @endforelse
     </div>
 

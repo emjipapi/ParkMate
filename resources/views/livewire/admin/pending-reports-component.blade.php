@@ -520,11 +520,7 @@
             @endif
         </article>
         @empty
-        <div class="text-center py-4">
-            <i class="bi bi-inbox fs-1 mb-2 text-muted"></i>
-            <h6 class="fw-medium">No Reports</h6>
-            <p class="small text-muted">There are currently no reports to display.</p>
-        </div>
+
         @endforelse
     </div>
     {{-- Approve with Message Modal --}}

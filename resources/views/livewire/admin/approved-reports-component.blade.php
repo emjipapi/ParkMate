@@ -218,7 +218,11 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" class="text-center text-muted py-4">No approved violations found.</td>
+                    <td colspan="9" class="text-center text-muted py-4">
+                            <div class="text-center py-8">
+        <div class="text-gray-500 text-lg mb-2">There are currently no reports to be display.</div>
+    </div>
+                    </td>
                 </tr>
                 @endforelse
             </tbody>
@@ -397,11 +401,9 @@
             </footer>
         </article>
         @empty
-        <div class="text-center py-4">
-            <i class="bi bi-inbox fs-1 mb-2 text-muted"></i>
-            <h6 class="fw-medium">No approved violations found.</h6>
-            <p class="small text-muted">There are currently no reports to display.</p>
-        </div>
+    <div class="text-center py-8">
+        <div class="text-gray-500 text-lg mb-2">No approved violations found</div>
+    </div>
         @endforelse
     </div>
 
