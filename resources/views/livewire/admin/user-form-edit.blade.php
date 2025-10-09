@@ -159,7 +159,7 @@
         <div class="vehicle-rows">
             @foreach($vehicles as $index => $vehicle)
 
-                <div class="card mb-4" wire:key="vehicle-{{ $vehicle['uid'] }}">
+                <div class="card mb-4" id="vehicle-{{ $vehicle['id'] ?? $vehicle['uid'] }}" wire:key="vehicle-{{ $vehicle['uid'] }}">
                     <div class="card-body">
                         <div class="row mb-2 align-items-end">
                             <div class="col-md">
@@ -259,4 +259,20 @@
             </div>
         @endif
     </form>
+    @push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const hash = window.location.hash;
+    if (hash && document.querySelector(hash)) {
+        const el = document.querySelector(hash);
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        el.classList.add('border', 'border-primary', 'rounded'); // subtle highlight
+
+        // Remove highlight after a few seconds
+        setTimeout(() => el.classList.remove('border', 'border-primary', 'rounded'), 2500);
+    }
+});
+</script>
+@endpush
+
 </div>
