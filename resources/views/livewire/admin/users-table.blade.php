@@ -141,8 +141,9 @@
             <thead>
                 <tr>
                     <th x-show="check2" style="width: 40px;"></th>
+                    <th>ID</th>
                     <th>User ID</th>
-                    <th>Student/Employee ID</th>
+                    <th>User Type</th>
                     <th>Firstname</th>
                     <th>Middlename</th>
                     <th>Lastname</th>
@@ -152,7 +153,27 @@
                 </tr>
             </thead>
             <tbody>
-                @forelse ($users as $user)
+                
+                            @forelse ($users as $user)
+            @php
+                // determine displayed user id and type
+                $displayUserId = $user->student_id ?: $user->employee_id ?: '—';
+                $type = null;
+                if (!empty($user->student_id) && $user->student_id !== '0') {
+                    $type = 'Student';
+                } elseif (!empty($user->employee_id) && $user->employee_id !== '0') {
+                    $type = 'Employee';
+                } else {
+                    $type = 'Unknown';
+                }
+
+                // badge class
+                $typeClass = match($type) {
+                    'Student' => 'badge bg-primary',
+                    'Employee' => 'badge bg-success',
+                    default => 'badge bg-secondary'
+                };
+            @endphp
                 <tr x-bind:class="{ 'table-active': check2 && selectedIds.includes({{ $user->id }}) }">
                     <td x-show="check2">
                         <input type="checkbox" class="form-check-input" value="{{ $user->id }}"
@@ -171,6 +192,7 @@
                     </td>
                     <td>{{ $user->id }}</td>
                     <td>{{ $user->student_id ?? $user->employee_id }}</td>
+                    <td><span class="{{ $typeClass }}">{{ $type }}</span></td>
                     <td>{{ $user->firstname }}</td>
                     <td>{{ $user->middlename }}</td>
                     <td>{{ $user->lastname }}</td>
