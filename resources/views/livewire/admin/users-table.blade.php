@@ -39,6 +39,7 @@
 }
 
     }">
+    <livewire:admin.user-info-modal />
 
     <!-- Alert at the top -->
     <template x-if="showAlert">
@@ -153,27 +154,27 @@
                 </tr>
             </thead>
             <tbody>
-                
-                            @forelse ($users as $user)
-            @php
+
+                @forelse ($users as $user)
+                @php
                 // determine displayed user id and type
                 $displayUserId = $user->student_id ?: $user->employee_id ?: '—';
                 $type = null;
                 if (!empty($user->student_id) && $user->student_id !== '0') {
-                    $type = 'Student';
+                $type = 'Student';
                 } elseif (!empty($user->employee_id) && $user->employee_id !== '0') {
-                    $type = 'Employee';
+                $type = 'Employee';
                 } else {
-                    $type = 'Unknown';
+                $type = 'Unknown';
                 }
 
                 // badge class
                 $typeClass = match($type) {
-                    'Student' => 'badge bg-primary',
-                    'Employee' => 'badge bg-success',
-                    default => 'badge bg-secondary'
+                'Student' => 'badge bg-primary',
+                'Employee' => 'badge bg-success',
+                default => 'badge bg-secondary'
                 };
-            @endphp
+                @endphp
                 <tr x-bind:class="{ 'table-active': check2 && selectedIds.includes({{ $user->id }}) }">
                     <td x-show="check2">
                         <input type="checkbox" class="form-check-input" value="{{ $user->id }}"
@@ -207,125 +208,10 @@
 
 
                         <!-- More Info Icon -->
-                        <a href="#" class="text-info text-decoration-none" data-bs-toggle="modal"
-                            data-bs-target="#userInfoModal{{ $user->id }}">
+                        <a href="#" class="text-info text-decoration-none"
+                            wire:click.prevent="$dispatch('openUserModal', { id: {{ $user->id }} })">
                             <i class="bi bi-info-circle"></i>
                         </a>
-
-                        <!-- Modal -->
-                        <div class="modal fade" id="userInfoModal{{ $user->id }}" tabindex="-1"
-                            aria-labelledby="userInfoLabel{{ $user->id }}" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered ">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="userInfoLabel{{ $user->id }}">
-                                            User Details: {{ $user->firstname }} {{ $user->lastname }}
-                                        </h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <!-- Profile Picture -->
-                                        <div class="text-center mb-4">
-                                            @if($user->profile_picture)
-                                            <img src="{{ route('profile.picture', $user->profile_picture) }}"
-                                                alt="Profile Picture" class="rounded-circle"
-                                                style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #dee2e6;">
-
-
-                                            @else
-                                            <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center text-white"
-                                                style="width: 100px; height: 100px; font-size: 36px; font-weight: bold;">
-                                                {{ strtoupper(substr($user->firstname, 0, 1) . substr(
-                                                $user->lastname,
-                                                0,
-                                                1
-                                                )) }}
-                                            </div>
-                                            @endif
-                                        </div>
-                                        <!-- User Details -->
-                                        <div class="row mb-2">
-                                            <div class="col-md-4"><strong>Year & Section:</strong></div>
-                                            <div class="col-md-8">{{ $user->year_section }}</div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-md-4"><strong>Address:</strong></div>
-                                            <div class="col-md-8">{{ $user->address }}</div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-md-4"><strong>Contact Number:</strong></div>
-                                            <div class="col-md-8">{{ $user->contact_number }}</div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-md-4"><strong>License Number:</strong></div>
-                                            <div class="col-md-8">{{ $user->license_number }}</div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-md-4"><strong>Expiration Date:</strong></div>
-                                            <div class="col-md-8">{{ $user->expiration_date }}</div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-md-4"><strong>Created At:</strong></div>
-                                            <div class="col-md-8">{{ $user->created_at?->format('F d, Y h:i A') }}</div>
-                                        </div>
-                                        <div class="row mb-2">
-                                            <div class="col-md-4"><strong>Updated At:</strong></div>
-                                            <div class="col-md-8">{{ $user->updated_at?->format('F d, Y h:i A') }}</div>
-                                        </div>
-
-                                        <!-- Vehicles Section -->
-                                        <hr>
-                                        <h6 class="mb-3">Vehicles</h6>
-                                        <div class="vehicle-rows">
-                                            @forelse($user->vehicles as $vehicle)
-                                            <div class="card mb-3">
-                                                <div class="card-body p-3">
-                                                    <div class="row mb-1">
-                                                        <div class="col-md-4"><strong>Type:</strong></div>
-                                                        <div class="col-md-8">{{ ucfirst($vehicle->type) }}</div>
-                                                    </div>
-                                                    <div class="row mb-1">
-                                                        <div class="col-md-4"><strong>Model:</strong></div>
-                                                        <div class="col-md-8">{{ $vehicle->body_type_model }}</div>
-                                                    </div>
-                                                    <div class="row mb-1">
-                                                        <div class="col-md-4"><strong>Plate:</strong></div>
-                                                        <div class="col-md-8">{{ $vehicle->license_plate }}</div>
-                                                    </div>
-                                                    <div class="row mb-1">
-                                                        <div class="col-md-4"><strong>RFID:</strong></div>
-                                                        <div class="col-md-8">{{ $vehicle->rfid_tag }}</div>
-                                                    </div>
-                                                    <div class="row mb-1">
-                                                        <div class="col-md-4"><strong>OR No.:</strong></div>
-                                                        <div class="col-md-8">{{ $vehicle->or_number }}</div>
-                                                    </div>
-                                                    <div class="row mb-1">
-                                                        <div class="col-md-4"><strong>CR No.:</strong></div>
-                                                        <div class="col-md-8">{{ $vehicle->cr_number }}</div>
-                                                    </div>
-                                                    <div class="row mb-1">
-                                                        <div class="col-md-4"><strong>Created At:</strong></div>
-                                                        <div class="col-md-8">{{ $vehicle->created_at?->format('F d, Y
-                                                            h:i A') }}</div>
-                                                    </div>
-                                                    <div class="row mb-0">
-                                                        <div class="col-md-4"><strong>Updated At:</strong></div>
-                                                        <div class="col-md-8">{{ $vehicle->updated_at?->format('F d, Y
-                                                            h:i A') }}</div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            @empty
-                                            <p class="text-muted">No vehicles linked to this user.</p>
-                                            @endforelse
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
 
                     </td>
 
@@ -371,5 +257,12 @@
         localStorage.removeItem('userTable_selectedIds');
         localStorage.removeItem('userTable_multiselect');
     });
+
+  window.addEventListener('show-user-modal', () => {
+    const modalEl = document.getElementById('userInfoModal');
+    if (!modalEl) return;
+    const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+    modal.show();
+  });
 
 </script>
