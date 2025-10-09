@@ -551,9 +551,9 @@
                 <button class="btn">Dashboard</button>
             </a>
         </div>
-        <div href='/parking-slots' wire:navigate class="btn-wrapper">
+        <div class="btn-wrapper">
 
-            <button class="btn">Parking Slots</button>
+            <button class="btn active">Parking Slots</button>
 
         </div>
         <div href='/violation-tracking' wire:navigate class="btn-wrapper">
@@ -566,9 +566,9 @@
             <button class="btn">Users</button>
 
         </div>
-        <div class="btn-wrapper">
+        <div class="btn-wrapper" href='/sticker-generator' wire:navigate >
 
-            <button class="btn active">Sticker Generator</button>
+            <button class="btn">Sticker Generator</button>
 
         </div>
         <div href='/activity-log' wire:navigate class="btn-wrapper">
