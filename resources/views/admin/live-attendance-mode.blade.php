@@ -281,7 +281,7 @@
     </div>
     </div>
 
-    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+    <script data-navigate-once src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
     <script>
         function updateClock() {
         const now = new Date();

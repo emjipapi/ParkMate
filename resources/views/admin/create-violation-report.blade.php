@@ -569,7 +569,7 @@
         <span>Copyright © 2025 - 2025 All rights reserved</span>
         <span>ParkMate</span>
     </div>
-    <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
+    <script data-navigate-once src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 
     {{-- <script src="{{ asset('js/alpine.min.js') }}"></script> --}}
     <livewire:scripts />
