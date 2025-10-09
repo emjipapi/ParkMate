@@ -83,7 +83,7 @@
             <span>Show</span>
             <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
                 @foreach($perPageOptions as $option)
-                    <option value="{{ $option }}">{{ $option }}</option>
+                <option value="{{ $option }}">{{ $option }}</option>
                 @endforeach
             </select>
             <span>entries</span>
@@ -91,14 +91,21 @@
     </div>
     <div
         class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
+
         <div class="d-flex gap-2 flex-wrap">
+            {{-- User Type Filter --}}
+            <select class="form-select form-select-sm w-auto" wire:model.live="userType">
+                <option value="">All Users</option>
+                <option value="student">Students</option>
+                <option value="employee">Employees</option>
+            </select>
             <select class="form-select form-select-sm w-auto" wire:model.live="filterDepartment"
                 wire:change="onDepartmentChanged($event.target.value)">
                 <option value="">All Departments</option>
                 @foreach($departments as $dept)
-                    <option value="{{ $dept }}" wire:key="dept-{{ \Illuminate\Support\Str::slug($dept) }}">
-                        {{ $dept }}
-                    </option>
+                <option value="{{ $dept }}" wire:key="dept-{{ \Illuminate\Support\Str::slug($dept) }}">
+                    {{ $dept }}
+                </option>
                 @endforeach
             </select>
 
@@ -106,9 +113,9 @@
                 wire:change="onProgramChanged($event.target.value)" style="max-width: 250px; min-width: 150px;">
                 <option value="">All Programs</option>
                 @foreach($programs as $prog)
-                    <option value="{{ $prog }}" wire:key="prog-{{ \Illuminate\Support\Str::slug($prog) }}">
-                        {{ $prog }}
-                    </option>
+                <option value="{{ $prog }}" wire:key="prog-{{ \Illuminate\Support\Str::slug($prog) }}">
+                    {{ $prog }}
+                </option>
                 @endforeach
             </select>
 
@@ -146,10 +153,10 @@
             </thead>
             <tbody>
                 @forelse ($users as $user)
-                    <tr x-bind:class="{ 'table-active': check2 && selectedIds.includes({{ $user->id }}) }">
-                        <td x-show="check2">
-                            <input type="checkbox" class="form-check-input" value="{{ $user->id }}"
-                                :checked="selectedIds.includes({{ $user->id }})" @change="
+                <tr x-bind:class="{ 'table-active': check2 && selectedIds.includes({{ $user->id }}) }">
+                    <td x-show="check2">
+                        <input type="checkbox" class="form-check-input" value="{{ $user->id }}"
+                            :checked="selectedIds.includes({{ $user->id }})" @change="
                                                        if ($event.target.checked) {
                                                            if (!selectedIds.includes({{ $user->id }})) {
                                                                selectedIds.push({{ $user->id }});
@@ -161,150 +168,150 @@
                                                        }
                                                        localStorage.setItem('userTable_selectedIds', JSON.stringify(selectedIds));
                                                    ">
-                        </td>
-                        <td>{{ $user->id }}</td>
-                        <td>{{ $user->student_id ?? $user->employee_id }}</td>
-                        <td>{{ $user->firstname }}</td>
-                        <td>{{ $user->middlename }}</td>
-                        <td>{{ $user->lastname }}</td>
-                        <td>{{ $user->program }}</td>
-                        <td>{{ $user->department }}</td>
-                        <td>
-                            <!-- Edit Icon -->
-                            <a href="{{ route('users.edit', $user->id) }}"
-                                class="text-primary me-2 text-info text-decoration-none">
-                                <i class="bi bi-pencil-square text-secondary"></i>
-                            </a>
+                    </td>
+                    <td>{{ $user->id }}</td>
+                    <td>{{ $user->student_id ?? $user->employee_id }}</td>
+                    <td>{{ $user->firstname }}</td>
+                    <td>{{ $user->middlename }}</td>
+                    <td>{{ $user->lastname }}</td>
+                    <td>{{ $user->program }}</td>
+                    <td>{{ $user->department }}</td>
+                    <td>
+                        <!-- Edit Icon -->
+                        <a href="{{ route('users.edit', $user->id) }}"
+                            class="text-primary me-2 text-info text-decoration-none">
+                            <i class="bi bi-pencil-square text-secondary"></i>
+                        </a>
 
 
-                            <!-- More Info Icon -->
-                            <a href="#" class="text-info text-decoration-none" data-bs-toggle="modal"
-                                data-bs-target="#userInfoModal{{ $user->id }}">
-                                <i class="bi bi-info-circle"></i>
-                            </a>
+                        <!-- More Info Icon -->
+                        <a href="#" class="text-info text-decoration-none" data-bs-toggle="modal"
+                            data-bs-target="#userInfoModal{{ $user->id }}">
+                            <i class="bi bi-info-circle"></i>
+                        </a>
 
-                            <!-- Modal -->
-                            <div class="modal fade" id="userInfoModal{{ $user->id }}" tabindex="-1"
-                                aria-labelledby="userInfoLabel{{ $user->id }}" aria-hidden="true">
-                                <div class="modal-dialog modal-dialog-centered ">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="userInfoLabel{{ $user->id }}">
-                                                User Details: {{ $user->firstname }} {{ $user->lastname }}
-                                            </h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                aria-label="Close"></button>
+                        <!-- Modal -->
+                        <div class="modal fade" id="userInfoModal{{ $user->id }}" tabindex="-1"
+                            aria-labelledby="userInfoLabel{{ $user->id }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered ">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="userInfoLabel{{ $user->id }}">
+                                            User Details: {{ $user->firstname }} {{ $user->lastname }}
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- Profile Picture -->
+                                        <div class="text-center mb-4">
+                                            @if($user->profile_picture)
+                                            <img src="{{ route('profile.picture', $user->profile_picture) }}"
+                                                alt="Profile Picture" class="rounded-circle"
+                                                style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #dee2e6;">
+
+
+                                            @else
+                                            <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center text-white"
+                                                style="width: 100px; height: 100px; font-size: 36px; font-weight: bold;">
+                                                {{ strtoupper(substr($user->firstname, 0, 1) . substr(
+                                                $user->lastname,
+                                                0,
+                                                1
+                                                )) }}
+                                            </div>
+                                            @endif
                                         </div>
-                                        <div class="modal-body">
-                                            <!-- Profile Picture -->
-                                            <div class="text-center mb-4">
-                                                @if($user->profile_picture)
-                                                    <img src="{{ route('profile.picture', $user->profile_picture) }}"
-                                                        alt="Profile Picture" class="rounded-circle"
-                                                        style="width: 150px; height: 150px; object-fit: cover; border: 3px solid #dee2e6;">
+                                        <!-- User Details -->
+                                        <div class="row mb-2">
+                                            <div class="col-md-4"><strong>Year & Section:</strong></div>
+                                            <div class="col-md-8">{{ $user->year_section }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-4"><strong>Address:</strong></div>
+                                            <div class="col-md-8">{{ $user->address }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-4"><strong>Contact Number:</strong></div>
+                                            <div class="col-md-8">{{ $user->contact_number }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-4"><strong>License Number:</strong></div>
+                                            <div class="col-md-8">{{ $user->license_number }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-4"><strong>Expiration Date:</strong></div>
+                                            <div class="col-md-8">{{ $user->expiration_date }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-4"><strong>Created At:</strong></div>
+                                            <div class="col-md-8">{{ $user->created_at?->format('F d, Y h:i A') }}</div>
+                                        </div>
+                                        <div class="row mb-2">
+                                            <div class="col-md-4"><strong>Updated At:</strong></div>
+                                            <div class="col-md-8">{{ $user->updated_at?->format('F d, Y h:i A') }}</div>
+                                        </div>
 
-
-                                                @else
-                                                                                        <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center text-white"
-                                                                                            style="width: 100px; height: 100px; font-size: 36px; font-weight: bold;">
-                                                                                            {{ strtoupper(substr($user->firstname, 0, 1) . substr(
-                                                        $user->lastname,
-                                                        0,
-                                                        1
-                                                    )) }}
-                                                                                        </div>
-                                                @endif
-                                            </div>
-                                            <!-- User Details -->
-                                            <div class="row mb-2">
-                                                <div class="col-md-4"><strong>Year & Section:</strong></div>
-                                                <div class="col-md-8">{{ $user->year_section }}</div>
-                                            </div>
-                                            <div class="row mb-2">
-                                                <div class="col-md-4"><strong>Address:</strong></div>
-                                                <div class="col-md-8">{{ $user->address }}</div>
-                                            </div>
-                                            <div class="row mb-2">
-                                                <div class="col-md-4"><strong>Contact Number:</strong></div>
-                                                <div class="col-md-8">{{ $user->contact_number }}</div>
-                                            </div>
-                                            <div class="row mb-2">
-                                                <div class="col-md-4"><strong>License Number:</strong></div>
-                                                <div class="col-md-8">{{ $user->license_number }}</div>
-                                            </div>
-                                            <div class="row mb-2">
-                                                <div class="col-md-4"><strong>Expiration Date:</strong></div>
-                                                <div class="col-md-8">{{ $user->expiration_date }}</div>
-                                            </div>
-                                            <div class="row mb-2">
-                                                <div class="col-md-4"><strong>Created At:</strong></div>
-                                                <div class="col-md-8">{{ $user->created_at?->format('F d, Y h:i A') }}</div>
-                                            </div>
-                                            <div class="row mb-2">
-                                                <div class="col-md-4"><strong>Updated At:</strong></div>
-                                                <div class="col-md-8">{{ $user->updated_at?->format('F d, Y h:i A') }}</div>
-                                            </div>
-
-                                            <!-- Vehicles Section -->
-                                            <hr>
-                                            <h6 class="mb-3">Vehicles</h6>
-                                            <div class="vehicle-rows">
-                                                @forelse($user->vehicles as $vehicle)
-                                                    <div class="card mb-3">
-                                                        <div class="card-body p-3">
-                                                            <div class="row mb-1">
-                                                                <div class="col-md-4"><strong>Type:</strong></div>
-                                                                <div class="col-md-8">{{ ucfirst($vehicle->type) }}</div>
-                                                            </div>
-                                                            <div class="row mb-1">
-                                                                <div class="col-md-4"><strong>Model:</strong></div>
-                                                                <div class="col-md-8">{{ $vehicle->body_type_model }}</div>
-                                                            </div>
-                                                            <div class="row mb-1">
-                                                                <div class="col-md-4"><strong>Plate:</strong></div>
-                                                                <div class="col-md-8">{{ $vehicle->license_plate }}</div>
-                                                            </div>
-                                                            <div class="row mb-1">
-                                                                <div class="col-md-4"><strong>RFID:</strong></div>
-                                                                <div class="col-md-8">{{ $vehicle->rfid_tag }}</div>
-                                                            </div>
-                                                            <div class="row mb-1">
-                                                                <div class="col-md-4"><strong>OR No.:</strong></div>
-                                                                <div class="col-md-8">{{ $vehicle->or_number }}</div>
-                                                            </div>
-                                                            <div class="row mb-1">
-                                                                <div class="col-md-4"><strong>CR No.:</strong></div>
-                                                                <div class="col-md-8">{{ $vehicle->cr_number }}</div>
-                                                            </div>
-                                                            <div class="row mb-1">
-                                                                <div class="col-md-4"><strong>Created At:</strong></div>
-                                                                <div class="col-md-8">{{ $vehicle->created_at?->format('F d, Y
-                                                                    h:i A') }}</div>
-                                                            </div>
-                                                            <div class="row mb-0">
-                                                                <div class="col-md-4"><strong>Updated At:</strong></div>
-                                                                <div class="col-md-8">{{ $vehicle->updated_at?->format('F d, Y
-                                                                    h:i A') }}</div>
-                                                            </div>
-                                                        </div>
+                                        <!-- Vehicles Section -->
+                                        <hr>
+                                        <h6 class="mb-3">Vehicles</h6>
+                                        <div class="vehicle-rows">
+                                            @forelse($user->vehicles as $vehicle)
+                                            <div class="card mb-3">
+                                                <div class="card-body p-3">
+                                                    <div class="row mb-1">
+                                                        <div class="col-md-4"><strong>Type:</strong></div>
+                                                        <div class="col-md-8">{{ ucfirst($vehicle->type) }}</div>
                                                     </div>
-                                                @empty
-                                                    <p class="text-muted">No vehicles linked to this user.</p>
-                                                @endforelse
+                                                    <div class="row mb-1">
+                                                        <div class="col-md-4"><strong>Model:</strong></div>
+                                                        <div class="col-md-8">{{ $vehicle->body_type_model }}</div>
+                                                    </div>
+                                                    <div class="row mb-1">
+                                                        <div class="col-md-4"><strong>Plate:</strong></div>
+                                                        <div class="col-md-8">{{ $vehicle->license_plate }}</div>
+                                                    </div>
+                                                    <div class="row mb-1">
+                                                        <div class="col-md-4"><strong>RFID:</strong></div>
+                                                        <div class="col-md-8">{{ $vehicle->rfid_tag }}</div>
+                                                    </div>
+                                                    <div class="row mb-1">
+                                                        <div class="col-md-4"><strong>OR No.:</strong></div>
+                                                        <div class="col-md-8">{{ $vehicle->or_number }}</div>
+                                                    </div>
+                                                    <div class="row mb-1">
+                                                        <div class="col-md-4"><strong>CR No.:</strong></div>
+                                                        <div class="col-md-8">{{ $vehicle->cr_number }}</div>
+                                                    </div>
+                                                    <div class="row mb-1">
+                                                        <div class="col-md-4"><strong>Created At:</strong></div>
+                                                        <div class="col-md-8">{{ $vehicle->created_at?->format('F d, Y
+                                                            h:i A') }}</div>
+                                                    </div>
+                                                    <div class="row mb-0">
+                                                        <div class="col-md-4"><strong>Updated At:</strong></div>
+                                                        <div class="col-md-8">{{ $vehicle->updated_at?->format('F d, Y
+                                                            h:i A') }}</div>
+                                                    </div>
+                                                </div>
                                             </div>
+                                            @empty
+                                            <p class="text-muted">No vehicles linked to this user.</p>
+                                            @endforelse
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
 
-                        </td>
+                    </td>
 
-                    </tr>
+                </tr>
                 @empty
-                    <tr>
-                        <td :colspan="check2 ? 9 : 8" class="text-center">No users found.</td>
-                    </tr>
+                <tr>
+                    <td :colspan="check2 ? 9 : 8" class="text-center">No users found.</td>
+                </tr>
                 @endforelse
             </tbody>
         </table>

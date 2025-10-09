@@ -4,7 +4,7 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\User;
-
+use Illuminate\Database\Eloquent\Builder;
 class UsersTable extends Component
 {
     use WithPagination;
@@ -12,6 +12,7 @@ class UsersTable extends Component
 
     // search + filters
     public $search = '';
+    public $userType = '';
     public $filterDepartment = '';
     public $filterProgram = '';
 
@@ -106,42 +107,60 @@ public function updatedPerPage()
     }
     
 
-    public function render()
-    {
 
 
-        $query = User::query();
+public function render()
+{
+    $query = User::query();
 
-        if ($this->search !== '') {
-            $s = $this->search;
-            $query->where(function ($q) use ($s) {
-                $q->whereRaw("CONCAT_WS(' ', firstname, middlename, lastname) LIKE ?", ["%$s%"])
-                    ->orWhere('student_id', 'like', "%$s%")
-                    ->orWhere('employee_id', 'like', "%$s%")
-                    ->orWhere('year_section', 'like', "%$s%")
-                    ->orWhere('address', 'like', "%$s%")
-                    ->orWhere('contact_number', 'like', "%$s%")
-                    ->orWhere('license_number', 'like', "%$s%")
-                    ->orWhere('expiration_date', 'like', "%$s%");
-            });
-        }
-
-        if ($this->filterDepartment !== '') {
-            $query->where('department', $this->filterDepartment);
-        }
-
-        if ($this->filterProgram !== '') {
-            $query->where('program', $this->filterProgram);
-        }
-
-        $users = $query->paginate($this->perPage);
-
-        return view('livewire.admin.users-table', [
-            'users' => $users,
-            'departments' => $this->departments,
-            'programs' => $this->programs,
-        ]);
+    if ($this->search !== '') {
+        $s = trim($this->search);
+        $query->where(function (Builder $q) use ($s) {
+            $q->whereRaw("CONCAT_WS(' ', firstname, middlename, lastname) LIKE ?", ["%{$s}%"])
+                ->orWhere('student_id', 'like', "%{$s}%")
+                ->orWhere('employee_id', 'like', "%{$s}%")
+                ->orWhere('year_section', 'like', "%{$s}%")
+                ->orWhere('address', 'like', "%{$s}%")
+                ->orWhere('contact_number', 'like', "%{$s}%")
+                ->orWhere('license_number', 'like', "%{$s}%")
+                ->orWhere('expiration_date', 'like', "%{$s}%");
+        });
     }
+
+    if ($this->filterDepartment !== '') {
+        $query->where('department', $this->filterDepartment);
+    }
+
+    if ($this->filterProgram !== '') {
+        $query->where('program', $this->filterProgram);
+    }
+
+    // USER TYPE filter
+    $query->when($this->userType === 'student', fn (Builder $q) =>
+        $q->whereNotNull('student_id')
+          ->where('student_id', '<>', '')
+          ->where('student_id', '<>', '0')
+    );
+
+    $query->when($this->userType === 'employee', fn (Builder $q) =>
+        $q->whereNotNull('employee_id')
+          ->where('employee_id', '<>', '')
+          ->where('employee_id', '<>', '0')
+          ->where(function (Builder $q2) {
+              // ensure not also a student (optional, mirrors your earlier logic)
+              $q2->whereNull('student_id')->orWhere('student_id', '');
+          })
+    );
+
+    $users = $query->paginate($this->perPage);
+
+    return view('livewire.admin.users-table', [
+        'users' => $users,
+        'departments' => $this->departments,
+        'programs' => $this->programs,
+    ]);
+}
+
 
     public function deleteSelected($ids)
     {
