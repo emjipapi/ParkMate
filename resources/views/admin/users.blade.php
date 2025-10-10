@@ -454,7 +454,21 @@
             padding: 10px;
             padding-bottom: 20px;
         }
+            .tabs-container {
+                margin: 0 -20px;
+                /* extend to screen edges */
+                padding: 0 20px;
+                /* add padding back inside */
+                touch-action: pan-x;
+                /* enable horizontal touch scrolling */
+            }
 
+            .nav-link {
+                font-size: 0.9rem;
+                /* slightly smaller text on mobile */
+                padding: 8px 16px !important;
+                /* adjust padding */
+            }
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
