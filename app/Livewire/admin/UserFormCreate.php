@@ -70,7 +70,7 @@ public function updatedProfilePicture()
 
             $image = Image::read($this->profile_picture->getPathname())
                 ->cover(800, 800, 'center')   // adjust max dimensions if you prefer
-                ->toJpeg(85);           // quality 0-100
+                ->toJpeg(50);           // quality 0-100
 
             $tmpPath = 'profile_pics/tmp/' . $filename;
 Storage::disk('public')->put($tmpPath, $image);

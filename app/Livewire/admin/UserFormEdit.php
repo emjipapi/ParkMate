@@ -73,7 +73,7 @@ class UserFormEdit extends Component
 
                 $image = Image::read($this->profile_picture->getPathname())
                     ->cover(800, 800, 'center')   // ensures 1:1 aspect
-                    ->toJpeg(85);
+                    ->toJpeg(50);
 
                 $tmpPath = 'profile_pics/tmp/'.$filename;
                 Storage::disk('public')->put($tmpPath, $image);
