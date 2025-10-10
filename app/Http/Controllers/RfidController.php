@@ -15,30 +15,30 @@ class RfidController extends Controller
     public $scanCooldown = 5;
     
     // Cooldown in seconds for unknown RFID tags
-    public $unknownTagCooldown = 10;
+    public $unknownTagCooldown = 30;
 
     /**
      * Check if user has 3+ approved violations and should be denied entry
      */
-    private function checkViolationStatus($userId)
-    {
-        try {
-            $approvedViolationCount = DB::table('violations')
-                ->where('violator_id', $userId)
-                ->where('status', 'approved')
-                ->count();
+private function checkViolationStatus($userId): bool
+{
+    try {
+        $count = DB::table('violations')
+            ->where('violator_id', $userId)
+            ->whereIn('status', ['approved', 'for_endorsement'])
+            ->count();
 
-            return $approvedViolationCount >= 3;
-            
-        } catch (\Exception $e) {
-            Log::error('Error checking violation status', [
-                'user_id' => $userId,
-                'error' => $e->getMessage()
-            ]);
-            
-            return false;
-        }
+        return $count >= 3;
+    } catch (\Exception $e) {
+        Log::error('Error checking violation status', [
+            'user_id' => $userId,
+            'error' => $e->getMessage()
+        ]);
+
+        return false;
     }
+}
+
 
     /**
      * Check and log unknown RFID tag with cooldown

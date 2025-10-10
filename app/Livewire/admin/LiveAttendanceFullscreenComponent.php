@@ -24,17 +24,18 @@ public function loadLatestScans()
 {
     $this->scans = ActivityLog::with('user')
         ->where(function ($q) {
+            // Regular entry/exit
             $q->where(function ($sub) {
                 $sub->where('actor_type', 'user')
                     ->whereIn('action', ['entry', 'exit'])
                     ->whereNotNull('details')
                     ->where('details', 'like', '%main gate%');
             })
+            // Denied entries - more flexible conditions
             ->orWhere(function ($sub2) {
-                $sub2->where('actor_type', 'system')
-                     ->where('action', 'denied_entry')
-                     ->whereNotNull('details')
-                     ->where('details', 'like', '%main gate%');
+                $sub2->where('action', 'denied_entry')
+                     ->whereNotNull('details');
+                // Removed actor_type requirement - might be NULL or different
             });
         })
         ->orderBy('created_at', 'desc')
