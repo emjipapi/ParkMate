@@ -23,17 +23,20 @@ class ViolationWarningMail extends Mailable
     {
         $this->user = $user;
         $this->stage = $stage;
+
         $this->violationCount = DB::table('violations')
             ->where('violator_id', $user->id)
             ->whereIn('status', ['approved', 'for_endorsement'])
             ->count();
 
-        $this->recentViolations = DB::table('violations')
-            ->where('violator_id', $user->id)
-            ->whereIn('status', ['approved', 'for_endorsement'])
-            ->latest()
-            ->take(5)
-            ->get();
+$this->recentViolations = DB::table('violations')
+    ->select('license_plate','created_at','description') // explicit
+    ->where('violator_id', $user->id)
+    ->whereIn('status', ['approved', 'for_endorsement'])
+    ->latest()
+    ->take(5)
+    ->get();
+
     }
 
     public function envelope(): Envelope
@@ -60,7 +63,12 @@ class ViolationWarningMail extends Mailable
         $view = $views[$this->stage] ?? $views[1];
 
         return new Content(
-            view: $view
+            view: $view,
+            with: [
+                'user' => $this->user,
+                'violationCount' => $this->violationCount,
+                'recentViolations' => $this->recentViolations,
+            ]
         );
     }
 
