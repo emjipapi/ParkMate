@@ -7,7 +7,7 @@ use Illuminate\Console\Scheduling\Schedule;
 
 use App\Http\Middleware\AdminMiddleware;
 use \App\Http\Middleware\Authenticate;
-
+use \App\Http\Middleware\CheckPermission;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__ . '/../routes/web.php',
@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => AdminMiddleware::class,
             'auth' => Authenticate::class,
+            'permission' => CheckPermission::class,
         ]);
 
         // Optional: default web middleware group

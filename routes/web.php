@@ -95,48 +95,54 @@ Route::get('/stickers/download/{filename}', [StickerDownloadController::class, '
 |--------------------------------------------------------------------------
 */
 Route::middleware(['admin'])->group(function () {
-    // Dashboard
+    
+    //Dashboard
+    Route::middleware(['admin', 'permission:dashboard'])->group(function () {
     Route::get('/admin-dashboard', function () {
-        return view('admin.dashboard'); // admin dashboard
+        return view('admin.dashboard');
     })->name('admin.dashboard');
-
-    // User management
-
-    Route::get('/users/create-user', function () {
-        return view('admin.user-create'); // Blade containing <livewire:user-form />
-    })->name('users.create');
-
-    Route::get('/users/create-admin', function () {
-        return view('admin.admin-create'); // Blade containing <livewire:user-form />
-    })->name('admins.create');
-    Route::get('/users/edit/{id}', [UserController::class, 'edit'])->name('users.edit');
-    // In your routes file
-    Route::get('/admins/edit/{id}', [UserController::class, 'editAdmin'])->name('admins.edit');
-
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-
-    // Other admin pages
-    // Route::view('/sample', 'sample');
-    Route::view('/users', 'admin.users');
-    Route::view('/admin-dashboard/live-attendance-mode', 'admin.live-attendance-mode');
-    Route::view('/sticker-generator', 'admin.sticker-generator');
-    Route::view('/violation-tracking', 'admin.violation-tracking');
-    Route::view('/create-report', 'admin.create-violation-report');
-    Route::view('/activity-log', 'admin.activity-log');
-    Route::view('/parking-slots', 'admin.parking-slots')->name('parking.slots');
-    Route::view('/parking-slots/map-manager', 'admin.map-template-editor')->name('parking.slots');
-    Route::get('/map/{map}', function (ParkingMap $map) {
+    });
+    Route::view('/admin-dashboard/live-attendance-mode', 'admin.live-attendance-mode'); 
+        Route::get('/map/{map}', function (ParkingMap $map) {
         return view('admin.parking-map', ['map' => $map]);
     })->name('parking-map.live');;
-    Route::view('/live-attendance', 'admin.live-attendance-fullscreen-mode');
-    // routes/web.php
+        Route::view('/live-attendance', 'admin.live-attendance-fullscreen-mode');
     Route::get('/dashboard/analytics-dashboard', function () {
         $chart = new AnalyticsChart;
 
         return view('admin.analytics-dashboard', compact('chart'));
     });
 
+    //Parking Slots
+    Route::middleware(['admin', 'permission:parking_slots'])->group(function () {
+    Route::view('/parking-slots', 'admin.parking-slots')->name('parking.slots');
 });
+    Route::view('/parking-slots/map-manager', 'admin.map-template-editor')->name('parking.slots');
+
+    //Violation Tracking
+    Route::view('/violation-tracking', 'admin.violation-tracking');
+    Route::view('/create-report', 'admin.create-violation-report');
+
+    //Users
+    Route::view('/users', 'admin.users')
+    ->middleware('permission:users')
+    ->name('users');
+    Route::get('/users/create-user', function () {
+        return view('admin.user-create'); // Blade containing <livewire:user-form />
+    })->name('users.create');
+    Route::get('/users/create-admin', function () {
+        return view('admin.admin-create'); // Blade containing <livewire:user-form />
+    })->name('admins.create');
+    Route::get('/users/edit/{id}', [UserController::class, 'edit'])->name('users.edit');
+    Route::get('/admins/edit/{id}', [UserController::class, 'editAdmin'])->name('admins.edit');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');                  
+
+    //Sticker Generator
+    Route::view('/sticker-generator', 'admin.sticker-generator');
+
+    //Activity Log
+    Route::view('/activity-log', 'admin.activity-log');
+    });
 // Route::get('/analytics', [AnalyticsController::class, 'index']);
 
 /*

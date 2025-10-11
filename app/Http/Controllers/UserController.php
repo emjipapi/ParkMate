@@ -62,7 +62,7 @@ $admin = auth('admin')->user();
         'created_at' => now(),
     ]);
 
-    return redirect()->route('users')->with('success', 'User created successfully!');
+    return redirect()->route('admin.users')->with('success', 'User created successfully!');
 }
 
 public function edit($id)
