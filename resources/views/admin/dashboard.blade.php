@@ -509,12 +509,13 @@
                         {{-- Livewire component that renders thumbnails --}}
                         <livewire:admin.parking-maps-modal />
                     </div>
-
+                    
                     <div class="modal-footer d-flex justify-content-between">
+                        @canaccess("manage_maps")
                         <a href="{{ url('/parking-slots/map-manager') }}" class="btn btn-outline-primary">
                             Manage Maps
                         </a>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        @endcanaccess
                     </div>
 
                 </div>
