@@ -524,14 +524,16 @@
                 touch-action: pan-x pan-y;
                 /* enable horizontal touch scrolling for table */
             }
-                      .content {
-            padding: 10px;
-            padding-bottom: 20px;
-        }
-                .btn-add-slot:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
+
+            .content {
+                padding: 10px;
+                padding-bottom: 20px;
+            }
+
+            .btn-add-slot:disabled {
+                cursor: not-allowed;
+                opacity: 0.5;
+            }
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -546,37 +548,46 @@
             <h4>Admin</h4>
         </div>
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
-        <div class="btn-wrapper mt-3">
+        <div style="display: inline-block; height: 1rem; width: 100%;"></div>
+        @canaccess("dashboard")
+        <div class="btn-wrapper">
             <a href="{{ url('/admin-dashboard') }}" style="text-decoration: none;">
                 <button class="btn">Dashboard</button>
             </a>
         </div>
+        @endcanaccess
+
+        @canaccess("parking_slots")
         <div class="btn-wrapper">
-
             <button class="btn active">Parking Slots</button>
-
         </div>
-        <div href='/violation-tracking' wire:navigate class="btn-wrapper">
+        @endcanaccess
 
+        @canaccess("violation_tracking")
+        <div href="/violation-tracking" wire:navigate class="btn-wrapper">
             <button class="btn">Violation Tracking</button>
-
         </div>
-        <div href='/users' wire:navigate class="btn-wrapper">
+        @endcanaccess
 
+        @canaccess("users")
+        <div href="/users" wire:navigate class="btn-wrapper">
             <button class="btn">Users</button>
-
         </div>
-        <div class="btn-wrapper" href='/sticker-generator' wire:navigate >
+        @endcanaccess
 
+        @canaccess("sticker_generator")
+        <div class="btn-wrapper" href="/sticker-generator" wire:navigate>
             <button class="btn">Sticker Generator</button>
-
         </div>
-        <div href='/activity-log' wire:navigate class="btn-wrapper">
+        @endcanaccess
 
+        @canaccess("activity_log")
+        <div href="/activity-log" wire:navigate class="btn-wrapper">
             <button class="btn">Activity Log</button>
-
         </div>
-        <div class="btn-wrapper"><button class="btn">Settings</button></div>
+        @endcanaccess
+
+        {{-- <div class="btn-wrapper"><button class="btn">Settings</button></div> --}}
         <div class="mt-auto p-3">
             <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf

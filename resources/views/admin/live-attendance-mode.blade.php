@@ -164,29 +164,32 @@
             padding: 0 20px;
             font-weight: 500;
         }
-                .mobile-warning {
-    display: none;
-}
-@media (max-width: 768px) {
-    .desktop-content {
-        display: none !important;
-    }
-    .mobile-warning {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
-        background: #f8f9fa;
-        color: #333;
-        text-align: center;
-    }
-}
+
+        .mobile-warning {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .desktop-content {
+                display: none !important;
+            }
+
+            .mobile-warning {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+                background: #f8f9fa;
+                color: #333;
+                text-align: center;
+            }
+        }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body>
-        <!-- Show this message only on mobile -->
+    <!-- Show this message only on mobile -->
     <div class="mobile-warning">
         <div class="text-center p-5">
             <h3>This page is only available on desktop</h3>
@@ -196,89 +199,98 @@
 
     <!-- Main page content -->
     <div class="desktop-content">
-    <!-- Sidebar -->
-    <div class="sidebar d-flex flex-column">
-        <div class="admin-header">
-            <h4>Admin</h4>
-        </div>
-
-        <div class="btn-wrapper mt-3">
-            <a href="{{ url('/admin-dashboard') }}" style="text-decoration: none;">
-                <button class="btn active">Dashboard</button>
-            </a>
-        </div>
-        <div href='/parking-slots' wire:navigate class="btn-wrapper">
-
-            <button class="btn">Parking Slots</button>
-
-        </div>
-        <div href='/violation-tracking' wire:navigate class="btn-wrapper">
-
-            <button class="btn">Violation Tracking</button>
-
-        </div>
-        <div href='/users' wire:navigate class="btn-wrapper">
-
-            <button class="btn">Users</button>
-
-        </div>
-        <div href='/sticker-generator' wire:navigate class="btn-wrapper">
-
-            <button class="btn">Sticker Generator</button>
-
-        </div>
-        <div href='/activity-log' wire:navigate class="btn-wrapper">
-
-            <button class="btn">Activity Log</button>
-
-        </div>
-        <div class="btn-wrapper"><button class="btn">Settings</button></div>
-        <div class="mt-auto p-3">
-            <form action="{{ route('admin.logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-danger w-100">Logout</button>
-            </form>
-        </div>
-
-    </div>
-
-    <div class="top-bar">
-        <div id="clock" style="font-size: 1rem;"></div>
-        <span style="flex: 1;"></span>
-
-
-        <div class="live-btn-bar">
-            <a href="{{ url('/live-attendance') }}" style="text-decoration: none;">
-                <button class="live-btn">
-                    Live Attendance Mode
-                </button>
-            </a>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="content">
-        <!-- Header stays at the top -->
-        <div class="d-flex align-items-baseline justify-content-between mb-3">
-            <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Dashboard</h3>
-                <h6 class="mb-0">Live Attendance</h6>
+        <!-- Sidebar -->
+        <div class="sidebar d-flex flex-column">
+            <div class="admin-header">
+                <h4>Admin</h4>
             </div>
-            <span class="text-muted">Home > Dashboard > Live Attendance Mode</span>
+            <div style="display: inline-block; height: 1rem; width: 100%;"></div>
+            @canaccess("dashboard")
+            <div class="btn-wrapper">
+                <a href="{{ url('/admin-dashboard') }}" style="text-decoration: none;">
+                    <button class="btn active">Dashboard</button>
+                </a>
+            </div>
+            @endcanaccess
+
+            @canaccess("parking-slots")
+            <div href="/parking-slots" wire:navigate class="btn-wrapper">
+                <button class="btn">Parking Slots</button>
+            </div>
+            @endcanaccess
+
+            @canaccess("violation-tracking")
+            <div href="/violation-tracking" wire:navigate class="btn-wrapper">
+                <button class="btn">Violation Tracking</button>
+            </div>
+            @endcanaccess
+
+            @canaccess("users")
+            <div href="/users" wire:navigate class="btn-wrapper">
+                <button class="btn">Users</button>
+            </div>
+            @endcanaccess
+
+            @canaccess("sticker-generator")
+            <div href="/sticker-generator" wire:navigate class="btn-wrapper">
+                <button class="btn">Sticker Generator</button>
+            </div>
+            @endcanaccess
+
+            @canaccess("activity-log")
+            <div href="/activity-log" wire:navigate class="btn-wrapper">
+                <button class="btn">Activity Log</button>
+            </div>
+            @endcanaccess
+
+
+            {{-- <div class="btn-wrapper"><button class="btn">Settings</button></div> --}}
+            <div class="mt-auto p-3">
+                <form action="{{ route('admin.logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn btn-danger w-100">Logout</button>
+                </form>
+            </div>
+
         </div>
 
-        <!-- Centering only this section -->
-        <div class="flex-grow-1 d-flex justify-content-center align-items-center">
-            <livewire:admin.live-attendance-component />
+        <div class="top-bar">
+            <div id="clock" style="font-size: 1rem;"></div>
+            <span style="flex: 1;"></span>
+
+
+            <div class="live-btn-bar">
+                <a href="{{ url('/live-attendance') }}" style="text-decoration: none;">
+                    <button class="live-btn">
+                        Live Attendance Mode
+                    </button>
+                </a>
+            </div>
         </div>
-    </div>
+
+        <!-- Main Content -->
+        <div class="content">
+            <!-- Header stays at the top -->
+            <div class="d-flex align-items-baseline justify-content-between mb-3">
+                <div class="d-flex align-items-baseline">
+                    <h3 class="mb-0 me-3">Dashboard</h3>
+                    <h6 class="mb-0">Live Attendance</h6>
+                </div>
+                <span class="text-muted">Home > Dashboard > Live Attendance Mode</span>
+            </div>
+
+            <!-- Centering only this section -->
+            <div class="flex-grow-1 d-flex justify-content-center align-items-center">
+                <livewire:admin.live-attendance-component />
+            </div>
+        </div>
 
 
-    <!-- Bottom Bar -->
-    <div class="bottom-bar">
-        <span>Copyright © 2025 - 2025 All rights reserved</span>
-        <span>ParkMate</span>
-    </div>
+        <!-- Bottom Bar -->
+        <div class="bottom-bar">
+            <span>Copyright © 2025 - 2025 All rights reserved</span>
+            <span>ParkMate</span>
+        </div>
     </div>
 
     <script data-navigate-once src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>

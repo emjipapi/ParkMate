@@ -1,8 +1,4 @@
-<?php
-
-?>
-
-
+{{-- resources\views\admin\violation-tracking.blade.php --}}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -471,29 +467,36 @@
                 touch-action: pan-x pan-y;
                 /* enable horizontal touch scrolling for table */
             }
-  .btn-group.w-100 .btn {
-    font-size: 1rem; /* bigger text */
-    padding: 10px 18px; /* more space to tap */
-  }
 
-  /* Ensure the button group takes full width of its container */
-  .btn-group.w-100 {
-    width: 100% !important;
-  }
+            .btn-group.w-100 .btn {
+                font-size: 1rem;
+                /* bigger text */
+                padding: 10px 18px;
+                /* more space to tap */
+            }
 
-  /* Prevent tiny split dropdown buttons */
-  .btn-group .dropdown-toggle-split {
-    padding: 10px 14px;
-    min-width: 48px; /* ensures the toggle isn't too small */
-  }
-    td .btn-group .btn {
-    padding: 0.75rem 1.5rem; /* taller + wider tap area */
-    font-size: 0.95rem;
-  }
-          .content {
-            padding: 10px;
-            padding-bottom: 20px;
-        }
+            /* Ensure the button group takes full width of its container */
+            .btn-group.w-100 {
+                width: 100% !important;
+            }
+
+            /* Prevent tiny split dropdown buttons */
+            .btn-group .dropdown-toggle-split {
+                padding: 10px 14px;
+                min-width: 48px;
+                /* ensures the toggle isn't too small */
+            }
+
+            td .btn-group .btn {
+                padding: 0.75rem 1.5rem;
+                /* taller + wider tap area */
+                font-size: 0.95rem;
+            }
+
+            .content {
+                padding: 10px;
+                padding-bottom: 20px;
+            }
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -508,34 +511,44 @@
             <h4>Admin</h4>
         </div>
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
-        <div class="btn-wrapper mt-3">
+        <div style="display: inline-block; height: 1rem; width: 100%;"></div>
+        @canaccess("dashboard")
+        <div class="btn-wrapper">
             <a href="{{ url('/admin-dashboard') }}" style="text-decoration: none;">
                 <button class="btn">Dashboard</button>
             </a>
         </div>
-        <div href='/parking-slots' wire:navigate class="btn-wrapper">
+        @endcanaccess
 
+        @canaccess("parking_slots")
+        <div href="/parking-slots" wire:navigate class="btn-wrapper">
             <button class="btn">Parking Slots</button>
-
         </div>
+        @endcanaccess
 
+        @canaccess("violation_tracking")
         <div class="btn-wrapper"><button class="btn active">Violation Tracking</button></div>
-        <div href='/users' wire:navigate class="btn-wrapper">
+        @endcanaccess
 
+        @canaccess("users")
+        <div href="/users" wire:navigate class="btn-wrapper">
             <button class="btn">Users</button>
-
         </div>
-        <div href='/sticker-generator' wire:navigate class="btn-wrapper">
+        @endcanaccess
 
+        @canaccess("sticker_generator")
+        <div href="/sticker-generator" wire:navigate class="btn-wrapper">
             <button class="btn">Sticker Generator</button>
-
         </div>
-        <div href='/activity-log' wire:navigate class="btn-wrapper">
+        @endcanaccess
 
+        @canaccess("activity_log")
+        <div href="/activity-log" wire:navigate class="btn-wrapper">
             <button class="btn">Activity Log</button>
-
         </div>
-        <div class="btn-wrapper"><button class="btn">Settings</button></div>
+        @endcanaccess
+
+        {{-- <div class="btn-wrapper"><button class="btn">Settings</button></div> --}}
         <div class="mt-auto p-3">
             <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf

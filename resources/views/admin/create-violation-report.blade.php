@@ -188,9 +188,10 @@
         .btn-add-slot:hover {
             background-color: var(--bg3);
         }
+
         .btn-warning {
-    color: #fff !important;
-}
+            color: #fff !important;
+        }
 
         .square-box {
             background-color: white;
@@ -369,10 +370,12 @@
             -webkit-overflow-scrolling: touch;
 
         }
+
         .btn-add-slot:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
         @media (max-width: 1200px) {
             body {
                 overflow-x: auto;
@@ -474,17 +477,20 @@
                 touch-action: pan-x pan-y;
                 /* enable horizontal touch scrolling for table */
             }
-                      .content {
-            padding: 10px;
-            padding-bottom: 20px;
-        }
-        .custom-table {
-            width: 100%;
-        }
-                .square-box {
-            padding: 10px;
 
-        }
+            .content {
+                padding: 10px;
+                padding-bottom: 20px;
+            }
+
+            .custom-table {
+                width: 100%;
+            }
+
+            .square-box {
+                padding: 10px;
+
+            }
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -499,34 +505,46 @@
             <h4>Admin</h4>
         </div>
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
-        <div class="btn-wrapper mt-3">
+        <div style="display: inline-block; height: 1rem; width: 100%;"></div>
+        @canaccess("dashboard")
+        <div class="btn-wrapper">
             <a href="{{ url('/admin-dashboard') }}" style="text-decoration: none;">
                 <button class="btn">Dashboard</button>
             </a>
         </div>
-        <div href='/parking-slots' wire:navigate class="btn-wrapper">
+        @endcanaccess
 
+        @canaccess("parking_slots")
+        <div href="/parking-slots" wire:navigate class="btn-wrapper">
             <button class="btn">Parking Slots</button>
-
         </div>
+        @endcanaccess
 
-        <div class="btn-wrapper"><button class="btn active">Violation Tracking</button></div>
-        <div href='/users' wire:navigate class="btn-wrapper">
+        @canaccess("violation_tracking")
+        <div class="btn-wrapper">
+            <button class="btn active">Violation Tracking</button>
+        </div>
+        @endcanaccess
 
+        @canaccess("users")
+        <div href="/users" wire:navigate class="btn-wrapper">
             <button class="btn">Users</button>
-
         </div>
-        <div href='/sticker-generator' wire:navigate class="btn-wrapper">
+        @endcanaccess
 
+        @canaccess("sticker_generator")
+        <div href="/sticker-generator" wire:navigate class="btn-wrapper">
             <button class="btn">Sticker Generator</button>
-
         </div>
-        <div href='/activity-log' wire:navigate class="btn-wrapper">
+        @endcanaccess
 
+        @canaccess("activity_log")
+        <div href="/activity-log" wire:navigate class="btn-wrapper">
             <button class="btn">Activity Log</button>
-
         </div>
-        <div class="btn-wrapper"><button class="btn">Settings</button></div>
+        @endcanaccess
+
+        {{-- <div class="btn-wrapper"><button class="btn">Settings</button></div> --}}
         <div class="mt-auto p-3">
             <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
@@ -558,10 +576,10 @@
                 <i class="bi bi-arrow-left"></i>
             </a>
         </div>
-        
-            <livewire:admin.create-violation-component />
 
-        
+        <livewire:admin.create-violation-component />
+
+
 
     </div>
     <!-- Bottom Bar -->

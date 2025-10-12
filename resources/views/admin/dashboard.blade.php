@@ -1,3 +1,4 @@
+{{-- resources\views\admin\dashboard.blade.php --}}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -404,43 +405,52 @@
             <h4>Admin</h4>
         </div>
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
-
-        @canaccess('dashboard')
-        <div class="btn-wrapper mt-3"><button class="btn active">Dashboard</button></div>
+        <div style="display: inline-block; height: 1rem; width: 100%;"></div>
+        @canaccess("dashboard")
+        <div class="btn-wrapper"><button class="btn active">Dashboard</button></div>
         @endcanaccess
-        @canaccess('parking_slots')
+
+        @canaccess("parking_slots")
         <div class="btn-wrapper">
             <a href="{{ url('/parking-slots') }}" style="text-decoration: none;">
                 <button class="btn">Parking Slots</button>
             </a>
         </div>
         @endcanaccess
+
+        @canaccess("violation_tracking")
         <div class="btn-wrapper">
             <a href="{{ url('/violation-tracking') }}" style="text-decoration: none;">
                 <button class="btn">Violation Tracking</button>
             </a>
         </div>
+        @endcanaccess
+
+        @canaccess("users")
         <div class="btn-wrapper">
             <a href="{{ url('/users') }}" style="text-decoration: none;">
                 <button class="btn">Users</button>
             </a>
         </div>
+        @endcanaccess
+
+        @canaccess("sticker_generator")
         <div class="btn-wrapper">
             <a href="{{ url('/sticker-generator') }}" style="text-decoration: none;">
                 <button class="btn">Sticker Generator</button>
             </a>
         </div>
+        @endcanaccess
+
+        @canaccess("activity_log")
         <div class="btn-wrapper">
             <a href="{{ url('/activity-log') }}" style="text-decoration: none;">
                 <button class="btn">Activity Log</button>
             </a>
         </div>
-        <div class="btn-wrapper">
-            <a href="" style="text-decoration: none;">
-                <button class="btn">Settings</button>
-            </a>
-        </div>
+        @endcanaccess
 
+        {{-- <div class="btn-wrapper"><button class="btn">Settings</button></div> --}}
         <div class="mt-auto p-3">
             <form action="{{ route('admin.logout') }}" method="POST">
                 @csrf
@@ -456,7 +466,7 @@
         <span style="flex: 1;"></span>
         <div class="live-btn-bar me-1">
             <a style="text-decoration: none;">
-                 <button type="button" class="live-btn" data-bs-toggle="modal" data-bs-target="#openMapModal">
+                <button type="button" class="live-btn" data-bs-toggle="modal" data-bs-target="#openMapModal">
                     Open Map
                 </button>
             </a>
@@ -483,29 +493,29 @@
         <livewire:admin.cards-component />
 
         {{-- Open Map Modal --}}
-<div wire:ignore.self class="modal fade" id="openMapModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Open Parking Map</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+        <div wire:ignore.self class="modal fade" id="openMapModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-xl modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Open Parking Map</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
 
-      <div class="modal-body">
-        {{-- Livewire component that renders thumbnails --}}
-        <livewire:admin.parking-maps-modal />
-      </div>
+                    <div class="modal-body">
+                        {{-- Livewire component that renders thumbnails --}}
+                        <livewire:admin.parking-maps-modal />
+                    </div>
 
-<div class="modal-footer d-flex justify-content-between">
-    <a href="{{ url('/parking-slots/map-manager') }}" class="btn btn-outline-primary">
-        Manage Maps
-    </a>
-    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-</div>
+                    <div class="modal-footer d-flex justify-content-between">
+                        <a href="{{ url('/parking-slots/map-manager') }}" class="btn btn-outline-primary">
+                            Manage Maps
+                        </a>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
 
-    </div>
-  </div>
-</div>
+                </div>
+            </div>
+        </div>
 
 
 
@@ -535,15 +545,15 @@
     sidebar.classList.toggle('open');
 }
     </script>
-{{-- close modal when the Livewire component dispatches 'close-open-map-modal' --}}
-<script>
-  window.addEventListener('close-open-map-modal', () => {
+    {{-- close modal when the Livewire component dispatches 'close-open-map-modal' --}}
+    <script>
+        window.addEventListener('close-open-map-modal', () => {
     const modalEl = document.getElementById('openMapModal');
     if (!modalEl) return;
     const instance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
     instance.hide();
   });
-</script>
+    </script>
 </body>
 
 </html>
