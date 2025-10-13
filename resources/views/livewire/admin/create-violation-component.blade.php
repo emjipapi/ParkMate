@@ -75,23 +75,26 @@
                 @endif
             </div>
         </div>
+        @canaccess("submit_approved_report")
         <div>
             <i class="bi bi-info-circle text-muted" style="opacity: 0.6; font-size: 0.9rem;"></i>
             <small class="text-muted" style="opacity: 0.6;"> You cannot send an approved report with invalid
                 data.</small>
         </div>
+        @endcanaccess
         {{-- Submit --}}
         <div class="mt-3 mt-md-4 d-flex gap-2">
             <button type="button" wire:click="submitReport('pending')" class="btn btn-warning px-3 px-md-4 py-2"
                 wire:loading.attr="disabled" wire:target="license_plate,submitReport">
                 Submit as Pending
             </button>
-
+            @canaccess("submit_approved_report")
             <button type="button" wire:click="submitReport('approved')" class="btn btn-success px-3 px-md-4 py-2"
                 @disabled($violatorStatus !=='found' ) wire:loading.attr="disabled"
                 wire:target="license_plate,submitReport">
                 Submit as Approved
             </button>
+            @endcanaccess
         </div>
 
         {{-- Success & Error Messages --}}

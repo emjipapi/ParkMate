@@ -29,6 +29,7 @@ class CreateViolationComponent extends Component
 
     public $violatorStatus = null;
     public $violatorName = null;
+    
 
     public function mount()
     {
