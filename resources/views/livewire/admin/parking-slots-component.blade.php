@@ -61,12 +61,14 @@
 
                         </div>
                         @endif
+                        @canaccess("edit_parking_area")
                         <div class="ms-auto">
                             <a href="#" class="text-secondary text-decoration-none"
                                 wire:click="openEditAreaModalServer({{ $area['id'] ?? $area->id }})">
                                 <i class="bi bi-gear-fill fs-5"></i>
                             </a>
                         </div>
+                        @endcanaccess
                     </div>
 
                     {{-- Cars: sensor grid --}}

@@ -493,25 +493,32 @@
             <span class="text-muted">Home > Slots</span>
         </div>
         <div class="d-flex gap-2 ms-3">
+        @canaccess("add_parking_area")
         <button type="button" class="btn-add-slot btn btn-primary" data-bs-toggle="modal"
             data-bs-target="#createAreaModal">
             Add Parking Area
         </button>
+        @endcanaccess
+        @canaccess("manage_maps")
             <div href='/parking-slots/map-manager' wire:navigate>
                 <button type="button" class="btn-add-slot btn btn-primary">
                     Manage Maps
                 </button>
             </div>
+            @endcanaccess
         </div>
-
+        
         <div class="square-box">
             <livewire:admin.parking-slots-component />
         </div>
 
     </div>
+    @canaccess("add_parking_area")
     <livewire:admin.create-area-modal />
+    @endcanaccess
+    @canaccess("edit_parking_area")
     <livewire:admin.edit-area-modal />
-
+    @endcanaccess
     <!-- Bottom Bar -->
     <div class="bottom-bar">
         <span>Copyright © 2025 - 2025 All rights reserved</span>
