@@ -95,54 +95,80 @@ Route::get('/stickers/download/{filename}', [StickerDownloadController::class, '
 |--------------------------------------------------------------------------
 */
 Route::middleware(['admin'])->group(function () {
-    
+
     //Dashboard
     Route::middleware(['admin', 'permission:dashboard'])->group(function () {
-    Route::get('/admin-dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+        Route::get('/admin-dashboard', function () {
+            return view('admin.dashboard');
+        })->name('admin.dashboard');
     });
-    Route::view('/admin-dashboard/live-attendance-mode', 'admin.live-attendance-mode'); 
-        Route::get('/map/{map}', function (ParkingMap $map) {
+    Route::middleware(['admin', 'permission:live_attendance'])->group(function () {
+    Route::view('/admin-dashboard/live-attendance-mode', 'admin.live-attendance-mode');
+    });
+    Route::middleware(['admin', 'permission:view_map'])->group(function () {
+    Route::get('/map/{map}', function (ParkingMap $map) {
         return view('admin.parking-map', ['map' => $map]);
-    })->name('parking-map.live');;
-        Route::view('/live-attendance', 'admin.live-attendance-fullscreen-mode');
-    Route::get('/dashboard/analytics-dashboard', function () {
+    })->name('parking-map.live');
+    });
+    Route::middleware(['admin', 'permission:live_attendance'])->group(function () {
+    Route::view('/live-attendance', 'admin.live-attendance-fullscreen-mode');
+    });
+    Route::middleware(['admin', 'permission:analytics_dashboard'])->group(function () {
+    Route::get('/admin-dashboard/analytics-dashboard', function () {
         $chart = new AnalyticsChart;
-
         return view('admin.analytics-dashboard', compact('chart'));
+    });
     });
 
     //Parking Slots
     Route::middleware(['admin', 'permission:parking_slots'])->group(function () {
-    Route::view('/parking-slots', 'admin.parking-slots')->name('parking.slots');
-});
+        Route::view('/parking-slots', 'admin.parking-slots')->name('parking.slots');
+    });
+    Route::middleware(['admin', 'permission:manage_map'])->group(function () {
     Route::view('/parking-slots/map-manager', 'admin.map-template-editor')->name('parking.slots');
+    });
 
     //Violation Tracking
+    Route::middleware(['admin', 'permission:violation_tracking'])->group(function () {
     Route::view('/violation-tracking', 'admin.violation-tracking');
+    });
+    Route::middleware(['admin', 'permission:create_report'])->group(function () {
     Route::view('/create-report', 'admin.create-violation-report');
+    });
 
     //Users
     Route::view('/users', 'admin.users')
-    ->middleware('permission:users')
-    ->name('users');
+        ->middleware('permission:users')
+        ->name('users');
+    Route::middleware(['admin', 'permission:create_user'])->group(function () {
     Route::get('/users/create-user', function () {
         return view('admin.user-create'); // Blade containing <livewire:user-form />
     })->name('users.create');
+    });
+    Route::middleware(['admin', 'permission:create_admin'])->group(function () {
     Route::get('/users/create-admin', function () {
         return view('admin.admin-create'); // Blade containing <livewire:user-form />
     })->name('admins.create');
+    });
+    Route::middleware(['admin', 'permission:edit_user'])->group(function () {
     Route::get('/users/edit/{id}', [UserController::class, 'edit'])->name('users.edit');
+    });
+    Route::middleware(['admin', 'permission:edit_admin'])->group(function () {
     Route::get('/admins/edit/{id}', [UserController::class, 'editAdmin'])->name('admins.edit');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');                  
+    });
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
 
     //Sticker Generator
+    Route::middleware(['admin', 'permission:sticker_generator'])->group(function () {
     Route::view('/sticker-generator', 'admin.sticker-generator');
+    });
 
     //Activity Log
+    Route::middleware(['admin', 'permission:activity_log'])->group(function () {
     Route::view('/activity-log', 'admin.activity-log');
     });
+    
+});
 // Route::get('/analytics', [AnalyticsController::class, 'index']);
 
 /*
