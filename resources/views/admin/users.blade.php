@@ -547,16 +547,20 @@
             <span class="text-muted">Home > Users</span>
         </div>
         <div class="d-flex gap-2 ms-3">
+            @canaccess("create_user")
             <div href='/users/create-user' wire:navigate>
                 <button type="button" class="btn-add-slot btn btn-primary">
                     Create User
                 </button>
             </div>
+            @endcanaccess
+            @canaccess("create_admin")
             <div href='/users/create-admin' wire:navigate>
                 <button type="button" class="btn-add-slot btn btn-primary">
                     Create Admin
                 </button>
             </div>
+            @endcanaccess
         </div>
         <div class="square-box">
             <livewire:admin.users-component />
