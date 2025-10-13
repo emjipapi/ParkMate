@@ -511,7 +511,7 @@
                     </div>
                     
                     <div class="modal-footer d-flex justify-content-between">
-                        @canaccess("manage_maps")
+                        @canaccess("manage_map")
                         <a href="{{ url('/parking-slots/map-manager') }}" class="btn btn-outline-primary">
                             Manage Maps
                         </a>

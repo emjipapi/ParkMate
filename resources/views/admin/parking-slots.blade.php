@@ -499,7 +499,7 @@
             Add Parking Area
         </button>
         @endcanaccess
-        @canaccess("manage_maps")
+        @canaccess("manage_map")
             <div href='/parking-slots/map-manager' wire:navigate>
                 <button type="button" class="btn-add-slot btn btn-primary">
                     Manage Maps
