@@ -430,13 +430,13 @@
         </div>
         @endcanaccess
 
-        @canaccess("parking-slots")
+        @canaccess("parking_slots")
         <div href="/parking-slots" wire:navigate class="btn-wrapper">
             <button class="btn">Parking Slots</button>
         </div>
         @endcanaccess
 
-        @canaccess("violation-tracking")
+        @canaccess("violation_tracking")
         <div href="/violation-tracking" wire:navigate class="btn-wrapper">
             <button class="btn">Violation Tracking</button>
         </div>
@@ -448,13 +448,13 @@
         </div>
         @endcanaccess
 
-        @canaccess("sticker-generator")
+        @canaccess("sticker_generator")
         <div href="/sticker-generator" wire:navigate class="btn-wrapper">
             <button class="btn">Sticker Generator</button>
         </div>
         @endcanaccess
 
-        @canaccess("activity-log")
+        @canaccess("activity_log")
         <div href="/activity-log" wire:navigate class="btn-wrapper">
             <button class="btn">Activity Log</button>
         </div>
