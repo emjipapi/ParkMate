@@ -572,6 +572,7 @@
             </div>
             <span class="text-muted">Home > Violation Tracking</span>
         </div>
+        @canaccess("create_report")
         <div class="d-flex gap-2 ms-3">
             <div href='/create-report' onclick="window.location='{{ url('/create-report') }}'">
                 <button type="button" class="btn-add-slot btn btn-primary">
@@ -579,6 +580,7 @@
                 </button>
             </div>
         </div>
+        @endcanaccess
 
         <div class="square-box">
             <livewire:admin.violation-admin-component />

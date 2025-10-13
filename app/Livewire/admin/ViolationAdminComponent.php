@@ -5,6 +5,7 @@ use Livewire\Component;
 use App\Models\Violation;
 use App\Models\Vehicle;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class ViolationAdminComponent extends Component
 {
@@ -13,6 +14,22 @@ class ViolationAdminComponent extends Component
     // Search
     public $searchTerm = '';
     public $searchResults = [];
+
+    public function mount()
+    {
+        $permissions = json_decode(Auth::guard('admin')->user()->permissions ?? '[]', true);
+
+        if (in_array('pending_reports', $permissions)) {
+            $this->activeTab = 'pending';
+        } elseif (in_array('approved_reports', $permissions)) {
+            $this->activeTab = 'approved';
+        } elseif (in_array('for_endorsement', $permissions)) {
+            $this->activeTab = 'endorsement';
+        } else {
+            // fallback if user has none of the three
+            $this->activeTab = null;
+        }
+    }
 
     public function setActiveTab($tab)
     {
