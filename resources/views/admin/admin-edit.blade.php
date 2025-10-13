@@ -480,8 +480,8 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Create</h3>
-                <h6 class="mb-0">User</h6>
+                <h3 class="mb-0 me-3">Edit</h3>
+                <h6 class="mb-0">Admin</h6>
             </div>
             <span class="text-muted">Home > Users > Edit</span>
         </div>

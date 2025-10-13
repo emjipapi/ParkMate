@@ -308,7 +308,9 @@
 
         <hr class="my-4">
 
-
+@if (empty($permissions))
+<div class="alert alert-danger mt-3">Please select at least one permission.</div>
+@endif
         @if (session()->has('success'))
         <div class="alert alert-success mt-3">{{ session('success') }}</div>
         @endif
@@ -320,7 +322,7 @@
             @endforeach
         </div>
         @endif
-        <button type="submit" class="btn btn-primary">
+        <button type="submit" class="btn btn-primary" @disabled(empty($permissions))>
             <span wire:loading.remove wire:target="update">Update Admin</span>
             <span wire:loading wire:target="update">Updating...</span>
         </button>

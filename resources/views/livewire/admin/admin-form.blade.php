@@ -303,9 +303,9 @@
         </div>
 
         <hr class="my-4">
-
-        <button type="submit" class="btn btn-primary">Add Admin</button>
-
+        @if (empty($permissions))
+<div class="alert alert-danger mt-3">Please select at least one permission.</div>
+@endif
         @if (session()->has('success'))
         <div class="alert alert-success mt-3">{{ session('success') }}</div>
         @endif
@@ -315,5 +315,7 @@
             @foreach ($errors->all() as $error) <div>{{ $error }}</div> @endforeach
         </div>
         @endif
+        <button type="submit" class="btn btn-primary" @disabled(empty($permissions))>Add Admin</button>
+
     </form>
 </div>

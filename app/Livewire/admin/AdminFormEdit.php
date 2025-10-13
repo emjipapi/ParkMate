@@ -66,6 +66,7 @@ public function syncParent($group)
         'middlename'=> 'nullable|string|max:50',
         'lastname'  => 'required|string|max:50',
         'password'  => 'nullable|string|min:6',
+        'permissions' => 'required|array|min:1',
     ];
 
     public function mount($id)
