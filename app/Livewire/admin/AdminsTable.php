@@ -4,6 +4,8 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Admin;
+use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Str; 
 
 class AdminsTable extends Component
 {
@@ -51,8 +53,28 @@ public function updatedPerPage()
     {
         if (empty($ids)) return;
 
-        Admin::whereIn('admin_id', $ids)->delete();
+        // Protect Super Admin (id 1) and current logged in admin from deletion
+        $current = (int) Auth::id(); // adjust if you use a different guard
+        $filtered = array_values(array_filter($ids, fn($id) => (int)$id !== 1 && (int)$id !== $current));
+
+        if (empty($filtered)) {
+            session()->flash('message', 'No valid admins selected for deletion.');
+            return;
+        }
+
+        // Soft-delete
+        Admin::whereIn('admin_id', $filtered)->delete();
+
+        // OPTIONAL: Revoke credentials (recommended) — uncomment to enable
+        /*
+        Admin::whereIn('admin_id', $filtered)
+            ->update([
+                'password' => bcrypt(Str::random(60)),
+                'permissions' => json_encode([]),
+            ]);
+        */
+
         $this->resetPage();
-        session()->flash('message', count($ids) . ' admin(s) deleted successfully.');
+        session()->flash('message', count($filtered) . ' admin(s) deleted successfully.');
     }
 }
