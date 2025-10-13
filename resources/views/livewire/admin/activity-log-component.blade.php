@@ -27,15 +27,35 @@
 
     {{-- Tab Content --}}
     <div>
-        {{-- Pending Reports --}}
+        {{-- System Logs --}}
         @if ($activeTab === 'system')
-        <livewire:admin.activity-log-system-component />
+            @canaccess('system_logs')
+                <livewire:admin.activity-log-system-component />
+            @else
+                <div class="alert alert-danger text-center mt-3">
+                    You don't have permission to view this tab.
+                </div>
+            @endcanaccess
 
-        {{-- Approved Reports --}}
+        {{-- Entry/Exit Logs --}}
         @elseif ($activeTab === 'entry/exit')
-        <livewire:admin.activity-log-entry-exit-component />
+            @canaccess('entry_exit_logs')
+                <livewire:admin.activity-log-entry-exit-component />
+            @else
+                <div class="alert alert-danger text-center mt-3">
+                    You don't have permission to view this tab.
+                </div>
+            @endcanaccess
+
+        {{-- Unknown Tags --}}
         @elseif ($activeTab === 'unknown')
-        <livewire:admin.unknown-tags-component />
+            @canaccess('unknown_tags')
+                <livewire:admin.unknown-tags-component />
+            @else
+                <div class="alert alert-danger text-center mt-3">
+                    You don't have permission to view this tab.
+                </div>
+            @endcanaccess
         @endif
     </div>
 </div>

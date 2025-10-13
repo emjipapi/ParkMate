@@ -6,7 +6,7 @@ use Livewire\WithPagination;
 use App\Models\Violation;
 use App\Models\Vehicle;
 use App\Models\User;
-
+use Illuminate\Support\Facades\Auth;
 
 class ActivityLogComponent extends Component
 {
@@ -16,6 +16,21 @@ class ActivityLogComponent extends Component
     protected $queryString = [
         'activeTab' => ['except' => 'system'], 
     ];
+        public function mount()
+    {
+        $permissions = json_decode(Auth::guard('admin')->user()->permissions ?? '[]', true);
+
+        if (in_array('system_logs', $permissions)) {
+            $this->activeTab = 'system';
+        } elseif (in_array('entry_exit_logs', $permissions)) {
+            $this->activeTab = 'entry/exit';
+        } elseif (in_array('unknown_tags', $permissions)) {
+            $this->activeTab = 'unknown';
+        } else {
+            // fallback if user has none of the three
+            $this->activeTab = null;
+        }
+    }
     public function setActiveTab($tab)
     {
         $this->activeTab = $tab;

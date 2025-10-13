@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\sticker-generator-component.blade.php --}}
 <div class="container mx-auto p-6">
     {{-- Tabs with horizontal scroll on mobile --}}
     <div class="tabs-container mb-4">

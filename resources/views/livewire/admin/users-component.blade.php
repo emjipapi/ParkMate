@@ -1,3 +1,4 @@
+{{-- resources\views\livewire\admin\users-component.blade.php --}}
 <div class="container mt-4">
 
     {{-- Tabs with horizontal scroll on mobile --}}
