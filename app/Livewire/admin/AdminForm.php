@@ -26,6 +26,7 @@ class AdminForm extends Component
         'middlename' => 'nullable|string|max:50',
         'lastname'   => 'required|string|max:50',
         'password'   => 'required|string|min:6',
+        'permissions' => 'required|array|min:1',
     ];
 
     public function mount()
