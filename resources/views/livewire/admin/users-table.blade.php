@@ -201,12 +201,22 @@
                     <td>{{ $user->department }}</td>
                     <td>
                         <!-- Edit Icon -->
-                        @canaccess("edit_user")
-                        <a href="{{ route('users.edit', $user->id) }}"
-                            class="text-primary me-2 text-info text-decoration-none">
-                            <i class="bi bi-pencil-square text-secondary"></i>
-                        </a>
-                        @endcanaccess
+                        
+@canaccess("edit_user")
+    <a href="{{ route('users.edit', $user->id) }}" 
+       class="text-primary me-2 text-info text-decoration-none">
+        <i class="bi bi-pencil-square text-secondary"></i>
+    </a>
+@else
+    <a href="javascript:void(0)" 
+       class="text-muted me-2 text-decoration-none" 
+       data-bs-toggle="tooltip" 
+       title="You don’t have permission to edit users.">
+        <i class="bi bi-pencil-square text-secondary"></i>
+    </a>
+@endcanaccess
+
+                        
                         <!-- More Info Icon -->
                         <a href="#" class="text-info text-decoration-none"
                             wire:click.prevent="$dispatch('openUserModal', { id: {{ $user->id }} })">

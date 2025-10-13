@@ -175,11 +175,34 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 
                     {{-- only show Edit when user is loaded --}}
-                    @if($user)
-                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary" target="_blank">Edit</a>
-                    @else
-                    <a href="#" class="btn btn-primary disabled" tabindex="-1" aria-disabled="true">Edit</a>
-                    @endif
+@if($user)
+    @canaccess("edit_user")
+        <a href="{{ route('users.edit', $user->id) }}" 
+           class="btn btn-primary" 
+           target="_blank">
+            Edit
+        </a>
+    @else
+        <a href="javascript:void(0)" 
+           class="btn btn-secondary disabled" 
+           tabindex="-1" 
+           aria-disabled="true" 
+           data-bs-toggle="tooltip" 
+           title="You don’t have permission to edit users.">
+            Edit
+        </a>
+    @endcanaccess
+@else
+    <a href="javascript:void(0)" 
+       class="btn btn-secondary disabled" 
+       tabindex="-1" 
+       aria-disabled="true" 
+       data-bs-toggle="tooltip" 
+       title="No user found.">
+        Edit
+    </a>
+@endif
+
                 </div>
             </div>
         </div>

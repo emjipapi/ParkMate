@@ -111,10 +111,20 @@
                     <td>{{ $admin->lastname }}</td>
                     <td>
                         <!-- Edit Icon -->
-                        <a href="{{ route('admins.edit', $admin->admin_id) }}"
-                            class="text-primary me-2 text-info text-decoration-none">
-                            <i class="bi bi-pencil-square text-secondary"></i>
-                        </a>
+@canaccess("edit_admin")
+    <a href="{{ route('admins.edit', $admin->admin_id) }}" 
+       class="text-primary me-2 text-info text-decoration-none">
+        <i class="bi bi-pencil-square text-secondary"></i>
+    </a>
+@else
+    <a href="javascript:void(0)" 
+       class="text-muted me-2 text-decoration-none" 
+       data-bs-toggle="tooltip" 
+       title="You don’t have permission to edit admins.">
+        <i class="bi bi-pencil-square text-secondary"></i>
+    </a>
+@endcanaccess
+
                     </td>
                 </tr>
                 @empty

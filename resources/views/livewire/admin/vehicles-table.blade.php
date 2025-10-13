@@ -53,9 +53,21 @@
                         <td>{{ $vehicle->license_plate }}</td>
                         <td>
                             <!-- Edit Icon -->
-<a href="{{ route('users.edit', $vehicle->user_id) }}#vehicle-{{ $vehicle->id }}" class="text-primary text-decoration-none">
-    <i class="bi bi-pencil-square text-secondary"></i>
-</a>
+                        
+@canaccess("edit_user")
+    <a href="{{ route('users.edit', $vehicle->user_id) }}#vehicle-{{ $vehicle->id }}" 
+       class="text-primary text-decoration-none">
+        <i class="bi bi-pencil-square text-secondary"></i>
+    </a>
+@else
+    <a href="javascript:void(0)" 
+       class="text-muted text-decoration-none" 
+       data-bs-toggle="tooltip" 
+       title="You don’t have permission to edit users.">
+        <i class="bi bi-pencil-square text-secondary"></i>
+    </a>
+@endcanaccess
+
 
                         </td>
                     </tr>
