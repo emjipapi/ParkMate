@@ -17,6 +17,10 @@ class AdminFormEdit extends Component
     public $password;
 public $permissions = [];
 public $allPermissions = [];
+public $originalPermissions = [];
+
+
+public $isSuperAdmin = false;
 
 public function toggleGroup($group)
 {
@@ -79,8 +83,9 @@ public function syncParent($group)
         $this->middlename= $admin->middlename;
         $this->lastname  = $admin->lastname;
         $this->permissions = json_decode($admin->permissions ?? '[]', true);
-
+        $this->originalPermissions = $this->permissions ?? [];
         $this->allPermissions = \DB::table('permissions')->pluck('description', 'name')->toArray();
+        $this->isSuperAdmin = $this->adminId == 1;
     }
 
     public function update()
@@ -95,6 +100,9 @@ public function syncParent($group)
         } else {
             unset($data['password']);
         }
+            if ($this->isSuperAdmin && $this->permissions !== $this->originalPermissions) {
+        abort(403, 'You are not allowed to modify the Super Admin permissions.');
+    }
 
         $admin->update($data);
 $admin->permissions = json_encode($this->permissions);

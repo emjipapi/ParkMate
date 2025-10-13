@@ -485,7 +485,7 @@
             </div>
             <span class="text-muted">Home > Users > Edit</span>
         </div>
-        <div class="position-absolute m-3 d-none d-md-block">
+        <div class="position-absolute m-3 d-none d-md-block" style="z-index: 1100;">
             <a href="/users" wire:navigate
                 class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
                 style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">

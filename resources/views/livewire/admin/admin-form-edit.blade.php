@@ -1,5 +1,7 @@
 {{-- resources\views\livewire\admin\admin-form-edit.blade.php --}}
-<div class="flex-grow-1 d-flex justify-content-center align-items-center square-box">
+<div class="flex-grow-1 d-flex justify-content-center align-items-center square-box position-relative">
+
+
     <form wire:submit.prevent="update">
         @csrf
 
@@ -29,6 +31,15 @@
         </div>
         <hr class="my-4">
         <h5 class="mb-3">Admin Permissions</h5>
+        <div class="permissions-wrapper position-relative">
+
+    {{-- overlay that blocks only permissions when editing super admin --}}
+@if ($isSuperAdmin)
+<div class="position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center text-center"
+     style="background: rgba(255,255,255,0.6); z-index: 10; cursor: not-allowed; font-weight: 600;">
+    The Super Admin permissions cannot be edited.
+</div>
+@endif
 
         {{-- Dashboard --}}
         <div class="mb-4">
@@ -305,7 +316,7 @@
                 </div>
             </div>
         </div>
-
+</div>
         <hr class="my-4">
 
 @if (empty($permissions))
