@@ -1,4 +1,3 @@
-{{-- resources/views/livewire/admin/sticker-generator-component.blade.php --}}
 <div class="container mx-auto p-6">
     {{-- Tabs with horizontal scroll on mobile --}}
     <div class="tabs-container mb-4">
@@ -22,11 +21,23 @@
     <div>
         {{-- Generate Stickers Tab --}}
         @if ($activeTab === 'generate')
-            <livewire:admin.sticker-generate-component />
+            @canaccess('generate_sticker')
+                <livewire:admin.sticker-generate-component />
+            @else
+                <div class="alert alert-danger text-center mt-3">
+                    You don't have permission to view this tab.
+                </div>
+            @endcanaccess
 
-            {{-- Manage Templates Tab --}}
+        {{-- Manage Templates Tab --}}
         @elseif ($activeTab === 'manage')
-            <livewire:admin.sticker-template-manager-component />
+            @canaccess('manage_sticker')
+                <livewire:admin.sticker-template-manager-component />
+            @else
+                <div class="alert alert-danger text-center mt-3">
+                    You don't have permission to view this tab.
+                </div>
+            @endcanaccess
         @endif
     </div>
 </div>
