@@ -59,7 +59,7 @@
     @endcanaccess
 
     {{-- Analytics Dashboard --}}
-    <div @canaccess("analytics_dashboard") onclick="window.location='{{ url('/dashboard/analytics-dashboard') }}'" @endcanaccess class="card card-5 d-flex flex-column"
+    <div @canaccess("analytics_dashboard") onclick="window.location='{{ url('/admin-dashboard/analytics-dashboard') }}'" @endcanaccess class="card card-5 d-flex flex-column"
         style="cursor:pointer;">
         <div class="card-body d-flex flex-column justify-content-center align-items-center" style="padding: 0.5rem;">
             <i class="bi bi-bar-chart" style="font-size: 5rem; color: white; line-height: 1; display: block;"></i>
