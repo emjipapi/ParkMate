@@ -18,33 +18,29 @@
         @endif
     </div>
 
-    {{-- Tabs with horizontal scroll on mobile --}}
+     {{-- Tabs with horizontal scroll on mobile --}}
     <div class="tabs-container mb-4">
         <ul class="nav nav-tabs border-b flex space-x-2">
-            @canaccess("pending_reports")
             <li class="flex-shrink-0">
                 <a class="nav-link px-4 py-2 cursor-pointer no-underline text-black whitespace-nowrap {{ $activeTab === 'pending' ? 'active font-semibold border-b-2 border-blue-500 text-black' : 'text-gray-600' }}"
                     wire:click="setActiveTab('pending')">
                     Pending Reports
                 </a>
             </li>
-            @endcanaccess
-            @canaccess("approved_reports")
+
             <li class="flex-shrink-0">
                 <a class="nav-link px-4 py-2 cursor-pointer no-underline text-black whitespace-nowrap {{ $activeTab === 'approved' ? 'active font-semibold border-b-2 border-blue-500 text-black' : 'text-gray-600' }}"
                     wire:click="setActiveTab('approved')">
                     Approved Reports
                 </a>
             </li>
-            @endcanaccess
-            @canaccess("for_endorsement")
+
             <li class="flex-shrink-0">
                 <a class="nav-link px-4 py-2 cursor-pointer no-underline text-black whitespace-nowrap {{ $activeTab === 'endorsement' ? 'active font-semibold border-b-2 border-blue-500 text-black' : 'text-gray-600' }}"
                     wire:click="setActiveTab('endorsement')">
                     For Endorsement
                 </a>
             </li>
-            @endcanaccess
         </ul>
     </div>
 
@@ -52,20 +48,33 @@
     <div>
         {{-- Pending Reports --}}
         @if ($activeTab === 'pending')
-            <livewire:admin.pending-reports-component />
+            @canaccess('pending_reports')
+                <livewire:admin.pending-reports-component />
+            @else
+                <div class="alert alert-danger text-center mt-3">
+                    You don't have permission to view this tab.
+                </div>
+            @endcanaccess
 
-            {{-- Approved Reports --}}
+        {{-- Approved Reports --}}
         @elseif ($activeTab === 'approved')
-            <livewire:admin.approved-reports-component />
+            @canaccess('approved_reports')
+                <livewire:admin.approved-reports-component />
+            @else
+                <div class="alert alert-danger text-center mt-3">
+                    You don't have permission to view this tab.
+                </div>
+            @endcanaccess
 
-            {{-- Resolved Reports --}}
+        {{-- For Endorsement --}}
         @elseif ($activeTab === 'endorsement')
-            <livewire:admin.for-endorsement-component />
+            @canaccess('for_endorsement')
+                <livewire:admin.for-endorsement-component />
+            @else
+                <div class="alert alert-danger text-center mt-3">
+                    You don't have permission to view this tab.
+                </div>
+            @endcanaccess
         @endif
     </div>
-    @if (!$activeTab)
-    <div class="alert alert-warning mt-3 text-center">
-        You don't have permission to view any of these tabs.
-    </div>
-    @endif
 </div>
