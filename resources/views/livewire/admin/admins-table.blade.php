@@ -93,18 +93,32 @@
             </thead>
             <tbody>
                 @forelse ($admins as $admin)
-                <tr x-bind:class="{ 'table-active': check2 && selectedIds.includes({{ $admin->id }}) }">
+                <tr x-bind:class="{ 'table-active': check2 && selectedIds.includes({{ $admin->admin_id }}) }">
+
                     <td x-show="check2">
-                        <input type="checkbox" class="form-check-input" value="{{ $admin->id }}"
-                            :checked="selectedIds.includes({{ $admin->id }})" @change="
-                                       if ($event.target.checked) {
-                                           if (!selectedIds.includes({{ $admin->id }})) selectedIds.push({{ $admin->id }});
-                                       } else {
-                                           selectedIds = selectedIds.filter(id => id !== {{ $admin->id }});
-                                       }
-                                       localStorage.setItem('adminTable_selectedIds', JSON.stringify(selectedIds));
-                                   ">
-                    </td>
+    <input
+        type="checkbox"
+        class="form-check-input"
+        value="{{ $admin->admin_id }}"
+        :checked="selectedIds.includes({{ $admin->admin_id }})"
+        @change="
+            if ({{ $admin->admin_id }} === 1) {
+                $event.target.checked = false;
+                return;
+            }
+
+            if ($event.target.checked) {
+                if (!selectedIds.includes({{ $admin->admin_id }})) selectedIds.push({{ $admin->admin_id }});
+            } else {
+                selectedIds = selectedIds.filter(id => id !== {{ $admin->admin_id }});
+            }
+            localStorage.setItem('adminTable_selectedIds', JSON.stringify(selectedIds));
+        "
+        @disabled($admin->admin_id == 1)
+        data-bs-toggle="{{ $admin->admin_id == 1 ? 'tooltip' : '' }}"
+        title="{{ $admin->admin_id == 1 ? 'Super Admin cannot be selected or deleted' : '' }}"
+    >
+</td>
                     <td>{{ $admin->admin_id }}</td>
                     <td>{{ $admin->firstname }}</td>
                     <td>{{ $admin->middlename }}</td>
