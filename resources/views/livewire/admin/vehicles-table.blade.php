@@ -54,7 +54,7 @@
                         <td>
                             <!-- Edit Icon -->
 <a href="{{ route('users.edit', $vehicle->user_id) }}#vehicle-{{ $vehicle->id }}" class="text-primary text-decoration-none">
-    <i class="bi bi-pencil-square"></i>
+    <i class="bi bi-pencil-square text-secondary"></i>
 </a>
 
                         </td>
