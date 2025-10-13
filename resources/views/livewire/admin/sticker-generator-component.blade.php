@@ -41,4 +41,9 @@
             @endcanaccess
         @endif
     </div>
+            @if (!$activeTab)
+    <div class="alert alert-warning mt-3 text-center">
+        You don't have permission to view any of these tabs.
+    </div>
+    @endif
 </div>
