@@ -42,7 +42,9 @@
                     <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#guestTagsModal">
                         Manage Guest Tags
                     </button>
-                    <button type="button" class="btn btn-primary">Create Guest</button>             
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#registerGuestModal">
+    <i class="bi bi-person-plus me-1"></i> Register Guest
+</button>          
                 </div>
             </div>
         </div>

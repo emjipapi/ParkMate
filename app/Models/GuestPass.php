@@ -26,5 +26,7 @@ class GuestPass extends Model
         'name',
         'rfid_tag',
         'status',
+                'reason',
+        'user_id',
     ];
 }
