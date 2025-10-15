@@ -59,113 +59,38 @@ public function updatedPerPage()
 
     public function render()
     {
-        $baseQuery = ActivityLog::query()
-            ->whereIn('action', ['entry', 'exit', 'denied_entry'])
-            ->when($this->startDate, fn (Builder $q) =>
-                $q->where('created_at', '>=', Carbon::parse($this->startDate)->startOfDay())
-            )
-            ->when($this->endDate, fn (Builder $q) =>
-                $q->where('created_at', '<=', Carbon::parse($this->endDate)->endOfDay())
-            )
-            ->when($this->userType === 'student', fn (Builder $q) =>
-                $q->where('actor_type', 'user')
-                  ->whereHas('user', fn ($u) =>
-                      $u->whereNotNull('student_id')
-                         ->where('student_id', '<>', '')
-                         ->where('student_id', '<>', '0')
-                  )
-            )
-            ->when($this->userType === 'employee', fn (Builder $q) =>
-                $q->where('actor_type', 'user')
-                  ->whereHas('user', fn ($u) =>
-                      $u->whereNotNull('employee_id')
-                         ->where('employee_id', '<>', '')
-                         ->where('employee_id', '<>', '0')
-                         ->where(function ($q) {
-                             $q->whereNull('student_id')->orWhere('student_id', '');
-                         })
-                  )
-            )
-            ->when($this->areaFilter !== '', fn (Builder $q) =>
-                $q->where('area_id', $this->areaFilter)
-            );
+        // Base query for both logs and counts
+        $query = ActivityLog::query()
+            ->whereIn('action', ['entry', 'exit', 'denied_entry']);
 
-        // Calculate counts
-        $entryCount = (clone $baseQuery)->where('action', 'entry')->count();
-        $exitCount = (clone $baseQuery)->where('action', 'exit')->count();
-        $deniedCount = (clone $baseQuery)->where('action', 'denied_entry')->count();
+        // Apply filters to the base query
+        $this->applyFilters($query);
+
+        // --- Calculate Counts ---
+        $entryCount = (clone $query)->where('action', 'entry')->count();
+        $exitCount = (clone $query)->where('action', 'exit')->count();
+        $deniedCount = (clone $query)->where('action', 'denied_entry')->count();
+
+        // --- Unknown Tags Count (independent query) ---
         $unknownTagsCount = UnknownRfidLog::query()
             ->when($this->startDate, fn ($q) => $q->where('created_at', '>=', Carbon::parse($this->startDate)->startOfDay()))
             ->when($this->endDate, fn ($q) => $q->where('created_at', '<=', Carbon::parse($this->endDate)->endOfDay()))
             ->count();
 
-        $logsQuery = ActivityLog::with([
-                'user' => function ($q) {
-                    $q->select('id', 'firstname', 'lastname', 'student_id', 'employee_id', 'profile_picture', 'department', 'program');
-                },
-                'area'
-            ])
-            // ✅ Only include entry/exit/denied_entry
-            ->whereIn('action', ['entry', 'exit', 'denied_entry'])
+        // --- Fetch Paginated Logs ---
+        $logsQuery = (clone $query)->with([
+            'user:id,firstname,lastname,student_id,employee_id,profile_picture,department,program',
+            'area'
+        ]);
 
-            // 🔍 SEARCH
-            ->when($this->search !== '', function (Builder $q) {
-                $s = trim($this->search);
-                $q->where(function (Builder $sub) use ($s) {
-                    $sub->where('action', 'like', "%{$s}%")
-                        ->orWhere('details', 'like', "%{$s}%")
-                        ->orWhereHas('user', function (Builder $u) use ($s) {
-                            $u->where('firstname', 'like', "%{$s}%")
-                              ->orWhere('lastname', 'like', "%{$s}%")
-                              ->orWhere('student_id', 'like', "%{$s}%")
-                              ->orWhere('employee_id', 'like', "%{$s}%");
-                        });
-                });
-            })
+        // Apply search separately as it's complex and shouldn't affect counts
+        $this->applySearch($logsQuery);
 
-            // 🎛 Action Filter
-            ->when($this->actionFilter !== '', fn (Builder $q) =>
-                $q->where('action', $this->actionFilter)
-            )
-// USER TYPE
-->when($this->userType === 'student', fn (Builder $q) =>
-    $q->where('actor_type', 'user')
-      ->whereHas('user', fn ($u) =>
-          $u->whereNotNull('student_id')
-             ->where('student_id', '<>', '')
-             ->where('student_id', '<>', '0')
-      )
-)
-            // AREA FILTER
-            ->when($this->areaFilter !== '', fn (Builder $q) =>
-                $q->where('area_id', $this->areaFilter) // 👈 --- ADD THIS
-            )
-->when($this->userType === 'employee', fn (Builder $q) =>
-    $q->where('actor_type', 'user')
-      ->whereHas('user', fn ($u) =>
-          $u->whereNotNull('employee_id')
-             ->where('employee_id', '<>', '')
-             ->where('employee_id', '<>', '0')
-             ->where(function ($q) {
-                 $q->whereNull('student_id')->orWhere('student_id', '');
-             })
-      )
-)
-
-
-            // 📅 Date Range (on-page filters)
-            ->when($this->startDate, fn (Builder $q) =>
-                $q->where('created_at', '>=', Carbon::parse($this->startDate)->startOfDay())
-            )
-          ->when($this->endDate, fn (Builder $q) =>
-    $q->where('created_at', '<=', Carbon::parse($this->endDate)->endOfDay())
-);
-
-$secondaryDirection = $this->sortOrder === 'desc' ? 'desc' : 'asc';
-
-$logs = $logsQuery->orderBy('created_at', $this->sortOrder)
-             ->orderBy('id', $secondaryDirection)
-             ->paginate($this->perPage, ['*'], $this->pageName);
+        // Apply sorting
+        $secondaryDirection = $this->sortOrder === 'desc' ? 'desc' : 'asc';
+        $logs = $logsQuery->orderBy('created_at', $this->sortOrder)
+                         ->orderBy('id', $secondaryDirection)
+                         ->paginate($this->perPage, ['*'], $this->pageName);
 
         return view('livewire.admin.activity-log-entry-exit-component', [
             'activityLogs' => $logs,
@@ -174,6 +99,72 @@ $logs = $logsQuery->orderBy('created_at', $this->sortOrder)
             'deniedCount' => $deniedCount,
             'unknownTagsCount' => $unknownTagsCount,
         ]);
+    }
+
+    /**
+     * Apply all relevant filters to the query builder instance.
+     *
+     * @param Builder $query
+     * @return void
+     */
+    private function applyFilters(Builder $query)
+    {
+        // Action Filter
+        $query->when($this->actionFilter, fn (Builder $q) =>
+            $q->where('action', $this->actionFilter)
+        );
+
+        // User Type Filter
+        $query->when($this->userType, function (Builder $q) {
+            $q->whereHas('user', function (Builder $userQuery) {
+                if ($this->userType === 'student') {
+                    $userQuery->whereNotNull('student_id')
+                              ->where('student_id', '<>', '')
+                              ->where('student_id', '<>', '0');
+                } elseif ($this->userType === 'employee') {
+                    $userQuery->whereNotNull('employee_id')
+                              ->where('employee_id', '<>', '')
+                              ->where('employee_id', '<>', '0')
+                              ->where(fn ($sq) => $sq->whereNull('student_id')->orWhere('student_id', ''));
+                }
+            });
+        });
+
+        // Area Filter
+        $query->when($this->areaFilter, fn (Builder $q) =>
+            $q->where('area_id', $this->areaFilter)
+        );
+
+        // Date Range Filter
+        $query->when($this->startDate, fn (Builder $q) =>
+            $q->where('created_at', '>=', Carbon::parse($this->startDate)->startOfDay())
+        );
+        $query->when($this->endDate, fn (Builder $q) =>
+            $q->where('created_at', '<=', Carbon::parse($this->endDate)->endOfDay())
+        );
+    }
+
+    /**
+     * Apply search logic to the query.
+     *
+     * @param Builder $query
+     * @return void
+     */
+    private function applySearch(Builder $query)
+    {
+        $query->when($this->search, function (Builder $q) {
+            $s = trim($this->search);
+            $q->where(function (Builder $sub) use ($s) {
+                $sub->where('action', 'like', "%{$s}%")
+                    ->orWhere('details', 'like', "%{$s}%")
+                    ->orWhereHas('user', function (Builder $u) use ($s) {
+                        $u->where('firstname', 'like', "%{$s}%")
+                          ->orWhere('lastname', 'like', "%{$s}%")
+                          ->orWhere('student_id', 'like', "%{$s}%")
+                          ->orWhere('employee_id', 'like', "%{$s}%");
+                    });
+            });
+        });
     }
 
     /**
