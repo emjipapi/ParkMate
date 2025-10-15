@@ -143,6 +143,7 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+             overflow: hidden;
         }
 
 
@@ -157,24 +158,24 @@
 
         .card-1 {
             border: 0px;
-            border-radius: 0px;
-            background-color: #00B8EE;
+            border-radius: 12px;
+            background-color: rgba(131, 205, 72);
             color: white;
             height: 200px;
         }
 
         .card-2 {
             border: 0px;
-            border-radius: 0px;
-            background-color: #F09113;
+            border-radius: 12px;
+            background-color: rgba(2, 158, 255);
             color: white;
             height: 200px;
         }
 
         .card-3 {
             border: 0px;
-            border-radius: 0px;
-            background-color: #019C50;
+            border-radius: 12px;
+            background-color: rgba(223, 138, 138);
             color: white;
             height: 200px;
         }
@@ -191,7 +192,7 @@
 
         .card-5 {
             border: 0px;
-            border-radius: 0px;
+            border-radius: 12px;
             background-color: #03ca6aff;
             color: white;
             height: 200px;
@@ -238,7 +239,7 @@
             grid-column: 4;
             grid-row: 1;
             border: 0;
-            border-radius: 0;
+            border-radius: 12px;
             background: #fff;
             color: #000;
             height: 450px;

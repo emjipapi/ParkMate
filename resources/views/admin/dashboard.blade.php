@@ -175,9 +175,8 @@
             display: flex;
             flex-direction: column;
             justify-content: space-between;
+            overflow: hidden;
         }
-
-
         .card-footer {
             padding: 0;
             white-space: normal;
@@ -189,24 +188,24 @@
 
         .card-1 {
             border: 0px;
-            border-radius: 0px;
-            background-color: #00B8EE;
+            border-radius: 12px;
+            background-color: rgba(131, 205, 72);
             color: white;
             height: 200px;
         }
 
         .card-2 {
             border: 0px;
-            border-radius: 0px;
-            background-color: #F09113;
+            border-radius: 12px;
+            background-color: rgba(2, 158, 255);
             color: white;
             height: 200px;
         }
 
         .card-3 {
             border: 0px;
-            border-radius: 0px;
-            background-color: #019C50;
+            border-radius: 12px;
+            background-color: rgba(223, 138, 138);
             color: white;
             height: 200px;
         }
@@ -215,33 +214,6 @@
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 1rem;
-        }
-
-        /* Place cards exactly */
-        .card-5 {
-            grid-column: 4;
-            grid-row: 1;
-            height: 200px;
-            border: 0;
-            border-radius: 0;
-            background: #6c63ff;
-            color: #fff;
-        }
-
-        .card-6 {
-            grid-column: 3;
-            grid-row: 2;
-            /* same row as card-3 */
-            align-self: start;
-            /* stick to top of this cell */
-            z-index: 1;
-            /* sit above card-3 */
-
-            border: 0px;
-            border-radius: 0px;
-            background-color: #03ca6aff;
-            color: white;
-            height: 200px;
         }
 
         .card-1 {
@@ -266,12 +238,47 @@
             grid-column: 4;
             grid-row: 2;
             border: 0;
-            border-radius: 0;
+            border-radius: 12px;
             background: #fff;
             color: #000;
             height: 450px;
             overflow-y: auto;
             padding: 1rem;
+        }
+
+                .card-5 {
+            grid-column: 4;
+            grid-row: 1;
+            height: 200px;
+            border: 0;
+            border-radius: 12px;
+            background: #6c63ff;
+            color: #fff;
+        }
+
+        .card-6 {
+            grid-column: 3;
+            grid-row: 2;
+
+            align-self: start;
+          z-index: 1;
+
+            border: 0px;
+            border-radius: 12px;
+            background-color: #03ca6aff;
+            color: white;
+            height: 200px;
+        }
+            .card-7 {
+            grid-column: 3;
+            grid-row: 1;
+            align-self: start;
+            z-index: 1;
+            border: 0px;
+            border-radius: 12px;
+            background-color: rgb(222, 11, 218);
+            color: white;
+            height: 200px;
         }
 
         /* Keep cards as flex boxes for internal layout (OK with grid) */
