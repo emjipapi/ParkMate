@@ -396,6 +396,10 @@
             }
 
             .cards-container .card-6 {
+                order: -2;
+                /* first on mobile */
+            }
+                        .cards-container .card-7 {
                 order: -1;
                 /* first on mobile */
             }
