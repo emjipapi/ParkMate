@@ -1,35 +1,47 @@
 {{-- resources/views/livewire/admin/unknown-tags-component.blade.php --}}
 <div class="p-3">
+    <div class="row g-3 mb-3">
+        {{-- Search Box --}}
+        <div class="col-md-3">
+            <label for="search" class="form-label fw-bold">Search</label>
+            <input type="text" id="search" class="form-control form-control-sm" placeholder="Search by tag..."
+                wire:model.live.debounce.300ms="search">
+        </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-        <div class="d-flex gap-2 align-items-center">
-            <input type="text" class="form-control" placeholder="Search by tag..."
-                wire:model.live.debounce.300ms="search" style="min-width: 240px;">
-
-            <div class="d-flex align-items-center gap-1">
-                <label class="mb-0 small">Date</label>
-                <input type="date" class="form-control form-control-sm" wire:model.live="startDate"
+        {{-- Date Range --}}
+        <div class="col-md-4">
+            <label for="startDate" class="form-label fw-bold">Date Range</label>
+            <div class="input-group input-group-sm">
+                <input type="date" id="startDate" class="form-control" wire:model.live="startDate"
                     onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
-                <span class="mx-1">-</span>
-                <input type="date" class="form-control form-control-sm" wire:model.live="endDate"
-                    onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
+                <span class="input-group-text">-</span>
+                <input type="date" class="form-control" wire:model.live="endDate" onfocus="this.showPicker();"
+                    onmousedown="event.preventDefault(); this.showPicker();">
             </div>
-<button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" wire:click="$refresh">
-    <i class="bi bi-arrow-clockwise"></i>
-    <span>Refresh</span>
-</button>
+        </div>
+                {{-- Refresh Button --}}
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
+                wire:click="$refresh">
+                <i class="bi bi-arrow-clockwise"></i>
+                <span>Refresh</span>
+            </button>
+        </div>
 
+        {{-- Per Page --}}
+        <div class="col-md-2 d-flex align-items-end">
+            <div class="d-flex align-items-center gap-1">
+                <span>Show</span>
+                <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
+                    @foreach($perPageOptions as $option)
+                        <option value="{{ $option }}">{{ $option }}</option>
+                    @endforeach
+                </select>
+                <span>entries</span>
+            </div>
         </div>
-        
-                <div class="d-flex align-items-center gap-1">
-            <span>Show</span>
-            <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
-                @foreach($perPageOptions as $option)
-                    <option value="{{ $option }}">{{ $option }}</option>
-                @endforeach
-            </select>
-            <span>entries</span>
-        </div>
+
+
     </div>
 
     <div class="table-responsive" wire:poll.2s>
