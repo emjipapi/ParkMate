@@ -81,47 +81,63 @@
     </div>
 
     {{-- 🎛 Filter Bar --}}
-    <div class="d-flex flex-wrap justify-content-start gap-2 mb-3">
-
+    <div class="row g-3 mb-3">
         {{-- Action Filter --}}
-        <select class="form-select form-select-sm w-auto" wire:model.live="actionFilter">
-            <option value="">All Actions</option>
-            <option value="entry">Entry</option>
-            <option value="exit">Exit</option>
-            <option value="denied_entry">Denied Entry</option>
-        </select>
+        <div class="col-md-2">
+            <label for="actionFilter" class="form-label fw-bold">Action</label>
+            <select id="actionFilter" class="form-select form-select-sm" wire:model.live="actionFilter">
+                <option value="">All Actions</option>
+                <option value="entry">Entry</option>
+                <option value="exit">Exit</option>
+                <option value="denied_entry">Denied Entry</option>
+            </select>
+        </div>
 
         {{-- User Type Filter --}}
-        <select class="form-select form-select-sm w-auto" wire:model.live="userType">
-            <option value="">All Users</option>
-            <option value="student">Students</option>
-            <option value="employee">Employees</option>
-        </select>
-                {{-- 📍 Area Filter (NEW) --}}
-        <select class="form-select form-select-sm w-auto" wire:model.live="areaFilter">
-            <option value="">All Areas</option>
-            @foreach($parkingAreas as $area)
-                <option value="{{ $area->id }}">{{ $area->name }}</option>
-            @endforeach
-        </select>
-
-        {{-- 📅 Date Range (kept together) --}}
-        <div class="d-flex align-items-center flex-nowrap">
-            <input type="date" class="form-control form-control-sm w-auto" wire:model.live="startDate"
-                onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
-            <span class="mx-1">-</span>
-            <input type="date" class="form-control form-control-sm w-auto" wire:model.live="endDate"
-                onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
+        <div class="col-md-2">
+            <label for="userType" class="form-label fw-bold">User Type</label>
+            <select id="userType" class="form-select form-select-sm" wire:model.live="userType">
+                <option value="">All Users</option>
+                <option value="student">Students</option>
+                <option value="employee">Employees</option>
+            </select>
         </div>
-        <div class="btn-group btn-group-sm" role="group" x-data="{ sortOrder: @entangle('sortOrder') }">
-            <button type="button" class="btn" :class="sortOrder === 'desc' ? 'btn-primary' : 'btn-outline-primary'"
-                wire:click="$set('sortOrder', 'desc')">
-                Newest
-            </button>
-            <button type="button" class="btn" :class="sortOrder === 'asc' ? 'btn-primary' : 'btn-outline-primary'"
-                wire:click="$set('sortOrder', 'asc')">
-                Oldest
-            </button>
+
+        {{-- Area Filter --}}
+        <div class="col-md-2">
+            <label for="areaFilter" class="form-label fw-bold">Area</label>
+            <select id="areaFilter" class="form-select form-select-sm" wire:model.live="areaFilter">
+                <option value="">All Areas</option>
+                @foreach($parkingAreas as $area)
+                    <option value="{{ $area->id }}">{{ $area->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        {{-- Date Range --}}
+        <div class="col-md-3">
+            <label for="startDate" class="form-label fw-bold">Date Range</label>
+            <div class="input-group input-group-sm">
+                <input type="date" id="startDate" class="form-control" wire:model.live="startDate"
+                    onfocus="this.showPicker();" onmousedown="event.preventDefault(); this.showPicker();">
+                <span class="input-group-text">-</span>
+                <input type="date" class="form-control" wire:model.live="endDate" onfocus="this.showPicker();"
+                    onmousedown="event.preventDefault(); this.showPicker();">
+            </div>
+        </div>
+
+        {{-- Sort Order Buttons --}}
+        <div class="col-md-3 d-flex align-items-end">
+            <div class="btn-group btn-group-sm" role="group" x-data="{ sortOrder: @entangle('sortOrder') }">
+                <button type="button" class="btn" :class="sortOrder === 'desc' ? 'btn-primary' : 'btn-outline-primary'"
+                    wire:click="$set('sortOrder', 'desc')">
+                    Newest
+                </button>
+                <button type="button" class="btn" :class="sortOrder === 'asc' ? 'btn-primary' : 'btn-outline-primary'"
+                    wire:click="$set('sortOrder', 'asc')">
+                    Oldest
+                </button>
+            </div>
         </div>
     </div>
     {{-- 📋 Activity Logs Table --}}
