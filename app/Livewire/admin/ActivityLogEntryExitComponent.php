@@ -7,6 +7,7 @@ use Livewire\WithPagination;
 use App\Models\ActivityLog;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
+use App\Models\ParkingArea;
 
 class ActivityLogEntryExitComponent extends Component
 {
@@ -37,6 +38,8 @@ class ActivityLogEntryExitComponent extends Component
 
         public $perPage = 15; // default
     public $perPageOptions = [15, 25, 50, 100];
+    public $areaFilter = '';
+    public $parkingAreas = [];
 
     // reset page when perPage changes
 public function updatedPerPage()
@@ -48,7 +51,7 @@ public function updatedPerPage()
     public function updating($name, $value)
     {
         // only reset page when user changes the on-page filters (not report fields)
-        if (in_array($name, ['search','actionFilter','userType','startDate','endDate'])) {
+        if (in_array($name, ['search','actionFilter','userType','startDate','endDate', 'areaFilter'])) {
             $this->resetPage($this->pageName);
         }
     }
@@ -84,7 +87,6 @@ public function updatedPerPage()
                 $q->where('action', $this->actionFilter)
             )
 // USER TYPE
-
 ->when($this->userType === 'student', fn (Builder $q) =>
     $q->where('actor_type', 'user')
       ->whereHas('user', fn ($u) =>
@@ -93,6 +95,10 @@ public function updatedPerPage()
              ->where('student_id', '<>', '0')
       )
 )
+            // AREA FILTER
+            ->when($this->areaFilter !== '', fn (Builder $q) =>
+                $q->where('area_id', $this->areaFilter) // 👈 --- ADD THIS
+            )
 ->when($this->userType === 'employee', fn (Builder $q) =>
     $q->where('actor_type', 'user')
       ->whereHas('user', fn ($u) =>
@@ -190,6 +196,11 @@ $logs = $logs->orderBy('created_at', $this->sortOrder)
         $this->reportType = 'week';
         $this->reportStartDate = null;
         $this->reportEndDate = null;
+    }
+        public function mount()
+    {
+        // 👈 --- ADD THIS: Fetch all parking areas so the dropdown can be built
+        $this->parkingAreas = ParkingArea::orderBy('name')->get();
     }
 
     public function refreshLogs()

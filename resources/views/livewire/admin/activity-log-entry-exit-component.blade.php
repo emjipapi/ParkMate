@@ -97,6 +97,13 @@
             <option value="student">Students</option>
             <option value="employee">Employees</option>
         </select>
+                {{-- 📍 Area Filter (NEW) --}}
+        <select class="form-select form-select-sm w-auto" wire:model.live="areaFilter">
+            <option value="">All Areas</option>
+            @foreach($parkingAreas as $area)
+                <option value="{{ $area->id }}">{{ $area->name }}</option>
+            @endforeach
+        </select>
 
         {{-- 📅 Date Range (kept together) --}}
         <div class="d-flex align-items-center flex-nowrap">
