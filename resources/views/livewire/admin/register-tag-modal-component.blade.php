@@ -6,7 +6,9 @@
             <div class="modal-content">
                 <form wire:submit.prevent="saveTag">
                     <div class="modal-header">
-                        <h5 class="modal-title">Register New Guest Tag</h5>
+                        <h5 class="modal-title">
+                            {{ $isEditMode ? 'Edit Guest Tag' : 'Register New Guest Tag' }}
+                        </h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -38,7 +40,9 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Register Tag</button>
+                        <button type="submit" class="btn btn-primary">
+                            {{ $isEditMode ? 'Update Tag' : 'Register Tag' }}
+                        </button>
                     </div>
                 </form>
             </div>
@@ -51,15 +55,10 @@
     const modalEl = document.getElementById('registerTagModal');
     
     modalEl.addEventListener('shown.bs.modal', function() {
-        // Force Livewire to refresh the component when modal opens
-        Livewire.dispatch('refreshComponent');
-        
-        // Alternative: Trigger a small update to force re-render
         $wire.$refresh();
     });
     
     modalEl.addEventListener('hidden.bs.modal', function() {
-        // Reset the form when modal closes
         $wire.call('resetForm');
     });
 </script>

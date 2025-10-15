@@ -9,7 +9,6 @@ class GuestTagsModalComponent extends Component
 {
     public $guestTags;
 
-    // Listen for an event to refresh the tag list
     protected $listeners = ['tagRegistered' => 'refreshTagList'];
 
     public function mount()
@@ -19,8 +18,18 @@ class GuestTagsModalComponent extends Component
 
     public function refreshTagList()
     {
-        // Fetch all guest tags, showing the newest ones first
         $this->guestTags = GuestTag::latest()->get();
+    }
+
+    public function editTag($tagId)
+    {
+        $this->dispatch('loadTagForEdit', $tagId);
+    }
+
+    public function deleteTag($tagId)
+    {
+        GuestTag::find($tagId)?->delete();
+        $this->refreshTagList();
     }
     
     public function render()

@@ -2,23 +2,33 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\GuestTag; // Import the GuestTag model
+use App\Models\GuestTag;
 use Livewire\Component;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class RegisterTagModalComponent extends Component
 {
     public $tagName = '';
     public $tagId = '';
+    public $editingTagId = null;
+    public $isEditMode = false;
 
-    // Remove mount() - it only runs once on page load
-    // Instead, reset values when modal opens
-    
+    #[\Livewire\Attributes\On('loadTagForEdit')]
+    public function loadTagForEdit($tagId)
+    {
+        $tag = GuestTag::find($tagId);
+        if ($tag) {
+            $this->editingTagId = $tag->id;
+            $this->tagName = $tag->name;
+            $this->tagId = $tag->rfid_tag;
+            $this->isEditMode = true;
+        }
+    }
+
     #[\Livewire\Attributes\On('refreshComponent')]
     public function refreshComponent()
     {
-        // This runs when modal opens
         $this->resetForm();
     }
 
@@ -26,6 +36,8 @@ class RegisterTagModalComponent extends Component
     {
         $this->tagName = '';
         $this->tagId = '';
+        $this->editingTagId = null;
+        $this->isEditMode = false;
         $this->resetErrorBag();
     }
 
@@ -54,20 +66,58 @@ class RegisterTagModalComponent extends Component
 
     public function saveTag()
     {
+        if ($this->isEditMode) {
+            $this->updateTag();
+        } else {
+            $this->createTag();
+        }
+    }
+
+    public function createTag()
+    {
         $this->validate([
             'tagName' => 'required|string|max:255',
             'tagId' => 'required|string|max:255|unique:guest_tags,rfid_tag',
         ]);
 
-        // Create the GuestTag record in the database
         GuestTag::create([
             'name' => $this->tagName,
             'rfid_tag' => $this->tagId,
         ]);
 
-        // Close modal and show success
         $this->dispatch('close-register-tag-modal');
+        $this->dispatch('tagRegistered'); // Notify GuestTagsModalComponent to refresh
         session()->flash('message', 'Tag registered successfully!');
+        $this->resetForm();
+    }
+
+    public function updateTag()
+    {
+        $tag = GuestTag::find($this->editingTagId);
+        if (!$tag) {
+            $this->addError('tagId', 'Tag not found');
+            return;
+        }
+
+        $this->validate([
+            'tagName' => 'required|string|max:255',
+            'tagId' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('guest_tags', 'rfid_tag')->ignore($tag->id),
+            ],
+        ]);
+
+        $tag->update([
+            'name' => $this->tagName,
+            'rfid_tag' => $this->tagId,
+        ]);
+
+        $this->dispatch('close-register-tag-modal');
+        $this->dispatch('tagRegistered'); // Notify GuestTagsModalComponent to refresh
+        session()->flash('message', 'Tag updated successfully!');
+        $this->resetForm();
     }
 
     public function render()

@@ -38,7 +38,11 @@
                                         @endif
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-info">Edit</button>
+                                        <button type="button" wire:click="editTag({{ $tag->id }})" 
+        class="btn btn-sm btn-info" 
+        data-bs-toggle="modal" data-bs-target="#registerTagModal">
+    Edit
+</button>
                                         <button class="btn btn-sm btn-danger">Delete</button>
                                     </td>
                                 </tr>
