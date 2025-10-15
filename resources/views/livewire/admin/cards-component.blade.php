@@ -58,13 +58,13 @@
     </div>
     @endcanaccess
     {{-- @canaccess("create_report") --}}
-    <div class="card card-7 text-center d-flex flex-column justify-content-center align-items-center"
-        style="cursor:pointer;" onclick="window.location='{{ url('/') }}'">
-        <div class="card-body d-flex flex-column justify-content-center align-items-center">
-            <i class="bi bi-people" style="font-size: 5rem; color: white;"></i>
-            <p class="card-text mt-2 mb-1 fw-bold">Guests</p>
-        </div>
+<div class="card card-7 text-center d-flex flex-column justify-content-center align-items-center"
+     style="cursor:pointer;" data-bs-toggle="modal" data-bs-target="#guestListModal">
+    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+        <i class="bi bi-people" style="font-size: 5rem; color: white;"></i>
+        <p class="card-text mt-2 mb-1 fw-bold">Guests</p>
     </div>
+</div>
     {{-- @endcanaccess --}}
 
     {{-- Analytics Dashboard --}}

@@ -502,6 +502,7 @@
         </div>
 
         <livewire:admin.cards-component />
+        <livewire:admin.guest-list-modal-component />
 
         {{-- Open Map Modal --}}
         <div wire:ignore.self class="modal fade" id="openMapModal" tabindex="-1" aria-hidden="true">
