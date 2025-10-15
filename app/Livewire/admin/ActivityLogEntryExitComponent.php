@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\ActivityLog;
+use App\Models\UnknownRfidLog;
 use Illuminate\Database\Eloquent\Builder;
 use Carbon\Carbon;
 use App\Models\ParkingArea;
@@ -58,7 +59,47 @@ public function updatedPerPage()
 
     public function render()
     {
-        $logs = ActivityLog::with([
+        $baseQuery = ActivityLog::query()
+            ->whereIn('action', ['entry', 'exit', 'denied_entry'])
+            ->when($this->startDate, fn (Builder $q) =>
+                $q->where('created_at', '>=', Carbon::parse($this->startDate)->startOfDay())
+            )
+            ->when($this->endDate, fn (Builder $q) =>
+                $q->where('created_at', '<=', Carbon::parse($this->endDate)->endOfDay())
+            )
+            ->when($this->userType === 'student', fn (Builder $q) =>
+                $q->where('actor_type', 'user')
+                  ->whereHas('user', fn ($u) =>
+                      $u->whereNotNull('student_id')
+                         ->where('student_id', '<>', '')
+                         ->where('student_id', '<>', '0')
+                  )
+            )
+            ->when($this->userType === 'employee', fn (Builder $q) =>
+                $q->where('actor_type', 'user')
+                  ->whereHas('user', fn ($u) =>
+                      $u->whereNotNull('employee_id')
+                         ->where('employee_id', '<>', '')
+                         ->where('employee_id', '<>', '0')
+                         ->where(function ($q) {
+                             $q->whereNull('student_id')->orWhere('student_id', '');
+                         })
+                  )
+            )
+            ->when($this->areaFilter !== '', fn (Builder $q) =>
+                $q->where('area_id', $this->areaFilter)
+            );
+
+        // Calculate counts
+        $entryCount = (clone $baseQuery)->where('action', 'entry')->count();
+        $exitCount = (clone $baseQuery)->where('action', 'exit')->count();
+        $deniedCount = (clone $baseQuery)->where('action', 'denied_entry')->count();
+        $unknownTagsCount = UnknownRfidLog::query()
+            ->when($this->startDate, fn ($q) => $q->where('created_at', '>=', Carbon::parse($this->startDate)->startOfDay()))
+            ->when($this->endDate, fn ($q) => $q->where('created_at', '<=', Carbon::parse($this->endDate)->endOfDay()))
+            ->count();
+
+        $logsQuery = ActivityLog::with([
                 'user' => function ($q) {
                     $q->select('id', 'firstname', 'lastname', 'student_id', 'employee_id', 'profile_picture', 'department', 'program');
                 },
@@ -122,12 +163,16 @@ public function updatedPerPage()
 
 $secondaryDirection = $this->sortOrder === 'desc' ? 'desc' : 'asc';
 
-$logs = $logs->orderBy('created_at', $this->sortOrder)
+$logs = $logsQuery->orderBy('created_at', $this->sortOrder)
              ->orderBy('id', $secondaryDirection)
              ->paginate($this->perPage, ['*'], $this->pageName);
 
         return view('livewire.admin.activity-log-entry-exit-component', [
             'activityLogs' => $logs,
+            'entryCount' => $entryCount,
+            'exitCount' => $exitCount,
+            'deniedCount' => $deniedCount,
+            'unknownTagsCount' => $unknownTagsCount,
         ]);
     }
 

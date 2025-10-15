@@ -140,6 +140,43 @@
             </div>
         </div>
     </div>
+
+    {{-- Counters --}}
+    <div class="row mb-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Entries</h5>
+                    <p class="card-text">{{ $entryCount }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Exits</h5>
+                    <p class="card-text">{{ $exitCount }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Denied</h5>
+                    <p class="card-text">{{ $deniedCount }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Unknown Tags Scanned</h5>
+                    <p class="card-text">{{ $unknownTagsCount }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- 📋 Activity Logs Table --}}
     <div class="table-responsive" wire:poll.2s>
         <table class="table table-striped custom-table">
