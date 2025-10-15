@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class GuestTag extends Model
+class GuestPass extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -15,7 +15,7 @@ class GuestTag extends Model
      *
      * @var string
      */
-    protected $table = 'guest_tags';
+    protected $table = 'guest_passes';
 
     /**
      * The attributes that are mass assignable.

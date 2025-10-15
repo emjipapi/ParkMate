@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\GuestTag;
+use App\Models\GuestPass;
 use Livewire\Component;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
@@ -17,7 +17,7 @@ class RegisterTagModalComponent extends Component
     #[\Livewire\Attributes\On('loadTagForEdit')]
     public function loadTagForEdit($tagId)
     {
-        $tag = GuestTag::find($tagId);
+        $tag = GuestPass::find($tagId);
         if ($tag) {
             $this->editingTagId = $tag->id;
             $this->tagName = $tag->name;
@@ -77,10 +77,10 @@ class RegisterTagModalComponent extends Component
     {
         $this->validate([
             'tagName' => 'required|string|max:255',
-            'tagId' => 'required|string|max:255|unique:guest_tags,rfid_tag',
+            'tagId' => 'required|string|max:255|unique:guest_passes,rfid_tag',
         ]);
 
-        GuestTag::create([
+        GuestPass::create([
             'name' => $this->tagName,
             'rfid_tag' => $this->tagId,
         ]);
@@ -93,7 +93,7 @@ class RegisterTagModalComponent extends Component
 
     public function updateTag()
     {
-        $tag = GuestTag::find($this->editingTagId);
+        $tag = GuestPass::find($this->editingTagId);
         if (!$tag) {
             $this->addError('tagId', 'Tag not found');
             return;
@@ -105,7 +105,7 @@ class RegisterTagModalComponent extends Component
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('guest_tags', 'rfid_tag')->ignore($tag->id),
+                Rule::unique('guest_passes', 'rfid_tag')->ignore($tag->id),
             ],
         ]);
 

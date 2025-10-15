@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Admin;
 
-use App\Models\GuestTag;
+use App\Models\GuestPass;
 use Livewire\Component;
 
 class GuestTagsModalComponent extends Component
@@ -18,7 +18,7 @@ class GuestTagsModalComponent extends Component
 
     public function refreshTagList()
     {
-        $this->guestTags = GuestTag::latest()->get();
+        $this->guestTags = GuestPass::latest()->get();
     }
 
     public function editTag($tagId)
@@ -28,7 +28,7 @@ class GuestTagsModalComponent extends Component
 
     public function deleteTag($tagId)
     {
-        GuestTag::find($tagId)?->delete();
+        GuestPass::find($tagId)?->delete();
         $this->refreshTagList();
     }
     
