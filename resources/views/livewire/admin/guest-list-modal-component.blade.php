@@ -39,9 +39,9 @@
                     </table>
                 </div>
                 <div class="modal-footer">
-                                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#registerTagModal">
-                            Register a Tag
-                        </button>
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#guestTagsModal">
+                        Manage Guest Tags
+                    </button>
                     <button type="button" class="btn btn-primary">Create Guest</button>             
                 </div>
             </div>

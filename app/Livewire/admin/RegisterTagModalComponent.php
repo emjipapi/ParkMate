@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\GuestTag; // Import the GuestTag model
 use Livewire\Component;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
@@ -55,11 +56,14 @@ class RegisterTagModalComponent extends Component
     {
         $this->validate([
             'tagName' => 'required|string|max:255',
-            'tagId' => 'required|string|max:255',
+            'tagId' => 'required|string|max:255|unique:guest_tags,rfid_tag',
         ]);
 
-        // Logic to save the new tag would go here.
-        // For example: GuestTag::create([...]);
+        // Create the GuestTag record in the database
+        GuestTag::create([
+            'name' => $this->tagName,
+            'rfid_tag' => $this->tagId,
+        ]);
 
         // Close modal and show success
         $this->dispatch('close-register-tag-modal');

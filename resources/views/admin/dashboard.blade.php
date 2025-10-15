@@ -508,6 +508,7 @@
         <livewire:admin.cards-component />
         <livewire:admin.guest-list-modal-component />
         <livewire:admin.register-tag-modal-component />
+        <livewire:admin.guest-tags-modal-component />
         {{-- Open Map Modal --}}
         <div wire:ignore.self class="modal fade" id="openMapModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-xl modal-dialog-centered">
@@ -566,6 +567,14 @@
     <script>
         window.addEventListener('close-open-map-modal', () => {
     const modalEl = document.getElementById('openMapModal');
+    if (!modalEl) return;
+    const instance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+    instance.hide();
+  });
+    </script>
+        <script>
+        window.addEventListener('close-register-tag-modal', () => {
+    const modalEl = document.getElementById('registerTagModal');
     if (!modalEl) return;
     const instance = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
     instance.hide();
