@@ -61,13 +61,14 @@ class ParkingSlotsComponent extends Component
             // Car slots for this area
             $carSlots = DB::table('car_slots')
                 ->where('area_id', $area->id)
-                ->select('id', 'label', 'occupied')
+                ->select('id', 'label', 'occupied', 'disabled')
                 ->get()
                 ->map(function ($slot) {
                     return [
                         'id' => $slot->id,
                         'label' => $slot->label,
                         'occupied' => (bool) $slot->occupied,
+                        'disabled' => (bool) $slot->disabled,
                     ];
                 })
                 ->toArray();
@@ -129,12 +130,16 @@ class ParkingSlotsComponent extends Component
         $this->loadAreasData();
     }
 
-    public function openSlot(int $areaId, int $slotId)
-    {
-        Log::info('Slot opened', ['area_id' => $areaId, 'slot_id' => $slotId]);
-        // Optional: open modal or emit event
-        // $this->emit('showSlotModal', $areaId, $slotId);
-    }
+public function openSlot(int $areaId, int $slotId)
+{
+    Log::info('Slot toggled', ['area_id' => $areaId, 'slot_id' => $slotId]);
+
+    DB::table('car_slots')
+        ->where('id', $slotId)
+        ->update(['disabled' => DB::raw('NOT disabled')]);
+
+    $this->loadAreasData();
+}
 
     public function render()
     {

@@ -10,5 +10,10 @@ class CarSlot extends Model
     protected $primaryKey = 'id';
     public $timestamps = true;
 
-    protected $fillable = ['area_id', 'label', 'occupied'];
+    protected $fillable = ['area_id', 'label', 'occupied', 'disabled'];
+
+    protected $casts = [
+        'occupied' => 'boolean',
+        'disabled' => 'boolean',
+    ];
 }
