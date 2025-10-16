@@ -120,10 +120,20 @@ class RegisterGuestModalComponent extends Component
             ]);
 
             // Close modal and refresh
-            $this->dispatch('close-register-guest-modal');
-            $this->dispatch('guestRegistered');
-            session()->flash('message', 'Guest registered successfully!');
-            $this->resetForm();
+$this->dispatch('guestRegistered');
+session()->flash('message', 'Guest registered successfully!');
+$this->resetForm();
+
+// Close and reopen the modal
+$this->js('
+    const modalEl = document.getElementById("registerGuestModal");
+    const modal = bootstrap.Modal.getInstance(modalEl);
+    if (modal) modal.hide();
+    setTimeout(() => {
+        const newModal = new bootstrap.Modal(modalEl);
+        newModal.show();
+    }, 500);
+');
 
         } catch (\Exception $e) {
             $this->addError('general', 'Error registering guest: ' . $e->getMessage());

@@ -98,7 +98,7 @@
                                     @error('reason') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                 </div>
 
-                                <div class="mb-3">
+                                <div class="mb-3" wire:key="guest-tags-{{ count($guestTags) }}">
                                     <label for="selectedTag" class="form-label">Guest Tag <span class="text-danger">*</span></label>
                                     <select class="form-select @error('selectedTag') is-invalid @enderror" wire:model.live="selectedTag">
                                         <option value="">-- Select a Tag --</option>
@@ -133,13 +133,27 @@
 @script
 <script>
     const modalEl = document.getElementById('registerGuestModal');
+    const modal = new bootstrap.Modal(modalEl);
     
     modalEl.addEventListener('shown.bs.modal', function() {
-        $wire.$refresh();
+        $wire.loadGuestTags();
     });
     
     modalEl.addEventListener('hidden.bs.modal', function() {
-        $wire.call('resetForm');
+        // Reset form
+        $wire.firstname = '';
+        $wire.middlename = '';
+        $wire.lastname = '';
+        $wire.contactNumber = '';
+        $wire.licensePlate = '';
+        $wire.vehicleType = '';
+        $wire.reason = '';
+        $wire.selectedTag = '';
+    });
+
+    // Listen for the reopenRegisterModal event
+    Livewire.hook('reopenRegisterModal', function() {
+        modal.show();
     });
 </script>
 @endscript
