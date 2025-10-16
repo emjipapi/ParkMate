@@ -42,6 +42,17 @@ class GuestListModalComponent extends Component
                 session()->flash('error', 'Guest pass not found.');
                 return;
             }
+                    $user = $guestPass->user;
+
+        // Soft delete the user's vehicles
+        if ($user && $user->vehicles) {
+            $user->vehicles()->delete();
+        }
+
+        // Soft delete the user
+        if ($user) {
+            $user->delete();
+        }
 
             // Update the guest pass: set reason and user_id to null, status to available
             $guestPass->update([
