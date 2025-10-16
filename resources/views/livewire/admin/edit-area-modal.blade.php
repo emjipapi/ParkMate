@@ -115,7 +115,24 @@
                         </div>
                     @endif
                 </div>
-
+<div class="mb-3">
+    <label class="form-label">Allowed User Types</label>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="chkStudents" wire:model.live="allowStudents">
+        <label class="form-check-label" for="chkStudents">Students</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="chkEmployees" wire:model.live="allowEmployees">
+        <label class="form-check-label" for="chkEmployees">Employees</label>
+    </div>
+    <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="chkGuests" wire:model.live="allowGuests">
+        <label class="form-check-label" for="chkGuests">Guests</label>
+    </div>
+    @error('allowStudents')
+    <div class="text-danger small mt-2">{{ $message }}</div>
+    @enderror
+</div>
             </div>
 
             <div class="modal-footer">

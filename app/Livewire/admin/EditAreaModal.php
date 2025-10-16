@@ -18,9 +18,14 @@ class EditAreaModal extends Component
     public $carSlotsEnabled = false;
     public $motorcycleEnabled = false;
 
+    // User type permissions
+    public $allowStudents = false;
+    public $allowEmployees = false;
+    public $allowGuests = false;
+
     // track if this area originally had car slots (to determine if prefix is editable)
     public $originallyHadCarSlots = false;
-      public $isLocked = false;
+    public $isLocked = false;
 
     protected $listeners = [
         'openEditAreaModal' => 'loadArea',
@@ -65,6 +70,11 @@ class EditAreaModal extends Component
 
         $this->motorcycleSlots = optional($area->motorcycleCount)->total_available ?? 0;
         $this->motorcycleEnabled = ($this->motorcycleSlots > 0);
+
+        // Load user type permissions
+        $this->allowStudents = (bool) $area->allow_students;
+        $this->allowEmployees = (bool) $area->allow_employees;
+        $this->allowGuests = (bool) $area->allow_guests;
 
         // generated slots list
         $this->updateGeneratedSlots();
@@ -142,6 +152,12 @@ class EditAreaModal extends Component
             return;
         }
 
+        // Check that at least one user type is allowed
+        if (!$this->allowStudents && !$this->allowEmployees && !$this->allowGuests) {
+            $this->addError('allowStudents', 'You must allow at least one user type (Students, Employees, or Guests).');
+            return;
+        }
+
         $this->validate([
             'areaName' => 'required|string|max:100',
             'slotPrefix' => $this->carSlotsEnabled && $this->carSlots > 0 ? 'required|string|max:1|regex:/^[A-Z]$/' : '',
@@ -149,31 +165,32 @@ class EditAreaModal extends Component
 
         $area = ParkingArea::findOrFail($this->areaId);
 
-            // Only check occupied/disabled slots if we're REDUCING the car slot count
-if ($this->carSlotsEnabled && $this->carSlots > 0) {
-    $currentCount = $area->carSlots()->count();
-    $targetCount = (int) $this->carSlots;
-    
-    if ($targetCount < $currentCount) {
-        // User is reducing slots, check if any occupied/disabled slots would be affected
-        $substrPos = strlen($this->slotPrefix) + 1;
-        
-        // Find occupied or disabled slots that would be removed (>= instead of >)
-        $affectedSlots = $area->carSlots()
-            ->whereRaw("CAST(SUBSTRING(label, {$substrPos}) AS UNSIGNED) >= ?", [$targetCount + 1])
-            ->where(function ($query) {
-                $query->where('occupied', 1)
-                      ->orWhere('disabled', 1);
-            })
-            ->get();
-        
-        if ($affectedSlots->count() > 0) {
-            $labels = $affectedSlots->pluck('label')->join(', ');
-            $this->addError('carSlots', "Cannot reduce slots. These slots are occupied or disabled and would be removed: {$labels}");
-            return;
+        // Only check occupied/disabled slots if we're REDUCING the car slot count
+        if ($this->carSlotsEnabled && $this->carSlots > 0) {
+            $currentCount = $area->carSlots()->count();
+            $targetCount = (int) $this->carSlots;
+            
+            if ($targetCount < $currentCount) {
+                // User is reducing slots, check if any occupied/disabled slots would be affected
+                $substrPos = strlen($this->slotPrefix) + 1;
+                
+                // Find occupied or disabled slots that would be removed (>= instead of >)
+                $affectedSlots = $area->carSlots()
+                    ->whereRaw("CAST(SUBSTRING(label, {$substrPos}) AS UNSIGNED) >= ?", [$targetCount + 1])
+                    ->where(function ($query) {
+                        $query->where('occupied', 1)
+                              ->orWhere('disabled', 1);
+                    })
+                    ->get();
+                
+                if ($affectedSlots->count() > 0) {
+                    $labels = $affectedSlots->pluck('label')->join(', ');
+                    $this->addError('carSlots', "Cannot reduce slots. These slots are occupied or disabled and would be removed: {$labels}");
+                    return;
+                }
+            }
         }
-    }
-}
+
         // Validate car slots before making changes
         if ($this->carSlotsEnabled && $this->carSlots > 0) {
             $validationResult = $this->validateCarSlotsChange($area);
@@ -195,6 +212,9 @@ if ($this->carSlotsEnabled && $this->carSlots > 0) {
         // If validation passes, proceed with updates
         $area->update([
             'name' => $this->areaName,
+            'allow_students' => $this->allowStudents,
+            'allow_employees' => $this->allowEmployees,
+            'allow_guests' => $this->allowGuests,
         ]);
 
         // Handle car slots updates
@@ -278,10 +298,8 @@ if ($this->carSlotsEnabled && $this->carSlots > 0) {
         $currentCount = $currentSlots->count();
 
         if ($targetCount < $currentCount) {
-            // start position for numeric part (prefix is one letter in your UI)
-            $substrPos = strlen($this->slotPrefix) + 1; // usually 2
+            $substrPos = strlen($this->slotPrefix) + 1;
 
-            // Find any occupied slots whose numeric suffix > targetCount
             $occupiedSlotsInRange = $area->carSlots()
                 ->whereRaw("CAST(SUBSTRING(label, {$substrPos}) AS UNSIGNED) > ?", [$targetCount])
                 ->where('occupied', 1)
@@ -309,7 +327,6 @@ if ($this->carSlotsEnabled && $this->carSlots > 0) {
         if ($mc) {
             $currentlyInUse = $mc->total_available - $mc->available_count;
 
-            // Prevent reducing below number currently parked (in-use)
             if ($targetCount < $currentlyInUse) {
                 return [
                     'valid' => false,
@@ -317,7 +334,6 @@ if ($this->carSlotsEnabled && $this->carSlots > 0) {
                 ];
             }
 
-            // Prevent reducing below the currently available count (would make available_count > total_available)
             if ($targetCount < $mc->available_count) {
                 return [
                     'valid' => false,
@@ -336,8 +352,6 @@ if ($this->carSlotsEnabled && $this->carSlots > 0) {
         $currentCount = $currentSlots->count();
 
         if ($targetCount > $currentCount) {
-            // Add new slots
-            $slotsToAdd = $targetCount - $currentCount;
             $newSlots = [];
 
             for ($i = $currentCount + 1; $i <= $targetCount; $i++) {
@@ -345,78 +359,70 @@ if ($this->carSlotsEnabled && $this->carSlots > 0) {
                     'area_id' => $area->id,
                     'label' => $this->slotPrefix.$i,
                     'occupied' => false,
+                    'disabled' => false,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
             }
 
-            // Bulk insert new slots
-            \DB::table('car_slots')->insert($newSlots); // Adjust table name as needed
+            \DB::table('car_slots')->insert($newSlots);
 
         } elseif ($targetCount < $currentCount) {
-            // Remove slots whose numeric index is greater than targetCount
             $substrPos = strlen($this->slotPrefix) + 1;
 
             $area->carSlots()
                 ->whereRaw("CAST(SUBSTRING(label, {$substrPos}) AS UNSIGNED) > ?", [$targetCount])
                 ->delete();
         }
-
-        // If count is the same, do nothing (preserve all existing data)
     }
 
-public function deleteArea()
-{
-    // Ensure areaId is set and area exists
-    $area = ParkingArea::with(['carSlots', 'motorcycleCount'])->find($this->areaId);
-    if (! $area) {
-        $this->addError('area', 'Parking area not found.');
-        return;
-    }
-
-    // Check occupied and disabled car slots
-    $occupiedCars = $area->carSlots()->where('occupied', 1)->count();
-    $disabledCars = $area->carSlots()->where('disabled', 1)->count();
-    
-    if ($occupiedCars > 0 || $disabledCars > 0) {
-        $this->addError('delete', "Cannot delete area. {$occupiedCars} car(s) are occupied and {$disabledCars} car(s) are disabled.");
-        return;
-    }
-
-    // Check occupied motorcycles (if motorcycleCount exists)
-    $mc = $area->motorcycleCount()->first();
-    $occupiedMotorcycles = 0;
-    if ($mc) {
-        $occupiedMotorcycles = max(0, (int)$mc->total_available - (int)$mc->available_count);
-    }
-
-    if ($occupiedMotorcycles > 0) {
-        $this->addError('delete', "Cannot delete area. {$occupiedMotorcycles} motorcycle(s) are currently parked.");
-        return;
-    }
-
-    $deletedId = $area->id;
-
-    // delete the area (foreign keys / cascading will remove related rows if configured)
-    $area->delete();
-
-    // Notify and emit so parent/list can refresh
-    $this->dispatch('notify', [
-        'type' => 'success',
-        'message' => 'Parking area deleted successfully!',
-    ]);
-
-    $this->dispatch('areaDeleted', $deletedId);
-
-    // Hide the modal
-    $this->js("
-        const modalEl = document.getElementById('editAreaModal');
-        if (modalEl) {
-            const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
-            bsModal.hide();
+    public function deleteArea()
+    {
+        $area = ParkingArea::with(['carSlots', 'motorcycleCount'])->find($this->areaId);
+        if (! $area) {
+            $this->addError('area', 'Parking area not found.');
+            return;
         }
-    ");
-}
+
+        // Check occupied and disabled car slots
+        $occupiedCars = $area->carSlots()->where('occupied', 1)->count();
+        $disabledCars = $area->carSlots()->where('disabled', 1)->count();
+        
+        if ($occupiedCars > 0 || $disabledCars > 0) {
+            $this->addError('delete', "Cannot delete area. {$occupiedCars} car(s) are occupied and {$disabledCars} car(s) are disabled.");
+            return;
+        }
+
+        // Check occupied motorcycles (if motorcycleCount exists)
+        $mc = $area->motorcycleCount()->first();
+        $occupiedMotorcycles = 0;
+        if ($mc) {
+            $occupiedMotorcycles = max(0, (int)$mc->total_available - (int)$mc->available_count);
+        }
+
+        if ($occupiedMotorcycles > 0) {
+            $this->addError('delete', "Cannot delete area. {$occupiedMotorcycles} motorcycle(s) are currently parked.");
+            return;
+        }
+
+        $deletedId = $area->id;
+        $area->delete();
+
+        $this->dispatch('notify', [
+            'type' => 'success',
+            'message' => 'Parking area deleted successfully!',
+        ]);
+
+        $this->dispatch('areaDeleted', $deletedId);
+
+        $this->js("
+            const modalEl = document.getElementById('editAreaModal');
+            if (modalEl) {
+                const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                bsModal.hide();
+            }
+        ");
+    }
 
     public function render()
     {
