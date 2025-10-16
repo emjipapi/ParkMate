@@ -33,7 +33,7 @@ class GuestListModalComponent extends Component
     /**
      * Clears guest information and makes the tag available again
      */
-    public function clearGuestInfo($guestPassId)
+public function clearGuestInfo($guestPassId)
     {
         try {
             $guestPass = GuestPass::find($guestPassId);
@@ -42,19 +42,20 @@ class GuestListModalComponent extends Component
                 session()->flash('error', 'Guest pass not found.');
                 return;
             }
-                    $user = $guestPass->user;
 
-        // Soft delete the user's vehicles
-        if ($user && $user->vehicles) {
-            $user->vehicles()->delete();
-        }
+            $user = $guestPass->user;
 
-        // Soft delete the user
-        if ($user) {
-            $user->delete();
-        }
+            // Soft delete the user's vehicles
+            if ($user && $user->vehicles) {
+                $user->vehicles()->delete();
+            }
 
-            // Update the guest pass: set reason and user_id to null, status to available
+            // Soft delete the user
+            if ($user) {
+                $user->delete();
+            }
+
+            // Update the guest pass
             $guestPass->update([
                 'reason' => null,
                 'user_id' => null,
@@ -65,6 +66,18 @@ class GuestListModalComponent extends Component
             $this->loadGuests();
             
             session()->flash('message', 'Guest information cleared successfully!');
+            
+            // Close and reopen the modal
+            $this->js('
+                const modalEl = document.getElementById("guestListModal");
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+                setTimeout(() => {
+                    const newModal = new bootstrap.Modal(modalEl);
+                    newModal.show();
+                }, 500);
+            ');
+            
         } catch (\Exception $e) {
             session()->flash('error', 'Error clearing guest information: ' . $e->getMessage());
         }
