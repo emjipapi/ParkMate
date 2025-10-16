@@ -80,7 +80,7 @@
             </thead>
             <tbody>
                 @forelse($violations as $violation)
-                <tr>
+                <tr wire:key="approved-violation-{{ $violation->id }}">
                     <td class="px-4 py-2 text-sm text-gray-800">
                         <div class="font-medium">
                             {{ $violation->reporter ? $violation->reporter->getKey() : 'N/A' }}
@@ -232,7 +232,7 @@
     <!-- Mobile cards (visible on xs only) -->
     <div class="mobile-cards d-block d-sm-none">
         @forelse($violations as $violation)
-        <article class="bg-white border rounded p-3 shadow-sm mb-3">
+        <article wire:key="approved-violation-card-{{ $violation->id }}" class="bg-white border rounded p-3 shadow-sm mb-3">
             <!-- Status Badge -->
             <div class="mb-3 d-flex justify-content-end">
                 @php
