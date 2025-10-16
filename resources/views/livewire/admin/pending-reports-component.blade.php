@@ -71,7 +71,7 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @foreach ($violations as $violation)
-                <tr class="hover:bg-gray-50">
+                <tr wire:key="violation-{{ $violation->id }}" class="hover:bg-gray-50">
 
                     {{-- Reporter ID & Name --}}
                     <td class="px-4 py-2 text-sm text-gray-800">
@@ -331,7 +331,7 @@
     <!-- Mobile: Card list (visible only on xs) -->
     <div class="mobile-cards d-block d-sm-none">
         @forelse ($violations as $violation)
-        <article class="bg-white border rounded p-3 shadow-sm mb-3">
+        <article wire:key="violation-card-{{ $violation->id }}" class="bg-white border rounded p-3 shadow-sm mb-3">
             <!-- Status Badge -->
             <div class="mb-3 d-flex justify-content-end">
                 @php
