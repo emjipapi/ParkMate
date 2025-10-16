@@ -11,24 +11,29 @@ class ParkingArea extends Model
 
     protected $fillable = [
         'name',
-        'moto_total',
+        'allow_students',
+        'allow_employees',
+        'allow_guests',
         'created_at',
         'updated_at',
     ];
 
-    public $timestamps = true;
-        protected $table = 'parking_areas';
+    protected $casts = [
+        'allow_students' => 'boolean',
+        'allow_employees' => 'boolean',
+        'allow_guests' => 'boolean',
+    ];
 
-    // If you use guarded/fillable adjust accordingly
+    public $timestamps = true;
+    protected $table = 'parking_areas';
+
     protected $guarded = [];
 
-    // one area has many car slots
     public function carSlots()
     {
         return $this->hasMany(CarSlot::class, 'area_id', 'id');
     }
 
-    // one area has one motorcycle count row
     public function motorcycleCount()
     {
         return $this->hasOne(MotorcycleCount::class, 'area_id', 'id');
