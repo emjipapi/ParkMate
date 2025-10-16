@@ -44,6 +44,22 @@
             <div id="collapse-{{ $area['id'] }}" class="accordion-collapse collapse"
                 aria-labelledby="heading-{{ $area['id'] }}" wire:ignore.self>
                 <div class="accordion-body pt-3 pb-4">
+
+                    <div class="mb-3">
+                        <strong>Allowed Users:</strong>
+                        <div class="mt-2 d-inline-flex gap-1">
+                            @if($area['allow_students'])
+                            <span class="badge bg-primary">Students</span>
+                            @endif
+                            @if($area['allow_employees'])
+                            <span class="badge bg-success">Employees</span>
+                            @endif
+                            @if($area['allow_guests'])
+                            <span class="badge bg-warning text-dark">Guests</span>
+                            @endif
+                        </div>
+                    </div>
+
                     {{-- Motorcycles: counter style --}}
                     <div class="d-flex align-items-center justify-content-between mb-4">
                         @if ((int) ($area['moto_total'] ?? 0) > 0)
@@ -82,28 +98,26 @@
                     </div>
 
                     <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
-@foreach($area['car_slots'] as $slot)
-@php
-$occupied = (bool) $slot['occupied'];
-$disabled = (bool) $slot['disabled'];
-$show = $filter === 'all'
-    || ($filter === 'available' && !$occupied)
-    || ($filter === 'occupied' && $occupied);
-@endphp
-@if($show)
-<div class="col">
-    <div class="slot-tile {{ $disabled ? 'bg-secondary' : ($occupied ? 'bg-danger' : 'bg-success') }} text-white p-2 rounded"
-        title="Slot {{ $slot['label'] }} — {{ $disabled ? 'Disabled' : ($occupied ? 'Occupied' : 'Available') }}"
-        wire:click="openSlot({{ $area['id'] }}, {{ $slot['id'] }})"
-        role="button"
-        style="{{ $disabled ? '
+                        @foreach($area['car_slots'] as $slot)
+                        @php
+                        $occupied = (bool) $slot['occupied'];
+                        $disabled = (bool) $slot['disabled'];
+                        $show = $filter === 'all'
+                        || ($filter === 'available' && !$occupied)
+                        || ($filter === 'occupied' && $occupied);
+                        @endphp
+                        @if($show)
+                        <div class="col">
+                            <div class="slot-tile {{ $disabled ? 'bg-secondary' : ($occupied ? 'bg-danger' : 'bg-success') }} text-white p-2 rounded"
+                                title="Slot {{ $slot['label'] }} — {{ $disabled ? 'Disabled' : ($occupied ? 'Occupied' : 'Available') }}"
+                                wire:click="openSlot({{ $area['id'] }}, {{ $slot['id'] }})" role="button" style="{{ $disabled ? '
         // cursor: not-allowed; 
         opacity: 0.6;' : 'cursor: pointer;' }}">
-        <span class="slot-label">{{ $slot['label'] }}</span>
-    </div>
-</div>
-@endif
-@endforeach
+                                <span class="slot-label">{{ $slot['label'] }}</span>
+                            </div>
+                        </div>
+                        @endif
+                        @endforeach
                     </div>
                     @else
                     <div class="text-muted fst-italic">
