@@ -1,3 +1,9 @@
+@if($isLocked)
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <strong>Area Locked:</strong> {{ $lockReason }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
 <div wire:ignore.self class="modal fade" id="editAreaModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -113,10 +119,14 @@
             </div>
 
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger me-auto" wire:click="deleteArea"
-                    wire:confirm="Are you sure you want to DELETE this parking area? This action cannot be undone.">
-                    Delete
-                </button>
+    <button type="button" 
+            class="btn btn-danger me-auto @if($isLocked) disabled @endif"
+            wire:click="deleteArea"
+            wire:confirm="Are you sure you want to DELETE this parking area? This action cannot be undone."
+            @disabled($isLocked)
+            title="{{ $isLocked ? $lockReason : '' }}">
+        Delete
+    </button>
 
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
 

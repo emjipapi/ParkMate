@@ -20,6 +20,7 @@ class EditAreaModal extends Component
 
     // track if this area originally had car slots (to determine if prefix is editable)
     public $originallyHadCarSlots = false;
+      public $isLocked = false;
 
     protected $listeners = [
         'openEditAreaModal' => 'loadArea',
@@ -148,6 +149,31 @@ class EditAreaModal extends Component
 
         $area = ParkingArea::findOrFail($this->areaId);
 
+            // Only check occupied/disabled slots if we're REDUCING the car slot count
+if ($this->carSlotsEnabled && $this->carSlots > 0) {
+    $currentCount = $area->carSlots()->count();
+    $targetCount = (int) $this->carSlots;
+    
+    if ($targetCount < $currentCount) {
+        // User is reducing slots, check if any occupied/disabled slots would be affected
+        $substrPos = strlen($this->slotPrefix) + 1;
+        
+        // Find occupied or disabled slots that would be removed (>= instead of >)
+        $affectedSlots = $area->carSlots()
+            ->whereRaw("CAST(SUBSTRING(label, {$substrPos}) AS UNSIGNED) >= ?", [$targetCount + 1])
+            ->where(function ($query) {
+                $query->where('occupied', 1)
+                      ->orWhere('disabled', 1);
+            })
+            ->get();
+        
+        if ($affectedSlots->count() > 0) {
+            $labels = $affectedSlots->pluck('label')->join(', ');
+            $this->addError('carSlots', "Cannot reduce slots. These slots are occupied or disabled and would be removed: {$labels}");
+            return;
+        }
+    }
+}
         // Validate car slots before making changes
         if ($this->carSlotsEnabled && $this->carSlots > 0) {
             $validationResult = $this->validateCarSlotsChange($area);
@@ -339,52 +365,58 @@ class EditAreaModal extends Component
         // If count is the same, do nothing (preserve all existing data)
     }
 
-    public function deleteArea()
-    {
-        // Ensure areaId is set and area exists
-        $area = ParkingArea::with(['carSlots', 'motorcycleCount'])->find($this->areaId);
-        if (! $area) {
-            $this->addError('area', 'Parking area not found.');
-            return;
-        }
-
-        // 1) Check occupied car slots
-        $occupiedCars = $area->carSlots()->where('occupied', 1)->count();
-
-        // 2) Check occupied motorcycles (if motorcycleCount exists)
-        $mc = $area->motorcycleCount()->first();
-        $occupiedMotorcycles = 0;
-        if ($mc) {
-            $occupiedMotorcycles = max(0, (int)$mc->total_available - (int)$mc->available_count);
-        }
-
-        if ($occupiedCars > 0 || $occupiedMotorcycles > 0) {
-            $this->addError('delete', "Cannot delete area. {$occupiedCars} car(s) and {$occupiedMotorcycles} motorcycle(s) are currently parked.");
-            return;
-        }
-
-        $deletedId = $area->id;
-
-        // delete the area (foreign keys / cascading will remove related rows if configured)
-        $area->delete();
-
-        // Notify and emit so parent/list can refresh
-        $this->dispatch('notify', [
-            'type' => 'success',
-            'message' => 'Parking area deleted successfully!',
-        ]);
-
-        $this->dispatch('areaDeleted', $deletedId);
-
-        // Hide the modal (same JS pattern you already use)
-        $this->js("
-            const modalEl = document.getElementById('editAreaModal');
-            if (modalEl) {
-                const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                bsModal.hide();
-            }
-        ");
+public function deleteArea()
+{
+    // Ensure areaId is set and area exists
+    $area = ParkingArea::with(['carSlots', 'motorcycleCount'])->find($this->areaId);
+    if (! $area) {
+        $this->addError('area', 'Parking area not found.');
+        return;
     }
+
+    // Check occupied and disabled car slots
+    $occupiedCars = $area->carSlots()->where('occupied', 1)->count();
+    $disabledCars = $area->carSlots()->where('disabled', 1)->count();
+    
+    if ($occupiedCars > 0 || $disabledCars > 0) {
+        $this->addError('delete', "Cannot delete area. {$occupiedCars} car(s) are occupied and {$disabledCars} car(s) are disabled.");
+        return;
+    }
+
+    // Check occupied motorcycles (if motorcycleCount exists)
+    $mc = $area->motorcycleCount()->first();
+    $occupiedMotorcycles = 0;
+    if ($mc) {
+        $occupiedMotorcycles = max(0, (int)$mc->total_available - (int)$mc->available_count);
+    }
+
+    if ($occupiedMotorcycles > 0) {
+        $this->addError('delete', "Cannot delete area. {$occupiedMotorcycles} motorcycle(s) are currently parked.");
+        return;
+    }
+
+    $deletedId = $area->id;
+
+    // delete the area (foreign keys / cascading will remove related rows if configured)
+    $area->delete();
+
+    // Notify and emit so parent/list can refresh
+    $this->dispatch('notify', [
+        'type' => 'success',
+        'message' => 'Parking area deleted successfully!',
+    ]);
+
+    $this->dispatch('areaDeleted', $deletedId);
+
+    // Hide the modal
+    $this->js("
+        const modalEl = document.getElementById('editAreaModal');
+        if (modalEl) {
+            const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            bsModal.hide();
+        }
+    ");
+}
 
     public function render()
     {
