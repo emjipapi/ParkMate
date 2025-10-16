@@ -1,7 +1,7 @@
 {{-- resources\views\livewire\admin\guest-tags-modal-component.blade.php --}}
 <div>
     {{-- Guest Tags List Modal --}}
-    <div wire:ignore.self class="modal fade" id="guestTagsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="guestTagsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -58,3 +58,17 @@
         </div>
     </div>
 </div>
+@script
+<script>
+    const registerModal = document.getElementById('registerGuestModal');
+    
+    registerModal.addEventListener('shown.bs.modal', function() {
+        $wire.$refresh();
+    });
+    
+    registerModal.addEventListener('hidden.bs.modal', function() {
+        // Just refresh, don't call resetForm
+        $wire.$refresh();
+    });
+</script>
+@endscript
