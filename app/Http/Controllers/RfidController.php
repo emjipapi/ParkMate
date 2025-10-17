@@ -314,7 +314,7 @@ if ($denialReason) {
     // This denied_entry will now respect the cooldown
     ActivityLog::create([
         'actor_type' => 'system',
-        'actor_id' => 1,
+        'actor_id' => $user->id,
         'action' => 'denied_entry',
         'details' => "User {$user->firstname} {$user->lastname} denied entry to {$area->name} (user type not allowed: {$denialReason}) | {$epc} - {$vehicle->type}",
         'area_id' => $areaId,
