@@ -31,21 +31,26 @@ Route::get('car-slots/update', function (Request $request) {
     return response()->json(['message' => 'Slot updated', 'slot' => $slot]);
 });
 
+
 Route::get('area-status', function (Request $request) {
     $areaId = $request->query('area_id');
 
-    $carAvailable = CarSlot::where('area_id', $areaId)
-        ->where('occupied', 0)
-        ->count();
+    // 🏎️ Car logic (currently commented out)
+    // $carAvailable = CarSlot::where('area_id', $areaId)
+    //     ->where('occupied', 0)
+    //     ->count();
 
+    // 🛵 Motorcycle logic
     $motoAvailable = DB::table('motorcycle_counts')
         ->where('area_id', $areaId)
         ->value('available_count');
 
     return response()->json([
-        'full' => ($carAvailable === 0 && $motoAvailable === 0),
+        // 'full' => ($carAvailable === 0 && $motoAvailable === 0),
+        'full' => ($motoAvailable === 0), // ✅ Only send true when motorcycle slots are full
     ]);
 });
+
 
 // main gate
 Route::post('/rfid', [RfidController::class, 'logScan']);
