@@ -343,6 +343,12 @@
             color: white;
             margin-right: 10px;
         }
+.accordion-button:focus,
+.accordion-button:active {
+    background-color: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
 
         @media (max-width: 768px) {
             .cards-container {

@@ -45,13 +45,14 @@ class ParkingSlotsComponent extends Component
             // Car slots for this area
             $carSlots = DB::table('car_slots')
                 ->where('area_id', $area->id)
-                ->select('id', 'label', 'occupied')
+                ->select('id', 'label', 'occupied', 'disabled')
                 ->get()
                 ->map(function ($slot) {
                     return [
                         'id' => $slot->id,
                         'label' => $slot->label,
                         'occupied' => (bool) $slot->occupied,
+                        'disabled' => (bool) $slot->disabled,
                     ];
                 })
                 ->toArray();

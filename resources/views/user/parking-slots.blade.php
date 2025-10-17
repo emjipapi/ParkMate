@@ -279,6 +279,13 @@
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
+        .accordion-button:focus,
+        .accordion-button:active {
+            background-color: transparent !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
         @media (max-width: 768px) {
             .cards-container {
                 display: flex;
@@ -346,14 +353,16 @@
                 font-size: 0.8rem;
                 /* smaller breadcrumb text */
             }
-                                  .content {
-            padding: 10px;
-            padding-bottom: 20px;
-        }
-                  .content {
-            padding: 10px;
-            padding-bottom: 20px;
-        }
+
+            .content {
+                padding: 10px;
+                padding-bottom: 20px;
+            }
+
+            .content {
+                padding: 10px;
+                padding-bottom: 20px;
+            }
         }
     </style>
 </head>
