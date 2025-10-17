@@ -32,7 +32,7 @@
     </div>
 
     <div class="card card-5 text-center d-flex flex-column justify-content-center align-items-center"
-        style="cursor:pointer;" onclick="window.location='{{ url('/create-report') }}'">
+        style="cursor:pointer;" onclick="window.location='{{ url('/user-create-report') }}'">
         <div class="card-body d-flex flex-column justify-content-center align-items-center">
             <i class="bi bi-plus-circle-fill" style="font-size: 5rem; color: white;"></i>
             <p class="card-text mt-2 mb-1 fw-bold">Make Report</p>
