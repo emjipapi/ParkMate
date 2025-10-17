@@ -131,118 +131,7 @@
             font-weight: 500;
         }
 
-        .content .cards-container {
-            margin-top: auto;
-
-        }
-
-        .card {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-
-        .card-footer {
-            padding: 0;
-            white-space: normal;
-            text-align: center;
-            background-color: rgba(0, 0, 0, 0.1);
-            border: none;
-            line-height: 2;
-        }
-
-        .card-1 {
-            border: 0px;
-            border-radius: 0px;
-            background-color: #00B8EE;
-            color: white;
-            height: 200px;
-        }
-
-        .card-2 {
-            border: 0px;
-            border-radius: 0px;
-            background-color: #F09113;
-            color: white;
-            height: 200px;
-        }
-
-        .card-3 {
-            border: 0px;
-            border-radius: 0px;
-            background-color: #019C50;
-            color: white;
-            height: 200px;
-        }
-
-        .cards-container {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 1rem;
-        }
-
-        /* Place cards exactly */
-        .card-5 {
-            grid-column: 4;
-            grid-row: 1;
-            height: 200px;
-            border: 0;
-            border-radius: 0;
-            background: #6c63ff;
-            color: #fff;
-        }
-
-        .card-1 {
-            grid-column: 1;
-            grid-row: 2;
-            height: 200px;
-        }
-
-        .card-2 {
-            grid-column: 2;
-            grid-row: 2;
-            height: 200px;
-        }
-
-        .card-3 {
-            grid-column: 3;
-            grid-row: 2;
-            height: 200px;
-        }
-
-        .card-4 {
-            grid-column: 4;
-            grid-row: 2;
-            border: 0;
-            border-radius: 0;
-            background: #fff;
-            color: #000;
-            height: 450px;
-            overflow-y: auto;
-            padding: 1rem;
-        }
-
-        /* Keep cards as flex boxes for internal layout (OK with grid) */
-        .cards-container .card {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        /* Remove leftover flex styles for cards inside grid */
-        .cards-container .card {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .card-4 h5 {
-            font-size: 1.2rem;
-            margin-bottom: 1rem;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 0.5rem;
-        }
+        
 
         .recent-activity-item {
             padding: 0.5rem 0;
@@ -287,16 +176,7 @@
         }
 
         @media (max-width: 768px) {
-            .cards-container {
-                display: flex;
-                flex-direction: column;
-                gap: 1rem;
-                /* spacing between cards */
-            }
-
-            .cards-container .card {
-                width: 100%;
-            }
+            
 
             .mobile-menu-btn {
                 display: inline-block;
