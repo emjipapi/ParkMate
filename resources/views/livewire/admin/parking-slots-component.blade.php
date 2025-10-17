@@ -29,11 +29,11 @@
                         <!-- Right column: car & motorcycle info stacked -->
                         <div class="d-flex flex-column">
                             @if(isset($area['car_slots']) && count($area['car_slots']) > 0)
-                            <span class="text-muted">🚗 {{ $area['car_available'] }}/{{ $area['car_total'] }}
-                                cars</span>
+                            <span class="text-muted">🚗 {{ $area['car_total'] - $area['car_available'] }} Occupied / {{ $area['car_total'] }} 
+                                car slots</span>
                             @endif
                             @if ((int) ($area['moto_total'] ?? 0) > 0)
-                            <span class="text-muted">🛵 {{ $area['moto_available_count'] }}/{{ $area['moto_total'] }}
+                            <span class="text-muted">🛵 {{ $area['moto_available_count'] }} Available / {{ $area['moto_total'] }}
                                 motorcycles</span>
                             @endif
                         </div>
@@ -111,8 +111,8 @@
                             <div class="slot-tile {{ $disabled ? 'bg-secondary' : ($occupied ? 'bg-danger' : 'bg-success') }} text-white p-2 rounded"
                                 title="Slot {{ $slot['label'] }} — {{ $disabled ? 'Disabled' : ($occupied ? 'Occupied' : 'Available') }}"
                                 wire:click="openSlot({{ $area['id'] }}, {{ $slot['id'] }})" role="button" style="{{ $disabled ? '
-        // cursor: not-allowed; 
-        opacity: 0.6;' : 'cursor: pointer;' }}">
+                                // cursor: not-allowed; 
+                                opacity: 0.6;' : 'cursor: pointer;' }}">
                                 <span class="slot-label">{{ $slot['label'] }}</span>
                             </div>
                         </div>
