@@ -35,14 +35,16 @@
         {{-- Approved Reports --}}
         @elseif ($activeTab === 'manage')
             @canaccess('manage_sticker')
-                <livewire:admin.sticker-template-manager-component />
+            <livewire:admin.sticker-template-manager-component />
+            @else
                 <div class="alert alert-danger text-center mt-3">
                     You don't have permission to view this tab.
                 </div>
             @endcanaccess
+
         @endif
     </div>
-            @if (!$activeTab)
+    @if (!$activeTab)
     <div class="alert alert-warning mt-3 text-center">
         You don't have permission to view any of these tabs.
     </div>
