@@ -319,31 +319,30 @@ class EditAreaModal extends Component
         return ['valid' => true];
     }
 
-    private function validateMotorcycleSlotsChange($area)
-    {
-        $targetCount = (int) $this->motorcycleSlots;
-        $mc = $area->motorcycleCount()->first();
+private function validateMotorcycleSlotsChange($area)
+{
+    $targetCount = (int) $this->motorcycleSlots;
+    $mc = $area->motorcycleCount()->first();
 
-        if ($mc) {
-            $currentlyInUse = $mc->total_available - $mc->available_count;
+    if ($mc) {
+        // number of motorcycles currently parked
+        $currentlyInUse = max(0, (int)$mc->total_available - (int)$mc->available_count);
 
-            if ($targetCount < $currentlyInUse) {
-                return [
-                    'valid' => false,
-                    'message' => "Cannot reduce motorcycle slots to {$targetCount}. Currently {$currentlyInUse} motorcycle(s) are parked.",
-                ];
-            }
-
-            if ($targetCount < $mc->available_count) {
-                return [
-                    'valid' => false,
-                    'message' => "Cannot set total available to {$targetCount}. There are currently {$mc->available_count} available motorcycle slot(s).",
-                ];
-            }
+        // Only block if the target is less than the number currently parked
+        if ($targetCount < $currentlyInUse) {
+            return [
+                'valid' => false,
+                'message' => "Cannot reduce motorcycle slots to {$targetCount}. Currently {$currentlyInUse} motorcycle(s) are parked.",
+            ];
         }
 
-        return ['valid' => true];
+        // No need to check $mc->available_count here — updateArea()
+        // will recompute available_count = target - occupied safely.
     }
+
+    return ['valid' => true];
+}
+
 
     private function updateCarSlots($area)
     {

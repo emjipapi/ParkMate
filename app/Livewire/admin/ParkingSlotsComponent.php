@@ -99,22 +99,36 @@ class ParkingSlotsComponent extends Component
         $this->loadAreasData();
     }
 
-    public function incrementMoto(int $areaId)
-    {
-        Log::info('Incrementing motorcycle slot', ['area_id' => $areaId]);
+public function incrementMoto(int $areaId)
+{
+    Log::info('Incrementing motorcycle slot', ['area_id' => $areaId]);
 
-        $before = DB::table('motorcycle_counts')->where('area_id', $areaId)->value('available_count');
-        Log::info('Before increment', ['area_id' => $areaId, 'available_count' => $before]);
+    $mc = DB::table('motorcycle_counts')->where('area_id', $areaId)->first();
 
-        DB::table('motorcycle_counts')
-            ->where('area_id', $areaId)
-            ->increment('available_count');
+    if (! $mc) {
+        Log::warning('No motorcycle_counts row found for area', ['area_id' => $areaId]);
+        return;
+    }
 
+    $before = (int) $mc->available_count;
+    $total  = (int) $mc->total_available;
+    Log::info('Before increment', ['area_id' => $areaId, 'available_count' => $before, 'total_available' => $total]);
+
+    // Only increment if available_count < total_available
+    $updated = DB::table('motorcycle_counts')
+        ->where('area_id', $areaId)
+        ->whereColumn('available_count', '<', 'total_available')
+        ->increment('available_count');
+
+    if ($updated) {
         $after = DB::table('motorcycle_counts')->where('area_id', $areaId)->value('available_count');
         Log::info('After increment', ['area_id' => $areaId, 'available_count' => $after]);
-
         $this->loadAreasData();
+    } else {
+        Log::info('Increment skipped — already at max', ['area_id' => $areaId, 'available_count' => $before, 'total_available' => $total]);
+        // optional: $this->dispatch('notify', ['type'=>'info','message'=>'No more available motorcycle slots.']);
     }
+}
 
     public function decrementMoto(int $areaId)
     {
