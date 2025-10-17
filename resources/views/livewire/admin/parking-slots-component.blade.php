@@ -97,7 +97,7 @@
                         <small>Occupied</small>
                     </div>
 
-                    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
+                    <div class="row row-cols-3 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
                         @foreach($area['car_slots'] as $slot)
                         @php
                         $occupied = (bool) $slot['occupied'];
@@ -106,17 +106,20 @@
                         || ($filter === 'available' && !$occupied)
                         || ($filter === 'occupied' && $occupied);
                         @endphp
-                        @if($show)
-                        <div class="col">
-                            <div class="slot-tile {{ $disabled ? 'bg-secondary' : ($occupied ? 'bg-danger' : 'bg-success') }} text-white p-2 rounded"
-                                title="Slot {{ $slot['label'] }} — {{ $disabled ? 'Disabled' : ($occupied ? 'Occupied' : 'Available') }}"
-                                wire:click="openSlot({{ $area['id'] }}, {{ $slot['id'] }})" role="button" style="{{ $disabled ? '
-                                // cursor: not-allowed; 
-                                opacity: 0.6;' : 'cursor: pointer;' }}">
-                                <span class="slot-label">{{ $slot['label'] }}</span>
-                            </div>
-                        </div>
-                        @endif
+@if($show)
+    <div class="col">
+        <div class="slot-tile 
+            {{ $disabled ? 'bg-secondary' : ($occupied ? 'bg-danger' : 'bg-success') }} 
+            text-white p-2 rounded d-flex justify-content-center align-items-center"
+            title="Slot {{ $slot['label'] }} — {{ $disabled ? 'Disabled' : ($occupied ? 'Occupied' : 'Available') }}"
+            wire:click="openSlot({{ $area['id'] }}, {{ $slot['id'] }})"
+            role="button"
+            style="{{ $disabled ? 'opacity: 0.6; height: 40px;' : 'cursor: pointer; height: 40px;' }}">
+            <span class="slot-label fw-semibold">{{ $slot['label'] }}</span>
+        </div>
+    </div>
+@endif
+
                         @endforeach
                     </div>
                     @else
