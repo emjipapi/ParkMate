@@ -314,7 +314,7 @@
             pointer-events: auto;
         }
 
-        <style>.slot-tile {
+        .slot-tile {
             border-radius: .5rem;
             height: 56px;
             display: flex;
@@ -421,6 +421,10 @@
             padding: 10px;
             padding-bottom: 20px;
         }
+            .area-info span {
+        font-size: 0.8rem; 
+    }
+    
         }
     </style>
 
