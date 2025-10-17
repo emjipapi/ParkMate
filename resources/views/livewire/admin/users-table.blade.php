@@ -93,34 +93,52 @@
     <div
         class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center mb-3 gap-2">
 
-        <div class="d-flex gap-2 flex-wrap">
-            {{-- User Type Filter --}}
-            <select class="form-select form-select-sm w-auto" wire:model.live="userType">
-                <option value="">All Users</option>
-                <option value="student">Students</option>
-                <option value="employee">Employees</option>
-            </select>
-            <select class="form-select form-select-sm w-auto" wire:model.live="filterDepartment"
-                wire:change="onDepartmentChanged($event.target.value)">
-                <option value="">All Departments</option>
-                @foreach($departments as $dept)
+        <div class="row g-3 mb-3 align-items-end">
+    {{-- User Type Filter --}}
+    <div class="col-12 col-md-3 col-lg-3">
+        <label for="userType" class="form-label fw-bold">User Type</label>
+        <select id="userType" class="form-select form-select-sm" 
+            style="min-width: 200px;"
+            wire:model.live="userType">
+            <option value="">All Users</option>
+            <option value="student">Students</option>
+            <option value="employee">Employees</option>
+        </select>
+    </div>
+
+    {{-- Department Filter --}}
+    <div class="col-12 col-md-4 col-lg-4">
+        <label for="filterDepartment" class="form-label fw-bold">Department</label>
+        <select id="filterDepartment" class="form-select form-select-sm"
+            style="min-width: 250px;"
+            wire:model.live="filterDepartment"
+            wire:change="onDepartmentChanged($event.target.value)">
+            <option value="">All Departments</option>
+            @foreach($departments as $dept)
                 <option value="{{ $dept }}" wire:key="dept-{{ \Illuminate\Support\Str::slug($dept) }}">
                     {{ $dept }}
                 </option>
-                @endforeach
-            </select>
+            @endforeach
+        </select>
+    </div>
 
-            <select class="form-select form-select-sm w-auto" wire:model.live="filterProgram"
-                wire:change="onProgramChanged($event.target.value)" style="max-width: 250px; min-width: 150px;">
-                <option value="">All Programs</option>
-                @foreach($programs as $prog)
+    {{-- Program Filter --}}
+    <div class="col-12 col-md-5 col-lg-5">
+        <label for="filterProgram" class="form-label fw-bold">Programs</label>
+        <select id="filterProgram" class="form-select form-select-sm"
+            style="min-width: 300px;"
+            wire:model.live="filterProgram"
+            wire:change="onProgramChanged($event.target.value)">
+            <option value="">All Programs</option>
+            @foreach($programs as $prog)
                 <option value="{{ $prog }}" wire:key="prog-{{ \Illuminate\Support\Str::slug($prog) }}">
                     {{ $prog }}
                 </option>
-                @endforeach
-            </select>
+            @endforeach
+        </select>
+    </div>
+</div>
 
-        </div>
 
         <!-- Toolbar -->
         <div class="d-flex gap-3 justify-content-sm-end">
