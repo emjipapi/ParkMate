@@ -390,14 +390,33 @@
                 /* smaller breadcrumb text */
             }
 
-            .tabs-container {
-                margin: 0 -20px;
-                /* extend to screen edges */
-                padding: 0 20px;
-                /* add padding back inside */
-                touch-action: pan-x;
-                /* enable horizontal touch scrolling */
-            }
+  .tabs-container {
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-x !important;
+    scrollbar-width: none; /* Firefox */
+    white-space: nowrap !important;
+  }
+  .tabs-container::-webkit-scrollbar { display: none; } /* WebKit */
+
+  /* Force the UL to be one single non-wrapping flex row */
+  .tabs-container ul {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    min-width: max-content !important; /* prevents flex items from shrinking too much */
+    gap: 0.5rem;
+  }
+
+  /* Ensure each LI keeps its intrinsic width (prevents wrapping) */
+  .tabs-container li {
+    flex: 0 0 auto !important;
+  }
+
+  /* Prevent text inside the tab from wrapping */
+  .tabs-container .nav-link {
+    white-space: nowrap !important;
+  }
 
             .nav-link {
                 font-size: 0.9rem;
