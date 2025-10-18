@@ -51,6 +51,20 @@
                             wire:ignore data-bs-toggle="tooltip" title="{{ $allPermissions['live_attendance'] ?? '' }}"
                             tabindex="0" role="button"></i></label>
                 </div>
+                <div class="form-check">
+                    <input class="form-check-input group-child" type="checkbox" value="manage_guest"
+                        data-group="dashboard" wire:model="permissions" wire:change="syncParent('dashboard')">
+                    <label class="form-check-label">Manage Guests<i class="bi bi-info-circle ms-1 text-secondary"
+                            wire:ignore data-bs-toggle="tooltip" title="{{ $allPermissions['manage_guest'] ?? '' }}"
+                            tabindex="0" role="button"></i></label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input group-child" type="checkbox" value="manage_guest_tag"
+                        data-group="dashboard" wire:model="permissions" wire:change="syncParent('dashboard')">
+                    <label class="form-check-label">Manage Guest Tags<i class="bi bi-info-circle ms-1 text-secondary"
+                            wire:ignore data-bs-toggle="tooltip" title="{{ $allPermissions['manage_guest_tag'] ?? '' }}"
+                            tabindex="0" role="button"></i></label>
+                </div>
             </div>
         </div>
 
@@ -296,8 +310,8 @@
 
         <hr class="my-4">
         @if (empty($permissions))
-<div class="alert alert-danger mt-3">Please select at least one permission.</div>
-@endif
+        <div class="alert alert-danger mt-3">Please select at least one permission.</div>
+        @endif
         @if (session()->has('success'))
         <div class="alert alert-success mt-3">{{ session('success') }}</div>
         @endif

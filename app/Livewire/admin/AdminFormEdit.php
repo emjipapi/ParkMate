@@ -25,7 +25,7 @@ public $isSuperAdmin = false;
 public function toggleGroup($group)
 {
     $groups = [
-        'dashboard' => ['analytics_dashboard', 'live_attendance'],
+        'dashboard' => ['analytics_dashboard', 'live_attendance', 'manage_guest', 'manage_guest_tag'],
         'parking_slots' => ['manage_map', 'add_parking_area', 'edit_parking_area'],
         'violation_tracking' => ['create_report', 'pending_reports', 'approved_reports', 'for_endorsement', 'submit_approved_report'],
         'users' => ['users_table', 'vehicles_table', 'admins_table', 'create_user', 'edit_user', 'create_admin', 'edit_admin'],
@@ -45,7 +45,7 @@ public function toggleGroup($group)
 public function syncParent($group)
 {
     $groups = [
-        'dashboard' => ['analytics_dashboard', 'live_attendance'],
+        'dashboard' => ['analytics_dashboard', 'live_attendance', 'manage_guest', 'manage_guest_tag'],
         'parking_slots' => [ 'manage_map', 'add_parking_area', 'edit_parking_area'],
         'violation_tracking' => ['create_report', 'pending_reports', 'approved_reports', 'for_endorsement', 'submit_approved_report'],
         'users' => ['users_table', 'vehicles_table', 'admins_table', 'create_user', 'edit_user', 'create_admin', 'edit_admin'],

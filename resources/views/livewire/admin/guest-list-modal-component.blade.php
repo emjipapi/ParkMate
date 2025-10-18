@@ -21,7 +21,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                         </div>
                     @endif
-
+                    @canaccess("manage_guest")
                     <table class="table table-striped">
                         <thead>
                             <tr>
@@ -66,14 +66,19 @@
                             @endforelse
                         </tbody>
                     </table>
+                    @endcanaccess
                 </div>
                 <div class="modal-footer">
+                    @canaccess("manage_guest_tag")
                     <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#guestTagsModal">
                         Manage Guest Tags
                     </button>
+                    @endcanaccess
+                    @canaccess("manage_guest")
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#registerGuestModal">
                         <i class="bi bi-person-plus me-1"></i> Register Guest
-                    </button>               
+                    </button>    
+                    @endcanaccess           
                 </div>
             </div>
         </div>
