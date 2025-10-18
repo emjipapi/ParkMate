@@ -105,11 +105,9 @@ Route::middleware(['admin'])->group(function () {
     Route::middleware(['admin', 'permission:live_attendance'])->group(function () {
     Route::view('/admin-dashboard/live-attendance-mode', 'admin.live-attendance-mode');
     });
-    Route::middleware(['admin', 'permission:view_map'])->group(function () {
     Route::get('/map/{map}', function (ParkingMap $map) {
         return view('admin.parking-map', ['map' => $map]);
     })->name('parking-map.live');
-    });
     Route::middleware(['admin', 'permission:live_attendance'])->group(function () {
     Route::view('/live-attendance', 'admin.live-attendance-fullscreen-mode');
     });

@@ -29,7 +29,7 @@ public function login(Request $request)
 
         // Group definitions (main => children). Adjust if you have different children.
         $groups = [
-            'dashboard'         => ['dashboard', 'analytics_dashboard', 'live_attendance', 'view_map'],
+            'dashboard'         => ['dashboard', 'analytics_dashboard', 'live_attendance', 'manage_guest', 'manage_guest_tag'],
             'parking_slots'     => ['parking_slots', 'manage_map', 'add_parking_area', 'edit_parking_area'],
             'violation_tracking'=> ['violation_tracking', 'create_report', 'pending_reports', 'approved_reports', 'for_endorsement', 'submit_approved_report'],
             'users'             => ['users', 'users_table', 'vehicles_table', 'admins_table', 'create_user', 'edit_user', 'create_admin', 'edit_admin'],

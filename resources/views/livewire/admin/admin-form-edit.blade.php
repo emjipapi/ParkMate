@@ -66,14 +66,6 @@
                             wire:ignore data-bs-toggle="tooltip" title="{{ $allPermissions['live_attendance'] ?? '' }}"
                             tabindex="0" role="button"></i></label>
                 </div>
-                <div class="form-check">
-                    <input class="form-check-input group-child" type="checkbox" value="view_map" data-group="dashboard"
-                        wire:model="permissions" wire:change="syncParent('dashboard')">
-                    <label class="form-check-label">View Map
-                        <i class="bi bi-info-circle ms-1 text-secondary" wire:ignore data-bs-toggle="tooltip"
-                            title="{{ $allPermissions['view_map'] ?? '' }}" tabindex="0" role="button"></i>
-                    </label>
-                </div>
             </div>
         </div>
 

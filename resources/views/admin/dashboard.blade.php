@@ -475,7 +475,6 @@
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
         <div id="clock" style="font-size: 1rem;" class="d-none d-md-block"></div>
         <span style="flex: 1;"></span>
-        @canaccess("view_map")
         <div class="live-btn-bar me-1">
             <a style="text-decoration: none;">
                 <button type="button" class="live-btn" data-bs-toggle="modal" data-bs-target="#openMapModal">
@@ -483,7 +482,6 @@
                 </button>
             </a>
         </div>
-        @endcanaccess
         @canaccess("live_attendance")
         <div class="live-btn-bar">
             <a href="{{ url('/live-attendance') }}" style="text-decoration: none;">
