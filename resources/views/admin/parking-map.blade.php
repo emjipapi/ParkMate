@@ -44,7 +44,7 @@
                 .mobile-warning {
     display: none;
 }
-@media (max-width: 768px) {
+/* @media (max-width: 768px) {
     .desktop-content {
         display: none !important;
     }
@@ -57,20 +57,20 @@
         color: #333;
         text-align: center;
     }
-}
+} */
     </style>
 </head>
 <body>
             <!-- Show this message only on mobile -->
-    <div class="mobile-warning">
+    {{-- <div class="mobile-warning">
         <div class="text-center p-5">
             <h3>This page is only available on desktop</h3>
             <p>Please use a larger screen to view this page.</p>
         </div>
-    </div>
+    </div> --}}
 
     <!-- Main page content -->
-    <div class="desktop-content">
+    {{-- <div class="desktop-content"> --}}
     <main class="live-map-viewport" role="main">
         <div class="livewire-component-wrapper" id="livewire-map-root">
             {{-- your Livewire component — exact tag you asked for --}}
@@ -79,7 +79,7 @@
            
         </div>
     </main>
-</div>
+{{-- </div> --}}
     {{-- Livewire scripts (required) --}}
     @livewireScripts
 </body>

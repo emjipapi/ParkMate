@@ -95,45 +95,62 @@
     @else
 
         <style>
-            html,
-            body {
-                height: 100%;
-                margin: 0;
-                background: #fefefe;
-            }
+html, body {
+    height: 100%;
+    margin: 0;
+    background: #fefefe;
+}
 
-            /* viewport covering whole page; centers the image */
-            .live-map-viewport {
-                position: relative;
-                height: 100vh;
-                width: 100vw;
-                overflow: visible;
-                /* Changed from hidden to allow labels to overflow */
-                background: #ffffff;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                padding: 0;
-                box-sizing: border-box;
-            }
+.live-map-viewport {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    overflow: visible;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    box-sizing: border-box;
+    /* Responsive padding for mobile */
+}
+@media (max-width: 768px) {
+    .live-map-viewport {
+        height: 100vh;
+        width: 100vw;
+        padding: 4px;
+    }
+}
 
-            /* container is the positioning reference for overlays */
-            .live-map-container {
-                position: relative;
-                display: inline-block;
-                /* CRITICAL: inline-block for accurate positioning */
-            }
+.live-map-container {
+    position: relative;
+    display: inline-block;
+}
 
-            /* image: as large as possible while preserving aspect ratio */
-            .live-map-container img {
-                display: block;
-                width: auto;
-                height: 95vh;
-                /* larger than template manager's 600px */
-                max-width: 95vw;
-                user-select: none;
-                -webkit-user-drag: none;
-            }
+.live-map-container img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 95vw;
+    max-height: 95vh;
+    /* Ensures aspect ratio is maintained on all screen sizes */
+    user-select: none;
+    -webkit-user-drag: none;
+}
+/* On mobile, reduce max sizes slightly */
+@media (max-width: 768px) {
+    .live-map-container img {
+        max-width: 98vw;
+        max-height: 98vh;
+    }
+}
+
+@media (max-width: 480px) {
+    .live-map-container img {
+        max-width: 99vw;
+        max-height: 99vh;
+    }
+}
 
             /* hide until positioned to avoid wrong initial placement */
             .map-marker,
