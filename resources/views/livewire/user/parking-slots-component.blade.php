@@ -1,5 +1,13 @@
 {{-- resources\views\livewire\user\parking-slots-component.blade.php --}}
 <div class="container py-4">
+        <div class="live-map-viewport mb-3" role="main">
+        <div class="livewire-component-wrapper" id="livewire-map-root">
+            {{-- your Livewire component — exact tag you asked for --}}
+
+            <livewire:admin.parking-map-live-view-component :map-id="14" />
+
+        </div>
+    </div>
 <div class="d-flex flex-column flex-sm-row justify-content-sm-between align-items-start align-items-sm-center mb-4">
     <h4 class="mb-2 mb-sm-0">Parking Slots</h4>
     <div class="btn-group btn-group-sm ms-sm-auto" role="group" aria-label="Filter slots">

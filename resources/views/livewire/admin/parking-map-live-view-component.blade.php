@@ -103,53 +103,41 @@ html, body {
 
 .live-map-viewport {
     position: relative;
-    height: 100vh;
-    width: 100vw;
+    height: auto;
+    /* CHANGE 1: from 100vh to 100% */
+    width: 100%;
+    /* CHANGE 2: from 100vw to 100% */
     overflow: visible;
+    /* CHANGE 3: from visible to hidden */
     background: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     box-sizing: border-box;
-    /* Responsive padding for mobile */
-}
-@media (max-width: 768px) {
-    .live-map-viewport {
-        height: 100vh;
-        width: 100vw;
-        padding: 4px;
-    }
 }
 
 .live-map-container {
     position: relative;
-    display: inline-block;
+    display: flex;
+    /* CHANGE 4: from inline-block to flex */
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
 }
 
 .live-map-container img {
     display: block;
-    width: auto;
+    width: 100%;
+    /* CHANGE 5: from auto to 80% */
     height: auto;
-    max-width: 95vw;
-    max-height: 95vh;
-    /* Ensures aspect ratio is maintained on all screen sizes */
+    max-width: 100%;
+    /* CHANGE 6: from 95vw to 90% */
+
+    object-fit: contain;
     user-select: none;
     -webkit-user-drag: none;
-}
-/* On mobile, reduce max sizes slightly */
-@media (max-width: 768px) {
-    .live-map-container img {
-        max-width: 98vw;
-        max-height: 98vh;
-    }
-}
-
-@media (max-width: 480px) {
-    .live-map-container img {
-        max-width: 99vw;
-        max-height: 99vh;
-    }
 }
 
             /* hide until positioned to avoid wrong initial placement */
@@ -183,13 +171,13 @@ html, body {
             /* map-label: side position and compact sizing */
             .map-label {
                 position: absolute;
-                z-index: 19;
+                z-index: 100;
                 /* background: rgba(0, 0, 0, 0.78); */
                 color: #fff;
                 padding: 6px 8px;
                 border-radius: 8px;
                 font-size: 13px;
-                pointer-events: none;
+                pointer-events: auto;
                 white-space: nowrap;
                 display: flex;
                 align-items: center;
@@ -236,6 +224,30 @@ html, body {
         font-weight: 600;
         line-height: 1;
     }
+    @media (max-width: 768px) {
+    .map-marker {
+        /* Marker size is set inline via :style, but we can reduce it here */
+        /* We'll use a scale transform instead */
+        transform: translate(-50%, -50%) scale(0.50) !important;
+    }
+    
+    .map-label {
+        font-size: 7px;
+        /* CHANGE: from 13px to 11px */
+        padding: 2px 4px;
+        /* CHANGE: from 6px 8px to 4px 6px */
+        max-width: 120px;
+    }
+    
+    .map-label .caption {
+        font-size: 7px;
+        /* CHANGE: from 11px to 9px */
+    }
+        .map-label .counts-col {
+        display: none;
+        /* CHANGE: hide the entire counts column on mobile */
+    }
+}
         </style>
 
         <div class="live-map-viewport" id="live-map-viewport">
