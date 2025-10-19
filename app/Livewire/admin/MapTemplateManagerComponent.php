@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Laravel\Facades\Image;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
 class MapTemplateManagerComponent extends Component
 {
     use WithFileUploads;
@@ -112,12 +113,33 @@ class MapTemplateManagerComponent extends Component
             $this->updatePreviewDimensions();
         }
     }
+    public function updated($propertyName)
+{
+        if (in_array($propertyName, ['mapFile', 'mapName'])) {
+        return;
+    }
+    // Prevent auto-saving when simply enabling/disabling an area
+    if (str_contains($propertyName, '.enabled')) {
+        return;
+    }
+
+    // Otherwise, save automatically (like when label, position, etc. changes)
+    $this->saveAreaPositions();
+}
+
 
     public function saveAreaPositions()
     {
         $map = ParkingMap::find($this->selectedMapId);
         if ($map) {
             $map->update(['area_config' => $this->areaConfig]);
+            ActivityLog::create([
+    'actor_type' => 'admin',
+    'actor_id'   => Auth::guard('admin')->id(),
+    'action'     => 'update',
+    'details'    => 'Admin '.Auth::guard('admin')->user()->firstname.' '.Auth::guard('admin')->user()->lastname.' modified the map "'.$map->name.'".',
+]);
+
             session()->flash('success', 'Parking area positions saved successfully!');
         }
     }
@@ -198,8 +220,16 @@ class MapTemplateManagerComponent extends Component
             // $this->selectedMapId = $map->id;
             // $this->loadAreaConfig();
             // $this->showPreview = true;
+            ActivityLog::create([
+    'actor_type' => 'admin',
+    'actor_id'   => Auth::guard('admin')->id(),
+    'action'     => 'create',
+    'details'    => 'Admin ' . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname . ' uploaded map "' . $this->mapName . '"',
+]);
+
 
             $this->reset(['mapFile', 'mapName']);
+
             session()->flash('success', 'Parking map uploaded successfully!');
 
         }
@@ -225,8 +255,15 @@ class MapTemplateManagerComponent extends Component
         $map = ParkingMap::find($mapId);
 
         if ($map) {
+            $mapName = $map->name;
             Storage::disk('public')->delete($map->file_path);
             $map->delete();
+                    ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id'   => Auth::guard('admin')->id(),
+            'action'     => 'delete',
+            'details'    => 'Admin ' . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname . ' deleted the map "' . $mapName . '".',
+        ]);
 
             if ($this->selectedMapId == $mapId) {
                 $firstMap = ParkingMap::first();
