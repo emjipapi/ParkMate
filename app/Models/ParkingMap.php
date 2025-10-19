@@ -13,11 +13,13 @@ class ParkingMap extends Model
         'height',
         'aspect_ratio',
         'status',
-        'area_config'
+        'area_config',
+        'is_default'
     ];
 
     protected $casts = [
         'area_config' => 'array',
+        'is_default' => 'boolean',
     ];
 
     public function getFileUrlAttribute()
