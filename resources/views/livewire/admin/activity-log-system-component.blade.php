@@ -20,14 +20,18 @@
         {{-- Action Filter --}}
         <div class="col-md-2">
             <label for="actionFilter" class="form-label fw-bold">Action</label>
-            <select id="actionFilter" class="form-select form-select-sm" wire:model.live="actionFilter">
-                <option value="">All Actions</option>
-                <option value="login">Login</option>
-                <option value="logout">Logout</option>
-                <option value="update">Update</option>
-                <option value="create">Create</option>
-                <option value="delete">Delete</option>
-            </select>
+<select id="actionFilter" class="form-select form-select-sm" wire:model.live="actionFilter">
+    <option value="">All Actions</option>
+    <option value="login">Login</option>
+    <option value="logout">Logout</option>
+    <option value="create">Create</option>
+    <option value="update">Update</option>
+    <option value="delete">Delete</option>
+    <option value="approve_with_message">Approve with Message</option>
+    <option value="reject_with_message">Reject with Message</option>
+    <option value="generate_report">Generate Report</option>
+</select>
+
         </div>
 
         {{-- User Type Filter --}}

@@ -66,7 +66,7 @@ public function clearGuestInfo($guestPassId)
             ActivityLog::create([
     'actor_type' => 'admin',
     'actor_id'   => Auth::guard('admin')->id(),
-    'action'     => 'modify',
+    'action'     => 'update',
     'details'    => 'Admin ' . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname .
                     ' cleared guest information for user "' . $user->firstname . ' ' . $user->lastname .
                     '" and freed guest pass "' . $guestPass->name . '".',
