@@ -5,6 +5,9 @@ use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
+
 class UsersTable extends Component
 {
     use WithPagination;
@@ -260,6 +263,17 @@ public function generateReport()
         rewind($handle);
         $csvContent = stream_get_contents($handle);
         fclose($handle);
+                ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id'   => Auth::guard('admin')->id(),
+            'area_id'    => null,
+            'action'     => 'generate',
+            'details'    => 'Admin ' 
+                . Auth::guard('admin')->user()->firstname . ' ' 
+                . Auth::guard('admin')->user()->lastname 
+                . ' exported users & vehicles data (' . $filename . ').',
+            'created_at' => now(),
+        ]);
 
         // Return CSV download
         return response()->streamDownload(function () use ($csvContent) {
