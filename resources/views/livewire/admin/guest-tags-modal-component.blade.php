@@ -11,7 +11,8 @@
                 <div class="modal-body">
                     <div class="d-flex justify-content-end mb-3">
                         {{-- This button now opens the register tag modal --}}
-                        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#registerTagModal">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#registerTagModal">
                             <i class="bi bi-plus-circle me-1"></i> Register New Tag
                         </button>
                     </div>
@@ -27,29 +28,29 @@
                         </thead>
                         <tbody>
                             @forelse ($guestTags as $tag)
-                                <tr>
-                                    <td>{{ $tag->name }}</td>
-                                    <td>{{ $tag->rfid_tag }}</td>
-                                    <td>
-                                        @if($tag->status == 'available')
-                                            <span class="badge bg-success">Available</span>
-                                        @else
-                                            <span class="badge bg-warning">In Use</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <button type="button" wire:click="editTag({{ $tag->id }})" 
-        class="btn btn-sm btn-info" 
-        data-bs-toggle="modal" data-bs-target="#registerTagModal">
-    Edit
-</button>
-                                        <button class="btn btn-sm btn-danger">Delete</button>
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td>{{ $tag->name }}</td>
+                                <td>{{ $tag->rfid_tag }}</td>
+                                <td>
+                                    @if($tag->status == 'available')
+                                    <span class="badge bg-success">Available</span>
+                                    @else
+                                    <span class="badge bg-warning">In Use</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <button type="button" wire:click="editTag({{ $tag->id }})"
+                                        class="btn btn-sm btn-info" data-bs-toggle="modal"
+                                        data-bs-target="#registerTagModal">
+                                        Edit
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" wire:click="deleteTag({{ $tag->id }})">Delete</button>
+                                </td>
+                            </tr>
                             @empty
-                                <tr>
-                                    <td colspan="4" class="text-center">No guest tags registered yet.</td>
-                                </tr>
+                            <tr>
+                                <td colspan="4" class="text-center">No guest tags registered yet.</td>
+                            </tr>
                             @endforelse
                         </tbody>
                     </table>
