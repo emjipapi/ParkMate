@@ -6,6 +6,7 @@ use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log; // 👈 Add this
 use App\Models\ParkingMap;
+use App\Models\ParkingArea;
 
 class ParkingSlotsComponent extends Component
 {
@@ -47,7 +48,7 @@ public ?int $defaultMapId = null;
         Log::info('Loading parking areas data...'); // 👈 log when loading
 
         // Fetch all parking areas
-        $areas = DB::table('parking_areas')->get();
+        $areas = ParkingArea::all(); // excludes soft-deleted
 
         $this->areas = $areas->map(function ($area) {
             // Motorcycle availability
