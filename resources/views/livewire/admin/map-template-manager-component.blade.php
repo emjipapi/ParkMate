@@ -242,8 +242,9 @@
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <div class="form-check">
                                             <input type="checkbox" class="form-check-input"
-                                                wire:model="areaConfig.{{ $areaKey }}.enabled"
-                                                wire:click="saveAreaPositions" id="enable-area-{{ $areaKey }}">
+                                                wire:model.live="areaConfig.{{ $areaKey }}.enabled"
+                                                {{-- wire:click="saveAreaPositions"  --}}
+                                                id="enable-area-{{ $areaKey }}">
                                             <label class="form-check-label fw-semibold"
                                                 for="enable-area-{{ $areaKey }}">
                                                 Enable this label
