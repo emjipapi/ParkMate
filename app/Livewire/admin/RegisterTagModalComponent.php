@@ -101,6 +101,15 @@ class RegisterTagModalComponent extends Component
         $this->dispatch('tagRegistered'); // Notify GuestTagsModalComponent to refresh
         session()->flash('message', 'Tag registered successfully!');
         $this->resetForm();
+                    $this->js('
+                const modalEl = document.getElementById("registerTagModal");
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+                setTimeout(() => {
+                    const newModal = new bootstrap.Modal(modalEl);
+                    newModal.show();
+                }, 500);
+            ');
     }
 
     public function updateTag()
