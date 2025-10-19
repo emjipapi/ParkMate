@@ -149,6 +149,9 @@
                         case 'reject':
                         $color = 'danger';
                         break;
+                        case 'delete':
+                        $color = 'danger';
+                        break;
                         default:
                         $color = 'dark';
                         break;
