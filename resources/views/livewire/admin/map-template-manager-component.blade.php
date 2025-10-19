@@ -7,13 +7,13 @@
         {{ session('success') }}
     </div>
     @endif
-        <div class=" d-none d-md-block">
-            <a href="/parking-slots" wire:navigate
-                class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
-                style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
-                <i class="bi bi-arrow-left"></i>
-            </a>
-        </div>
+    <div class=" d-none d-md-block">
+        <a href="/parking-slots" wire:navigate
+            class="text-black d-inline-flex align-items-center justify-content-center border rounded-circle shadow"
+            style="width: 50px; height: 50px; font-size: 1.2rem; padding: 10px;">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+    </div>
     <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         {{-- Map List --}}
         <div class="xl:col-span-1 space-y-4">
@@ -64,9 +64,9 @@
                         <span class="badge {{ $selectedMapId == $map->id ? 'bg-success' : 'bg-secondary' }}">
                             {{ $selectedMapId == $map->id ? 'Active' : 'Inactive' }}
                         </span>
-                              @if($map->is_default)
+                        @if($map->is_default)
                         <span class="badge bg-success ms-2">Default</span>
-                            @endif
+                        @endif
                     </div>
                     <div class="card-footer bg-transparent border-0 p-2">
                         <button type="button" class="btn btn-sm btn-outline-danger w-100"
@@ -89,16 +89,15 @@
         <div class="xl:col-span-2">
             @if($selectedMap)
             <div class="space-y-4">
-                        <div class="form-check ms-3 mb-4">
-            <input class="form-check-input" type="checkbox"
-                   id="map-default-{{ $selectedMap->id }}"
-                   {{-- clicking toggles default for this map --}}
-                   wire:click="setDefaultMapToggle({{ $selectedMap->id }})"
-                   {{ $selectedMap->is_default ? 'checked' : '' }}>
-            <label class="form-check-label" for="map-default-{{ $selectedMap->id }}">
-                Make this map the default for viewing
-            </label>
-        </div>
+                <div class="form-check ms-3 mb-4">
+                    <input class="form-check-input" type="checkbox" id="map-default-{{ $selectedMap->id }}" {{--
+                        clicking toggles default for this map --}}
+                        wire:click="setDefaultMapToggle({{ $selectedMap->id }})" {{ $selectedMap->is_default ? 'checked'
+                    : '' }}>
+                    <label class="form-check-label" for="map-default-{{ $selectedMap->id }}">
+                        Make this map the default for viewing
+                    </label>
+                </div>
                 {{-- Map Info & Actions --}}
                 <div class="flex justify-between items-start">
                     <div>
@@ -126,14 +125,31 @@
                             @foreach($areaConfig as $areaKey => $config)
                             @if(!empty($config['enabled']))
                             @php
+
                             $x = $config['x_percent'] ?? 50;
                             $y = $config['y_percent'] ?? 50;
-                            $markerSize = $config['marker_size'] ?? 24;
-                            $markerColor = '#6b7280'; // Neutral gray color
+
+                            // marker size (you already had)
+                            $agent = new Jenssegers\Agent\Agent();
+                            $isMobile = $agent->isMobile();
+                            $baseSize = $config['marker_size'] ?? 24;
+                            $markerSize = $isMobile ? round($baseSize * 0.6) : $baseSize;
+
+                            // label sizing: allow overriding via config.label_font_size if present
+                            $baseLabelSize = $config['label_font_size'] ?? 11;
+                            // scale down on mobile but keep readable
+                            $labelFontSize = $isMobile ? max(9, round($baseLabelSize * 0.85)) : $baseLabelSize;
+
+                            // padding and max width tuned for mobile vs desktop
+                            $labelPaddingY = $isMobile ? 1 : 4;
+                            $labelPaddingX = $isMobile ? 4 : 8;
+                            $labelMaxWidth = $isMobile ? 140 : 250;
+
+                            $markerColor = '#6b7280';
                             $label = $config['label'] ?? 'Area';
                             $showLabelLetter = $config['show_label_letter'] ?? true;
 
-                            // Get parking area details if linked
+                            // linked parking area lookup
                             $parkingArea = null;
                             if (!empty($config['parking_area_id'])) {
                             $parkingArea = $availableParkingAreas->firstWhere('id', $config['parking_area_id']);
@@ -167,20 +183,29 @@
 
                             {{-- Area label --}}
                             {{-- Area label (no inline left/top; JS will position it) --}}
-                            <div class="area-label-{{ $selectedMap->id }}" data-area="{{ $areaKey }}" data-x="{{ $x }}"
-                                data-y="{{ $y }}" data-marker-size="{{ $markerSize }}"
+                            <div class="area-label area-label-{{ $selectedMap->id }}" data-area="{{ $areaKey }}"
+                                data-x="{{ $x }}" data-y="{{ $y }}" data-marker-size="{{ $markerSize }}"
                                 data-position="{{ $config['label_position'] ?? 'right' }}" style="position:absolute;
-            background: rgba(0,0,0,{{ $config['label_opacity'] ?? 0.78 }});
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            white-space: nowrap;
-            z-index: 19;">
-                                {{ $label }}
-                                @if($parkingArea)
-                                <br><small>({{ $parkingArea->name }})</small>
-                                @endif
+                                background: rgba(0,0,0,{{ $config['label_opacity'] ?? 0.78 }});
+                                color: white;
+                                padding: {{ $labelPaddingY }}px {{ $labelPaddingX }}px;
+                                border-radius: 4px;
+                                font-size: {{ $labelFontSize }}px;
+                                white-space: nowrap;
+                                max-width: {{ $labelMaxWidth }}px;
+                                box-sizing: border-box;
+                                z-index: 19;">
+                                <span class="label-col"
+                                    style="display:inline-flex; flex-direction:column; align-items:center; justify-content:center; width:100%; text-align:center; overflow:hidden; text-overflow:ellipsis; line-height:1;">
+                                    <span>{{ $label }}</span>
+                                    @if($parkingArea)
+                                    <small
+                                        style="font-size: {{ max($labelFontSize - 2, 8) }}px; opacity:0.9; line-height:2; margin-top:-1px;">
+                                        ({{ $parkingArea->name }})
+                                    </small>
+                                    @endif
+                                </span>
+
                             </div>
 
 
@@ -352,6 +377,7 @@
         </div>
     </div>
 </div>
+
 
 {{-- Positioning script --}}
 <script>
@@ -540,7 +566,8 @@
                     log('label', area, 'markerEl not found — computed center from percents', { centerX: Math.round(centerX), centerY: Math.round(centerY) });
                 }
 
-                const gap = 8;
+                const isMobile = window.matchMedia('(max-width: 768px)').matches;
+const gap = isMobile ? 1 : 8;
                 const markerRadius = markerSize / 2;
                 let leftPx = centerX;
                 let topPx = centerY;

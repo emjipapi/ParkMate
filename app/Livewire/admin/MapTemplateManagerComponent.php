@@ -2,35 +2,39 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\ParkingArea;
+use App\Models\ParkingMap;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Laravel\Facades\Image;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use App\Models\ParkingMap;
-use App\Models\ParkingArea;
-use Intervention\Image\Laravel\Facades\Image;
-use Illuminate\Support\Facades\Storage;
 
 class MapTemplateManagerComponent extends Component
 {
     use WithFileUploads;
 
     public $selectedMapId;
+
     public $mapFile;
+
     public $mapName;
+
     public $isEditing = false;
-    
+
     // Area positioning properties
     public $areaConfig = [];
-    
+
     public $showPreview = false;
+
     public $previewImageDimensions = ['width' => 0, 'height' => 0];
-    
+
     // Available parking areas from database
     public $availableParkingAreas = [];
+
     public ?int $defaultMapId = null;
 
-
     protected $listeners = [
-        'setPreviewDimensions' => 'setPreviewDimensions'
+        'setPreviewDimensions' => 'setPreviewDimensions',
     ];
 
     protected $rules = [
@@ -41,7 +45,7 @@ class MapTemplateManagerComponent extends Component
     public function mount()
     {
         $this->loadAvailableParkingAreas();
-        
+
         $firstMap = ParkingMap::first();
         if ($firstMap) {
             $this->selectedMapId = $firstMap->id;
@@ -103,7 +107,7 @@ class MapTemplateManagerComponent extends Component
 
     public function togglePreview()
     {
-        $this->showPreview = !$this->showPreview;
+        $this->showPreview = ! $this->showPreview;
         if ($this->showPreview) {
             $this->updatePreviewDimensions();
         }
@@ -120,7 +124,7 @@ class MapTemplateManagerComponent extends Component
 
     public function addParkingArea()
     {
-        $newKey = 'area_' . uniqid();
+        $newKey = 'area_'.uniqid();
         $this->areaConfig[$newKey] = [
             'x_percent' => 50,
             'y_percent' => 50,
@@ -129,7 +133,7 @@ class MapTemplateManagerComponent extends Component
             'enabled' => true,
             'marker_size' => 24,
             'marker_color' => '#3b82f6',
-            'show_label_letter' => true
+            'show_label_letter' => true,
         ];
     }
 
@@ -169,16 +173,16 @@ class MapTemplateManagerComponent extends Component
             $height = $image->height();
             $aspectRatio = round($width / $height, 4);
 
-            $filename = 'parking_map_' . time() . '.' . $this->mapFile->getClientOriginalExtension();
-            $path = 'parking-maps/' . $filename;
+            $filename = 'parking_map_'.time().'.'.$this->mapFile->getClientOriginalExtension();
+            $path = 'parking-maps/'.$filename;
 
             // Ensure directory exists
             $mapDir = storage_path('app/public/parking-maps');
-            if (!file_exists($mapDir)) {
+            if (! file_exists($mapDir)) {
                 mkdir($mapDir, 0755, true);
             }
 
-            $image->save(storage_path('app/public/' . $path));
+            $image->save(storage_path('app/public/'.$path));
 
             $map = ParkingMap::create([
                 'name' => $this->mapName,
@@ -187,9 +191,8 @@ class MapTemplateManagerComponent extends Component
                 'height' => $height,
                 'aspect_ratio' => $aspectRatio,
                 'status' => 'active',
-                'area_config' => $this->getDefaultAreaConfig()
+                'area_config' => $this->getDefaultAreaConfig(),
             ]);
-            
 
             // Select the newly created map
             // $this->selectedMapId = $map->id;
@@ -198,7 +201,7 @@ class MapTemplateManagerComponent extends Component
 
             $this->reset(['mapFile', 'mapName']);
             session()->flash('success', 'Parking map uploaded successfully!');
-            
+
         }
     }
 
@@ -210,7 +213,7 @@ class MapTemplateManagerComponent extends Component
         if ($map) {
             $map->update([
                 'name' => $this->mapName,
-                'area_config' => $this->areaConfig
+                'area_config' => $this->areaConfig,
             ]);
             $this->isEditing = false;
             session()->flash('success', 'Parking map updated successfully!');
@@ -220,11 +223,11 @@ class MapTemplateManagerComponent extends Component
     public function deleteMap($mapId)
     {
         $map = ParkingMap::find($mapId);
-        
+
         if ($map) {
             Storage::disk('public')->delete($map->file_path);
             $map->delete();
-            
+
             if ($this->selectedMapId == $mapId) {
                 $firstMap = ParkingMap::first();
                 $this->selectedMapId = $firstMap?->id;
@@ -234,7 +237,7 @@ class MapTemplateManagerComponent extends Component
                     $this->areaConfig = [];
                 }
             }
-            
+
             session()->flash('success', 'Parking map deleted successfully!');
         }
     }
@@ -251,43 +254,44 @@ class MapTemplateManagerComponent extends Component
                 'marker_size' => 24,
                 'show_label_letter' => true,
                 'label_position' => 'right',
-                'label_opacity' => 0.78
-            ]
+                'label_opacity' => 0.78,
+            ],
         ];
     }
-public function setDefaultMapToggle(int $mapId)
-{
-    $map = ParkingMap::find($mapId);
-    if (! $map) {
-        session()->flash('error', 'Map not found.');
-        return;
+
+    public function setDefaultMapToggle(int $mapId)
+    {
+        $map = ParkingMap::find($mapId);
+        if (! $map) {
+            session()->flash('error', 'Map not found.');
+
+            return;
+        }
+
+        // current status of clicked map
+        $currentlyDefault = (bool) $map->is_default;
+
+        \DB::transaction(function () use ($mapId) {
+            ParkingMap::query()->update(['is_default' => false]);
+            ParkingMap::where('id', $mapId)->update(['is_default' => true]);
+        });
+        $this->defaultMapId = $mapId;
+        session()->flash('success', 'Default map updated.');
+
+        // Refresh map list & selectedMap so the UI updates immediately
+        $this->loadAreaConfig();        // reload area_config for selected map if needed
     }
-
-    // current status of clicked map
-    $currentlyDefault = (bool)$map->is_default;
-
-\DB::transaction(function () use ($mapId) {
-    ParkingMap::query()->update(['is_default' => false]);
-    ParkingMap::where('id', $mapId)->update(['is_default' => true]);
-});
-$this->defaultMapId = $mapId;
-session()->flash('success', 'Default map updated.');
-
-    // Refresh map list & selectedMap so the UI updates immediately
-    $this->loadAreaConfig();        // reload area_config for selected map if needed
-}
-
 
     public function render()
     {
         $maps = ParkingMap::orderBy('created_at', 'asc')->get();
-        $selectedMap = $this->selectedMapId 
-            ? ParkingMap::find($this->selectedMapId) 
+        $selectedMap = $this->selectedMapId
+            ? ParkingMap::find($this->selectedMapId)
             : null;
 
         return view('livewire.admin.map-template-manager-component', [
             'maps' => $maps,
-            'selectedMap' => $selectedMap
+            'selectedMap' => $selectedMap,
         ]);
     }
 }
