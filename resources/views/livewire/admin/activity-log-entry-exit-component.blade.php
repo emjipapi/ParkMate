@@ -20,6 +20,7 @@
                         <div class="mb-3">
                             <label for="reportType" class="form-label">Report Type</label>
                             <select id="reportType" class="form-select" wire:model="reportType" required>
+                                <option value="day">Today</option>
                                 <option value="week">This Week</option>
                                 <option value="month">This Month</option>
                                 <option value="range">Custom Range</option>
