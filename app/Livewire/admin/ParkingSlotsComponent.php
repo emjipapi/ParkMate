@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log; // 👈 Add this
+use App\Models\ParkingMap;
 
 class ParkingSlotsComponent extends Component
 {
@@ -12,9 +13,16 @@ class ParkingSlotsComponent extends Component
 
     /** @var array<int, array> */
     public array $areas = [];
-
+public ?int $defaultMapId = null;
     public function mount()
     {
+        $this->loadAreasData();
+        $this->defaultMapId = ParkingMap::where('is_default', true)->value('id');
+    }
+    protected $listeners = ['defaultMapChanged' => 'reloadDefaultMap'];
+        public function reloadDefaultMap()
+    {
+        $this->defaultMapId = ParkingMap::where('is_default', true)->value('id');
         $this->loadAreasData();
     }
     // Fixed method using dispatch() - this is the proper Livewire v3 way

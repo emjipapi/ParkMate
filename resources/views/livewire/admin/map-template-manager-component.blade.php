@@ -64,8 +64,10 @@
                         <span class="badge {{ $selectedMapId == $map->id ? 'bg-success' : 'bg-secondary' }}">
                             {{ $selectedMapId == $map->id ? 'Active' : 'Inactive' }}
                         </span>
+                              @if($map->is_default)
+                        <span class="badge bg-success ms-2">Default</span>
+                            @endif
                     </div>
-
                     <div class="card-footer bg-transparent border-0 p-2">
                         <button type="button" class="btn btn-sm btn-outline-danger w-100"
                             onclick="event.stopPropagation(); if(confirm('Are you sure you want to delete this map? This cannot be undone.')) { @this.deleteMap({{ $map->id }}) }"
@@ -87,6 +89,16 @@
         <div class="xl:col-span-2">
             @if($selectedMap)
             <div class="space-y-4">
+                        <div class="form-check ms-3 mb-4">
+            <input class="form-check-input" type="checkbox"
+                   id="map-default-{{ $selectedMap->id }}"
+                   {{-- clicking toggles default for this map --}}
+                   wire:click="setDefaultMapToggle({{ $selectedMap->id }})"
+                   {{ $selectedMap->is_default ? 'checked' : '' }}>
+            <label class="form-check-label" for="map-default-{{ $selectedMap->id }}">
+                Make this map the default for viewing
+            </label>
+        </div>
                 {{-- Map Info & Actions --}}
                 <div class="flex justify-between items-start">
                     <div>
@@ -209,7 +221,7 @@
                                                 wire:click="saveAreaPositions" id="enable-area-{{ $areaKey }}">
                                             <label class="form-check-label fw-semibold"
                                                 for="enable-area-{{ $areaKey }}">
-                                                Enable this area
+                                                Enable this label
                                             </label>
                                         </div>
                                         <button wire:click="removeParkingArea('{{ $areaKey }}')"
@@ -328,7 +340,7 @@
                     </div>
 
                     <button wire:click="addParkingArea" class="btn-add-slot btn btn-primary">
-                        <i class="bi bi-plus-circle"></i> Add Area
+                        <i class="bi bi-plus-circle"></i> Add New Label
                     </button>
                 </div>
             </div>

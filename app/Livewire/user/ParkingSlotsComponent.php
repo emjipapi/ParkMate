@@ -5,6 +5,7 @@ namespace App\Livewire\User;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log; // 👈 Add this
+use App\Models\ParkingMap;
 
 class ParkingSlotsComponent extends Component
 {
@@ -12,10 +13,12 @@ class ParkingSlotsComponent extends Component
 
     /** @var array<int, array> */
     public array $areas = [];
+    public ?int $defaultMapId = null;
 
     public function mount()
     {
         $this->loadAreasData();
+        $this->defaultMapId = ParkingMap::where('is_default', true)->value('id');
     }
 
     private function loadAreasData()

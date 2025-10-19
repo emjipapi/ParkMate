@@ -26,6 +26,8 @@ class MapTemplateManagerComponent extends Component
     
     // Available parking areas from database
     public $availableParkingAreas = [];
+    public ?int $defaultMapId = null;
+
 
     protected $listeners = [
         'setPreviewDimensions' => 'setPreviewDimensions'
@@ -45,6 +47,7 @@ class MapTemplateManagerComponent extends Component
             $this->selectedMapId = $firstMap->id;
             $this->loadAreaConfig();
         }
+        $this->defaultMapId = ParkingMap::where('is_default', true)->value('id');
     }
 
     public function loadAvailableParkingAreas()
@@ -252,6 +255,28 @@ class MapTemplateManagerComponent extends Component
             ]
         ];
     }
+public function setDefaultMapToggle(int $mapId)
+{
+    $map = ParkingMap::find($mapId);
+    if (! $map) {
+        session()->flash('error', 'Map not found.');
+        return;
+    }
+
+    // current status of clicked map
+    $currentlyDefault = (bool)$map->is_default;
+
+\DB::transaction(function () use ($mapId) {
+    ParkingMap::query()->update(['is_default' => false]);
+    ParkingMap::where('id', $mapId)->update(['is_default' => true]);
+});
+$this->defaultMapId = $mapId;
+session()->flash('success', 'Default map updated.');
+
+    // Refresh map list & selectedMap so the UI updates immediately
+    $this->loadAreaConfig();        // reload area_config for selected map if needed
+}
+
 
     public function render()
     {
