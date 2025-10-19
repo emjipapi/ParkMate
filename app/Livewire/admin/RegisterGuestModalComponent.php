@@ -153,21 +153,6 @@ class RegisterGuestModalComponent extends Component
         }
     }
 
-    private function generateGuestEmail()
-    {
-        // Generate a unique email for the guest
-        $baseEmail = strtolower($this->firstname . '.' . $this->lastname) . '+guest@campus.local';
-        $email = $baseEmail;
-        $counter = 1;
-
-        while (User::where('email', $email)->exists()) {
-            $email = strtolower($this->firstname . '.' . $this->lastname) . '+guest' . $counter . '@campus.local';
-            $counter++;
-        }
-
-        return $email;
-    }
-
     public function render()
     {
         return view('livewire.admin.register-guest-modal-component');
