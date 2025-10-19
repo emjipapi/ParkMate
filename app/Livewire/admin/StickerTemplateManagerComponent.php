@@ -311,8 +311,21 @@ public function loadElementConfig()
     {
         $template = StickerTemplate::find($templateId);
         if ($template) {
+            $templateName = $template->name;
             Storage::disk('public')->delete($template->file_path);
             $template->delete();
+                    // Log activity
+        ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id'   => Auth::guard('admin')->id(),
+            'area_id'    => null, // set if relevant
+            'action'     => 'delete',
+            'details'    => 'Admin ' 
+                . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
+                . ' deleted sticker template "' . $templateName . '".',
+            'created_at' => now(),
+        ]);
+            
             
             if ($this->selectedTemplateId == $templateId) {
                 $firstTemplate = StickerTemplate::first();
