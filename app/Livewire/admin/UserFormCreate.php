@@ -493,7 +493,34 @@ if ($this->compressedProfilePicture) {
         $this->vehicles = [$this->defaultVehicle()];
 
     }
+public function addRfidTag(int $vehicleIndex)
+{
+    // ensure vehicles array exists and has the rfid_tags array
+    if (! isset($this->vehicles[$vehicleIndex])) return;
 
+    if (! isset($this->vehicles[$vehicleIndex]['rfid_tags']) || ! is_array($this->vehicles[$vehicleIndex]['rfid_tags'])) {
+        $this->vehicles[$vehicleIndex]['rfid_tags'] = [''];
+        return;
+    }
+
+    // cap at 3 tags
+    if (count($this->vehicles[$vehicleIndex]['rfid_tags']) >= 3) return;
+
+    $this->vehicles[$vehicleIndex]['rfid_tags'][] = '';
+}
+
+public function removeRfidTag(int $vehicleIndex, int $tagIndex)
+{
+    if (! isset($this->vehicles[$vehicleIndex]['rfid_tags'][$tagIndex])) return;
+
+    // remove the tag and reindex
+    array_splice($this->vehicles[$vehicleIndex]['rfid_tags'], $tagIndex, 1);
+
+    // ensure there's always at least an empty slot for tag 0 (if you want that)
+    if (empty($this->vehicles[$vehicleIndex]['rfid_tags'])) {
+        $this->vehicles[$vehicleIndex]['rfid_tags'] = [''];
+    }
+}
     public function render()
     {
         return view('livewire.admin.user-form-create');
