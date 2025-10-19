@@ -119,7 +119,7 @@ class RegisterGuestModalComponent extends Component
                 'reason' => $this->reason,
                 'user_id' => $user->id,
             ]);
-            ActivityLog::create([
+ActivityLog::create([
     'actor_type' => 'admin',
     'actor_id'   => Auth::guard('admin')->id(),
     'action'     => 'create',
@@ -127,8 +127,10 @@ class RegisterGuestModalComponent extends Component
         . Auth::guard('admin')->user()->firstname . ' ' 
         . Auth::guard('admin')->user()->lastname 
         . ' created guest "' 
-        . $this->firstname . ' ' . $this->lastname . '".',
+        . $this->firstname . ' ' . $this->lastname 
+        . '" using tag "' . $tag->name . '" (RFID: ' . $tag->rfid_tag . ').',
 ]);
+
 
 
 
