@@ -231,6 +231,34 @@ public function updateStatus($violationId, $newStatus)
         'final_license_plate' => $violation->license_plate,
         'will_check_email' => ($newStatus === 'approved' && $violation->violator_id)
     ]);
+        // CHANGE: Add ActivityLog creation here
+    $admin = Auth::guard('admin')->user();
+    
+    if ($newStatus === 'approved') {
+        ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id' => $admin ? $admin->getKey() : null,
+            'area_id' => $violation->area_id,
+            'action' => 'approve',
+            'details' => 'Admin ' 
+                . ($admin ? $admin->firstname . ' ' . $admin->lastname : 'Unknown') 
+                . ' approved violation #' . $violation->id 
+                . ($violation->license_plate ? ' for license plate ' . $violation->license_plate : '') . '.',
+            'created_at' => now(),
+        ]);
+    } elseif ($newStatus === 'rejected') {
+        ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id' => $admin ? $admin->getKey() : null,
+            'area_id' => $violation->area_id,
+            'action' => 'reject',
+            'details' => 'Admin ' 
+                . ($admin ? $admin->firstname . ' ' . $admin->lastname : 'Unknown') 
+                . ' rejected violation #' . $violation->id 
+                . ($violation->license_plate ? ' for license plate ' . $violation->license_plate : '') . '.',
+            'created_at' => now(),
+        ]);
+    }
 
     // Side effects when approved
     if ($newStatus === 'approved' && $violation->violator_id) {
@@ -578,14 +606,17 @@ public function sendApproveMessage()
         'created_at' => now(),
     ]);
 
-    ActivityLog::create([
-        'actor_type' => 'admin',
-        'actor_id' => $admin ? $admin->getKey() : null,
-        'area_id' => $violation->area_id,
-        'action' => 'approve_with_message',
-        'details' => "Approved #{$violation->id} with message: {$message}",
-        'created_at' => now(),
-    ]);
+ActivityLog::create([
+    'actor_type' => 'admin',
+    'actor_id' => $admin ? $admin->getKey() : null,
+    'area_id' => $violation->area_id,
+    'action' => 'approve_with_message',
+    'details' => 'Admin ' 
+        . ($admin ? $admin->firstname . ' ' . $admin->lastname : 'Unknown') 
+        . ' approved violation #' . $violation->id 
+        . ' with message: "' . $message . '".',
+    'created_at' => now(),
+]);
 
     // Handle emails & threshold checks
     if ($finalViolatorId) {
@@ -638,14 +669,17 @@ public function sendApproveMessage()
             'created_at' => now(),
         ]);
 
-        ActivityLog::create([
-            'actor_type' => 'admin',
-            'actor_id' => $admin ? $admin->getKey() : null,
-            'area_id' => $violation->area_id,
-            'action' => 'reject_with_message',
-            'details' => "Rejected #{$violation->id} with message: {$message}",
-            'created_at' => now(),
-        ]);
+ActivityLog::create([
+    'actor_type' => 'admin',
+    'actor_id' => $admin ? $admin->getKey() : null,
+    'area_id' => $violation->area_id,
+    'action' => 'reject_with_message',
+    'details' => 'Admin ' 
+        . ($admin ? $admin->firstname . ' ' . $admin->lastname : 'Unknown') 
+        . ' rejected violation #' . $violation->id 
+        . ' with message: "' . $message . '".',
+    'created_at' => now(),
+]);
 
         session()->flash('success', 'Violation rejected and message saved/sent.');
         $this->dispatch('close-reject-modal');
@@ -719,7 +753,7 @@ private function handleApprovalSideEffects(int $violatorId, int $previousApprove
             ]);
 
             if ($inserted) {
-                \App\Jobs\SendViolationWarningEmail::dispatch($user->id, $sendStage);
+                SendViolationWarningEmail::dispatch($user->id, $sendStage);
                 \Log::info("Dispatched SendViolationWarningEmail job (via violation_notifications)", ['user_id' => $user->id, 'stage' => $sendStage]);
             } else {
                 \Log::info("Notification already exists; skipping dispatch", ['user_id' => $user->id, 'stage' => $sendStage]);
@@ -727,7 +761,7 @@ private function handleApprovalSideEffects(int $violatorId, int $previousApprove
         } else {
             // Table doesn't exist — warn, but still dispatch (job checks the DB itself).
             \Log::warning("violation_notifications table missing — dispatching without DB guard", ['user_id' => $user->id, 'stage' => $sendStage]);
-            \App\Jobs\SendViolationWarningEmail::dispatch($user->id, $sendStage);
+            SendViolationWarningEmail::dispatch($user->id, $sendStage);
             \Log::info("Dispatched SendViolationWarningEmail job (no notification table)", ['user_id' => $user->id, 'stage' => $sendStage]);
         }
     } catch (\Throwable $ex) {
