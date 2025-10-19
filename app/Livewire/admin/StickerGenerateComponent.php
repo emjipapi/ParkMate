@@ -12,6 +12,8 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cache;
 use App\Jobs\GenerateStickersJob;
 use Illuminate\Support\Facades\Log;
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
 class StickerGenerateComponent extends Component
 {
     public $selectedTemplateId;
@@ -83,6 +85,20 @@ $this->total = 0;
 
     GenerateStickersJob::dispatch($this->selectedTemplateId, $numbers, $key, $userId)
         ->onQueue('default');
+            $template = StickerTemplate::find($this->selectedTemplateId);
+    if ($template) {
+        ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id'   => Auth::guard('admin')->id(),
+            'area_id'    => null, // set if relevant
+            'action'     => 'generate',
+            'details'    => 'Admin ' 
+                . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
+                . ' started generating stickers for template "' . $template->name . '" '
+                . 'with ' . count($numbers) . ' number(s).',
+            'created_at' => now(),
+        ]);
+    }
 
     session()->flash('success', 'Sticker generation has started — this will run in background.');
 }
