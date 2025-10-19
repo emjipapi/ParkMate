@@ -8,6 +8,8 @@ use App\Models\Violation;
 use App\Models\Vehicle;
 use App\Models\Admin;
 use App\Models\User; // add any other reporter models you use
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
 
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
@@ -36,7 +38,7 @@ public $sortOrder = 'desc';
     public $searchTerm = '';
     public $searchResults = [];
     
-public $endorsementReportType = 'week';
+public $endorsementReportType = 'day';
 public $endorsementReportStartDate = null;
 public $endorsementReportEndDate = null;
     public $perPage = 15; // default
@@ -92,7 +94,9 @@ public function generateEndorsementReport()
     }
 
     // compute start/end as Y-m-d strings
-    if ($this->endorsementReportType === 'week') {
+    if ($this->endorsementReportType === 'day') {
+        $start = $end = Carbon::now()->toDateString();
+    } elseif ($this->endorsementReportType === 'week') {
         $start = Carbon::now()->startOfWeek()->toDateString();
         $end   = Carbon::now()->endOfWeek()->toDateString();
     } elseif ($this->endorsementReportType === 'month') {
