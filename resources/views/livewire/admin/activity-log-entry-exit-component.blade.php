@@ -195,15 +195,36 @@
                 <tr>
                     <td>{{ $log->id }}</td>
 
+ @php
+                    // Safe ID display
+                    $idDisplay = $log->actor_type === 'admin'
+                    ? (optional($log->admin)->username ?? '—')
+                    : (optional($log->user)->student_id ?? optional($log->user)->employee_id ?? '—');
+
+                    // Safe Name display (lastname, firstname) — fall back to id-like value if name missing
+                    if ($log->actor_type === 'admin') {
+                    $lastname = optional($log->admin)->lastname;
+                    $firstname = optional($log->admin)->firstname;
+                    } else {
+                    $lastname = optional($log->user)->lastname;
+                    $firstname = optional($log->user)->firstname;
+                    }
+
+                    $nameDisplay = trim(($lastname ? $lastname . ', ' : '') . ($firstname ?? ''));
+
+                    if ($nameDisplay === '') {
+                    // fallback if no name available
+                    $nameDisplay = $log->actor_type === 'admin'
+                    ? (optional($log->admin)->username ?? '—')
+                    : (optional($log->user)->student_id ?? optional($log->user)->employee_id ?? '—');
+                    }
+                    @endphp
+
                     {{-- Show ID depending on actor type --}}
-                    <td>{{ $log->actor_type === 'admin' ? $log->admin->username ?? '—' : $log->user->student_id ??
-                        $log->user->employee_id ?? '—' }}
-                    </td>
+                    <td>{{ $idDisplay }}</td>
 
                     {{-- Show Name depending on actor type --}}
-                    <td>{{ $log->actor_type === 'admin' ? $log->admin->lastname . ', ' . $log->admin->firstname :
-                        $log->user->lastname . ', ' . $log->user->firstname }}
-                    </td>
+                    <td>{{ $nameDisplay }}</td>
 
                     <td>
                         @php
