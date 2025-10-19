@@ -4,6 +4,8 @@ namespace App\Livewire\Admin;
 
 use App\Models\ParkingArea;
 use Livewire\Component;
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
 
 class EditAreaModal extends Component
 {
@@ -373,55 +375,85 @@ private function validateMotorcycleSlotsChange($area)
                 ->whereRaw("CAST(SUBSTRING(label, {$substrPos}) AS UNSIGNED) > ?", [$targetCount])
                 ->delete();
         }
+        ActivityLog::create([
+    'actor_type' => 'admin',
+    'actor_id'   => Auth::guard('admin')->id(),
+    'action'     => 'update',
+    'details'    => 'Admin '
+        . Auth::guard('admin')->user()->firstname . ' '
+        . Auth::guard('admin')->user()->lastname
+        . ' modified the parking area "' . $area->name . '".',
+]);
+
     }
 
-    public function deleteArea()
-    {
-        $area = ParkingArea::with(['carSlots', 'motorcycleCount'])->find($this->areaId);
-        if (! $area) {
-            $this->addError('area', 'Parking area not found.');
-            return;
-        }
-
-        // Check occupied and disabled car slots
-        $occupiedCars = $area->carSlots()->where('occupied', 1)->count();
-        $disabledCars = $area->carSlots()->where('disabled', 1)->count();
-        
-        if ($occupiedCars > 0 || $disabledCars > 0) {
-            $this->addError('delete', "Cannot delete area. {$occupiedCars} car(s) are occupied and {$disabledCars} car(s) are disabled.");
-            return;
-        }
-
-        // Check occupied motorcycles (if motorcycleCount exists)
-        $mc = $area->motorcycleCount()->first();
-        $occupiedMotorcycles = 0;
-        if ($mc) {
-            $occupiedMotorcycles = max(0, (int)$mc->total_available - (int)$mc->available_count);
-        }
-
-        if ($occupiedMotorcycles > 0) {
-            $this->addError('delete', "Cannot delete area. {$occupiedMotorcycles} motorcycle(s) are currently parked.");
-            return;
-        }
-
-        $deletedId = $area->id;
-        $area->delete();
-
-        $this->dispatch('notify', [
-            'type' => 'success',
-            'message' => 'Parking area deleted successfully!',
-        ]);
-
-        $this->dispatch('areaDeleted', $deletedId);
-
-        $this->js("
-            const modalEl = document.getElementById('editAreaModal');
-            if (modalEl) {
-                const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
-                bsModal.hide();
-            }
-        ");
+public function deleteArea()
+{
+    $area = ParkingArea::with(['carSlots', 'motorcycleCount'])->find($this->areaId);
+    if (! $area) {
+        $this->addError('area', 'Parking area not found.');
+        return;
     }
+
+    // Check occupied and disabled car slots
+    $occupiedCars = $area->carSlots()->where('occupied', 1)->count();
+    $disabledCars = $area->carSlots()->where('disabled', 1)->count();
+    
+    if ($occupiedCars > 0 || $disabledCars > 0) {
+        $this->addError('delete', "Cannot delete area. {$occupiedCars} car(s) are occupied and {$disabledCars} car(s) are disabled.");
+        return;
+    }
+
+    // Check occupied motorcycles (if motorcycleCount exists)
+    $mc = $area->motorcycleCount()->first();
+    $occupiedMotorcycles = 0;
+    if ($mc) {
+        $occupiedMotorcycles = max(0, (int)$mc->total_available - (int)$mc->available_count);
+    }
+
+    if ($occupiedMotorcycles > 0) {
+        $this->addError('delete', "Cannot delete area. {$occupiedMotorcycles} motorcycle(s) are currently parked.");
+        return;
+    }
+
+    // Store details before deletion
+    $areaName = $area->name;
+    $allowedUsers = [];
+    if ($area->allow_students) $allowedUsers[] = 'Students';
+    if ($area->allow_employees) $allowedUsers[] = 'Employees';
+    if ($area->allow_guests) $allowedUsers[] = 'Guests';
+    $allowedUsersStr = implode(', ', $allowedUsers);
+
+    // Soft delete the area
+    $area->delete();
+
+    // Log the deletion
+    ActivityLog::create([
+        'actor_type' => 'admin',
+        'actor_id'   => Auth::guard('admin')->id(),
+        'action'     => 'delete',
+        'details'    => 'Admin ' 
+            . Auth::guard('admin')->user()->firstname . ' ' 
+            . Auth::guard('admin')->user()->lastname
+            . ' deleted parking area "' . $areaName . '" (Allowed users: ' . $allowedUsersStr . ').',
+    ]);
+
+    $this->dispatch('notify', [
+        'type' => 'success',
+        'message' => 'Parking area deleted successfully!',
+    ]);
+
+    $this->dispatch('areaDeleted', $area->id);
+
+    $this->js("
+        const modalEl = document.getElementById('editAreaModal');
+        if (modalEl) {
+            const bsModal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            bsModal.hide();
+        }
+    ");
+}
+
 
     public function render()
     {

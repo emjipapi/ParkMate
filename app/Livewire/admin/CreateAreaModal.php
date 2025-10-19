@@ -7,6 +7,8 @@ use App\Models\ParkingArea;
 use App\Models\CarSlot;
 use App\Models\MotorcycleCount;
 use Illuminate\Support\Facades\DB;
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
 
 class CreateAreaModal extends Component
 {
@@ -89,6 +91,24 @@ class CreateAreaModal extends Component
             $this->addError('areaName', 'Failed to create parking area: ' . $e->getMessage());
             return;
         }
+
+        // Create activity log entry
+$allowedUsers = [];
+if ($this->allowStudents) $allowedUsers[] = 'Students';
+if ($this->allowEmployees) $allowedUsers[] = 'Employees';
+if ($this->allowGuests) $allowedUsers[] = 'Guests';
+
+ActivityLog::create([
+    'actor_type' => 'admin',
+    'actor_id'   => Auth::guard('admin')->id(),
+    'action'     => 'create',
+    'details'    => 'Admin ' 
+        . Auth::guard('admin')->user()->firstname . ' ' 
+        . Auth::guard('admin')->user()->lastname 
+        . ' created parking area "' . $this->areaName . '" '
+        . 'allowing access to: ' . implode(', ', $allowedUsers) . '.',
+]);
+
 
         $this->reset(['areaName', 'carSlots', 'motorcycleSlots', 'slotPrefix', 'allowStudents', 'allowEmployees', 'allowGuests']);
         $this->dispatch('areaCreated');
