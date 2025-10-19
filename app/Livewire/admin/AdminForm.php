@@ -100,12 +100,16 @@ class AdminForm extends Component
 
         // Log activity
         $actorId = Auth::guard('admin')->id();
-        ActivityLog::create([
-            'actor_type' => 'admin',
-            'actor_id'   => $actorId,
-            'action'     => 'create',
-            'details'    => "Admin {$admin->firstname} {$admin->lastname} was created.",
-        ]);
+ActivityLog::create([
+    'actor_type' => 'admin',
+    'actor_id'   => Auth::guard('admin')->id(), // the admin performing the action
+    'area_id'    => null, // set if relevant
+    'action'     => 'create',
+    'details'    => 'Admin ' 
+        . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
+        . ' created a new admin: ' . $admin->firstname . ' ' . $admin->lastname . '.',
+    'created_at' => now(),
+]);
 
         session()->flash('success', 'Admin created successfully!');
         $this->reset(['username','firstname','middlename','lastname','password','permissions']);
