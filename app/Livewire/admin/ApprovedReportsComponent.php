@@ -343,14 +343,17 @@ if (! empty($this->compressedProofs[$violationId])) {
         $admin = Auth::guard('admin')->user();
 
         // optional: create activity log entry for audit
-        ActivityLog::create([
-            'actor_type' => 'admin',
-            'actor_id' => $admin->admin_id,
-            'area_id' => $violation->area_id,
-            'action' => 'resolve',
-            'details' => "Violation #{$violation->id} marked for endorsement by admin {$adminName}",
-            'created_at' => now(),
-        ]);
+ActivityLog::create([
+    'actor_type' => 'admin',
+    'actor_id'   => Auth::guard('admin')->id(),
+    'area_id'    => $violation->area_id,
+    'action'     => 'resolve',
+    'details'    => 'Admin '
+        . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
+        . ' marked violation #' . $violation->id . ' for endorsement.',
+    'created_at' => now(),
+]);
+
 
         // clear the temporary file in Livewire so UI resets
         if (isset($this->proofs[$violationId])) {
