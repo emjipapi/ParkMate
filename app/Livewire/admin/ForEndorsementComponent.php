@@ -108,6 +108,16 @@ public function generateEndorsementReport()
             return;
         }
     }
+        ActivityLog::create([
+        'actor_type' => 'admin',
+        'actor_id'   => Auth::guard('admin')->id(),
+        'area_id'    => null, // or set a relevant area if applicable
+        'action'     => 'generate_report',
+        'details'    => 'Admin ' 
+            . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
+            . ' generated an endorsement report for the period ' . $start . ' to ' . $end . '.',
+        'created_at' => now(),
+    ]);
 
     // Use Livewire's redirect method
 return $this->redirect(route('reports.endorsement', [
