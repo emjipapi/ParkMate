@@ -307,6 +307,7 @@ class MapTemplateManagerComponent extends Component
 
         // current status of clicked map
         $currentlyDefault = (bool) $map->is_default;
+        $previousDefault = ParkingMap::where('is_default', true)->first();
 
         \DB::transaction(function () use ($mapId) {
             ParkingMap::query()->update(['is_default' => false]);
@@ -314,6 +315,18 @@ class MapTemplateManagerComponent extends Component
         });
         $this->defaultMapId = $mapId;
         session()->flash('success', 'Default map updated.');
+
+            ActivityLog::create([
+        'actor_type' => 'admin',
+        'actor_id'   => Auth::guard('admin')->id(),
+        'area_id'    => null, // set if relevant
+        'action'     => 'update',
+        'details'    => 'Admin ' 
+            . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
+            . ' set "' . $map->name . '" as the default parking map' 
+            . ($previousDefault ? ' (previous default: "' . $previousDefault->name . '")' : '') . '.',
+        'created_at' => now(),
+    ]);
 
         // Refresh map list & selectedMap so the UI updates immediately
         $this->loadAreaConfig();        // reload area_config for selected map if needed
