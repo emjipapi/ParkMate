@@ -2,16 +2,21 @@
 
 namespace App\Livewire\Admin;
 
+use App\Models\ActivityLog;
 use App\Models\GuestPass;
-use Livewire\Component;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
+use Livewire\Component;
 
 class RegisterTagModalComponent extends Component
 {
     public $tagName = '';
+
     public $tagId = '';
+
     public $editingTagId = null;
+
     public $isEditMode = false;
 
     #[\Livewire\Attributes\On('loadTagForEdit')]
@@ -54,13 +59,13 @@ class RegisterTagModalComponent extends Component
                 if ($data['success'] && isset($data['rfid_tag'])) {
                     $this->tagId = $data['rfid_tag'];
                 } else {
-                    $this->addError("tagId", $data['error'] ?? 'No RFID scan received from the device.');
+                    $this->addError('tagId', $data['error'] ?? 'No RFID scan received from the device.');
                 }
             } else {
-                $this->addError("tagId", 'Failed to connect to the RFID scanner.');
+                $this->addError('tagId', 'Failed to connect to the RFID scanner.');
             }
         } catch (\Exception $e) {
-            $this->addError("tagId", 'RFID scanner is not running or the connection timed out.');
+            $this->addError('tagId', 'RFID scanner is not running or the connection timed out.');
         }
     }
 
@@ -84,6 +89,13 @@ class RegisterTagModalComponent extends Component
             'name' => $this->tagName,
             'rfid_tag' => $this->tagId,
         ]);
+        ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id' => Auth::guard('admin')->id(),
+            'action' => 'create',
+            'details' => 'Admin ' . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname .
+                ' created guest tag "' . $this->tagName . '" with RFID "' . $this->tagId . '".',
+        ]);
 
         $this->dispatch('close-register-tag-modal');
         $this->dispatch('tagRegistered'); // Notify GuestTagsModalComponent to refresh
@@ -93,9 +105,11 @@ class RegisterTagModalComponent extends Component
 
     public function updateTag()
     {
+
         $tag = GuestPass::find($this->editingTagId);
         if (!$tag) {
             $this->addError('tagId', 'Tag not found');
+
             return;
         }
 
@@ -108,10 +122,20 @@ class RegisterTagModalComponent extends Component
                 Rule::unique('guest_passes', 'rfid_tag')->ignore($tag->id),
             ],
         ]);
+        $oldName = $tag->name;
+        $oldRfid = $tag->rfid_tag;
 
         $tag->update([
             'name' => $this->tagName,
             'rfid_tag' => $this->tagId,
+        ]);
+        ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id' => Auth::guard('admin')->id(),
+            'action' => 'update',
+            'details' => 'Admin ' . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname .
+                ' updated guest tag "' . $oldName . '" (RFID: ' . $oldRfid . ') to "' . $this->tagName .
+                '" (RFID: ' . $this->tagId . ').',
         ]);
 
         $this->dispatch('close-register-tag-modal');

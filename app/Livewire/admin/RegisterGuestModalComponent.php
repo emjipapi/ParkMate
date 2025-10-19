@@ -6,7 +6,8 @@ use App\Models\User;
 use App\Models\Vehicle;
 use App\Models\GuestPass;
 use Livewire\Component;
-
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
 class RegisterGuestModalComponent extends Component
 {
     // User fields
@@ -118,22 +119,34 @@ class RegisterGuestModalComponent extends Component
                 'reason' => $this->reason,
                 'user_id' => $user->id,
             ]);
+            ActivityLog::create([
+    'actor_type' => 'admin',
+    'actor_id'   => Auth::guard('admin')->id(),
+    'action'     => 'create',
+    'details'    => 'Admin ' 
+        . Auth::guard('admin')->user()->firstname . ' ' 
+        . Auth::guard('admin')->user()->lastname 
+        . ' created guest "' 
+        . $this->firstname . ' ' . $this->lastname . '".',
+]);
+
+
 
             // Close modal and refresh
-$this->dispatch('guestRegistered');
-session()->flash('message', 'Guest registered successfully!');
-$this->resetForm();
+            $this->dispatch('guestRegistered');
+            session()->flash('message', 'Guest registered successfully!');
+            $this->resetForm();
 
-// Close and reopen the modal
-$this->js('
-    const modalEl = document.getElementById("registerGuestModal");
-    const modal = bootstrap.Modal.getInstance(modalEl);
-    if (modal) modal.hide();
-    setTimeout(() => {
-        const newModal = new bootstrap.Modal(modalEl);
-        newModal.show();
-    }, 500);
-');
+            // Close and reopen the modal
+            $this->js('
+                const modalEl = document.getElementById("registerGuestModal");
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+                setTimeout(() => {
+                    const newModal = new bootstrap.Modal(modalEl);
+                    newModal.show();
+                }, 500);
+            ');
 
         } catch (\Exception $e) {
             $this->addError('general', 'Error registering guest: ' . $e->getMessage());

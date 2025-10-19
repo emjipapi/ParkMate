@@ -4,6 +4,8 @@ namespace App\Livewire\Admin;
 
 use App\Models\GuestPass;
 use Livewire\Component;
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
 
 class GuestListModalComponent extends Component
 {
@@ -61,6 +63,14 @@ public function clearGuestInfo($guestPassId)
                 'user_id' => null,
                 'status' => 'available',
             ]);
+            ActivityLog::create([
+    'actor_type' => 'admin',
+    'actor_id'   => Auth::guard('admin')->id(),
+    'action'     => 'modify',
+    'details'    => 'Admin ' . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname .
+                    ' cleared guest information for user "' . $user->firstname . ' ' . $user->lastname .
+                    '" and freed guest pass "' . $guestPass->name . '".',
+]);
 
             // Refresh the guest list
             $this->loadGuests();

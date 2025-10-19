@@ -47,7 +47,7 @@
                                     <td>{{ $guest->current_location }}</td>
 
                                     <td>
-                                        <button class="btn btn-sm btn-info">Edit</button>
+                                        {{-- <button class="btn btn-sm btn-info">Edit</button> --}}
                                         <button type="button" 
                                                 wire:click="clearGuestInfo({{ $guest->id }})"
                                                 wire:confirm="Are you sure you want to clear this guest's information?"
