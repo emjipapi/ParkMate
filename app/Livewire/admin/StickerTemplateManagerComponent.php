@@ -8,6 +8,8 @@ use Livewire\WithFileUploads;
 use App\Models\StickerTemplate;
 use Intervention\Image\Laravel\Facades\Image;
 use Illuminate\Support\Facades\Storage;
+use App\Models\ActivityLog;
+use Illuminate\Support\Facades\Auth;
 
 class StickerTemplateManagerComponent extends Component
 {
@@ -115,6 +117,16 @@ public function loadElementConfig()
         $template = StickerTemplate::find($this->selectedTemplateId);
         if ($template) {
             $template->update(['element_config' => $this->elementConfig]);
+                    ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id'   => Auth::guard('admin')->id(),
+            'area_id'    => null, // set if relevant
+            'action'     => 'update',
+            'details'    => 'Admin ' 
+                . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
+                . ' updated element positions for sticker template "' . $template->name . '".',
+            'created_at' => now(),
+        ]);
             session()->flash('success', 'Element positions saved successfully!');
         }
     }
@@ -259,6 +271,16 @@ public function loadElementConfig()
                 'status' => 'active',
                 'element_config' => $this->getDefaultElementConfig()
             ]);
+                    ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id'   => Auth::guard('admin')->id(),
+            'area_id'    => null, // set if relevant
+            'action'     => 'create',
+            'details'    => 'Admin ' 
+                . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
+                . ' uploaded and created a new sticker template: "' . $template->name . '".',
+            'created_at' => now(),
+        ]);
 
             // Select the newly created template
             $this->selectedTemplateId = $template->id;
