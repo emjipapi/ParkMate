@@ -69,6 +69,7 @@
             <thead>
                 <tr>
                     <th>Reporter</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">User Type</th>
                     <th class="px-3 py-2 text-left text-sm font-semibold text-gray-700">Date</th>
                     <th>Area</th>
                     <th>License Plate</th>
@@ -90,6 +91,29 @@
                             {{ $violation->reporter->firstname ?? '' }}
                             {{ $violation->reporter->lastname ?? '' }}
                         </div>
+                    </td>
+                    {{-- Reporter Type --}}
+                    <td>
+                        @php
+                        $reporter = $violation->reporter;
+                        $type = 'Unknown';
+                        $badgeClass = 'bg-secondary text-white';
+
+                        if ($reporter instanceof \App\Models\User) {
+                        if (!empty($reporter->student_id)) {
+                        $type = 'Student';
+                        $badgeClass = 'bg-primary text-white'; // blue
+                        } elseif (!empty($reporter->employee_id)) {
+                        $type = 'Employee';
+                        $badgeClass = 'bg-success text-white'; // green
+                        }
+                        } elseif ($reporter instanceof \App\Models\Admin) {
+                        $type = 'Admin';
+                        $badgeClass = 'bg-info text-white'; // purple
+                        }
+                        @endphp
+
+                        <span class="badge rounded-pill {{ $badgeClass }}">{{ $type }}</span>
                     </td>
 
                     <!-- Date -->
@@ -261,6 +285,33 @@
                         <div>{{ $violation->reporter ? $violation->reporter->getKey() : 'N/A' }}</div>
                         <div class="small text-muted">
                             {{ $violation->reporter->firstname ?? '' }} {{ $violation->reporter->lastname ?? '' }}
+                        </div>
+                    </div>
+                </div>
+                                <!-- User Type -->
+                <div class="d-flex mb-2">
+                    <div class="fw-bold text-muted" style="min-width: 110px; flex-shrink: 0;">Reporter Type:</div>
+                    <div class="text-dark">
+                        <div class="fw-medium"> @php
+                            $reporter = $violation->reporter;
+                            $type = 'Unknown';
+                            $badgeClass = 'bg-secondary text-white';
+
+                            if ($reporter instanceof \App\Models\User) {
+                            if (!empty($reporter->student_id)) {
+                            $type = 'Student';
+                            $badgeClass = 'bg-primary text-white'; // blue
+                            } elseif (!empty($reporter->employee_id)) {
+                            $type = 'Employee';
+                            $badgeClass = 'bg-success text-white'; // green
+                            }
+                            } elseif ($reporter instanceof \App\Models\Admin) {
+                            $type = 'Admin';
+                            $badgeClass = 'bg-info text-white'; // purple
+                            }
+                            @endphp
+
+                            <span class="badge rounded-pill {{ $badgeClass }}">{{ $type }}</span>
                         </div>
                     </div>
                 </div>

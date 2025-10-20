@@ -144,6 +144,7 @@
             <thead class="bg-gray-100">
                 <tr>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Reporter</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">User Type</th>
                     <th class="px-3 py-2 text-left text-sm font-semibold text-gray-700">Date</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Area</th>
                     <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">License Plate</th>
@@ -165,6 +166,29 @@
                         <div class="text-gray-600">{{ $violation->reporter->firstname ?? '' }}
                             {{ $violation->reporter->lastname ?? '' }}
                         </div>
+                    </td>
+                                        {{-- Reporter Type --}}
+                    <td>
+                        @php
+                        $reporter = $violation->reporter;
+                        $type = 'Unknown';
+                        $badgeClass = 'bg-secondary text-white';
+
+                        if ($reporter instanceof \App\Models\User) {
+                        if (!empty($reporter->student_id)) {
+                        $type = 'Student';
+                        $badgeClass = 'bg-primary text-white'; // blue
+                        } elseif (!empty($reporter->employee_id)) {
+                        $type = 'Employee';
+                        $badgeClass = 'bg-success text-white'; // green
+                        }
+                        } elseif ($reporter instanceof \App\Models\Admin) {
+                        $type = 'Admin';
+                        $badgeClass = 'bg-info text-white'; // purple
+                        }
+                        @endphp
+
+                        <span class="badge rounded-pill {{ $badgeClass }}">{{ $type }}</span>
                     </td>
 
                     <!-- Date -->
@@ -326,6 +350,7 @@
                     </div>
                 </div>
 
+
                 {{-- status badge --}}
                 @php
                 $status = $violation->status ?? 'unknown';
@@ -345,6 +370,36 @@
                     </span>
                 </div>
             </header>
+
+            <div>
+        <div class="mt-3 small text-muted">Reporter Type:</div>
+        @php
+            $reporter = $violation->reporter;
+            $type = 'Unknown';
+            $badgeClass = 'bg-secondary text-white';
+
+            if ($reporter) {
+                // Check if it's an Admin model
+                if ($reporter instanceof \App\Models\Admin) {
+                    $type = 'Admin';
+                    $badgeClass = 'bg-info text-white';
+                }
+
+                // Check if it's a User model
+                elseif ($reporter instanceof \App\Models\User) {
+                    if (!is_null($reporter->student_id)) {
+                        $type = 'Student';
+                        $badgeClass = 'bg-primary text-white';
+                    } elseif (!is_null($reporter->employee_id)) {
+                        $type = 'Employee';
+                        $badgeClass = 'bg-success text-white';
+                    }
+                }
+            }
+        @endphp
+
+        <span class="badge rounded-pill {{ $badgeClass }}">{{ $type }}</span>
+    </div>
 
             <div class="mt-3 small text-muted">Date</div>
             <div class="small text-dark">
