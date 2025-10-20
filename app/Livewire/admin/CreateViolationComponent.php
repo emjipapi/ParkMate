@@ -188,15 +188,27 @@ public $violator_id = null;
 
     $violation = $admin->reportedViolations()->create($data);
 
-    ActivityLog::create([
-        'actor_type' => 'admin',
-        'actor_id'   => $admin->getKey(),
-        'area_id'    => $this->area_id,
-        'action'     => 'report',
-        'details'    => "Admin {$admin->firstname} created a {$status} violation report" 
-                         . (!empty($this->license_plate) ? " for plate {$this->license_plate}" : '') . ".",
-        'created_at' => now(),
-    ]);
+$area = ParkingArea::find($this->area_id);
+
+$licensePlate = !empty($this->license_plate)
+    ? strtoupper($this->license_plate)
+    : '(empty)';
+
+$areaName = $area
+    ? $area->name
+    : '(empty)';
+
+ActivityLog::create([
+    'actor_type' => 'admin',
+    'actor_id'   => $admin->getKey(),
+    'area_id'    => $this->area_id,
+    'action'     => 'report',
+    'details'    => "Admin {$admin->firstname} created a {$status} violation report "
+                  . "with license plate {$licensePlate} in area {$areaName}.",
+    'created_at' => now(),
+]);
+
+
 
     // **NEW: Handle approval side effects (send email job)**
     if ($status === 'approved' && $this->violator) {

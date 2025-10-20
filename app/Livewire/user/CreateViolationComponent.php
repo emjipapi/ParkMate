@@ -143,15 +143,27 @@ public function submitReport()
 
     $violation = $user->reportedViolations()->create($data);
 
-    $userName = trim(($user->firstname ?? '') . ' ' . ($user->lastname ?? ''));
-    ActivityLog::create([
-        'actor_type' => 'user',
-        'actor_id'   => $user->getKey(),
-        'area_id'    => $this->area_id,
-        'action'     => 'report',
-        'details'    => "User {$userName} submitted a violation report" . (!empty($this->license_plate) ? " for plate {$this->license_plate}" : '') . ".",
-        'created_at' => now(),
-    ]);
+$area = ParkingArea::find($this->area_id);
+
+$userName = trim(($user->firstname ?? '') . ' ' . ($user->lastname ?? ''));
+$licensePlate = !empty($this->license_plate)
+    ? strtoupper($this->license_plate)
+    : '(empty)';
+
+$areaName = $area
+    ? $area->name
+    : '(empty)';
+
+ActivityLog::create([
+    'actor_type' => 'user',
+    'actor_id'   => $user->getKey(),
+    'area_id'    => $this->area_id,
+    'action'     => 'report',
+    'details'    => "User {$userName} submitted a violation report "
+                  . "with license plate {$licensePlate} in area {$areaName}.",
+    'created_at' => now(),
+]);
+
 
     session()->flash('success', 'Report submitted successfully!');
     $this->resetFormInputs();
