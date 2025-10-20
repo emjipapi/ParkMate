@@ -469,24 +469,34 @@ $violationsQuery->when(trim($this->search ?? '') !== '', function ($q) {
 });
 
         // 🎛 Reporter Type Filter (student / employee)
-        $violationsQuery->when($this->reporterType === 'student', fn (Builder $q) =>
-            $q->whereHas('reporter', fn (Builder $u) =>
-                $u->whereNotNull('student_id')
-                  ->where('student_id', '<>', '')
-                  ->where('student_id', '<>', '0')
-            )
-        );
+$violationsQuery->when($this->reporterType === 'student', fn (Builder $q) =>
+    $q->whereHasMorph(
+        'reporter',
+        [User::class],
+        fn (Builder $u) => $u
+            ->whereNotNull('student_id')
+            ->where('student_id', '<>', '')
+            ->where('student_id', '<>', '0')
+    )
+);
 
-        $violationsQuery->when($this->reporterType === 'employee', fn (Builder $q) =>
-            $q->whereHas('reporter', fn (Builder $u) =>
-                $u->whereNotNull('employee_id')
-                  ->where('employee_id', '<>', '')
-                  ->where('employee_id', '<>', '0')
-                  ->where(function ($q) {
-                      $q->whereNull('student_id')->orWhere('student_id', '');
-                  })
-            )
-        );
+/* EMPLOYEE reporters -> reporters that are User and have employee_id (but not a student) */
+$violationsQuery->when($this->reporterType === 'employee', fn (Builder $q) =>
+    $q->whereHasMorph(
+        'reporter',
+        [User::class],
+        fn (Builder $u) => $u
+            ->whereNotNull('employee_id')
+            ->where('employee_id', '<>', '')
+            ->where('employee_id', '<>', '0')
+            ->where(function (Builder $sub) {
+                $sub->whereNull('student_id')->orWhere('student_id', '');
+            })
+    )
+);
+$violationsQuery->when($this->reporterType === 'admin', fn (Builder $q) =>
+    $q->whereHasMorph('reporter', [Admin::class], fn (Builder $a) => $a->whereNotNull('admin_id'))
+);
 
         // 📅 Date Range
         $violationsQuery->when($this->startDate, fn (Builder $q) =>
