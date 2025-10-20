@@ -167,14 +167,7 @@
                     <div class="col-md">
                         <label>RFID Tag 1</label>
                         <div class="input-group">
-                            <input type="text" wire:model="vehicles.{{ $index }}.rfid_tags.0" class="form-control" required>
-                            <button type="button" wire:click="scanRfid({{ $index }}, 0)" class="btn btn-primary"
-                                wire:loading.attr="disabled" wire:target="scanRfid">
-                                <span wire:loading.remove wire:target="scanRfid">Scan</span>
-                                <span wire:loading wire:target="scanRfid">
-                                    <i class="spinner-border spinner-border-sm me-1"></i>
-                                </span>
-                            </button>
+                            <input type="text" wire:model="vehicles.{{ $index }}.rfid_tags.0" class="form-control" maxlength="10">
                         </div>
                     </div>
                 </div>
@@ -198,14 +191,8 @@
                             <div class="input-group">
                                 <input type="text"
                                     wire:model="vehicles.{{ $index }}.rfid_tags.1"
-                                    class="form-control">
-                                <button type="button" wire:click="scanRfid({{ $index }}, 1)" class="btn btn-primary"
-                                    wire:loading.attr="disabled" wire:target="scanRfid">
-                                    <span wire:loading.remove wire:target="scanRfid">Scan</span>
-                                    <span wire:loading wire:target="scanRfid">
-                                        <i class="spinner-border spinner-border-sm me-1"></i>
-                                    </span>
-                                </button>
+                                    class="form-control"
+                                    maxlength="10">
                                 <button type="button" wire:click="removeRfidTag({{ $index }}, 1)" class="btn btn-outline-danger">
                                     &times;
                                 </button>
@@ -237,14 +224,8 @@
                             <div class="input-group">
                                 <input type="text"
                                     wire:model="vehicles.{{ $index }}.rfid_tags.2"
-                                    class="form-control">
-                                <button type="button" wire:click="scanRfid({{ $index }}, 2)" class="btn btn-primary"
-                                    wire:loading.attr="disabled" wire:target="scanRfid">
-                                    <span wire:loading.remove wire:target="scanRfid">Scan</span>
-                                    <span wire:loading wire:target="scanRfid">
-                                        <i class="spinner-border spinner-border-sm me-1"></i>
-                                    </span>
-                                </button>
+                                    class="form-control"
+                                    maxlength="10">
                                 <button type="button" wire:click="removeRfidTag({{ $index }}, 2)" class="btn btn-outline-danger">
                                     &times;
                                 </button>
