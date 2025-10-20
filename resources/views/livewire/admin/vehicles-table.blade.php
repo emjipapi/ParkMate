@@ -8,7 +8,7 @@
             <span>Show</span>
             <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
                 @foreach($perPageOptions as $option)
-                    <option value="{{ $option }}">{{ $option }}</option>
+                <option value="{{ $option }}">{{ $option }}</option>
                 @endforeach
             </select>
             <span>entries</span>
@@ -33,48 +33,59 @@
             </thead>
             <tbody>
                 @forelse ($vehicles as $vehicle)
-                    <tr>
-                        <td>{{ $vehicle->id }}</td>
-                        <td>{{ $vehicle->serial_number }}</td>
-                        <td>
-                            @if ($vehicle->user)
-                                {{ $vehicle->user->firstname }} {{ $vehicle->user->lastname }}
-                                <br>
-                                <small class="text-muted">ID: {{ $vehicle->user->student_id ?? $vehicle->user->employee_id }}</small>
-                            @else
-                                <span class="text-muted">—</span>
-                            @endif
-                        </td>
-                        <td>{{ $vehicle->rfid_tag }}</td>
-                        <td>{{ $vehicle->type }}</td>
-                        <td>{{ $vehicle->body_type_model }}</td>
-                        <td>{{ $vehicle->or_number }}</td>
-                        <td>{{ $vehicle->cr_number }}</td>
-                        <td>{{ $vehicle->license_plate }}</td>
-                        <td>
-                            <!-- Edit Icon -->
-                        
-@canaccess("edit_user")
-    <a href="{{ route('users.edit', $vehicle->user_id) }}#vehicle-{{ $vehicle->id }}" 
-       class="text-primary text-decoration-none">
-        <i class="bi bi-pencil-square text-secondary"></i>
-    </a>
-@else
-    <a href="javascript:void(0)" 
-       class="text-muted text-decoration-none" 
-       data-bs-toggle="tooltip" 
-       title="You don’t have permission to edit users.">
-        <i class="bi bi-pencil-square text-secondary"></i>
-    </a>
-@endcanaccess
+                <tr>
+                    <td>{{ $vehicle->id }}</td>
+                    <td>{{ $vehicle->serial_number }}</td>
+                    <td>
+                        @if ($vehicle->user)
+                        {{ $vehicle->user->firstname }} {{ $vehicle->user->lastname }}
+                        <br>
+                        <small class="text-muted">ID: {{ $vehicle->user->student_id ?? $vehicle->user->employee_id
+                            }}</small>
+                        @else
+                        <span class="text-muted">—</span>
+                        @endif
+                    </td>
+                    <td>
+                    <td>
+                        @php
+                        $tags = json_decode($vehicle->rfid_tag, true);
+
+                        // If JSON decoding fails, just wrap the raw string in an array
+                        if (json_last_error() !== JSON_ERROR_NONE || !is_array($tags)) {
+                        $tags = [$vehicle->rfid_tag];
+                        }
+                        @endphp
+
+                        {{ implode(', ', array_filter($tags)) }}
+                    </td>
+                    <td>{{ $vehicle->type }}</td>
+                    <td>{{ $vehicle->body_type_model }}</td>
+                    <td>{{ $vehicle->or_number }}</td>
+                    <td>{{ $vehicle->cr_number }}</td>
+                    <td>{{ $vehicle->license_plate }}</td>
+                    <td>
+                        <!-- Edit Icon -->
+
+                        @canaccess("edit_user")
+                        <a href="{{ route('users.edit', $vehicle->user_id) }}#vehicle-{{ $vehicle->id }}"
+                            class="text-primary text-decoration-none">
+                            <i class="bi bi-pencil-square text-secondary"></i>
+                        </a>
+                        @else
+                        <a href="javascript:void(0)" class="text-muted text-decoration-none" data-bs-toggle="tooltip"
+                            title="You don’t have permission to edit users.">
+                            <i class="bi bi-pencil-square text-secondary"></i>
+                        </a>
+                        @endcanaccess
 
 
-                        </td>
-                    </tr>
+                    </td>
+                </tr>
                 @empty
-                    <tr>
-                        <td colspan="10" class="text-center">No vehicles found.</td>
-                    </tr>
+                <tr>
+                    <td colspan="10" class="text-center">No vehicles found.</td>
+                </tr>
                 @endforelse
             </tbody>
         </table>
@@ -82,4 +93,3 @@
 
     {{ $vehicles->links() }}
 </div>
-
