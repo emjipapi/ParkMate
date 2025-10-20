@@ -37,7 +37,7 @@ class PendingReportsComponent extends Component
 
     public $perPage = 15; // default
     public $perPageOptions = [15, 25, 50, 100];
-    public $pageName = 'page';
+    public $pageName = 'pendingPage';
     // modal / message fields
 public $selectedViolationId = null;
 

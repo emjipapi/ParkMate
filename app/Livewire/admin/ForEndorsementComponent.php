@@ -26,6 +26,7 @@ public $sortOrder = 'desc';
     public $vehicles = [];
     public $users = [];
     protected $paginationTheme = 'bootstrap';
+        public $pageName = 'endorsementPage';
 
     // Search properties for dynamic loading
     public $vehicleSearch = '';
@@ -249,12 +250,11 @@ $violationsQuery->when(trim($this->search ?? '') !== '', function ($q) {
     // Ordering + pagination
     $violations = $violationsQuery
         ->orderBy('created_at', ($this->sortOrder ?? 'desc') === 'asc' ? 'asc' : 'desc')
-        ->paginate($this->perPage);
-
+        ->paginate(1, ['*'], $this->pageName);
     // Process violations for display
-    $violations = $violationsQuery
-    ->orderBy('created_at', ($this->sortOrder ?? 'desc') === 'asc' ? 'asc' : 'desc')
-    ->paginate($this->perPage);
+    // $violations = $violationsQuery
+    // ->orderBy('created_at', ($this->sortOrder ?? 'desc') === 'asc' ? 'asc' : 'desc')
+    // ->paginate($this->perPage);
 
 // --- DEBUGGING + DEFENSIVE FALLBACK (paste this block) ---
 

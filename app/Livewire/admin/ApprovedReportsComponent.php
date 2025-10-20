@@ -42,7 +42,7 @@ class ApprovedReportsComponent extends Component
 
     public $perPageOptions = [15, 25, 50, 100];
 
-    public $pageName = 'page';
+    public $pageName = 'approvedPage';
 
     public $compressedProofs = []; // store compressed versions per violation
     public $proofs = [];
