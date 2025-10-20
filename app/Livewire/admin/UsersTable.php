@@ -12,6 +12,7 @@ class UsersTable extends Component
 {
     use WithPagination;
     protected string $paginationTheme = 'bootstrap';
+    protected $pageName = 'usersPage';
 
     // search + filters
     public $search = '';
@@ -155,7 +156,7 @@ public function render()
           })
     );
 
-    $users = $query->paginate($this->perPage);
+    $users = $query->paginate($this->perPage, ['*'], $this->pageName);
 
     return view('livewire.admin.users-table', [
         'users' => $users,

@@ -11,6 +11,7 @@ class AdminsTable extends Component
 {
     use WithPagination;
     protected string $paginationTheme = 'bootstrap';
+    protected $pageName = 'adminsPage';
 
     public $search = '';
 
@@ -42,7 +43,7 @@ public function updatedPerPage()
             });
         }
 
-        $admins = $query->paginate($this->perPage);
+        $admins = $query->paginate($this->perPage, ['*'], $this->pageName);
 
         return view('livewire.admin.admins-table', [
             'admins' => $admins,

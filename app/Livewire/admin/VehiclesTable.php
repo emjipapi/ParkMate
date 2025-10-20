@@ -12,6 +12,7 @@ class VehiclesTable extends Component
     use WithPagination;
 
     protected string $paginationTheme = 'bootstrap';
+    protected $pageName = 'vehiclesPage';
 
     public $search = '';
     public $perPage = 15;
@@ -50,7 +51,7 @@ class VehiclesTable extends Component
             });
         }
 
-        $vehicles = $query->paginate($this->perPage);
+        $vehicles = $query->paginate($this->perPage, ['*'], $this->pageName);
 
         return view('livewire.admin.vehicles-table', [
             'vehicles' => $vehicles,
