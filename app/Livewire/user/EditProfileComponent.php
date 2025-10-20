@@ -206,7 +206,12 @@ class EditProfileComponent extends Component
 
         // load vehicles for this user directly from DB (avoid any relation caching / guard differences)
         $loaded = [];
-        $userVehicles = Vehicle::where('user_id', $user->id)->get();
+        // initialize source user variables (used if we need to fallback to another user record)
+        /** @var int $sourceUserId The user id we actually pull vehicles from (may fallback) */
+        $sourceUserId = intval($user->id);
+        /** @var User $sourceUser The user record we used as the source for profile/vehicles */
+        $sourceUser = $user;
+        $userVehicles = Vehicle::where('user_id', $sourceUserId)->get();
         // If no vehicles found for the exact user_id, try a fallback lookup by employee_id or student_id.
         // This handles cases where vehicles were imported or associated with a different user row but share the same employee/student identifier.
         if ($userVehicles->isEmpty()) {
@@ -218,19 +223,10 @@ class EditProfileComponent extends Component
                 if ($altUser) {
                     \Log::info('EditProfileComponent: no vehicles for user_id='.$user->id.'; falling back to user_id='.$altUser->id.' via employee_id='.$user->employee_id);
                     $userVehicles = Vehicle::where('user_id', $altUser->id)->get();
+                    $sourceUserId = $altUser->id;
+                    $sourceUser = $altUser;
                     // also pull profile fields from alt user if main user appears empty
-                    if (empty($user->address) && !empty($altUser->address)) {
-                        $user->address = $altUser->address;
-                    }
-                    if (empty($user->contact_number) && !empty($altUser->contact_number)) {
-                        $user->contact_number = $altUser->contact_number;
-                    }
-                    if (empty($user->license_number) && !empty($altUser->license_number)) {
-                        $user->license_number = $altUser->license_number;
-                    }
-                    if (empty($user->expiration_date) && !empty($altUser->expiration_date)) {
-                        $user->expiration_date = $altUser->expiration_date;
-                    }
+                    // We'll copy these into the component props after loading $loaded below.
                 }
             }
 
@@ -243,19 +239,9 @@ class EditProfileComponent extends Component
                 if ($altUser) {
                     \Log::info('EditProfileComponent: no vehicles for user_id='.$user->id.'; falling back to user_id='.$altUser->id.' via student_id='.$user->student_id);
                     $userVehicles = Vehicle::where('user_id', $altUser->id)->get();
-
-                    if (empty($user->address) && !empty($altUser->address)) {
-                        $user->address = $altUser->address;
-                    }
-                    if (empty($user->contact_number) && !empty($altUser->contact_number)) {
-                        $user->contact_number = $altUser->contact_number;
-                    }
-                    if (empty($user->license_number) && !empty($altUser->license_number)) {
-                        $user->license_number = $altUser->license_number;
-                    }
-                    if (empty($user->expiration_date) && !empty($altUser->expiration_date)) {
-                        $user->expiration_date = $altUser->expiration_date;
-                    }
+                    $sourceUserId = $altUser->id;
+                    $sourceUser = $altUser;
+                    // We'll copy these into the component props after loading $loaded below.
                 }
             }
         }
@@ -297,9 +283,26 @@ class EditProfileComponent extends Component
 
         $this->vehicles = count($loaded) ? $loaded : [$this->defaultVehicle()];
 
-    // fill debug raw records
-    $this->rawUser = User::find($user->id)?->toArray();
-    $this->rawVehicles = Vehicle::where('user_id', $user->id)->get()->toArray();
+        // If we used a fallback source user, copy any missing profile fields into the component props
+        if (isset($sourceUser) && $sourceUser instanceof User) {
+            // Only overwrite component props when the source has non-empty values
+            if (!empty($sourceUser->address)) {
+                $this->address = $sourceUser->address;
+            }
+            if (!empty($sourceUser->contact_number)) {
+                $this->contact_number = $sourceUser->contact_number;
+            }
+            if (!empty($sourceUser->license_number)) {
+                $this->license_number = $sourceUser->license_number;
+            }
+            if (!empty($sourceUser->expiration_date)) {
+                $this->expiration_date = $sourceUser->expiration_date;
+            }
+        }
+
+        // fill debug raw records using the actual source user id we pulled vehicles from
+        $this->rawUser = User::find($sourceUserId)?->toArray();
+        $this->rawVehicles = Vehicle::where('user_id', $sourceUserId)->get()->toArray();
 
     }
 
