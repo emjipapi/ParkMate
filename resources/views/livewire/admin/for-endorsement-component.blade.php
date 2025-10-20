@@ -33,6 +33,7 @@
                 <option value="">All Reporters</option>
                 <option value="student">Students</option>
                 <option value="employee">Employees</option>
+                <option value="admin">Admins</option>
             </select>
 
             {{-- Date Range --}}

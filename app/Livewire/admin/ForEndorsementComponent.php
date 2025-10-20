@@ -10,9 +10,9 @@ use App\Models\Admin;
 use App\Models\User; // add any other reporter models you use
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
-
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Eloquent\Builder;
 class ForEndorsementComponent extends Component
 {
     use WithPagination;
@@ -219,25 +219,36 @@ $violationsQuery->when(trim($this->search ?? '') !== '', function ($q) {
 });
 
 
-    // Reporter type filters (student / employee)
-    $violationsQuery->when(($this->reporterType ?? '') === 'student', fn ($q) =>
-        $q->whereHas('reporter', fn ($u) =>
-            $u->whereNotNull('student_id')
-              ->where('student_id', '<>', '')
-              ->where('student_id', '<>', '0')
-        )
-    );
+// student reporters
+$violationsQuery->when($this->reporterType === 'student', fn (Builder $q) =>
+    $q->whereHasMorph(
+        'reporter',
+        [User::class],
+        fn (Builder $u) => $u
+            ->whereNotNull('student_id')
+            ->where('student_id', '<>', '')
+            ->where('student_id', '<>', '0')
+    )
+);
 
-    $violationsQuery->when(($this->reporterType ?? '') === 'employee', fn ($q) =>
-        $q->whereHas('reporter', fn ($u) =>
-            $u->whereNotNull('employee_id')
-              ->where('employee_id', '<>', '')
-              ->where('employee_id', '<>', '0')
-              ->where(function ($q) {
-                  $q->whereNull('student_id')->orWhere('student_id', '');
-              })
-        )
-    );
+// EMPLOYEE reporters
+$violationsQuery->when($this->reporterType === 'employee', fn (Builder $q) =>
+    $q->whereHasMorph(
+        'reporter',
+        [User::class],
+        fn (Builder $u) => $u
+            ->whereNotNull('employee_id')
+            ->where('employee_id', '<>', '')
+            ->where('employee_id', '<>', '0')
+            ->where(function (Builder $sub) {
+                $sub->whereNull('student_id')->orWhere('student_id', '');
+            })
+    )
+);
+// Admin reporters
+$violationsQuery->when($this->reporterType === 'admin', fn (Builder $q) =>
+    $q->whereHasMorph('reporter', [Admin::class], fn (Builder $a) => $a->whereNotNull('admin_id'))
+);
 
     // Date range filters
     $violationsQuery->when($this->startDate ?? null, fn ($q) =>
