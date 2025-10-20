@@ -143,8 +143,22 @@
                                     <div class="col-md-8">{{ $vehicle->license_plate }}</div>
                                 </div>
                                 <div class="row mb-1">
-                                    <div class="col-md-4"><strong>RFID:</strong></div>
-                                    <div class="col-md-8">{{ $vehicle->rfid_tag }}</div>
+                                    <div class="col-md-4"><strong>RFID Tag(s):</strong></div>
+                                    <div class="col-md-8">
+                                        @php
+                                        // Decode JSON if necessary
+                                        $tags = is_array($vehicle->rfid_tag) ? $vehicle->rfid_tag :
+                                        json_decode($vehicle->rfid_tag, true);
+                                        @endphp
+
+                                        @if(!empty($tags) && is_array($tags))
+                                        @foreach($tags as $tag)
+                                        <span class="badge bg-info text-dark me-1">{{ $tag }}</span>
+                                        @endforeach
+                                        @else
+                                        <span class="text-muted">—</span>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="row mb-1">
                                     <div class="col-md-4"><strong>OR No.:</strong></div>
@@ -175,33 +189,23 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 
                     {{-- only show Edit when user is loaded --}}
-@if($user)
-    @canaccess("edit_user")
-        <a href="{{ route('users.edit', $user->id) }}" 
-           class="btn btn-primary" 
-           target="_blank">
-            Edit
-        </a>
-    @else
-        <a href="javascript:void(0)" 
-           class="btn btn-secondary disabled" 
-           tabindex="-1" 
-           aria-disabled="true" 
-           data-bs-toggle="tooltip" 
-           title="You don’t have permission to edit users.">
-            Edit
-        </a>
-    @endcanaccess
-@else
-    <a href="javascript:void(0)" 
-       class="btn btn-secondary disabled" 
-       tabindex="-1" 
-       aria-disabled="true" 
-       data-bs-toggle="tooltip" 
-       title="No user found.">
-        Edit
-    </a>
-@endif
+                    @if($user)
+                    @canaccess("edit_user")
+                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-primary" target="_blank">
+                        Edit
+                    </a>
+                    @else
+                    <a href="javascript:void(0)" class="btn btn-secondary disabled" tabindex="-1" aria-disabled="true"
+                        data-bs-toggle="tooltip" title="You don’t have permission to edit users.">
+                        Edit
+                    </a>
+                    @endcanaccess
+                    @else
+                    <a href="javascript:void(0)" class="btn btn-secondary disabled" tabindex="-1" aria-disabled="true"
+                        data-bs-toggle="tooltip" title="No user found.">
+                        Edit
+                    </a>
+                    @endif
 
                 </div>
             </div>
