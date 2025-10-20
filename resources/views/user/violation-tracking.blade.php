@@ -324,7 +324,7 @@
         <div class="btn-wrapper" href='/user-parking-slots' wire:navigate>
             <button class="btn">Parking Slots</button>
         </div>
-        <div class="btn-wrapper" href='/user-settings' wire:navigate>
+        <div class="btn-wrapper" href='/user-violation-tracking' wire:navigate>
             <button class="btn active">Violation Tracking</button>
         </div>
         <div class="btn-wrapper" href='/user-settings' wire:navigate>
@@ -350,8 +350,8 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Ano ilalagay</h3>
-                <h6 class="mb-0">ko otid</h6>
+                <h3 class="mb-0 me-3">Manage</h3>
+                <h6 class="mb-0">Reports</h6>
             </div>
             <span class="text-muted">Home > Violation Tracking</span>
         </div>

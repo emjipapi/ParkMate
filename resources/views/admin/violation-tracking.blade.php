@@ -567,8 +567,8 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Ano ilalagay ko</h3>
-                <h6 class="mb-0">otid</h6>
+                <h3 class="mb-0 me-3">Manage</h3>
+                <h6 class="mb-0">Reports</h6>
             </div>
             <span class="text-muted">Home > Violation Tracking</span>
         </div>

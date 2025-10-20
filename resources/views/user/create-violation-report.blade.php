@@ -346,8 +346,8 @@
     <div class="content">
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
-                <h3 class="mb-0 me-3">Ano ilalagay</h3>
-                <h6 class="mb-0">ko otid</h6>
+                <h3 class="mb-0 me-3">Create</h3>
+                <h6 class="mb-0">Report</h6>
             </div>
             <span class="text-muted">Home > Violation Tracking > Create Report</span>
         </div>
