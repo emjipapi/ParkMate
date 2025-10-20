@@ -133,12 +133,28 @@ class UserFormEdit extends Component
             'uid' => (string) Str::uuid(),
             'serial_number' => '',
             'type' => 'motorcycle',
-            'rfid_tag' => '',
+            'rfid_tags' => [''],
             'license_plate' => '',
             'body_type_model' => '',
             'or_number' => '',
             'cr_number' => '',
         ];
+    }
+
+    protected function compactRfidTags(?array $rawTags): array
+    {
+        if (empty($rawTags) || !is_array($rawTags)) {
+            return [];
+        }
+
+        // Trim each tag and remove empties
+        $clean = array_values(array_filter(array_map(function ($t) {
+            return is_string($t) ? trim($t) : null;
+        }, $rawTags), function ($v) {
+            return $v !== null && $v !== '';
+        }));
+
+        return $clean;
     }
 
     public $programToDept = [];
@@ -225,7 +241,9 @@ class UserFormEdit extends Component
                 'uid' => (string) Str::uuid(),
                 'serial_number' => $serialNumber,
                 'type' => $vehicle->type,
-                'rfid_tag' => $vehicle->rfid_tag,
+                'rfid_tags' => is_string($vehicle->rfid_tag) ? 
+                    json_decode($vehicle->rfid_tag, true) ?: [$vehicle->rfid_tag] : 
+                    [$vehicle->rfid_tag],
                 'license_plate' => $vehicle->license_plate,
                 'body_type_model' => $vehicle->body_type_model,
                 'or_number' => $vehicle->or_number,
@@ -344,13 +362,8 @@ class UserFormEdit extends Component
             'expiration_date' => 'required|date|after:today',
             'profile_picture' => 'nullable|image|max:5120', // 5 MB
             'vehicles.*.type' => 'required|in:car,motorcycle',
-            'vehicles.*.rfid_tag' => [
-                'required',
-                'string',
-                'max:20',
-                'distinct',
-                Rule::unique('vehicles', 'rfid_tag')->ignore($this->userId, 'user_id'),
-            ],
+            'vehicles.*.rfid_tags' => 'array',
+            'vehicles.*.rfid_tags.*' => 'nullable|string|max:20',
             'vehicles.*.license_plate' => 'nullable|string|max:20',
             'vehicles.*.body_type_model' => 'nullable|string|max:30',
             'vehicles.*.or_number' => 'nullable|string|max:30',
@@ -418,6 +431,41 @@ class UserFormEdit extends Component
         array_splice($this->vehicles, $index, 1);
     }
 
+    public function addRfidTag(int $vehicleIndex)
+    {
+        // ensure vehicles array exists and has the rfid_tags array
+        if (!isset($this->vehicles[$vehicleIndex])) {
+            return;
+        }
+
+        if (!isset($this->vehicles[$vehicleIndex]['rfid_tags']) || !is_array($this->vehicles[$vehicleIndex]['rfid_tags'])) {
+            $this->vehicles[$vehicleIndex]['rfid_tags'] = [''];
+            return;
+        }
+
+        // cap at 3 tags
+        if (count($this->vehicles[$vehicleIndex]['rfid_tags']) >= 3) {
+            return;
+        }
+
+        $this->vehicles[$vehicleIndex]['rfid_tags'][] = '';
+    }
+
+    public function removeRfidTag(int $vehicleIndex, int $tagIndex)
+    {
+        if (!isset($this->vehicles[$vehicleIndex]['rfid_tags'][$tagIndex])) {
+            return;
+        }
+
+        // remove the tag and reindex
+        array_splice($this->vehicles[$vehicleIndex]['rfid_tags'], $tagIndex, 1);
+
+        // ensure there's always at least an empty slot for tag 0 (if you want that)
+        if (empty($this->vehicles[$vehicleIndex]['rfid_tags'])) {
+            $this->vehicles[$vehicleIndex]['rfid_tags'] = [''];
+        }
+    }
+
     public function update()
     {
         // If we created a compressed tmp image, temporarily clear $this->profile_picture
@@ -427,17 +475,19 @@ class UserFormEdit extends Component
             $this->profile_picture = null;
         }
 
+        // NOTE: RFID validation will be performed once further down (after serial checks)
+
         // require either student_id or employee_id
         if (empty($this->student_id) && empty($this->employee_id)) {
             $this->addError('id', 'Please provide either Student ID or Employee ID.');
-
             return;
         }
         if (! empty($this->student_id) && ! empty($this->employee_id)) {
             $this->addError('id', 'Please provide only one: Student ID or Employee ID, not both.');
-
             return;
         }
+
+        // (removed duplicate validation block - single unified validation will run after serial checks)
 
         // Validate incoming raw input first
         $data = $this->validate();
@@ -479,6 +529,45 @@ class UserFormEdit extends Component
         if (! empty($existing)) {
             $this->addError('vehicles', 'One or more vehicle serial numbers already exist: '.implode(', ', $existing));
 
+            return;
+        }
+
+        // --- RFID tags validation (single unified block, same behavior as UserFormCreate) ---
+        $allTags = [];
+        foreach ($this->vehicles as $i => $veh) {
+            $tags = $this->compactRfidTags($veh['rfid_tags'] ?? []);
+            if (count($tags) === 0) {
+                $this->addError("vehicles.$i.rfid_tags.0", 'At least one RFID tag is required for each vehicle.');
+                return;
+            }
+            $allTags = array_merge($allTags, $tags);
+        }
+
+        // check duplicates within submission
+        if (count($allTags) !== count(array_unique($allTags))) {
+            $this->addError('vehicles', 'Duplicate RFID tag values found in your submitted vehicles.');
+            return;
+        }
+
+        // check duplicates in DB (handle JSON and plain strings)
+        $duplicateTags = [];
+
+        foreach ($allTags as $tag) {
+            $exists = Vehicle::where(function ($query) use ($tag) {
+                $query->where('rfid_tag', $tag)
+                      ->orWhere('rfid_tag', 'like', '%"' . $tag . '"%');
+            })->where('user_id', '!=', $this->userId)->exists();
+
+            if ($exists) {
+                $duplicateTags[] = $tag;
+            }
+        }
+
+        if (!empty($duplicateTags)) {
+            $this->addError(
+                'vehicles',
+                'The following RFID tag(s) already exist in the database: ' . implode(', ', $duplicateTags)
+            );
             return;
         }
 
@@ -540,12 +629,16 @@ class UserFormEdit extends Component
             // Delete vehicles removed from the form
             $user->vehicles()->whereNotIn('id', $incomingIds)->delete();
 
+            // (RFID validation was already performed above)
+
             // Update or create vehicles
             foreach ($this->vehicles as $idx => $vehicle) {
+                $tags = array_values(array_filter($vehicle['rfid_tags'] ?? [], fn($t) => !empty($t)));
+                
                 $vehicleData = [
                     'type' => $vehicle['type'],
                     'serial_number' => $normalizedSerials[$idx] ?? null,
-                    'rfid_tag' => $vehicle['rfid_tag'],
+                    'rfid_tag' => json_encode($tags),
                     'license_plate' => $vehicle['license_plate'] ?? null,
                     'body_type_model' => $vehicle['body_type_model'] ?? null,
                     'or_number' => $vehicle['or_number'] ?? null,
