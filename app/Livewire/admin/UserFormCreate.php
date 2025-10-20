@@ -131,7 +131,7 @@ class UserFormCreate extends Component
             'uid' => (string) Str::uuid(),
             'serial_number' => '',
             'type' => 'motorcycle',
-            'rfid_tag' => '',
+            'rfid_tags' => [''],
             'license_plate' => '',
             'body_type_model' => '',
             'or_number' => '',
@@ -250,15 +250,19 @@ class UserFormCreate extends Component
                 $data = $response->json();
 
                 if ($data['success'] && isset($data['rfid_tag'])) {
-                    $this->vehicles[$index]['rfid_tag'] = $data['rfid_tag'];
+                    // ensure rfid_tags array exists
+                    if (!isset($this->vehicles[$index]['rfid_tags']) || !is_array($this->vehicles[$index]['rfid_tags'])) {
+                        $this->vehicles[$index]['rfid_tags'] = [''];
+                    }
+                    $this->vehicles[$index]['rfid_tags'][0] = $data['rfid_tag'];
                 } else {
-                    $this->addError("vehicles.$index.rfid_tag", $data['error'] ?? 'No RFID scan received');
+                    $this->addError("vehicles.$index.rfid_tags.0", $data['error'] ?? 'No RFID scan received');
                 }
             } else {
-                $this->addError("vehicles.$index.rfid_tag", 'Failed to connect to RFID scanner.');
+                $this->addError("vehicles.$index.rfid_tags.0", 'Failed to connect to RFID scanner.');
             }
         } catch (\Exception $e) {
-            $this->addError("vehicles.$index.rfid_tag", 'RFID scanner not running or timeout.');
+            $this->addError("vehicles.$index.rfid_tags.0", 'RFID scanner not running or timeout.');
         }
     }
 
@@ -581,8 +585,6 @@ if (!empty($duplicateTags)) {
 
         if (!isset($this->vehicles[$vehicleIndex]['rfid_tags']) || !is_array($this->vehicles[$vehicleIndex]['rfid_tags'])) {
             $this->vehicles[$vehicleIndex]['rfid_tags'] = [''];
-
-            return;
         }
 
         // cap at 3 tags
