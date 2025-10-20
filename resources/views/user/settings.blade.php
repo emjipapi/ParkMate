@@ -280,7 +280,9 @@
             </div>
             <span class="text-muted">Home > Settings</span>
         </div>
-
+        <div class="square-box">
+            <livewire:user.edit-profile-component />
+        </div>
     </div>
     <!-- Bottom Bar -->
     <div class="bottom-bar">
