@@ -62,4 +62,10 @@
     </div>
 </div>
 
+<script>
+    window.addEventListener('clear-query-string', () => {
+        const cleanUrl = window.location.origin + window.location.pathname;
+        window.history.replaceState({}, '', cleanUrl);
+    });
+</script>
 

@@ -38,6 +38,7 @@ class ActivityLogComponent extends Component
         // 🔔 tell child components to reset filters
         $this->resetPage();
         $this->dispatch('resetFilters');
+        $this->dispatch('clear-query-string');
     }
 
     public function render()
