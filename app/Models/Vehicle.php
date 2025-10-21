@@ -22,6 +22,7 @@ class Vehicle extends Model
     ];
 
     protected $casts = [
+        'rfid_tag' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -47,9 +48,10 @@ class Vehicle extends Model
      */
     public function scopeByRfidTag($query, $rfidTag)
     {
-        return $query->where('rfid_tag', $rfidTag);
+        return $query->where('rfid_tag', 'like', '%"'.$rfidTag.'"%');
     }
-        public function violations()
+
+    public function violations()
     {
         return $this->hasMany(Violation::class, 'license_plate', 'license_plate');
     }
