@@ -16,6 +16,7 @@ use Illuminate\Validation\Rule;
 use Intervention\Image\Laravel\Facades\Image;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use App\Jobs\SendOtpJob;
 
 class EditProfileComponent extends Component
 {
@@ -59,17 +60,56 @@ class EditProfileComponent extends Component
 public $email;
 public $originalEmail; // store the mounted email
 public $otps = [];
-public $isDisabled = false;
+public $passwordConfirm;
+public function updatedPassword($value)
+{
+    $this->validatePassword($value);
+}
+
+private function validatePassword($password)
+{
+    if (empty($password)) {
+        $this->resetValidation('password');
+        return;
+    }
+
+    // Check if at least 6 characters AND has at least one number
+    if (strlen($password) < 6 || !preg_match('/\d/', $password)) {
+        $this->addError('password', 'Password must be at least 6 characters and contain at least one number.');
+        return;
+    }
+
+    // Valid password
+    $this->resetValidation('password');
+}
+
+public function isPasswordValid()
+{
+    if (empty($this->password)) {
+        return false;
+    }
+    return strlen($this->password) >= 6 && preg_match('/\d/', $this->password);
+}
 
 
 public function getOtp()
 {
     if ($this->email === $this->originalEmail) {
-        $this->addError('email', 'Email has not changed. No need to request OTP.');
+        $this->addError('email', 'No changes detected in your email. Update your email address to request a new OTP.');
         $this->dispatch('validationFailed');
         return;
     }
 
+    // Generate a 6-digit OTP
+    $otp = rand(100000, 999999);
+
+    // Dispatch the job to the queue
+    SendOtpJob::dispatch($this->email, $otp);
+
+    // Store OTP temporarily (you might want to use cache with expiration)
+    cache()->put('otp_' . $this->email, $otp, now()->addMinutes(10));
+
+    // Clear previous OTPs and add a single OTP input field
     $this->otps = [];
     $this->otps[] = '';
 }
@@ -419,8 +459,14 @@ foreach ($userVehicles as $vehicle) {
             'student_id' => 'nullable|string|max:10',
             'employee_id' => 'nullable|string|max:15',
             // 'serial_number' => 'required|string|min:5|max:6|unique:users,serial_number',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6',
+        'email' => [
+            'required',
+            'email',
+            Rule::unique('users', 'email')->ignore(Auth::user()->id),
+        ],
+                    'password' => 'nullable|string|min:6',  // Change to nullable since it's optional
+        'passwordConfirm' => 'nullable|string|min:6',
+        'otps.0' => 'nullable|string',
             'firstname' => 'required|string|max:50',
             'middlename' => 'nullable|string|max:50',
             'lastname' => 'required|string|max:50',
@@ -438,12 +484,12 @@ foreach ($userVehicles as $vehicle) {
             'vehicles.*.body_type_model' => 'nullable|string|max:30',
             'vehicles.*.or_number' => 'nullable|string|max:30',
             'vehicles.*.cr_number' => 'nullable|string|max:30',
-            'vehicles.*.serial_number' => [
-                'required',
-                'regex:/^\d{1,6}$/', // only digits, max length 6
-                'distinct',
-                Rule::unique('vehicles', 'serial_number'),
-            ],
+            // 'vehicles.*.serial_number' => [
+            //     'required',
+            //     'regex:/^\d{1,6}$/', // only digits, max length 6
+            //     'distinct',
+            //     Rule::unique('vehicles', 'serial_number'),
+            // ],
 
         ];
 
@@ -455,8 +501,8 @@ foreach ($userVehicles as $vehicle) {
             $rules['year_section'] = 'nullable|string|max:2';
         } else {
             // students — make department and program required
-            $rules['program'] = 'required|string|max:50';
-            $rules['department'] = 'required|string|max:50';
+            // $rules['program'] = 'required|string|max:50';
+            // $rules['department'] = 'required|string|max:50';
             // if you want year_section required for students, change to 'required|string|max:2'
             $rules['year_section'] = 'nullable|string|max:2';
         }
@@ -501,221 +547,261 @@ foreach ($userVehicles as $vehicle) {
         return $clean;
     }
 
-    public function save()
-    {
-        // quick size check for picture
-        // if ($this->profile_picture && $this->profile_picture->getSize() > 5 * 1024 * 1024) {
-        //     $this->addError('profile_picture', 'Profile picture must be less than 5 MB.');
-        //     return;
-        // }
+public function save()
+{
+    // quick size check for picture
+    // if ($this->profile_picture && $this->profile_picture->getSize() > 5 * 1024 * 1024) {
+    //     $this->addError('profile_picture', 'Profile picture must be less than 5 MB.');
+    //     return;
+    // }
 
-        // require either student_id or employee_id
-        if (empty($this->student_id) && empty($this->employee_id)) {
-            $this->addError('id', 'Please provide either Student ID or Employee ID.');
-
-            return;
-        }
-        if (!empty($this->student_id) && !empty($this->employee_id)) {
-            $this->addError('id', 'Please provide only one: Student ID or Employee ID, not both.');
-
-            return;
-        }
-        $originalProfileUpload = null;
-        if (!empty($this->compressedProfilePicture)) {
-            $originalProfileUpload = $this->profile_picture;
-            $this->profile_picture = null;
-        }
-        // Validate incoming raw input first (this will check email uniqueness etc.)
-        $data = $this->validate();
-
-        // --- Normalize serials and perform all vehicle-level checks BEFORE creating anything ---
-        $normalizedSerials = [];
-        foreach ($this->vehicles as $i => $vehicle) {
-            $raw = isset($vehicle['serial_number']) ? (string) $vehicle['serial_number'] : '';
-            $digits = preg_replace('/\D/', '', $raw); // keep digits only
-
-            if ($digits === '') {
-                $this->addError("vehicles.$i.serial_number", 'Serial number must contain at least one digit.');
-
-                return;
-            }
-
-            // Normalization logic: pad up to 4 digits, otherwise keep as-is, always prefix with 'S'
-            if (strlen($digits) <= 4) {
-                $norm = 'S' . str_pad($digits, 4, '0', STR_PAD_LEFT);
-            } else {
-                $norm = 'S' . $digits;
-            }
-
-            $normalizedSerials[$i] = $norm;
-        }
-
-        // check duplicates within submitted normalized set
-        if (count(array_unique($normalizedSerials)) !== count($normalizedSerials)) {
-            $this->addError('vehicles', 'Two or more vehicles have the same serial number after normalization.');
-
-            return;
-        }
-
-        // check DB for collisions against normalized values
-        $existing = Vehicle::whereIn('serial_number', array_values($normalizedSerials))->pluck('serial_number')->toArray();
-        if (!empty($existing)) {
-            $this->addError('vehicles', 'One or more vehicle serial numbers already exist: ' . implode(', ', $existing));
-
-            return;
-        }
-
-        // Good — all checks passed. Proceed to create everything inside a transaction.
-        // Hash password and prepare $data for insert
-        $data['password'] = Hash::make($data['password'] ?? '');
-
-        // Log normalized serials for debugging (optional)
-        \Log::debug('Normalized serials before insert: ' . json_encode($normalizedSerials));
-    $allTags = [];
-    foreach ($this->vehicles as $i => $veh) {
-        $tags = $this->compactRfidTags($veh['rfid_tags'] ?? []);
-        if (count($tags) === 0) {
-            $this->addError("vehicles.$i.rfid_tags.0", 'At least one RFID tag is required for each vehicle.');
-            return;
-        }
-        $allTags = array_merge($allTags, $tags);
+    // require either student_id or employee_id
+    // if (empty($this->student_id) && empty($this->employee_id)) {
+    //     $this->addError('id', 'Please provide either Student ID or Employee ID.');
+    //     return;
+    // }
+    // if (!empty($this->student_id) && !empty($this->employee_id)) {
+    //     $this->addError('id', 'Please provide only one: Student ID or Employee ID, not both.');
+    //     return;
+    // }
+    
+    $originalProfileUpload = null;
+    if (!empty($this->compressedProfilePicture)) {
+        $originalProfileUpload = $this->profile_picture;
+        $this->profile_picture = null;
     }
+    
+// Clear profile_picture from validation if no new one was uploaded
+if (empty($this->compressedProfilePicture)) {
+    $this->profile_picture = null;
+}
 
-    // check duplicates within submission
-    if (count($allTags) !== count(array_unique($allTags))) {
-        $this->addError('vehicles', 'Duplicate RFID tag values found in your submitted vehicles.');
+$data = $this->validate();
+
+// Remove it from the data so it doesn't update
+unset($data['profile_picture']);
+
+    // --- Normalize serials and perform all vehicle-level checks BEFORE creating anything ---
+    // $normalizedSerials = [];
+    // foreach ($this->vehicles as $i => $vehicle) {
+    //     $raw = isset($vehicle['serial_number']) ? (string) $vehicle['serial_number'] : '';
+    //     $digits = preg_replace('/\D/', '', $raw); // keep digits only
+
+    //     if ($digits === '') {
+    //         $this->addError("vehicles.$i.serial_number", 'Serial number must contain at least one digit.');
+    //         return;
+    //     }
+
+    //     // Normalization logic: pad up to 4 digits, otherwise keep as-is, always prefix with 'S'
+    //     if (strlen($digits) <= 4) {
+    //         $norm = 'S' . str_pad($digits, 4, '0', STR_PAD_LEFT);
+    //     } else {
+    //         $norm = 'S' . $digits;
+    //     }
+
+    //     $normalizedSerials[$i] = $norm;
+    // }
+
+    // // check duplicates within submitted normalized set
+    // if (count(array_unique($normalizedSerials)) !== count($normalizedSerials)) {
+    //     $this->addError('vehicles', 'Two or more vehicles have the same serial number after normalization.');
+    //     return;
+    // }
+
+    // // check DB for collisions against normalized values
+    // $existing = Vehicle::whereIn('serial_number', array_values($normalizedSerials))->pluck('serial_number')->toArray();
+    // if (!empty($existing)) {
+    //     $this->addError('vehicles', 'One or more vehicle serial numbers already exist: ' . implode(', ', $existing));
+    //     return;
+    // }
+
+    // Good — all checks passed. Proceed to create everything inside a transaction.
+    // Hash password and prepare $data for insert
+    $data['password'] = Hash::make($data['password'] ?? '');
+
+    // Log normalized serials for debugging (optional)
+    // \Log::debug('Normalized serials before insert: ' . json_encode($normalizedSerials));
+    
+    // $allTags = [];
+    // foreach ($this->vehicles as $i => $veh) {
+    //     $tags = $this->compactRfidTags($veh['rfid_tags'] ?? []);
+    //     if (count($tags) === 0) {
+    //         $this->addError("vehicles.$i.rfid_tags.0", 'At least one RFID tag is required for each vehicle.');
+    //         return;
+    //     }
+    //     $allTags = array_merge($allTags, $tags);
+    // }
+
+    // // check duplicates within submission
+    // if (count($allTags) !== count(array_unique($allTags))) {
+    //     $this->addError('vehicles', 'Duplicate RFID tag values found in your submitted vehicles.');
+    //     return;
+    // }
+
+    // // check duplicates in DB (handle JSON and plain strings)
+    // $duplicateTags = [];
+
+    // foreach ($allTags as $tag) {
+    //     $exists = Vehicle::where(function ($query) use ($tag) {
+    //         $query->where('rfid_tag', $tag)
+    //               ->orWhere('rfid_tag', 'like', '%"' . $tag . '"%');
+    //     })->exists();
+
+    //     if ($exists) {
+    //         $duplicateTags[] = $tag;
+    //     }
+    // }
+
+    // if (!empty($duplicateTags)) {
+    //     $this->addError(
+    //         'vehicles',
+    //         'The following RFID tag(s) already exist in the database: ' . implode(', ', $duplicateTags)
+    //     );
+    //     return;
+    // }
+    
+    // Check if email changed
+    $emailChanged = $this->email !== $this->originalEmail;
+    
+    // Check if password changed
+    $passwordChanged = !empty($this->password);
+    
+    // If email changed, require OTP verification
+    if ($emailChanged) {
+        $cachedOtp = cache()->get('otp_' . $this->email);
+        
+        if (!$cachedOtp) {
+            $this->addError('otps.0', 'OTP expired. Please request a new one.');
+            return;
+        }
+        
+        if (empty($this->otps[0])) {
+            $this->addError('otps.0', 'Please enter the OTP sent to your email.');
+            return;
+        }
+        
+        if ((string)$this->otps[0] !== (string)$cachedOtp) {
+            $this->addError('otps.0', 'OTP is incorrect.');
+            return;
+        }
+        
+        // OTP verified, clear it
+        cache()->forget('otp_' . $this->email);
+    }
+    
+    // If password changed, validate it meets requirements
+if ($passwordChanged) {
+    if (!$this->isPasswordValid()) {
+        $this->addError('password', 'Password must be at least 6 characters and contain at least one number.');
         return;
     }
-
-// check duplicates in DB (handle JSON and plain strings)
-$duplicateTags = [];
-
-foreach ($allTags as $tag) {
-    $exists = Vehicle::where(function ($query) use ($tag) {
-        $query->where('rfid_tag', $tag)
-              ->orWhere('rfid_tag', 'like', '%"' . $tag . '"%');
-    })->exists();
-
-    if ($exists) {
-        $duplicateTags[] = $tag;
+    
+    if ($this->password !== $this->passwordConfirm) {
+        $this->addError('passwordConfirm', 'Passwords do not match.');
+        return;
     }
 }
 
-if (!empty($duplicateTags)) {
-    $this->addError(
-        'vehicles',
-        'The following RFID tag(s) already exist in the database: ' . implode(', ', $duplicateTags)
-    );
-    return;
-}
+    DB::transaction(function () use ($data) {
+        // Update user
+        $user = Auth::user();
+        $user->update($data);
 
+        // Handle profile picture with user ID using compressed version
+        if ($this->compressedProfilePicture) {
+            // Generate the final filename
+            $hash = substr(md5(uniqid((string) rand(), true)), 0, 8);
+            $filename = $user->id . '_' . $hash . '.jpg'; // Always .jpg since compressed to JPEG
 
+            // Define final path using new filename
+            $finalPath = 'profile_pics/' . $filename;
 
-        DB::transaction(function () use ($data, $normalizedSerials) {
-            // create user
-            $user = User::create($data);
+            // Read the image from the public tmp folder
+            $fileContents = Storage::disk('public')->get($this->compressedProfilePicture);
 
-            // Handle profile picture with user ID using compressed version
-            if ($this->compressedProfilePicture) {
-                // Generate the final filename
-                $hash = substr(md5(uniqid((string) rand(), true)), 0, 8);
-                $filename = $user->id . '_' . $hash . '.jpg'; // Always .jpg since compressed to JPEG
+            // Save it to the private disk
+            Storage::disk('private')->put($finalPath, $fileContents);
 
-                // Define final path using new filename
-                $finalPath = 'profile_pics/' . $filename;
+            // Delete the original tmp file
+            Storage::disk('public')->delete($this->compressedProfilePicture);
 
-                // Read the image from the public tmp folder
-                $fileContents = Storage::disk('public')->get($this->compressedProfilePicture);
+            // Update the user with the new profile picture filename
+            $user->update(['profile_picture' => $filename]);
 
-                // Save it to the private disk
-                Storage::disk('private')->put($finalPath, $fileContents);
-
-                // Delete the original tmp file
-                Storage::disk('public')->delete($this->compressedProfilePicture);
-
-                // Update the user with the new profile picture filename
-                $user->update(['profile_picture' => $filename]);
-
-                \Log::info('✅ Profile picture moved from tmp to final: ' . $finalPath);
-            }
-            // foreach ($this->vehicles as $i => $veh) {
-            //     $tags = $this->compactRfidTags($veh['rfid_tags'] ?? []);
-            //     if (count($tags) === 0) {
-            //         $this->addError("vehicles.$i.rfid_tags.0", 'At least one RFID tag is required for each vehicle.');
-            //         return;
-            //     }
-            // }
-
-
-            // create vehicles
-    foreach ($this->vehicles as $idx => $vehicle) {
-        $rawTags = $vehicle['rfid_tags'] ?? [];
-        $tags = $this->compactRfidTags($rawTags);
-
-        // firstTag for legacy column
-        $tags = array_values(array_filter($vehicle['rfid_tags'] ?? [], fn($t) => !empty($t)));
-
-        $vehicleData = [
-            'user_id' => $user->id,
-            'type' => $vehicle['type'],
-            'serial_number' => $normalizedSerials[$idx] ?? null,
-            'rfid_tag' => json_encode($tags),
-            'license_plate' => $vehicle['license_plate'] ?? null,
-            'body_type_model' => $vehicle['body_type_model'] ?? null,
-            'or_number' => $vehicle['or_number'] ?? null,
-            'cr_number' => $vehicle['cr_number'] ?? null,
-        ];
-
-        if (Schema::hasColumn('vehicles', 'rfid_tags')) {
-            $vehicleData['rfid_tags'] = json_encode($tags);
+            \Log::info('✅ Profile picture moved from tmp to final: ' . $finalPath);
         }
 
-        Vehicle::create($vehicleData);
-    }
+        // // create vehicles
+        // foreach ($this->vehicles as $idx => $vehicle) {
+        //     $rawTags = $vehicle['rfid_tags'] ?? [];
+        //     $tags = $this->compactRfidTags($rawTags);
 
+        //     // firstTag for legacy column
+        //     $tags = array_values(array_filter($vehicle['rfid_tags'] ?? [], fn($t) => !empty($t)));
 
-            // activity log
-            $adminId = Auth::guard('admin')->id();
-            if (!$adminId) {
-                abort(403, 'Admin not authenticated');
-            }
+        //     $vehicleData = [
+        //         'user_id' => $user->id,
+        //         'type' => $vehicle['type'],
+        //         'serial_number' => $normalizedSerials[$idx] ?? null,
+        //         'rfid_tag' => json_encode($tags),
+        //         'license_plate' => $vehicle['license_plate'] ?? null,
+        //         'body_type_model' => $vehicle['body_type_model'] ?? null,
+        //         'or_number' => $vehicle['or_number'] ?? null,
+        //         'cr_number' => $vehicle['cr_number'] ?? null,
+        //     ];
 
-            ActivityLog::create([
-                'actor_type' => 'admin',
-                'actor_id' => $adminId,
-                'action' => 'create',
-                'details' => 'Admin ' . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname . " created user {$user->firstname} {$user->lastname}.",
-            ]);
-        });
+        //     if (Schema::hasColumn('vehicles', 'rfid_tags')) {
+        //         $vehicleData['rfid_tags'] = json_encode($tags);
+        //     }
 
-        session()->flash('success', 'User and vehicles created successfully!');
-        $this->resetForm();
-    }
+        //     Vehicle::create($vehicleData);
+        // }
+
+        // // activity log
+        // $adminId = Auth::guard('admin')->id();
+        // if (!$adminId) {
+        //     abort(403, 'Admin not authenticated');
+        // }
+
+        // ActivityLog::create([
+        //     'actor_type' => 'admin',
+        //     'actor_id' => $adminId,
+        //     'action' => 'create',
+        //     'details' => 'Admin ' . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname . " created user {$user->firstname} {$user->lastname}.",
+        // ]);
+    });
+
+    session()->flash('success', 'Profile updated successfully!');
+    $this->originalEmail = $this->email;
+    $this->resetForm();
+}
 
     private function resetForm()
     {
         $this->reset([
-            'student_id',
-            'employee_id',
-            'email',
+            // 'student_id',
+            // 'employee_id',
+            // 'email',
             'password',
-            'firstname',
-            'middlename',
-            'lastname',
-            'program',
-            'department',
-            'license_number',
-            'profile_picture',
-            'compressedProfilePicture',
-            'vehicles',
-            'year_section',
-            'address',
-            'contact_number',
-            'expiration_date',
+            'passwordConfirm',
+            // 'firstname',
+            // 'middlename',
+            // 'lastname',
+            // 'program',
+            // 'department',
+            // 'license_number',
+            // 'profile_picture',
+            // 'compressedProfilePicture',
+            // 'vehicles',
+            // 'year_section',
+            // 'address',
+            // 'contact_number',
+            // 'expiration_date',
         ]);
 
         // Reset to one empty vehicle row
-        $this->vehicles = [$this->defaultVehicle()];
+        // $this->vehicles = [$this->defaultVehicle()];
+        $this->otps = [];
 
     }
 

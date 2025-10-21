@@ -53,33 +53,46 @@
         @enderror
     </div>
 
-    @foreach($otps as $index => $otp)
-        <div class="mb-2">
-            <label>OTP</label>
-            <input type="text" wire:model="otps.{{ $index }}" class="form-control" placeholder="Enter OTP">
-        </div>
-    @endforeach
+@foreach($otps as $index => $otp)
+    <div class="mb-2">
+        <label>OTP</label>
+        <input type="text" wire:model="otps.{{ $index }}" class="form-control @error('otps.'.$index) is-invalid @enderror" placeholder="Enter OTP">
+        @error('otps.'.$index)
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+        @enderror
+    </div>
+@endforeach
 
-    <button 
-        id="getOtpBtn"
-        class="btn btn-primary mt-2" 
-        wire:click="getOtp"
-        type="button"
-    >
-        Get OTP
-    </button>
+<button 
+    id="getOtpBtn"
+    class="btn btn-primary mt-2" 
+    type="button"
+    wire:ignore
+>
+    Get OTP
+</button>
 </div>
 
 
-        <div class="mb-3 mt-2">
-            <label>Password</label>
-            <input type="password" wire:model="password" class="form-control" required>
-        </div>
+<div class="mb-3 mt-2">
+    <label>Password <small class="text-muted">(leave blank to keep current)</small></label>
+    <input type="password" wire:model.live.debounce.500ms="password" class="form-control @error('password') is-invalid @enderror">
+    @error('password')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+    @enderror
+</div>
+<div class="mb-3 mt-2">
+    <label>Confirm Password</label>
+    <input type="password" wire:model="passwordConfirm" class="form-control @error('passwordConfirm') is-invalid @enderror" @disabled(strlen($password) < 6 || !$this->isPasswordValid()) required>
+    @error('passwordConfirm')
+        <div class="invalid-feedback d-block">{{ $message }}</div>
+    @enderror
+</div>
 
         <div class="row mb-3">
             <div class="col-md">
                 <label>First Name</label>
-                <input type="text" wire:model="firstname" class="form-control" required disabled>
+                <input type="text" wire:model="firstname" class="form-control" disabled>
             </div>
             <div class="col-md">
                 <label>Middle Name</label>
@@ -87,7 +100,7 @@
             </div>
             <div class="col-md">
                 <label>Last Name</label>
-                <input type="text" wire:model="lastname" class="form-control" required disabled>
+                <input type="text" wire:model="lastname" class="form-control" disabled>
             </div>
         </div>
 
@@ -133,24 +146,24 @@
         <div class="row mb-3">
             <div class="col-md">
                 <label>Address</label>
-                <input type="text" wire:model="address" class="form-control" required disabled>
+                <input type="text" wire:model="address" class="form-control" disabled>
             </div>
             <div class="col-md">
                 <label>Contact Number</label>
-                <input type="text" wire:model="contact_number" class="form-control" required disabled>
+                <input type="text" wire:model="contact_number" class="form-control" disabled>
             </div>
         </div>
 
         <div class="row mb-3">
             <div class="col-md">
                 <label>License Number</label>
-                <input type="text" wire:model="license_number" class="form-control" required disabled>
+                <input type="text" wire:model="license_number" class="form-control" disabled>
             </div>
             <div class="col-md">
                 <label>Expiration Date</label>
                 <input type="date" wire:model="expiration_date"
                     class="form-control @error('expiration_date') is-invalid @enderror" onfocus="this.showPicker();"
-                    onmousedown="event.preventDefault(); this.showPicker();" required disabled>
+                    onmousedown="event.preventDefault(); this.showPicker();" disabled>
 
                 @error('expiration_date')
                 <div class="invalid-feedback">{{ $message }}</div>
@@ -207,12 +220,12 @@
                             <label>Serial Number <span class="text-muted" style="font-size:0.75rem;">(Number
                                     only)</span></label>
                             <input type="text" wire:model="vehicles.{{ $index }}.serial_number" class="form-control"
-                                placeholder="123" required disabled>
+                                placeholder="123" disabled>
                         </div>
 
                         <div class="col-md">
                             <label>Type</label>
-                            <select wire:model="vehicles.{{ $index }}.type" class="form-control" required disabled>
+                            <select wire:model="vehicles.{{ $index }}.type" class="form-control" disabled>
                                 <option value="">Select Type</option>
                                 <option value="motorcycle">Motorcycle</option>
                                 <option value="car">Car</option>
@@ -235,13 +248,13 @@
                         <div class="col-md">
                             <label>License Plate</label>
                             <input type="text" wire:model="vehicles.{{ $index }}.license_plate" class="form-control"
-                                required disabled>
+                             disabled>
                         </div>
 
                         <div class="col-md">
                             <label>Body Type/Model</label>
                             <input type="text" wire:model="vehicles.{{ $index }}.body_type_model" class="form-control"
-                                required disabled>
+                                 disabled>
                         </div>
 
                         @if(isset($tags[1]) && trim((string)$tags[1]) !== '')
@@ -260,13 +273,13 @@
                         <div class="col-md">
                             <label>OR Number</label>
                             <input type="text" wire:model="vehicles.{{ $index }}.or_number" class="form-control"
-                                required disabled>
+                                 disabled>
                         </div>
 
                         <div class="col-md">
                             <label>CR Number</label>
                             <input type="text" wire:model="vehicles.{{ $index }}.cr_number" class="form-control"
-                                required disabled>
+                                 disabled>
                         </div>
 
                         @if(isset($tags[2]) && trim((string)$tags[2]) !== '')
@@ -295,8 +308,8 @@
                 Add Vehicle
             </button> --}}
 
-            <button type="submit" class="btn btn-primary" disabled>
-                Save Profile
+            <button type="submit" class="btn btn-primary">
+                Update Profile
             </button>
         </div>
 
@@ -321,12 +334,18 @@
         let currentInterval = null;
 
         btn.addEventListener('click', function() {
+            // Check if already counting down
+            if (btn.disabled) return;
+
             // Reset any existing countdown
             if (currentInterval) {
                 clearInterval(currentInterval);
             }
 
-            let countdown = 5;
+            // Call the Livewire method
+            @this.getOtp();
+
+            let countdown = 30;
             btn.disabled = true;
             btn.textContent = `Get OTP (${countdown}s)`;
 
@@ -342,7 +361,7 @@
             }, 1000);
         });
 
-        // Listen for Livewire validation errors
+        // Listen for validation errors
         Livewire.on('validationFailed', () => {
             if (currentInterval) {
                 clearInterval(currentInterval);
