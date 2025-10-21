@@ -8,6 +8,7 @@ use App\Models\ActivityLog;
 use App\Models\ParkingArea;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use \App\Models\Vehicle;
 
 class RfidController extends Controller
 {
@@ -91,8 +92,9 @@ private function checkViolationStatus($userId): bool
             $areaId = $request->input('area_id');
 
             // Get vehicle first, then user
-            $vehicle = DB::table('vehicles')->where('rfid_tag', $epc)->first();
-            
+            // $vehicle = DB::table('vehicles')->where('rfid_tag', $epc)->first();
+            $vehicle = Vehicle::byRfidTag($epc)->first();
+
             if (!$vehicle) {
                 $unknownResult = $this->logUnknownTag($epc, $areaId);
                 
@@ -260,7 +262,8 @@ public function logScanArea(Request $request)
     $areaId = $request->input('area_id');
 
     try {
-        $vehicle = DB::table('vehicles')->where('rfid_tag', $epc)->first();
+        // $vehicle = DB::table('vehicles')->where('rfid_tag', $epc)->first();
+        $vehicle = Vehicle::byRfidTag($epc)->first();
         
         if (!$vehicle) {
             $unknownResult = $this->logUnknownTag($epc, $areaId);
