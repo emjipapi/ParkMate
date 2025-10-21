@@ -24,6 +24,7 @@
             --text1: #ffffff;
             --text2: #4b6fc0;
             --text3: #8b8d8e;
+            --text4: #000000;
         }
 
         body {
@@ -93,6 +94,105 @@
             font-size: 1.25rem;
             line-height: 36px;
         }
+.notification {
+  position: relative;
+  display: inline-block;
+  margin-left: 1rem;
+}
+
+.notification .bi-bell-fill {
+  font-size: 1.3rem;
+  color: var(--text1);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.notification .bi-bell-fill:hover {
+  color: #0d6efd;
+}
+
+.notification .badge {
+  position: absolute;
+  top: 0px;
+  right: -6px;
+  font-size: 0.55rem;
+  padding: 2px 4px;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.notification-header {
+  background-color: #f8f9fa;
+  padding: 10px 12px;
+  font-weight: 600;
+  border-bottom: 1px solid #ddd;
+  color: #333;
+}
+
+/* The dropdown panel */
+.notification-panel {
+  position: absolute;
+  top: 34px;
+  right: 0;
+  background-color: var(--bg4);
+  color: var(--text4);
+  width: 240px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  display: none;
+  overflow: hidden;
+  z-index: 999;
+}
+
+.notification-panel.show {
+  display: block;
+  animation: fadeIn 0.15s ease-in-out;
+}
+
+.notif-item {
+  padding: 10px 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 0.85rem;
+  line-height: 1.2;
+}
+
+.notif-item:last-child {
+  border-bottom: none;
+}
+
+.notif-item:hover {
+  background-color: rgba(13, 110, 253, 0.1);
+}
+.notif-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    padding: 0;
+    display: inline-block;
+    position: absolute;
+    top: 4px;
+    right: 0;
+    transform: translate(50%, -50%);
+}
+
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-15px) scale(0.98);
+    filter: blur(2px);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(3px) scale(1.02);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+
 
         .live-btn-bar {
             display: flex;
@@ -491,6 +591,14 @@
             </a>
         </div>
         @endcanaccess
+<div class="notification">
+  <i class="bi bi-bell-fill" id="notifBell"></i>
+  <span class="badge bg-danger notif-dot"></span>
+
+
+<livewire:admin.notification-panel-component />
+</div>
+
     </div>
 
     <!-- Main Content -->
@@ -580,6 +688,24 @@
     instance.hide();
   });
     </script>
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+  const bell = document.getElementById('notifBell');
+  const panel = document.getElementById('notifPanel');
+
+  bell.addEventListener('click', () => {
+    panel.classList.toggle('show');
+  });
+
+  // Close the panel when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!bell.contains(e.target) && !panel.contains(e.target)) {
+      panel.classList.remove('show');
+    }
+  });
+});
+</script>
+
 </body>
 
 </html>
