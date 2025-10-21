@@ -245,41 +245,31 @@ class EditProfileComponent extends Component
                 }
             }
         }
-        foreach ($userVehicles as $v) {
-            $tags = [];
-            // prefer rfid_tags column if present and JSON
-            if (isset($v->rfid_tags) && $v->rfid_tags) {
-                $decoded = json_decode($v->rfid_tags, true);
-                if (is_array($decoded)) {
-                    $tags = $decoded;
-                } else {
-                    $tags = [$v->rfid_tags];
-                }
-            } elseif (isset($v->rfid_tag) && $v->rfid_tag) {
-                // legacy: could be JSON or plain string
-                $decoded = json_decode($v->rfid_tag, true);
-                if (is_array($decoded)) {
-                    $tags = $decoded;
-                } else {
-                    $tags = [$v->rfid_tag];
-                }
-            }
+foreach ($userVehicles as $vehicle) {
+    // Eloquent automatically casts rfid_tag into an array because of $casts in Vehicle model
+    $tags = $vehicle->rfid_tag ?? []; 
 
-            if (empty($tags)) {
-                $tags = [''];
-            }
+    // Ensure it's always an array even if something unexpected happens
+    if (!is_array($tags)) {
+        $tags = [$tags];
+    }
 
-            $loaded[] = [
-                'uid' => $v->id,
-                'serial_number' => $v->serial_number ?? '',
-                'type' => $v->type ?? 'motorcycle',
-                'rfid_tags' => $tags,
-                'license_plate' => $v->license_plate ?? '',
-                'body_type_model' => $v->body_type_model ?? '',
-                'or_number' => $v->or_number ?? '',
-                'cr_number' => $v->cr_number ?? '',
-            ];
-        }
+    // Fallback to empty string if no tags
+    if (empty($tags)) {
+        $tags = [''];
+    }
+
+    $loaded[] = [
+        'uid' => $vehicle->id,
+        'serial_number' => $vehicle->serial_number ?? '',
+        'type' => $vehicle->type ?? 'motorcycle',
+        'rfid_tags' => $tags,
+        'license_plate' => $vehicle->license_plate ?? '',
+        'body_type_model' => $vehicle->body_type_model ?? '',
+        'or_number' => $vehicle->or_number ?? '',
+        'cr_number' => $vehicle->cr_number ?? '',
+    ];
+}
 
         $this->vehicles = count($loaded) ? $loaded : [$this->defaultVehicle()];
 
