@@ -141,21 +141,40 @@ class UserFormEdit extends Component
         ];
     }
 
-    protected function compactRfidTags(?array $rawTags): array
-    {
-        if (empty($rawTags) || !is_array($rawTags)) {
-            return [];
-        }
-
-        // Trim each tag and remove empties
-        $clean = array_values(array_filter(array_map(function ($t) {
-            return is_string($t) ? trim($t) : null;
-        }, $rawTags), function ($v) {
-            return $v !== null && $v !== '';
-        }));
-
-        return $clean;
+protected function compactRfidTags($rawTags): array
+{
+    // Accept a single string as input
+    if (is_string($rawTags)) {
+        $rawTags = [$rawTags];
     }
+
+    if (empty($rawTags) || !is_array($rawTags)) {
+        return [];
+    }
+
+    $result = [];
+
+    foreach ($rawTags as $item) {
+        if ($item === null) continue;
+
+        // ensure it's a string
+        $item = (string) $item;
+
+        // split by comma, semicolon or newline
+        $parts = preg_split('/[\r\n]+|[,\;]\s*/', $item);
+
+        foreach ($parts as $p) {
+            $p = trim($p);
+            if ($p === '') continue;
+            $result[] = $p;
+        }
+    }
+
+    // Unique + reindex
+    $result = array_values(array_unique($result));
+
+    return $result;
+}
 
     public $programToDept = [];
 
@@ -229,27 +248,43 @@ class UserFormEdit extends Component
         }
 
         // load vehicles with proper structure
-        $this->vehicles = $user->vehicles->map(function ($vehicle) {
-            // Extract just the number from S0123 format for editing
-            $serialNumber = '';
-            if ($vehicle->serial_number && str_starts_with($vehicle->serial_number, 'S')) {
-                $serialNumber = ltrim(substr($vehicle->serial_number, 1), '0');
-            }
+$this->vehicles = $user->vehicles->map(function ($vehicle) {
+    // Extract just the number from S0123 format for editing
+    $serialNumber = '';
+    if ($vehicle->serial_number && str_starts_with($vehicle->serial_number, 'S')) {
+        $serialNumber = ltrim(substr($vehicle->serial_number, 1), '0');
+    }
 
-            return [
-                'id' => $vehicle->id,
-                'uid' => (string) Str::uuid(),
-                'serial_number' => $serialNumber,
-                'type' => $vehicle->type,
-                'rfid_tags' => is_string($vehicle->rfid_tag) ? 
-                    json_decode($vehicle->rfid_tag, true) ?: [$vehicle->rfid_tag] : 
-                    [$vehicle->rfid_tag],
-                'license_plate' => $vehicle->license_plate,
-                'body_type_model' => $vehicle->body_type_model,
-                'or_number' => $vehicle->or_number,
-                'cr_number' => $vehicle->cr_number,
-            ];
-        })->toArray();
+    $tags = [];
+
+    if (is_string($vehicle->rfid_tag)) {
+        $decoded = json_decode($vehicle->rfid_tag, true);
+        if (is_array($decoded)) {
+            $tags = $decoded;
+        } elseif (trim($vehicle->rfid_tag) !== '') {
+            $tags = [trim($vehicle->rfid_tag)];
+        }
+    } elseif (is_array($vehicle->rfid_tag)) {
+        $tags = $vehicle->rfid_tag;
+    }
+
+    if (empty($tags)) {
+        $tags = [''];
+    }
+
+    return [
+        'id' => $vehicle->id,
+        'uid' => (string) Str::uuid(),
+        'serial_number' => $serialNumber,
+        'type' => $vehicle->type,
+        'rfid_tags' => $tags,
+        'license_plate' => $vehicle->license_plate,
+        'body_type_model' => $vehicle->body_type_model,
+        'or_number' => $vehicle->or_number,
+        'cr_number' => $vehicle->cr_number,
+    ];
+})->toArray();
+
 
         // ensure at least one vehicle row exists
         if (empty($this->vehicles)) {
@@ -635,30 +670,31 @@ class UserFormEdit extends Component
             // (RFID validation was already performed above)
 
             // Update or create vehicles
-            foreach ($this->vehicles as $idx => $vehicle) {
-                $tags = array_values(array_filter($vehicle['rfid_tags'] ?? [], fn($t) => !empty($t)));
-                
-                $vehicleData = [
-                    'type' => $vehicle['type'],
-                    'serial_number' => $normalizedSerials[$idx] ?? null,
-                    'rfid_tag' => json_encode($tags),
-                    'license_plate' => $vehicle['license_plate'] ?? null,
-                    'body_type_model' => $vehicle['body_type_model'] ?? null,
-                    'or_number' => $vehicle['or_number'] ?? null,
-                    'cr_number' => $vehicle['cr_number'] ?? null,
-                ];
+foreach ($this->vehicles as $idx => $vehicle) {
+    // normalize & split any comma-joined values
+    $tags = $this->compactRfidTags($vehicle['rfid_tags'] ?? []);
 
-                if (! empty($vehicle['id'])) {
-                    // Update existing vehicle
-                    $existingVehicle = $user->vehicles()->find($vehicle['id']);
-                    if ($existingVehicle) {
-                        $existingVehicle->update($vehicleData);
-                    }
-                } else {
-                    // Create new vehicle
-                    $user->vehicles()->create($vehicleData);
-                }
-            }
+    // ensure we always save an array (empty array when no tags)
+    $vehicleData = [
+        'type' => $vehicle['type'] ?? null,
+        'serial_number' => $normalizedSerials[$idx] ?? null,
+        'rfid_tag' => $tags, // pass array — Eloquent will cast to JSON
+        'license_plate' => $vehicle['license_plate'] ?? null,
+        'body_type_model' => $vehicle['body_type_model'] ?? null,
+        'or_number' => $vehicle['or_number'] ?? null,
+        'cr_number' => $vehicle['cr_number'] ?? null,
+    ];
+
+    if (! empty($vehicle['id'])) {
+        $existingVehicle = $user->vehicles()->find($vehicle['id']);
+        if ($existingVehicle) {
+            $existingVehicle->update($vehicleData);
+        }
+    } else {
+        $user->vehicles()->create($vehicleData);
+    }
+}
+
 
             // Log admin action
             $adminId = Auth::guard('admin')->id();
