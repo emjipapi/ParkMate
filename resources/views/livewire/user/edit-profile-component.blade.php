@@ -1,7 +1,7 @@
 {{-- resources\views\livewire\admin\user-form-create.blade.php --}}
 <div class="flex-grow-1 d-flex justify-content-center align-items-center square-box">
     {{-- DEBUG: temporary diagnostics — remove when done --}}
-    <div class="mb-3 p-2 border rounded bg-light w-100 text-monospace" style="font-size:0.85rem;">
+    {{-- <div class="mb-3 p-2 border rounded bg-light w-100 text-monospace" style="font-size:0.85rem;">
         <strong>DEBUG STATE</strong>
 @php
     $payload = [
@@ -22,7 +22,7 @@
 
 <pre style="white-space:pre-wrap;">{!! json_encode($payload, JSON_PRETTY_PRINT) !!}</pre>
 
-    </div>
+    </div> --}}
     <form wire:submit.prevent="save" enctype="multipart/form-data">
         @csrf
 
@@ -252,9 +252,9 @@
 
 
         <div class="d-flex flex-column">
-            <button type="button" class="btn btn-secondary mb-5" disabled>
+            {{-- <button type="button" class="btn btn-secondary mb-5" disabled>
                 Add Vehicle
-            </button>
+            </button> --}}
 
             <button type="submit" class="btn btn-primary" disabled>
                 Save Profile
