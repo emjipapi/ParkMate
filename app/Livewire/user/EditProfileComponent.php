@@ -770,6 +770,36 @@ if ($passwordChanged) {
         //     'details' => 'Admin ' . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname . " created user {$user->firstname} {$user->lastname}.",
         // ]);
     });
+    $user = Auth::user();
+$updates = [];
+
+if ($emailChanged) {
+    $updates[] = "email";
+}
+if ($passwordChanged) {
+    $updates[] = "password";
+}
+if (!empty($this->compressedProfilePicture)) {
+    $updates[] = "profile picture";
+}
+if (!empty($this->year_section)) {
+    $updates[] = "year & section";
+}
+
+$detailsMessage = "User {$user->firstname} {$user->lastname} updated their profile";
+if (!empty($updates)) {
+    $detailsMessage .= " (" . implode(", ", $updates) . ")";
+} else {
+    $detailsMessage .= ".";
+}
+
+ActivityLog::create([
+    'actor_type' => 'user',
+    'actor_id' => $user->id,
+    'action' => 'update',
+    'details' => $detailsMessage,
+    'created_at' => now(),
+]);
 
     session()->flash('success', 'Profile updated successfully!');
     $this->originalEmail = $this->email;
