@@ -46,7 +46,7 @@
                         <span class="text-muted">—</span>
                         @endif
                     </td>
-                    <td>
+                    
                     <td>
                         @php
                         $tags = json_decode($vehicle->rfid_tag, true);
