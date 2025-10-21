@@ -262,12 +262,10 @@ public function logScanArea(Request $request)
     $areaId = $request->input('area_id');
 
     try {
-        // $vehicle = DB::table('vehicles')->where('rfid_tag', $epc)->first();
         $vehicle = Vehicle::byRfidTag($epc)->first();
-        
+
         if (!$vehicle) {
             $unknownResult = $this->logUnknownTag($epc, $areaId);
-            
             return response()->json([
                 'message' => 'Vehicle not found',
                 'epc' => $epc,
@@ -277,10 +275,8 @@ public function logScanArea(Request $request)
         }
 
         $user = User::find($vehicle->user_id);
-        
         if (!$user) {
             $unknownResult = $this->logUnknownTag($epc, $areaId);
-            
             return response()->json([
                 'message' => 'User not found',
                 'logged_as_unknown' => $unknownResult['logged'],
@@ -289,95 +285,27 @@ public function logScanArea(Request $request)
         }
 
         $area = ParkingArea::find($areaId);
-if (!$area) {
-    return response()->json(['message' => 'Area not found'], 404);
-}
-
-$areaName = $area->name;
-$now = now();
-
-// CHECK COOLDOWN FIRST - before any other checks
-$lastGlobal = ActivityLog::where('actor_type', 'user')
-    ->where('actor_id', $user->id)
-    ->latest()
-    ->first();
-
-if ($lastGlobal && $lastGlobal->created_at->diffInSeconds($now) < $this->scanCooldown) {
-    return response()->json([
-        'message' => 'Scan too soon',
-        'last_scan_time' => $lastGlobal->created_at,
-    ], 200);
-}
-
-// NOW check permission after cooldown passes
-$userType = $this->getUserType($user);
-$denialReason = $this->checkAreaPermission($area, $userType);
-
-if ($denialReason) {
-    // This denied_entry will now respect the cooldown
-    ActivityLog::create([
-        'actor_type' => 'system',
-        'actor_id' => $user->id,
-        'action' => 'denied_entry',
-        'details' => "User {$user->firstname} {$user->lastname} denied entry to {$area->name} (user type not allowed: {$denialReason}) | {$epc} - {$vehicle->type}",
-        'area_id' => $areaId,
-        'created_at' => $now,
-    ]);
-
-    return response()->json([
-        'message' => "Entry denied - {$denialReason}",
-        'user' => $user->only(['id', 'firstname', 'lastname']),
-        'vehicle_type' => $vehicle->type,
-        'denied' => true,
-    ], 403);
-}
-        // Check status at main gate
-        $lastMainGateScan = ActivityLog::where('actor_type', 'user')
-            ->where('actor_id', $user->id)
-            ->whereNull('area_id')
-            ->whereIn('action', ['entry', 'exit'])
-            ->orderBy('created_at', 'desc')
-            ->first();
-
-        $needsMainGateEntry = !$lastMainGateScan || $lastMainGateScan->action === 'exit';
-
-        // If we would need to create a main-gate entry, check violations first
-        if ($needsMainGateEntry && $this->checkViolationStatus($user->id)) {
-            Log::warning("Parking area entry denied due to violations (auto main gate check)", [
-                'user_id' => $user->id,
-                'area_id' => $areaId,
-                'epc' => $epc,
-                'reason' => '3 or more approved violations'
-            ]);
-
-            ActivityLog::create([
-                'actor_type' => 'system',
-                'actor_id' => 1,
-                'action' => 'denied_entry',
-                'details' => "User {$user->firstname} {$user->lastname} denied entry (main gate check) due to 3 or more approved violations | {$epc} - {$vehicle->type}",
-                'area_id' => null,
-                'created_at' => $now,
-            ]);
-
-            return response()->json([
-                'message' => "Entry denied - 3 or more approved violations",
-                'user' => $user->only(['id', 'firstname', 'lastname']),
-                'vehicle_type' => $vehicle->type,
-                'denied' => true,
-            ], 403);
+        if (!$area) {
+            return response()->json(['message' => 'Area not found'], 404);
         }
 
-        // Get last action for this area
-        $lastAreaScan = ActivityLog::where('actor_type', 'user')
+        $areaName = $area->name;
+        $now = now();
+
+        // CHECK COOLDOWN FIRST - before any other checks
+        $lastGlobal = ActivityLog::where('actor_type', 'user')
             ->where('actor_id', $user->id)
-            ->where('area_id', $areaId)
-            ->whereIn('action', ['entry', 'exit'])
-            ->orderBy('created_at', 'desc')
+            ->latest()
             ->first();
 
-        $newAction = ($lastAreaScan && $lastAreaScan->action === 'entry') ? 'exit' : 'entry';
+        if ($lastGlobal && $lastGlobal->created_at->diffInSeconds($now) < $this->scanCooldown) {
+            return response()->json([
+                'message' => 'Scan too soon',
+                'last_scan_time' => $lastGlobal->created_at,
+            ], 200);
+        }
 
-        // Find other active areas
+        // --- DETECT active areas up-front so we can always exit them if needed ---
         $distinctAreaIds = ActivityLog::where('actor_type', 'user')
             ->where('actor_id', $user->id)
             ->whereNotNull('area_id')
@@ -386,7 +314,7 @@ if ($denialReason) {
 
         $activeAreaIdsToExit = [];
         foreach ($distinctAreaIds as $aId) {
-            if ($aId == $areaId) continue;
+            if ($aId == $areaId) continue; // skip target area
             $last = ActivityLog::where('actor_type', 'user')
                 ->where('actor_id', $user->id)
                 ->where('area_id', $aId)
@@ -398,8 +326,143 @@ if ($denialReason) {
                 $activeAreaIdsToExit[] = $aId;
             }
         }
+        // --- end active detection ---
 
-        // Transaction for all changes
+        // NOW check permission
+        $userType = $this->getUserType($user);
+        $denialReason = $this->checkAreaPermission($area, $userType);
+
+        if ($denialReason) {
+            // If denied, first exit other active areas (so we don't leave the user inside them)
+            DB::beginTransaction();
+            try {
+                foreach ($activeAreaIdsToExit as $exitAreaId) {
+                    $exitArea = ParkingArea::find($exitAreaId);
+                    $exitAreaName = $exitArea ? $exitArea->name : 'Unknown area';
+
+                    if ($vehicle->type === 'motorcycle') {
+                        $moto = DB::table('motorcycle_counts')
+                            ->where('area_id', $exitAreaId)
+                            ->lockForUpdate()
+                            ->first();
+
+                        if ($moto && (int)$moto->available_count < (int)$moto->total_available) {
+                            DB::table('motorcycle_counts')
+                                ->where('id', $moto->id)
+                                ->increment('available_count');
+                        }
+                    }
+
+                    ActivityLog::create([
+                        'actor_type' => 'user',
+                        'actor_id' => $user->id,
+                        'action' => 'exit',
+                        'details' => "User {$user->firstname} {$user->lastname} automatically exited area {$exitAreaName} (denied entry elsewhere). | {$epc} - {$vehicle->type}",
+                        'area_id' => $exitAreaId,
+                        'created_at' => $now,
+                    ]);
+                }
+
+                // create denied_entry log (permission)
+                ActivityLog::create([
+                    'actor_type' => 'system',
+                    'actor_id' => $user->id,
+                    'action' => 'denied_entry',
+                    'details' => "User {$user->firstname} {$user->lastname} denied entry to {$area->name} (user type not allowed: {$denialReason}) | {$epc} - {$vehicle->type}",
+                    'area_id' => $areaId,
+                    'created_at' => $now,
+                ]);
+
+                DB::commit();
+
+                return response()->json([
+                    'message' => "Entry denied - {$denialReason}",
+                    'user' => $user->only(['id', 'firstname', 'lastname']),
+                    'vehicle_type' => $vehicle->type,
+                    'denied' => true,
+                ], 403);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+        }
+
+        // Determine if a main-gate entry would be needed (same logic as before)
+        $lastMainGateScan = ActivityLog::where('actor_type', 'user')
+            ->where('actor_id', $user->id)
+            ->whereNull('area_id')
+            ->whereIn('action', ['entry', 'exit'])
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $needsMainGateEntry = !$lastMainGateScan || $lastMainGateScan->action === 'exit';
+
+        // If we would need to create a main-gate entry, check violations first
+        if ($needsMainGateEntry && $this->checkViolationStatus($user->id)) {
+            // Before denying due to violations, exit other active areas
+            DB::beginTransaction();
+            try {
+                foreach ($activeAreaIdsToExit as $exitAreaId) {
+                    $exitArea = ParkingArea::find($exitAreaId);
+                    $exitAreaName = $exitArea ? $exitArea->name : 'Unknown area';
+
+                    if ($vehicle->type === 'motorcycle') {
+                        $moto = DB::table('motorcycle_counts')
+                            ->where('area_id', $exitAreaId)
+                            ->lockForUpdate()
+                            ->first();
+
+                        if ($moto && (int)$moto->available_count < (int)$moto->total_available) {
+                            DB::table('motorcycle_counts')
+                                ->where('id', $moto->id)
+                                ->increment('available_count');
+                        }
+                    }
+
+                    ActivityLog::create([
+                        'actor_type' => 'user',
+                        'actor_id' => $user->id,
+                        'action' => 'exit',
+                        'details' => "User {$user->firstname} {$user->lastname} automatically exited area {$exitAreaName} (denied entry due to violations). | {$epc} - {$vehicle->type}",
+                        'area_id' => $exitAreaId,
+                        'created_at' => $now,
+                    ]);
+                }
+
+                ActivityLog::create([
+                    'actor_type' => 'system',
+                    'actor_id' => 1,
+                    'action' => 'denied_entry',
+                    'details' => "User {$user->firstname} {$user->lastname} denied entry (main gate check) due to 3 or more approved violations | {$epc} - {$vehicle->type}",
+                    'area_id' => null,
+                    'created_at' => $now,
+                ]);
+
+                DB::commit();
+
+                return response()->json([
+                    'message' => "Entry denied - 3 or more approved violations",
+                    'user' => $user->only(['id', 'firstname', 'lastname']),
+                    'vehicle_type' => $vehicle->type,
+                    'denied' => true,
+                ], 403);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                throw $e;
+            }
+        }
+
+        // Recompute the last area action for this specific area to decide entry/exit
+        $lastAreaScan = ActivityLog::where('actor_type', 'user')
+            ->where('actor_id', $user->id)
+            ->where('area_id', $areaId)
+            ->whereIn('action', ['entry', 'exit'])
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        $newAction = ($lastAreaScan && $lastAreaScan->action === 'entry') ? 'exit' : 'entry';
+
+        // Transaction for normal allowed flow
         DB::beginTransaction();
         try {
             // 1) Auto-create main gate entry if needed
@@ -522,6 +585,7 @@ if ($denialReason) {
         ], 500);
     }
 }
+
 
 /**
  * Determine user type based on student_id, employee_id, or guest status
