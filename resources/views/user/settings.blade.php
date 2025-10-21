@@ -276,7 +276,7 @@
         <div class="d-flex align-items-baseline justify-content-between mb-3">
             <div class="d-flex align-items-baseline">
                 <h3 class="mb-0 me-3">Manage</h3>
-                <h6 class="mb-0">Settings</h6>
+                <h6 class="mb-0">Profile Settings</h6>
             </div>
             <span class="text-muted">Home > Settings</span>
         </div>

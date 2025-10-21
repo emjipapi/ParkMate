@@ -26,8 +26,6 @@ class EditProfileComponent extends Component
 
     public $employee_id;
 
-    public $email;
-
     public $password;
 
     public $firstname;
@@ -47,6 +45,8 @@ class EditProfileComponent extends Component
     public $expiration_date; // ✅ add this
 
     public $profile_picture;
+    public $currentProfilePicture;
+
 
     // this is a user-side profile editor — require web auth
     protected $middleware = ['auth'];
@@ -56,6 +56,29 @@ class EditProfileComponent extends Component
     public $useEmployeeId = false;
 
     public $compressedProfilePicture; // holds the compressed tmp path (e.g. profile_pics/tmp/...)
+public $email;
+public $originalEmail; // store the mounted email
+public $otps = [];
+public $isDisabled = false;
+
+
+public function getOtp()
+{
+    if ($this->email === $this->originalEmail) {
+        $this->addError('email', 'Email has not changed. No need to request OTP.');
+        $this->dispatch('validationFailed');
+        return;
+    }
+
+    $this->otps = [];
+    $this->otps[] = '';
+}
+public function updatedEmail($value)
+{
+    // Clear the email error when user changes the email
+    $this->resetValidation('email');
+}
+
 
     public function updatedProfilePicture()
     {
@@ -191,6 +214,7 @@ class EditProfileComponent extends Component
         $this->student_id = $user->student_id ?? null;
         $this->employee_id = $user->employee_id ?? null;
         $this->email = $user->email ?? null;
+        $this->originalEmail = $this->email;
         // we don't expose password here
         $this->firstname = $user->firstname ?? null;
         $this->middlename = $user->middlename ?? null;
@@ -200,6 +224,7 @@ class EditProfileComponent extends Component
         $this->contact_number = $user->contact_number ?? null;
         $this->license_number = $user->license_number ?? null;
         $this->expiration_date = $user->expiration_date ?? null;
+        $this->currentProfilePicture = $user->profile_picture;
 
         $this->useStudentId = !empty($this->student_id) && empty($this->employee_id);
         $this->useEmployeeId = !empty($this->employee_id) && empty($this->student_id);
