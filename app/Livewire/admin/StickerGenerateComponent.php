@@ -19,7 +19,7 @@ class StickerGenerateComponent extends Component
     public $selectedTemplateId;
     public $userType = 'all';
     public $quantity = 1;
-    public $preview = false;
+    public $preview = true;
     public $selectedUserIds = [];
     public $generationMode = 'quantity'; // 'quantity' or 'users'
     public $isGenerating = false;
