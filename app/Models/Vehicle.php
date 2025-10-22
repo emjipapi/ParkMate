@@ -19,12 +19,14 @@ class Vehicle extends Model
         'serial_number',
         'or_number',
         'cr_number',
+        'sticker_template_id',
     ];
 
     protected $casts = [
         'rfid_tag' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'sticker_template_id' => 'integer',
     ];
 
     /**
@@ -54,5 +56,9 @@ class Vehicle extends Model
     public function violations()
     {
         return $this->hasMany(Violation::class, 'license_plate', 'license_plate');
+    }
+        public function stickerTemplate()
+    {
+        return $this->belongsTo(StickerTemplate::class, 'sticker_template_id');
     }
 }

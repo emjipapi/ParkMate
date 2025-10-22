@@ -17,17 +17,29 @@ class StickerTemplate extends Model
         'height',
         'aspect_ratio',
         'element_config',
-        'status'
+        'status',
     ];
 
     protected $casts = [
         'element_config' => 'array',
-        'aspect_ratio' => 'decimal:4'
+        'aspect_ratio' => 'decimal:4',
     ];
 
+    /**
+     * Accessor for the public file URL (storage).
+     */
     public function getFileUrlAttribute()
     {
         return asset('storage/' . $this->file_path);
+    }
+
+    /**
+     * Vehicles that currently reference this template (one-to-many).
+     * Vehicles have a `sticker_template_id` FK.
+     */
+    public function vehicles()
+    {
+        return $this->hasMany(Vehicle::class, 'sticker_template_id');
     }
 
     public function scopeActive($query)

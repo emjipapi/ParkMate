@@ -11,6 +11,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class GenerateStickersJob implements ShouldQueue
 {
@@ -72,6 +73,60 @@ public function handle(StickerGeneratorService $stickerService)
             'zip'            => $zipPath,
             'generated_count'=> count($results),
         ]);
+// --- start: DB update with debugging logs ---
+$numbers = array_map('intval', $this->numbers);
+Log::info("Sticker update: preparing to update vehicles", [
+    'template_id' => $this->templateId,
+    'numbers' => $numbers,
+    'job_key' => $this->key,
+]);
+
+if (! empty($numbers)) {
+    try {
+        // create placeholders for parameter binding
+        $placeholders = implode(',', array_fill(0, count($numbers), '?'));
+
+        // For serial format like "S0004" (one prefix char), substring from 2
+        $sqlWhere = "CAST(SUBSTRING(serial_number, 2) AS UNSIGNED) IN ($placeholders)";
+
+        // 1) SELECT matched rows to inspect why matching may fail
+        $selectSql = "SELECT id, serial_number FROM vehicles WHERE {$sqlWhere} LIMIT 1000";
+        $matched = DB::select($selectSql, $numbers);
+
+        Log::info("Sticker update: matched vehicles (sample)", [
+            'matched_count' => count($matched),
+            // map to simple array for readability
+            'samples' => array_map(function($r){ return ['id' => $r->id, 'serial' => $r->serial_number]; }, array_slice($matched, 0, 10)),
+        ]);
+
+        // 2) Perform the update and log affected rows
+        $affected = DB::table('vehicles')
+            ->whereRaw($sqlWhere, $numbers)
+            ->update([
+                'sticker_template_id' => $this->templateId,
+                'updated_at' => now(),
+            ]);
+
+        Log::info("Sticker update: update completed", [
+            'affected_rows' => $affected,
+            'template_id' => $this->templateId,
+            'numbers_count' => count($numbers),
+        ]);
+    } catch (\Throwable $ex) {
+        Log::error("Sticker update: exception during DB update", [
+            'message' => $ex->getMessage(),
+            'trace'   => $ex->getTraceAsString(),
+            'numbers' => $numbers,
+            'template_id' => $this->templateId,
+        ]);
+    }
+} else {
+    Log::info("Sticker update: no numbers provided, skipping DB update", [
+        'job_key' => $this->key,
+    ]);
+}
+// --- end: DB update with debugging logs ---
+
     } catch (\Throwable $e) {
         Log::error('GenerateStickersJob failed: ' . $e->getMessage(), [
             'key'       => $this->key,
