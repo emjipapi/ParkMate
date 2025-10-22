@@ -32,7 +32,7 @@ class UsersTable extends Component
 public function updatedPerPage()
 {
     // explicitly reset the default "page" paginator
-    $this->resetPage('page');
+    $this->resetPage($this->pageName);
 }
     public function mount()
     {
@@ -57,7 +57,7 @@ public function updatedPerPage()
 
     public function updatingSearch()
     {
-        $this->resetPage();
+        $this->resetPage($this->pageName);
     }
 
     // call this from blade with wire:change or rely on Livewire update naming
@@ -68,7 +68,7 @@ public function updatedPerPage()
             $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
             $this->filterProgram = '';
             $this->filterDepartment = '';
-            $this->resetPage();
+            $this->resetPage($this->pageName);
             return;
         }
 
@@ -81,7 +81,7 @@ public function updatedPerPage()
             $this->filterProgram = '';
         }
 
-        $this->resetPage();
+        $this->resetPage($this->pageName);
     }
 
     public function onProgramChanged($value)
@@ -92,7 +92,7 @@ public function updatedPerPage()
             $this->filterProgram = '';
             $this->filterDepartment = '';
             $this->programs = collect($this->allPrograms)->flatten()->sort()->values()->toArray();
-            $this->resetPage();
+            $this->resetPage($this->pageName);
             return;
         }
 
@@ -107,7 +107,7 @@ public function updatedPerPage()
             $this->filterDepartment = '';
         }
 
-        $this->resetPage();
+        $this->resetPage($this->pageName);
     }
     
 
@@ -170,7 +170,7 @@ public function render()
     {
         if (empty($ids)) return;
         User::whereIn('id', $ids)->delete();
-        $this->resetPage();
+        $this->resetPage($this->pageName);
         session()->flash('message', count($ids) . ' user(s) deleted successfully.');
     }
 public function generateReport()

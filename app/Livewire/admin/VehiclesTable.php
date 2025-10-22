@@ -20,12 +20,12 @@ class VehiclesTable extends Component
 
     public function updatingSearch()
     {
-        $this->resetPage();
+        $this->resetPage($this->pageName);
     }
 
     public function updatedPerPage()
     {
-        $this->resetPage('page');
+        $this->resetPage($this->pageName);
     }
 
     public function render()

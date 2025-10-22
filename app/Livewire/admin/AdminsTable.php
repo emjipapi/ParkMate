@@ -22,11 +22,11 @@ class AdminsTable extends Component
 public function updatedPerPage()
 {
     // explicitly reset the default "page" paginator
-    $this->resetPage('page');
+    $this->resetPage($this->pageName);
 }
     public function updatingSearch()
     {
-        $this->resetPage();
+        $this->resetPage($this->pageName);
     }
 
 
@@ -75,7 +75,7 @@ public function updatedPerPage()
             ]);
         */
 
-        $this->resetPage();
+        $this->resetPage($this->pageName);
         session()->flash('message', count($filtered) . ' admin(s) deleted successfully.');
     }
 }
