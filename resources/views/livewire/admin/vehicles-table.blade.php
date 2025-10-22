@@ -46,18 +46,20 @@
                         <span class="text-muted">—</span>
                         @endif
                     </td>
-                    
+
                     <td>
                         @php
-                        $tags = json_decode($vehicle->rfid_tag, true);
+                        // $vehicle->rfid_tag is already casted to an array by Eloquent
+                        $tags = $vehicle->rfid_tag;
 
-                        // If JSON decoding fails, just wrap the raw string in an array
-                        if (json_last_error() !== JSON_ERROR_NONE || !is_array($tags)) {
-                        $tags = [$vehicle->rfid_tag];
+                        // If it's not an array for some reason (e.g., legacy data), wrap it
+                        if (!is_array($tags)) {
+                        $tags = [$tags];
                         }
                         @endphp
 
                         {{ implode(', ', array_filter($tags)) }}
+
                     </td>
                     <td>{{ $vehicle->type }}</td>
                     <td>{{ $vehicle->body_type_model }}</td>
