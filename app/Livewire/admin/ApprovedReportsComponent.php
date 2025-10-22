@@ -51,7 +51,7 @@ class ApprovedReportsComponent extends Component
     public function updatedPerPage()
     {
         // explicitly reset the default "page" paginator
-        $this->resetPage('page');
+        $this->resetPage($this->pageName);
     }
 
     public function mount()
@@ -379,7 +379,7 @@ ActivityLog::create([
         $this->resetValidation("proofs.$violationId");
 
         // Reset pagination (optional)
-        $this->resetPage();
+        $this->resetPage($this->pageName);
 
         session()->flash('message', 'Violation marked as for endorsement and evidence attached.');
     }
@@ -391,4 +391,30 @@ ActivityLog::create([
 
         return $vehicles ? ['plates' => $vehicles] : null;
     }
+    // Reset pagination when any filter changes
+public function updatedSearch()
+{
+    $this->resetPage($this->pageName);
+}
+
+public function updatedReporterType()
+{
+    $this->resetPage($this->pageName);
+}
+
+public function updatedStartDate()
+{
+    $this->resetPage($this->pageName);
+}
+
+public function updatedEndDate()
+{
+    $this->resetPage($this->pageName);
+}
+
+public function updatedSortOrder()
+{
+    $this->resetPage($this->pageName);
+}
+
 }

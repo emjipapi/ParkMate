@@ -63,7 +63,7 @@ public $rejectCustomMessage = '';
 public function updatedPerPage()
 {
     // explicitly reset the default "page" paginator
-    $this->resetPage('page');
+    $this->resetPage($this->pageName);
 }
     public function mount()
     {
@@ -276,7 +276,7 @@ public function updateStatus($violationId, $newStatus)
         ]);
     }
 
-    $this->resetPage();
+    $this->resetPage($this->pageName);
 }
 
 
@@ -640,7 +640,7 @@ ActivityLog::create([
     $this->selectedViolationId = null;
     $this->selectedApproveMessage = '';
     $this->approveCustomMessage = '';
-    $this->resetPage();
+    $this->resetPage($this->pageName);
 }
 
  public function sendRejectMessage()
@@ -697,7 +697,7 @@ ActivityLog::create([
         $this->selectedViolationId = null;
         $this->selectedRejectMessage = '';
         $this->rejectCustomMessage = '';
-        $this->resetPage();
+        $this->resetPage($this->pageName);
     }
 private function handleApprovalSideEffects(int $violatorId, int $previousApprovedOrEndorseCount): void
 {
@@ -844,7 +844,31 @@ public function approveWithMessageConfirm()
         'message' => 'Violation approved and message saved.',
     ]);
     $this->dispatch('close-approve-modal'); // wire this up to close the approve modal on frontend if needed
-    $this->resetPage();
+    $this->resetPage($this->pageName);
+}
+public function updatedSearch()
+{
+    $this->resetPage($this->pageName);
+}
+
+public function updatedReporterType()
+{
+    $this->resetPage($this->pageName);
+}
+
+public function updatedStartDate()
+{
+    $this->resetPage($this->pageName);
+}
+
+public function updatedEndDate()
+{
+    $this->resetPage($this->pageName);
+}
+
+public function updatedSortOrder()
+{
+    $this->resetPage($this->pageName);
 }
 
 

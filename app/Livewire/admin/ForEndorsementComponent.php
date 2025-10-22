@@ -52,7 +52,7 @@ public $compressedEvidence;
 public function updatedPerPage()
 {
     // explicitly reset the default "page" paginator
-    $this->resetPage('page');
+    $this->resetPage($this->pageName);
 }
 
     public function mount()
@@ -261,7 +261,7 @@ $violationsQuery->when($this->reporterType === 'admin', fn (Builder $q) =>
     // Ordering + pagination
     $violations = $violationsQuery
         ->orderBy('created_at', ($this->sortOrder ?? 'desc') === 'asc' ? 'asc' : 'desc')
-        ->paginate(1, ['*'], $this->pageName);
+        ->paginate($this->perPage, ['*'], $this->pageName);
     // Process violations for display
     // $violations = $violationsQuery
     // ->orderBy('created_at', ($this->sortOrder ?? 'desc') === 'asc' ? 'asc' : 'desc')
@@ -347,4 +347,29 @@ $violations->getCollection()->transform(function ($v) {
         'users' => $this->users
     ]);
 }
+public function updatedSearch()
+{
+    $this->resetPage($this->pageName);
+}
+
+public function updatedReporterType()
+{
+    $this->resetPage($this->pageName);
+}
+
+public function updatedStartDate()
+{
+    $this->resetPage($this->pageName);
+}
+
+public function updatedEndDate()
+{
+    $this->resetPage($this->pageName);
+}
+
+public function updatedSortOrder()
+{
+    $this->resetPage($this->pageName);
+}
+
 }
