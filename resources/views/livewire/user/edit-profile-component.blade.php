@@ -83,11 +83,17 @@
 </div>
 <div class="mb-3 mt-2">
     <label>Confirm Password</label>
-    <input type="password" wire:model="passwordConfirm" class="form-control @error('passwordConfirm') is-invalid @enderror" @disabled(strlen($password) < 6 || !$this->isPasswordValid()) required>
-    @error('passwordConfirm')
+    <input
+        type="password"
+        wire:model.live.debounce.500ms="password_confirmation"
+        class="form-control @error('password') is-invalid @enderror"
+        @disabled(empty($password) || strlen($password) < 6)
+    >
+    @error('password')
         <div class="invalid-feedback d-block">{{ $message }}</div>
     @enderror
 </div>
+
 
         <div class="row mb-3">
             <div class="col-md">

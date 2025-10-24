@@ -60,7 +60,7 @@ class EditProfileComponent extends Component
 public $email;
 public $originalEmail; // store the mounted email
 public $otps = [];
-public $passwordConfirm;
+public $password_confirmation;
 public function updatedPassword($value)
 {
     $this->validatePassword($value);
@@ -464,8 +464,7 @@ foreach ($userVehicles as $vehicle) {
             'email',
             Rule::unique('users', 'email')->ignore(Auth::user()->id),
         ],
-                    'password' => 'nullable|string|min:6',  // Change to nullable since it's optional
-        'passwordConfirm' => 'nullable|string|min:6',
+'password' => 'nullable|string|min:6|confirmed',
         'otps.0' => 'nullable|string',
             'firstname' => 'required|string|max:50',
             'middlename' => 'nullable|string|max:50',
@@ -617,7 +616,17 @@ unset($data['profile_picture']);
 
     // Good — all checks passed. Proceed to create everything inside a transaction.
     // Hash password and prepare $data for insert
-    $data['password'] = Hash::make($data['password'] ?? '');
+    unset($data['otps']); // keep if exists; remove any other UI-only fields here
+
+// Only include password if the user actually provided one (and validation passed).
+// We use $this->password which is the Livewire bound property.
+if (!empty($this->password)) {
+    // validation already ensured min length + confirmed
+    $data['password'] = Hash::make($this->password);
+} else {
+    // ensure password field is not present so update() won't overwrite it
+    unset($data['password']);
+}
 
     // Log normalized serials for debugging (optional)
     // \Log::debug('Normalized serials before insert: ' . json_encode($normalizedSerials));
@@ -696,10 +705,10 @@ if ($passwordChanged) {
         return;
     }
     
-    if ($this->password !== $this->passwordConfirm) {
-        $this->addError('passwordConfirm', 'Passwords do not match.');
-        return;
-    }
+    // if ($this->password !== $this->passwordConfirm) {
+    //     $this->addError('passwordConfirm', 'Passwords do not match.');
+    //     return;
+    // }
 }
 
     DB::transaction(function () use ($data) {
@@ -813,7 +822,7 @@ ActivityLog::create([
             // 'employee_id',
             // 'email',
             'password',
-            'passwordConfirm',
+            'password_confirmation',
             // 'firstname',
             // 'middlename',
             // 'lastname',
