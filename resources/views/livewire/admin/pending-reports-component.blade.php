@@ -691,33 +691,61 @@
     {{ $violations->links() }}
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-    // open
-    window.addEventListener('open-approve-modal', () => {
-      const el = document.getElementById('approveMessageModal');
-      if (el) new bootstrap.Modal(el).show();
-    });
+    function setupModalListeners() {
+        // Remove old listeners to prevent stacking
+        const oldHandler = window._pendingReportsModalHandler;
+        if (oldHandler) {
+            window.removeEventListener('open-approve-modal', oldHandler.openApprove);
+            window.removeEventListener('open-reject-modal', oldHandler.openReject);
+            window.removeEventListener('close-approve-modal', oldHandler.closeApprove);
+            window.removeEventListener('close-reject-modal', oldHandler.closeReject);
+        }
 
-    window.addEventListener('open-reject-modal', () => {
-      const el = document.getElementById('rejectMessageModal');
-      if (el) new bootstrap.Modal(el).show();
-    });
+        // Define new handlers
+        const openApprove = () => {
+            const el = document.getElementById('approveMessageModal');
+            if (el) new bootstrap.Modal(el).show();
+        };
 
-    // close
-    window.addEventListener('close-approve-modal', () => {
-      const el = document.getElementById('approveMessageModal');
-      if (el) {
-        const m = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
-        m.hide();
-      }
-    });
+        const openReject = () => {
+            const el = document.getElementById('rejectMessageModal');
+            if (el) new bootstrap.Modal(el).show();
+        };
 
-    window.addEventListener('close-reject-modal', () => {
-      const el = document.getElementById('rejectMessageModal');
-      if (el) {
-        const m = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
-        m.hide();
-      }
-    });
-  });
+        const closeApprove = () => {
+            const el = document.getElementById('approveMessageModal');
+            if (el) {
+                const m = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
+                m.hide();
+            }
+        };
+
+        const closeReject = () => {
+            const el = document.getElementById('rejectMessageModal');
+            if (el) {
+                const m = bootstrap.Modal.getInstance(el) || new bootstrap.Modal(el);
+                m.hide();
+            }
+        };
+
+        // Attach new listeners
+        window.addEventListener('open-approve-modal', openApprove);
+        window.addEventListener('open-reject-modal', openReject);
+        window.addEventListener('close-approve-modal', closeApprove);
+        window.addEventListener('close-reject-modal', closeReject);
+
+        // Store handlers for cleanup next time
+        window._pendingReportsModalHandler = {
+            openApprove,
+            openReject,
+            closeApprove,
+            closeReject
+        };
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', setupModalListeners);
+    
+    // Reinitialize after wire:navigate
+    document.addEventListener('livewire:navigated', setupModalListeners);
 </script>
