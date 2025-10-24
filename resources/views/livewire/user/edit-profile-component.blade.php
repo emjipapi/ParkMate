@@ -333,38 +333,82 @@
     </form>
 </div>
 <script>
+    // Initialize OTP countdown with localStorage persistence
     function initializeOtpButton() {
         const btn = document.getElementById('getOtpBtn');
         if (!btn) return;
         
         let currentInterval = null;
 
-        btn.addEventListener('click', function() {
-            // Check if already counting down
-            if (btn.disabled) return;
+        // Function to restore countdown from localStorage if active
+        function restoreCountdownIfActive() {
+            const saved = localStorage.getItem('otpCountdown');
+            if (!saved) {
+                btn.disabled = false;
+                btn.textContent = 'Get OTP';
+                return false;
+            }
 
-            // Reset any existing countdown
+            const otpData = JSON.parse(saved);
+            const elapsed = Math.floor((Date.now() - otpData.startTime) / 1000);
+            const remaining = otpData.duration - elapsed;
+
+            if (remaining > 0) {
+                // Countdown still active
+                startCountdown(remaining);
+                return true;
+            } else {
+                // Countdown expired, clear it
+                localStorage.removeItem('otpCountdown');
+                btn.disabled = false;
+                btn.textContent = 'Get OTP';
+                return false;
+            }
+        }
+
+        // Function to start/resume countdown
+        function startCountdown(initialCountdown) {
+            btn.disabled = true;
+            let countdown = initialCountdown;
+            btn.textContent = `Get OTP (${countdown}s)`;
+
             if (currentInterval) {
                 clearInterval(currentInterval);
             }
-
-            // Call the Livewire method
-            @this.getOtp();
-
-            let countdown = 30;
-            btn.disabled = true;
-            btn.textContent = `Get OTP (${countdown}s)`;
 
             currentInterval = setInterval(() => {
                 countdown--;
                 btn.textContent = `Get OTP (${countdown}s)`;
 
-                if (countdown === 0) {
+                if (countdown <= 0) {
                     clearInterval(currentInterval);
                     btn.disabled = false;
                     btn.textContent = 'Get OTP';
+                    localStorage.removeItem('otpCountdown');
                 }
             }, 1000);
+        }
+
+        // Try to restore countdown from localStorage on page load
+        restoreCountdownIfActive();
+
+        // Handle button click
+        btn.addEventListener('click', function() {
+            // Check if already counting down
+            if (btn.disabled) return;
+
+            // Call the Livewire method
+            @this.getOtp();
+
+            // Save countdown start time to localStorage
+            const otpData = {
+                startTime: Date.now(),
+                duration: 60
+            };
+            localStorage.setItem('otpCountdown', JSON.stringify(otpData));
+
+            // Start countdown
+            startCountdown(60);
         });
 
         // Listen for validation errors
@@ -373,6 +417,7 @@
                 clearInterval(currentInterval);
                 btn.disabled = false;
                 btn.textContent = 'Get OTP';
+                localStorage.removeItem('otpCountdown');
             }
         });
     }
