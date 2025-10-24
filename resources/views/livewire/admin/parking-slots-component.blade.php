@@ -161,3 +161,28 @@
         @endforeach
     </div>
 </div>
+
+<script>
+    // Listen for Livewire navigation away from this page
+    document.addEventListener('livewire:navigating', () => {
+        console.log('🔄 Livewire navigating away - stopping parking map polling...');
+        
+        // Find and destroy the Alpine parking map component
+        const mapContainer = document.getElementById('live-map-container');
+        if (mapContainer && mapContainer.__x) {
+            try {
+                mapContainer.__x.destroy?.();
+                console.log('✅ Parking map polling stopped');
+            } catch (e) {
+                console.warn('⚠️ Error stopping parking map:', e);
+            }
+        }
+        
+        // Also clear any setIntervals that might be running
+        // Get the highest interval ID and clear them all as a safety measure
+        let id = setInterval(() => {}, 0);
+        while (id--) {
+            clearInterval(id);
+        }
+    });
+</script>
