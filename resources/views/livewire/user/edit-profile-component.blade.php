@@ -147,8 +147,6 @@
             </div>
         </div>
 
-
-
         <div class="row mb-3">
             <div class="col-md">
                 <label>Address</label>
@@ -335,8 +333,10 @@
     </form>
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    function initializeOtpButton() {
         const btn = document.getElementById('getOtpBtn');
+        if (!btn) return;
+        
         let currentInterval = null;
 
         btn.addEventListener('click', function() {
@@ -375,5 +375,11 @@
                 btn.textContent = 'Get OTP';
             }
         });
-    });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', initializeOtpButton);
+    
+    // Reinitialize after wire:navigate
+    document.addEventListener('livewire:navigated', initializeOtpButton);
 </script>
