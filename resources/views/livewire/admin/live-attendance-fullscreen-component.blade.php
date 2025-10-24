@@ -22,33 +22,46 @@
             }
         @endphp
 
-        <div class="d-flex align-items-center border rounded shadow-sm bg-white {{ $bgClass }}"
+        <div class="d-flex align-items-center justify-content-between border rounded shadow-sm bg-white {{ $bgClass }}"
             style="font-size: {{ $loop->first ? '1.8rem' : '1.3rem' }}; 
                         width: 100%; max-width: {{ $loop->first ? '1200px' : '900px' }};
                         padding: {{ $loop->first ? '2.5rem' : '1rem' }};
                         transition: transform 0.3s ease;
                         {{ $status === 'DENIED' ? 'background: linear-gradient(135deg, #ffffffff 0%, #fff3cd 100%);' : '' }}">
 
-            <!-- Picture -->
-            <img src="{{ $scan['picture'] }}" alt="Profile"
-                class="rounded-circle me-4 {{ $status === 'DENIED' ? 'opacity-75' : '' }}" style="width: {{ $loop->first ? '220px' : '100px' }};
-                            height: {{ $loop->first ? '220px' : '100px' }};
-                            object-fit: cover;">
+            <!-- Left: Picture + Texts -->
+            <div class="d-flex align-items-center">
+                <!-- Picture -->
+                <img src="{{ $scan['picture'] }}" alt="Profile"
+                    class="rounded-circle me-4 {{ $status === 'DENIED' ? 'opacity-75' : '' }}" style="width: {{ $loop->first ? '220px' : '100px' }};
+                                height: {{ $loop->first ? '220px' : '100px' }};
+                                object-fit: cover;">
 
-            <!-- Texts -->
-            <div>
-                <div class="fw-bold" style="font-size: {{ $loop->first ? '2.2rem' : '1.5rem' }};">
-                    {{ $scan['name'] ?? 'Name, EPC' }}
-                </div>
-                <div class="fw-bold {{ $colorClass }}" style="font-size: {{ $loop->first ? '2rem' : '1.2rem' }};">
-                    {{ $status }}
-                    @if ($status === 'DENIED')
-                        <small class="d-block text-muted" style="font-size: 0.7em; font-weight: normal;">
-                            Entry denied due to violations
-                        </small>
-                    @endif
+                <!-- Texts -->
+                <div>
+                    <div class="fw-bold" style="font-size: {{ $loop->first ? '2.2rem' : '1.5rem' }};">
+                        {{ $scan['name'] ?? 'Name, EPC' }}
+                    </div>
+                    <div class="fw-bold {{ $colorClass }}" style="font-size: {{ $loop->first ? '2rem' : '1.2rem' }};">
+                        {{ $status }}
+                        @if ($status === 'DENIED')
+                            <small class="d-block text-muted" style="font-size: 0.7em; font-weight: normal;">
+                                Entry denied due to violations
+                            </small>
+                        @endif
+                    </div>
                 </div>
             </div>
+
+            <!-- Right: Date & Time -->
+            {{-- <div class="d-flex flex-column align-items-end justify-content-center ps-4" style="min-width: 200px;">
+                <div style="font-size: {{ $loop->first ? '1.4rem' : '0.95rem' }}; font-weight: 500; color: #666;">
+                    {{ \Carbon\Carbon::parse($scan['time'])->format('M d, Y') }}
+                </div>
+                <div style="font-size: {{ $loop->first ? '1.2rem' : '0.85rem' }}; color: #999;">
+                    {{ \Carbon\Carbon::parse($scan['time'])->format('h:i:s A') }}
+                </div>
+            </div> --}}
         </div>
     @endforeach
     <livewire:admin.unknown-epcs-component />
