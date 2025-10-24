@@ -331,8 +331,12 @@ $areaStatuses[$areaKey] = [
                     positioningSetup: false,
 
                     init() {
+                        const self = this;
                         this.pollInterval = setInterval(() => {
-                            this.refreshStatuses();
+                            // Only refresh if the document is visible
+                            if (!document.hidden) {
+                                this.refreshStatuses();
+                            }
                         }, 2000);
 
                         this.$nextTick(() => {
