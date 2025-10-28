@@ -27,7 +27,7 @@
     </div>
 
     {{-- Campus Entry/Exit Summary --}}
-    <div @canaccess("entry_exit_logs") onclick="window.location='{{ url('/activity-log?activeTab=entry/exit') }}'" @endcanaccess class="card card-3"
+    <div @canaccess("entry_exit_logs") onclick="window.location='{{ url('/activity-log?activeTab=entry%2Fexit') }}'" @endcanaccess class="card card-3"
         style="cursor:pointer;">
         @canaccess("entry_exit_logs")
         <div class="card-body">

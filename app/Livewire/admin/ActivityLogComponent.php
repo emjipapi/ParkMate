@@ -20,6 +20,12 @@ class ActivityLogComponent extends Component
     {
         $permissions = json_decode(Auth::guard('admin')->user()->permissions ?? '[]', true);
 
+        // Only set activeTab based on permissions if no query parameter was provided
+        if (request()->query('activeTab')) {
+            // Query parameter exists, let $queryString binding handle it
+            return;
+        }
+
         if (in_array('system_logs', $permissions)) {
             $this->activeTab = 'system';
         } elseif (in_array('entry_exit_logs', $permissions)) {
