@@ -259,7 +259,7 @@
         </div>
 
         <div class="top-bar">
-            <div id="clock" style="font-size: 1rem;"></div>
+            <div id="admin-name" style="font-size: 1rem; font-weight: bold;">{{ Auth::guard('admin')->user()->lastname }}, {{ Auth::guard('admin')->user()->firstname }}</div>
             <span style="flex: 1;"></span>
 
             <div class="live-btn-bar">

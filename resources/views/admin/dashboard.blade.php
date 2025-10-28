@@ -577,7 +577,7 @@
 
     <div class="top-bar">
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
-        <div id="clock" style="font-size: 1rem;" class="d-none d-md-block"></div>
+        <div id="admin-name" class="d-none d-md-block" style="font-size: 1rem; font-weight: bold;">{{ Auth::guard('admin')->user()->lastname }}, {{ Auth::guard('admin')->user()->firstname }}</div>
         <span style="flex: 1;"></span>
         <div class="live-btn-bar me-1">
             <a style="text-decoration: none;">
