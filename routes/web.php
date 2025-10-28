@@ -154,7 +154,7 @@ Route::middleware(['admin'])->group(function () {
     Route::middleware(['admin', 'permission:edit_admin'])->group(function () {
     Route::get('/admins/edit/{id}', [UserController::class, 'editAdmin'])->name('admins.edit');
     });
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    // Route::post('/users', [UserController::class, 'store'])->name('users.store');
 
     //Sticker Generator
     Route::middleware(['admin', 'permission:sticker_generator'])->group(function () {
