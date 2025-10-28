@@ -471,6 +471,33 @@
                 padding: 8px 16px !important;
                 /* adjust padding */
             }
+
+            
+            .tabs-container {
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+            /* Hide scrollbars */
+            scrollbar-width: none;
+            /* Firefox */
+            -ms-overflow-style: none;
+            /* IE/Edge */
+        }
+
+        .tabs-container::-webkit-scrollbar {
+            display: none;
+            /* Chrome, Safari, Opera */
+        }
+
+        .nav-tabs {
+            min-width: max-content;
+            flex-wrap: nowrap;
+            display: flex;
+        }
+
+        .nav-tabs .nav-link {
+            cursor: pointer;
+        }
         }
     </style>
     <meta name="csrf-token" content="{{ csrf_token() }}">
