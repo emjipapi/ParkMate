@@ -19,7 +19,7 @@
     html {
       height: 100%;
       font-family: 'Inter', sans-serif;
-      background-color: #CDD1D9;
+      background-color: #dfdfdf;
     }
 
     .center-box {
@@ -28,6 +28,7 @@
       height: 240px;
       background-color: #ffffff;
       padding: 20px;
+      border-radius: 16px;
     }
 
     h2 {
@@ -45,6 +46,7 @@
       padding: 8px 24px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      border-radius: 8px;
     }
 
     .btn:hover {

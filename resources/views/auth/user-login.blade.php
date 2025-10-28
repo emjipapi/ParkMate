@@ -19,7 +19,7 @@
     html {
       height: 100%;
       font-family: 'Inter', sans-serif;
-      background-color: #CDD1D9;
+      background-color: #dfdfdf;
     }
 
     .center-box {
@@ -29,6 +29,7 @@
       min-height: 240px;
       background-color: #ffffff;
       padding: 20px;
+      border-radius: 16px;
     }
 
     h2 {
@@ -46,6 +47,8 @@
       padding: 8px 24px;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      width: 100%;
+      border-radius: 8px;
     }
 
     .btn-signin:hover {
@@ -67,7 +70,7 @@
     <a href="{{ url('/') }}" class="position-absolute text-decoration-none text-secondary" style="top: 15px; left: 15px; z-index: 10;">
       <i class="bi bi-arrow-left fs-5"></i>
     </a>
-      <p class="text-center mb-4">Sign in to start your session.</p>
+      <p class="text-center mb-4">Sign in as user.</p>
 
 
       <!-- Display errors -->
@@ -88,10 +91,10 @@
 
         </div>
         <div class="input-group mb-3">
-          <input type="password" name="password" class="form-control" placeholder="Password" required />
-          <span class="input-group-text bg-white border-start-0">
-            <i class="fas fa-lock text-secondary"></i>
-          </span>
+          <input type="password" name="password" id="passwordInput" class="form-control" placeholder="Password" required />
+        <span class="input-group-text bg-white border-start-0 password-toggle" onclick="togglePasswordVisibility()">
+          <i class="fas fa-eye text-secondary" id="passwordIcon"></i>
+        </span>
         </div>
         <div class="d-flex justify-content-end mt-3">
           <button type="submit" class="btn-signin">Sign In</button>
@@ -99,4 +102,20 @@
       </form>
     </div>
   </div>
+  <script>
+  function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('passwordInput');
+    const passwordIcon = document.getElementById('passwordIcon');
+    
+    if (passwordInput.type === 'password') {
+      passwordInput.type = 'text';
+      passwordIcon.classList.remove('fa-eye');
+      passwordIcon.classList.add('fa-eye-slash');
+    } else {
+      passwordInput.type = 'password';
+      passwordIcon.classList.remove('fa-eye-slash');
+      passwordIcon.classList.add('fa-eye');
+    }
+  }
+</script>
 </body>
