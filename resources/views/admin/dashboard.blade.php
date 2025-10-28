@@ -317,19 +317,19 @@
         }
 
         .card-1 {
-            grid-column: 1;
-            grid-row: 2;
-            height: 200px;
-        }
-
-        .card-2 {
             grid-column: 2;
             grid-row: 2;
             height: 200px;
         }
 
-        .card-3 {
+        .card-2 {
             grid-column: 3;
+            grid-row: 2;
+            height: 200px;
+        }
+
+        .card-3 {
+            grid-column: 1;
             grid-row: 2;
             height: 200px;
         }
@@ -495,14 +495,18 @@
                 /* smaller breadcrumb text */
             }
 
-            .cards-container .card-6 {
+            /* .cards-container .card-6 {
                 order: -2;
-                /* first on mobile */
+                
             }
                         .cards-container .card-7 {
                 order: -1;
-                /* first on mobile */
-            }
+               
+            } */
+                     .live-btn {
+            font-size: 0.6rem;
+
+        }
         }
     </style>
 </head>
