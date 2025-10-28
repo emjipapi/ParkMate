@@ -224,6 +224,13 @@ public function generateReport()
             
             // Each user has vehicles - create one row per vehicle
             foreach ($user->vehicles as $vehicle) {
+                // Handle RFID tag - could be array or string
+                $tags = $vehicle->rfid_tag;
+                if (!is_array($tags)) {
+                    $tags = [$tags];
+                }
+                $tagsString = implode(',', array_filter($tags)); // join multiple tags with comma
+                
                 $csvData[] = [
                     $user->id,
                     $userId,
@@ -245,7 +252,7 @@ public function generateReport()
                     $vehicle->body_type_model,
                     $vehicle->or_number,
                     $vehicle->cr_number,
-                    $vehicle->rfid_tag,
+                    $tagsString,
                     $vehicle->license_plate,
                     $vehicle->created_at ? $vehicle->created_at->format('Y-m-d H:i:s') : ''
                 ];
