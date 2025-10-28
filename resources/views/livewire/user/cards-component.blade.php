@@ -4,7 +4,7 @@
     {{-- Car Slots --}}
     <div href='/user-parking-slots' wire:navigate class="card card-1" style="cursor:pointer;">
         <div class="card-body">
-            <h1 class="card-title">{{ $totalCarOccupied }}</h1>
+            <h1 class="card-title" style="text-align: center;">{{ $totalCarOccupied }}</h1>
             <p class="card-text">Occupied Car Slots</p>
             <small>{{ $totalCarSlots }} Total Motorcycle Slots</small>
         </div>
@@ -14,7 +14,7 @@
     {{-- Motorcycle Slots --}}
     <div href='/user-parking-slots' wire:navigate class="card card-2" style="cursor:pointer;">
         <div class="card-body">
-            <h1 class="card-title">{{ $totalMotoOccupied }}</h1>
+            <h1 class="card-title" style="text-align: center;">{{ $totalMotoOccupied }}</h1>
             <p class="card-text">Occupied Motorcycle Slots</p>
             <small>{{ $totalMotoSlots }} Total Motorcycle Slots</small>
 
@@ -24,7 +24,7 @@
     {{-- Violations & Pending Reports --}}
     <div href='/user-violation-tracking' wire:navigate class="card card-3" style="cursor:pointer;">
         <div class="card-body">
-            <h1 class="card-title">{{ $myViolationsCount }}</h1>
+            <h1 class="card-title" style="text-align: center;">{{ $myViolationsCount }}</h1>
             <p class="card-text">Violations</p>
             <small>{{ $myPendingReports }} Reports Pending</small>
         </div>

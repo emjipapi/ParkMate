@@ -5,7 +5,7 @@
     <div @canaccess("parking_slots") onclick="window.location='{{ url('/parking-slots') }}'" @endcanaccess class="card card-1" style="cursor:pointer;">
         @canaccess("parking_slots")
         <div class="card-body">
-            <h1 class="card-title">{{ $totalCarOccupied }}</h1>
+            <h1 class="card-title" style="text-align: center;">{{ $totalCarOccupied }}</h1>
             <p class="card-text">Occupied Car Slots</p>
             <small>{{ $totalCarSlots }} Total Motorcycle Slots</small>
         </div>
@@ -17,7 +17,7 @@
     <div @canaccess("parking_slots") onclick="window.location='{{ url('/parking-slots') }}'" @endcanaccess class="card card-2" style="cursor:pointer;">
         @canaccess("parking_slots")
         <div class="card-body">
-            <h1 class="card-title">{{ $totalMotoOccupied }}</h1>
+            <h1 class="card-title" style="text-align: center;">{{ $totalMotoOccupied }}</h1>
             <p class="card-text">Occupied Motorcycle Slots</p>
             <small>{{ $totalMotoSlots }} Total Motorcycle Slots</small>
 
@@ -31,7 +31,7 @@
         style="cursor:pointer;">
         @canaccess("entry_exit_logs")
         <div class="card-body">
-            <h2 class="card-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+            <h2 class="card-title" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;">
                 Campus Activity
             </h2>
 
