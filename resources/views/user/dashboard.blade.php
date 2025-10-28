@@ -401,8 +401,20 @@
 
     <div class="top-bar">
         <button class="mobile-menu-btn" onclick="openSidebar()">☰</button>
-        <div id="clock" style="font-size: 1rem;"></div>
+        {{-- <div id="clock" style="font-size: 1rem;"></div> --}}
         <span style="flex: 1;"></span>
+                <div style="display: flex; align-items: center; gap: 12px;">
+            <div id="user-name" style="font-size: 1rem; font-weight: bold;">{{ Auth::guard('web')->user()->firstname }}</div>
+            @if(Auth::guard('web')->user()->profile_picture)
+            <img src="{{ route('profile.picture', Auth::guard('web')->user()->profile_picture) }}" 
+                 alt="Profile" 
+                 style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;">
+            @else
+            <div style="width: 36px; height: 36px; border-radius: 50%; background-color: #ccc; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                {{ substr(Auth::guard('web')->user()->firstname, 0, 1) }}
+            </div>
+            @endif
+        </div>
 
     </div>
 
