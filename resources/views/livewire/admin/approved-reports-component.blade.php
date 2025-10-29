@@ -197,12 +197,26 @@
                         'resolved' => 'bg-success text-white',
                         ];
                         $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
+                        
+                        $violationCount = 0;
+                        if ($violation->violator_id) {
+                            $violationCount = \App\Models\Violation::where('violator_id', $violation->violator_id)
+                                ->whereIn('status', ['first_violation', 'second_violation', 'third_violation', 'approved', 'rejected'])
+                                ->where('id', '!=', $violation->id)
+                                ->count();
+                        }
+                        $nextLevel = $violationCount + 1;
+                        $levelText = $nextLevel === 1 ? '1st Violation' : ($nextLevel === 2 ? '2nd Violation' : '3rd+ Violation');
+                        $levelBadge = $nextLevel === 1 ? 'bg-info text-white' : ($nextLevel === 2 ? 'bg-warning text-dark' : 'bg-danger text-white');
                         @endphp
 
-                        <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}"
-                            aria-label="Status: {{ $statusText }}">
-                            {{ $statusText }}
-                        </span>
+                        <div class="d-flex flex-column gap-1">
+                            <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}"
+                                aria-label="Status: {{ $statusText }}">
+                                {{ $statusText }}
+                            </span>
+                            <span class="badge rounded-pill {{ $levelBadge }}">{{ $levelText }}</span>
+                        </div>
                     </td>
 
                     <!-- Actions (desktop) -->
@@ -232,7 +246,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="9" class="text-center text-muted py-4">
+                    <td colspan="11" class="text-center text-muted py-4">
                             <div class="text-center py-8">
         <div class="text-gray-500 text-lg mb-2">There are currently no reports to be display.</div>
     </div>
@@ -248,7 +262,7 @@
         @forelse($violations as $violation)
         <article wire:key="approved-violation-card-{{ $violation->id }}" class="bg-white border rounded p-3 shadow-sm mb-3">
             <!-- Status Badge -->
-            <div class="mb-3 d-flex justify-content-end">
+            <div class="mb-3 d-flex justify-content-end gap-2">
                 @php
                 $status = $violation->status ?? 'unknown';
                 $statusText = ucfirst(str_replace('_', ' ', $status));
@@ -260,9 +274,20 @@
                 'resolved' => 'bg-success text-white',
                 ];
                 $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
+                
+                $violationCount = 0;
+                if ($violation->violator_id) {
+                    $violationCount = \App\Models\Violation::where('violator_id', $violation->violator_id)
+                        ->whereIn('status', ['first_violation', 'second_violation', 'third_violation', 'approved', 'rejected'])
+                        ->where('id', '!=', $violation->id)
+                        ->count();
+                }
+                $nextLevel = $violationCount + 1;
+                $levelText = $nextLevel === 1 ? '1st Violation' : ($nextLevel === 2 ? '2nd Violation' : '3rd+ Violation');
+                $levelBadge = $nextLevel === 1 ? 'bg-info text-white' : ($nextLevel === 2 ? 'bg-warning text-dark' : 'bg-danger text-white');
                 @endphp
-                <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}">{{ $statusText
-                    }}</span>
+                <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}">{{ $statusText }}</span>
+                <span class="badge rounded-pill {{ $levelBadge }}">{{ $levelText }}</span>
             </div>
 
             <!-- 2-Column Details -->
