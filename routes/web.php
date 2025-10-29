@@ -87,6 +87,10 @@ Route::get('/reports/attendance', [ReportController::class, 'generateAttendanceR
 
 Route::get('/reports/endorsement', [ReportController::class, 'endorsementReport'])
     ->name('reports.endorsement');
+
+Route::get('/reports/download-endorsement/{file}', [ReportController::class, 'downloadEndorsementReport'])
+    ->name('reports.download-endorsement');
+
 Route::get('/stickers/download/{filename}', [StickerDownloadController::class, 'download'])
     ->name('stickers.download');
 /*
@@ -133,6 +137,7 @@ Route::middleware(['admin'])->group(function () {
     Route::middleware(['admin', 'permission:create_report'])->group(function () {
     Route::view('/create-report', 'admin.create-violation-report');
     });
+Route::get('/reports/download/{file}', [ReportController::class, 'downloadReport'])->name('reports.download');
 
     //Users
     Route::view('/users', 'admin.users')

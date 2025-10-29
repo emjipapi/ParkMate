@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\ActivityLog;
 use App\Models\Violation;
+use App\Jobs\GenerateEndorsementReport;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
 use App\Models\User;
 use App\Models\Admin;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
 class ReportController extends Controller
 {
     public function generateAttendanceReport(Request $request)
@@ -90,74 +95,53 @@ class ReportController extends Controller
 
         return $response;
     }
-public function endorsementReport(Request $request)
+    public function endorsementReport(Request $request)
+    {
+        // validate dates
+        $request->validate([
+            'startDate' => 'required|date',
+            'endDate'   => 'required|date|after_or_equal:startDate',
+        ]);
+
+        $start = Carbon::parse($request->get('startDate'))->startOfDay();
+        $end   = Carbon::parse($request->get('endDate'))->endOfDay();
+
+        $fileName = sprintf(
+            'endorsement-report-%s-to-%s-%s.pdf',
+            $start->format('Ymd'),
+            $end->format('Ymd'),
+            Str::random(8)
+        );
+
+        // Dispatch job to queue with the filename
+        GenerateEndorsementReport::dispatch(
+            $start->toDateString(),
+            $end->toDateString(),
+            Auth::guard('admin')->id(),
+            $fileName
+        );
+
+        // Redirect to the download endpoint with a small delay built into the download method
+        // The download method will check if the file exists and wait if needed
+        return redirect()->route('reports.download-endorsement', ['file' => $fileName]);
+    }public function downloadEndorsementReport($file)
 {
-    // validate dates
-    $request->validate([
-        'startDate' => 'required|date',
-        'endDate'   => 'required|date|after_or_equal:startDate',
-    ]);
-
-    $start = Carbon::parse($request->get('startDate'))->startOfDay();
-    $end   = Carbon::parse($request->get('endDate'))->endOfDay();
-
-    $violations = Violation::with(['reporter', 'area', 'violator'])
-        ->where('status', 'for_endorsement')
-        ->whereBetween('endorsed_at', [$start, $end])
-        ->orderBy('endorsed_at', 'asc')
-        ->get();
-
-    $summary = [
-        'total_reports'     => $violations->count(),
-        'unique_reporters'  => $violations->pluck('reporter_id')->filter()->unique()->count(),
-        'unique_violators'  => $violations->pluck('violator_id')->filter()->unique()->count(),
-    ];
-
-    $reportType = 'For Endorsement';
-
-    $fileName = sprintf(
-        'endorsement-report-%s-to-%s.pdf',
-        $start->format('Ymd'),
-        $end->format('Ymd')
-    );
-
-    try {
-        $pdf = PDF::loadView('reports.endorsement', [
-            'violations' => $violations,
-            'summary'    => $summary,
-            'reportType' => $reportType,
-            'startDate'  => $start->toDateString(),
-            'endDate'    => $end->toDateString(),
-        ])
-        ->setPaper('a4')
-        ->setOptions([
-            'margin-top' => 15,
-            'margin-bottom' => 15,
-            'margin-left' => 10,
-            'margin-right' => 10,
-            'enable-local-file-access' => true,
-            'no-stop-slow-scripts' => true,
-            'disable-smart-shrinking' => true,
-            'load-error-handling' => 'ignore',
-            'load-media-error-handling' => 'ignore',
-        ]);
-
-        return $pdf->download($fileName);
-        
-    } catch (\Exception $e) {
-        \Log::error('PDF generation failed:', [
-            'error' => $e->getMessage(),
-            'violations_count' => $violations->count(),
-            'date_range' => $start->toDateString() . ' to ' . $end->toDateString()
-        ]);
-        
-        return response()->json([
-            'error' => 'PDF generation failed. Please check the logs for details.',
-            'debug_info' => [
-                'violations_found' => $violations->count(),
-                'date_range' => $start->toDateString() . ' to ' . $end->toDateString()
-            ]
-        ], 500);
+    $path = 'reports/' . $file;
+    
+    // Wait up to 30 seconds for the file to be generated
+    $maxAttempts = 30;
+    $attempts = 0;
+    
+    while (!Storage::disk('private')->exists($path) && $attempts < $maxAttempts) {
+        sleep(1);
+        $attempts++;
     }
+    
+    if (!Storage::disk('private')->exists($path)) {
+        abort(404, 'Report generation failed or took too long. Please try again.');
+    }
+
+    $fullPath = storage_path('app/private/' . $path);
+    return response()->download($fullPath, $file);
 }
 }

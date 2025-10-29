@@ -230,13 +230,12 @@ public function generateReport()
         'action'     => 'generate_report',
         'details'    => 'Admin ' 
             . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
-            . ' generated an attendance report for the period ' . $start . ' to ' . $end . '.',
+            . ' generated an endorsement report for the period ' . $start . ' to ' . $end . '.',
         'created_at' => now(),
     ]);
 
-    // Redirect to report download
-    return redirect()->route('reports.attendance', [
-        'reportType' => $this->reportType,
+    // Redirect to report endpoint (which queues the job and returns JSON with download URL)
+    return redirect()->route('reports.endorsement', [
         'startDate'  => $start,
         'endDate'    => $end,
     ]);
