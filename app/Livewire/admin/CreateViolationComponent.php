@@ -41,9 +41,15 @@ class CreateViolationComponent extends Component
         $this->areas = ParkingArea::all();
     }
 
-    public function updatedEvidence()
+    #[\Livewire\Attributes\On('upload:starting')]
+    public function handleUploadStart()
     {
-        // Upload finished, disable the flag
+        $this->isUploadingEvidence = true;
+    }
+
+    #[\Livewire\Attributes\On('upload:finished')]
+    public function handleUploadFinished()
+    {
         $this->isUploadingEvidence = false;
     }
 

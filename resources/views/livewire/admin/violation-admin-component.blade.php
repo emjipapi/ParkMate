@@ -38,7 +38,7 @@
             <li class="flex-shrink-0">
                 <a class="nav-link px-4 py-2 cursor-pointer no-underline text-black whitespace-nowrap {{ $activeTab === 'endorsement' ? 'active font-semibold border-b-2 border-blue-500 text-black' : 'text-gray-600' }}"
                     wire:click="setActiveTab('endorsement')">
-                    For Endorsement
+                    Resolutions
                 </a>
             </li>
         </ul>
@@ -66,10 +66,10 @@
                 </div>
             @endcanaccess
 
-        {{-- For Endorsement --}}
+        {{-- Resolutions --}}
         @elseif ($activeTab === 'endorsement')
             @canaccess('for_endorsement')
-                <livewire:admin.for-endorsement-component />
+                <livewire:admin.resolutions-component />
             @else
                 <div class="alert alert-danger text-center mt-3">
                     You don't have permission to view this tab.

@@ -219,23 +219,12 @@
                                 @enderror
                             </div>
 
-                            <select class="form-select form-select-sm mb-1"
-                                wire:model="violationsActionTaken.{{ $violation->id }}" @if($violation->status ===
-                                'resolved') disabled @endif>
-                                <option value="">Select action</option>
-                                <option value="Warning">Warning Issued</option>
-                                <option value="6 Months Penalty">6 Months Penalty</option>
-                                <option value="Access Denied">Access Denied</option>
-                            </select>
-                            @error('violationsActionTaken.' . $violation->id) <span class="text-danger small">{{
-                                $message }}</span> @enderror
-
                             @if($violation->status === 'resolved')
                             <button class="btn btn-sm btn-secondary" disabled>✓ Resolved</button>
                             @else
-                            <button wire:click="markForEndorsement({{ $violation->id }})" wire:loading.attr="disabled"
-                                class="btn btn-sm btn-primary" wire:target="markForEndorsement({{ $violation->id }})">
-                                Mark as For Endorsement
+                            <button wire:click="proceedToResolution({{ $violation->id }})" wire:loading.attr="disabled"
+                                class="btn btn-sm btn-primary" wire:target="proceedToResolution({{ $violation->id }})">
+                                Proceed to Resolution
                             </button>
                             @endif
                         </div>
@@ -427,25 +416,12 @@
                     </div>
 
                     <div>
-                        <select class="form-select form-select-sm"
-                            wire:model="violationsActionTaken.{{ $violation->id }}" @if($violation->status ===
-                            'resolved') disabled @endif>
-                            <option value="">Select action</option>
-                            <option value="Warning">Warning Issued</option>
-                            <option value="6 Months Penalty">6 Months Penalty</option>
-                            <option value="Access Denied">Access Denied</option>
-                        </select>
-                        @error('violationsActionTaken.' . $violation->id) <span class="text-danger small">{{ $message
-                            }}</span> @enderror
-                    </div>
-
-                    <div>
                         @if($violation->status === 'resolved')
                         <button class="btn btn-sm btn-secondary w-100" disabled>✓ Resolved</button>
                         @else
-                        <button wire:click="markForEndorsement({{ $violation->id }})" wire:loading.attr="disabled"
-                            class="btn btn-sm btn-primary w-100" wire:target="markForEndorsement({{ $violation->id }})">
-                            Mark as For Endorsement
+                        <button wire:click="proceedToResolution({{ $violation->id }})" wire:loading.attr="disabled"
+                            class="btn btn-sm btn-primary w-100" wire:target="proceedToResolution({{ $violation->id }})">
+                            Proceed to Resolution
                         </button>
                         @endif
                     </div>

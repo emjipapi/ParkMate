@@ -140,7 +140,9 @@
                         'pending' => 'bg-warning text-dark',
                         'rejected' => 'bg-danger text-white',
                         'approved' => 'bg-success text-white',
-                        'for_endorsement' => 'bg-primary text-white',
+                        'first_offense' => 'bg-info text-white',
+                        'second_offense' => 'bg-warning text-dark',
+                        'third_offense' => 'bg-danger text-white',
                         'resolved' => 'bg-success text-white',
                         ];
 
@@ -174,7 +176,9 @@
                     'pending' => 'bg-warning text-dark',
                     'rejected' => 'bg-danger text-white',
                     'approved' => 'bg-success text-white',
-                    'for_endorsement' => 'bg-primary text-white',
+                    'first_offense' => 'bg-info text-white',
+                    'second_offense' => 'bg-warning text-dark',
+                    'third_offense' => 'bg-danger text-white',
                     'resolved' => 'bg-success text-white',
                     ];
                     $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';

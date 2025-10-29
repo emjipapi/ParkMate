@@ -339,10 +339,17 @@
                         $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
                         @endphp
 
-                        <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}"
-                            aria-label="Status: {{ $statusText }}">
-                            {{ $statusText }}
-                        </span>
+                        @if($status === 'third_violation')
+                            <span class="badge rounded-pill {{ $badgeClass }}" style="display: flex; flex-direction: column; align-items: center; padding: 0.5rem;">
+                                <div>Third violation</div>
+                                <div style="font-size: 0.8em; margin-top: 0.25rem;">For endorsement</div>
+                            </span>
+                        @else
+                            <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}"
+                                aria-label="Status: {{ $statusText }}">
+                                {{ $statusText }}
+                            </span>
+                        @endif
                     </td>
                 </tr>
                 @empty
@@ -391,9 +398,16 @@
                 $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
                 @endphp
                 <div class="ms-auto">
-                    <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}">
-                        {{ $statusText }}
-                    </span>
+                    @if($status === 'third_violation')
+                        <span class="badge rounded-pill {{ $badgeClass }}" style="display: flex; flex-direction: column; align-items: center; padding: 0.5rem;">
+                            <div>Third violation</div>
+                            <div style="font-size: 0.8em; margin-top: 0.25rem;">For endorsement</div>
+                        </span>
+                    @else
+                        <span class="badge rounded-pill {{ $badgeClass }}" title="Status: {{ $statusText }}">
+                            {{ $statusText }}
+                        </span>
+                    @endif
                 </div>
             </header>
 

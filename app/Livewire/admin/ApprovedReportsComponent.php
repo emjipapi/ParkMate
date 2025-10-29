@@ -32,8 +32,6 @@ class ApprovedReportsComponent extends Component
 
     public $sortOrder = 'desc';    // 'desc' or 'asc'
 
-    public $violationsActionTaken = [];
-
     public $vehicles = [];
 
     protected $paginationTheme = 'bootstrap';
@@ -44,7 +42,6 @@ class ApprovedReportsComponent extends Component
 
     public $pageName = 'approvedPage';
 
-    public $compressedProofs = []; // store compressed versions per violation
     public $proofs = [];
 
     // reset page when perPage changes
@@ -214,96 +211,26 @@ $violationsQuery->when($this->reporterType === 'admin', fn (Builder $q) =>
      * Mark a violation as ForEndorsement, optionally store approved image and action_taken.
      * Uses $this->proofs[$violationId] as upload from the row's file input.
      */
-public function updatedProofs($value, $name)
-{
-    \Log::info('updatedProofs called', [
-        'raw_name' => $name,
-        'value_type' => is_object($value) ? get_class($value) : gettype($value),
-    ]);
-
-    // Get violation id: support "51" or "proofs.51"
-    if (is_numeric($name)) {
-        $violationId = (int) $name;
-    } elseif (preg_match('/^proofs\.(\d+)/', $name, $m)) {
-        $violationId = (int) $m[1];
-    } else {
-        $violationId = null;
+    public function updatedProofs($value, $name)
+    {
+        // This is just a placeholder - file upload handling happens in markForEndorsement
     }
 
-    if (! $violationId) {
-        \Log::warning('updatedProofs: could not determine violationId', ['name' => $name]);
-        return;
-    }
-
-    // Get the file object
-    $file = null;
-    if (is_object($value) && method_exists($value, 'getPathname')) {
-        $file = $value;
-    } elseif (isset($this->proofs[$violationId]) && is_object($this->proofs[$violationId]) && method_exists($this->proofs[$violationId], 'getPathname')) {
-        $file = $this->proofs[$violationId];
-    }
-
-    if (! $file) {
-        \Log::warning("updatedProofs: no usable upload object found for violation {$violationId}");
-        return;
-    }
-
-    try {
-        \Log::info("📥 Proof upload detected for violation {$violationId} — dispatching compression job...");
-
-        // Generate deterministic filename
-        $hash = substr(md5(uniqid((string) mt_rand(), true)), 0, 8);
-        $filename = "proof_{$violationId}_{$hash}.jpg";
-
-        // Store original to local disk temporarily
-        $tmpOriginalPath = 'evidence/uploads/originals/' . $filename;
-        $file->storeAs('evidence/uploads/originals', $filename, 'local');
-
-        // Set expected compressed path
-        $compressedPath = 'evidence/tmp/' . $filename;
-        $this->compressedProofs[$violationId] = $compressedPath;
-
-        \Log::info('⚙️ Compression job dispatched', [
-            'violation_id' => $violationId,
-            'input' => $tmpOriginalPath,
-            'output' => $compressedPath
-        ]);
-
-        // Dispatch job
-        \App\Jobs\ProcessEvidenceImage::dispatch(
-            'local',              // input disk
-            $tmpOriginalPath,     // input path
-            'public',             // output disk
-            [$compressedPath],    // output paths array
-            1200,                 // maxWidth
-            1200,                 // maxHeight
-            90                    // quality
-        );
-
-    } catch (\Exception $e) {
-        \Log::error("❌ Failed to dispatch proof compression job for violation {$violationId}: " . $e->getMessage());
-        $this->compressedProofs[$violationId] = null;
-        session()->flash('error', 'Failed to process the uploaded image. Please try again.');
-    }
-}
 
 
 
-
-    public function markForEndorsement($violationId)
+    public function proceedToResolution($violationId)
     {
         $violation = Violation::find($violationId);
         if (! $violation) {
             return;
         }
 
-        // validate both the optional approved image and required action
+        // Validate the image upload
         $this->validate([
             "proofs.{$violationId}" => 'required|image|mimes:jpg,jpeg,png|max:10240',
-            "violationsActionTaken.{$violationId}" => 'required|string|min:1',
         ], [
             "proofs.{$violationId}.required" => 'Please upload an image before proceeding.',
-            "violationsActionTaken.{$violationId}.required" => 'Please select an action before proceeding.',
         ]);
 
         // Load existing evidence safely (support casted array or raw JSON/string)
@@ -317,26 +244,25 @@ public function updatedProofs($value, $name)
             $evidence = [];
         }
 
-        // If there's an uploaded approved image for this violation, store it
-if (! empty($this->compressedProofs[$violationId])) {
-    $tmpPath = $this->compressedProofs[$violationId];
-    
-    // Wait a moment and check if file exists
-    if (Storage::disk('public')->exists($tmpPath)) {
-        $finalPath = str_replace('tmp/', 'approved/', $tmpPath);
-        Storage::disk('public')->move($tmpPath, $finalPath);
-        $evidence['approved'] = $finalPath;
-    } else {
-        \Log::warning("Compressed proof not ready yet for violation {$violationId}");
-        session()->flash('error', 'Image is still processing. Please wait a moment and try again.');
-        return;
-    }
-}
+        // Store the uploaded image directly
+        if (isset($this->proofs[$violationId])) {
+            $evidence['approved'] = $this->proofs[$violationId]->store('evidence/approved', 'public');
+        }
 
-        // Save action taken if provided
-        $actionTaken = $this->violationsActionTaken[$violationId] ?? null;
-        if ($actionTaken) {
-            $violation->action_taken = $actionTaken;
+        // Auto-assign status based on violator's violation history
+        $newStatus = 'first_violation'; // default
+        
+        if ($violation->violator_id) {
+            $violationCount = Violation::where('violator_id', $violation->violator_id)
+                ->whereIn('status', ['first_violation', 'second_violation', 'third_violation'])
+                ->where('id', '!=', $violation->id)
+                ->count();
+            
+            if ($violationCount === 1) {
+                $newStatus = 'second_violation';
+            } elseif ($violationCount >= 2) {
+                $newStatus = 'third_violation';
+            }
         }
 
         // Save evidence properly respecting model casts
@@ -347,28 +273,21 @@ if (! empty($this->compressedProofs[$violationId])) {
             $violation->evidence = json_encode($evidence);
         }
 
-        $violation->markForEndorsement();
-        // determine admin user using the admin guard
-        $admin = Auth::guard('admin')->user();
-
-        // If you require an authenticated admin, you can abort or return with an error:
-        // if (! $admin) { abort(403, 'Admin not authenticated'); }
-
-        $adminName = $admin ? ($admin->firstname ?? $admin->name ?? 'Admin#'.$admin->id) : 'System';
-        $admin = Auth::guard('admin')->user();
+        // Update status to the appropriate violation level
+        $violation->status = $newStatus;
+        $violation->save();
 
         // optional: create activity log entry for audit
-ActivityLog::create([
-    'actor_type' => 'admin',
-    'actor_id'   => Auth::guard('admin')->id(),
-    'area_id'    => $violation->area_id,
-    'action'     => 'resolve',
-    'details'    => 'Admin '
-        . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
-        . ' marked violation #' . $violation->id . ' for endorsement.',
-    'created_at' => now(),
-]);
-
+        ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id'   => Auth::guard('admin')->id(),
+            'area_id'    => $violation->area_id,
+            'action'     => 'resolve',
+            'details'    => 'Admin '
+                . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
+                . ' moved violation #' . $violation->id . ' to resolution with status: ' . $newStatus . '.',
+            'created_at' => now(),
+        ]);
 
         // clear the temporary file in Livewire so UI resets
         if (isset($this->proofs[$violationId])) {
@@ -381,7 +300,7 @@ ActivityLog::create([
         // Reset pagination (optional)
         $this->resetPage($this->pageName);
 
-        session()->flash('message', 'Violation marked as for endorsement and evidence attached.');
+        session()->flash('message', 'Violation moved to resolution with status: ' . $newStatus . '.');
     }
 
     // Add method if it doesn't exist

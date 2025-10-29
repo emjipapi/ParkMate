@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\Builder;
-class ForEndorsementComponent extends Component
+class ResolutionsComponent extends Component
 {
     use WithPagination;
 public $search = '';
@@ -26,7 +26,7 @@ public $sortOrder = 'desc';
     public $vehicles = [];
     public $users = [];
     protected $paginationTheme = 'bootstrap';
-        public $pageName = 'endorsementPage';
+        public $pageName = 'resolutionsPage';
 
     // Search properties for dynamic loading
     public $vehicleSearch = '';
@@ -122,13 +122,13 @@ public function generateEndorsementReport()
         'action'     => 'generate_report',
         'details'    => 'Admin ' 
             . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
-            . ' generated an endorsement report for the period ' . $start . ' to ' . $end . '.',
+            . ' generated a resolutions report for the period ' . $start . ' to ' . $end . '.',
         'created_at' => now(),
     ]);
 
     // Generate filename
     $fileName = sprintf(
-        'endorsement-report-%s-to-%s-%s.pdf',
+        'resolutions-report-%s-to-%s-%s.pdf',
         Carbon::parse($start)->format('Ymd'),
         Carbon::parse($end)->format('Ymd'),
         \Illuminate\Support\Str::random(8)
@@ -314,7 +314,7 @@ $violationsQuery->when($this->reporterType === 'admin', fn (Builder $q) =>
 $violations->getCollection()->transform(function ($v) {
     $rt = $v->reporter_type ?? '';
     // Log a visible marker, length and whether PHP knows the class
-    Log::info('for-endorsement: reporter_type check', [
+    Log::info('resolutions: reporter_type check', [
         'violation_id' => $v->id,
         'marker' => 'INSERT("' . $rt . '")',
         'len' => is_string($rt) ? strlen($rt) : null,
@@ -327,7 +327,7 @@ $violations->getCollection()->transform(function ($v) {
     if ($trimmed !== $rt) {
         // update in-memory value (not DB) so later code uses trimmed version
         $v->reporter_type = $trimmed;
-        Log::info('for-endorsement: trimmed reporter_type', [
+        Log::info('resolutions: trimmed reporter_type', [
             'violation_id' => $v->id,
             'before' => $rt,
             'after' => $trimmed,
@@ -352,27 +352,27 @@ $violations->getCollection()->transform(function ($v) {
                 if ($found) {
                     // attach relation so blade can access properties safely
                     $v->setRelation('reporter', $found);
-                    Log::info('for-endorsement: reporter fallback attached', [
+                    Log::info('resolutions: reporter fallback attached', [
                         'violation_id' => $v->id,
                         'attached_class' => $class,
                         'reporter_id' => $v->reporter_id,
                     ]);
                 } else {
-                    Log::info('for-endorsement: reporter fallback not found', [
+                    Log::info('resolutions: reporter fallback not found', [
                         'violation_id' => $v->id,
                         'tried_class' => $class,
                         'reporter_id' => $v->reporter_id,
                     ]);
                 }
             } catch (\Throwable $e) {
-                Log::warning('for-endorsement: reporter fallback error', [
+                Log::warning('resolutions: reporter fallback error', [
                     'violation_id' => $v->id,
                     'class' => $class,
                     'error' => $e->getMessage(),
                 ]);
             }
         } else {
-            Log::warning('for-endorsement: class does not exist', [
+            Log::warning('resolutions: class does not exist', [
                 'violation_id' => $v->id,
                 'attempted' => [$trimmed, 'App\\Models\\'.ucfirst($trimmed)],
             ]);
@@ -382,7 +382,7 @@ $violations->getCollection()->transform(function ($v) {
     return $v;
 });
 
-    return view('livewire.admin.for-endorsement-component', [
+    return view('livewire.admin.resolutions-component', [
         'violations' => $violations,
         'vehicles' => $this->vehicles,
         'users' => $this->users
