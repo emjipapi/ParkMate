@@ -131,9 +131,15 @@ public function updatedPerPage()
         });
 
         // Area Filter
-        $query->when($this->areaFilter, fn (Builder $q) =>
-            $q->where('area_id', $this->areaFilter)
-        );
+        $query->when($this->areaFilter, function (Builder $q) {
+            if ($this->areaFilter === 'null') {
+                // Filter for null area_id (Main Gate)
+                $q->whereNull('area_id');
+            } else {
+                // Filter for specific area
+                $q->where('area_id', $this->areaFilter);
+            }
+        });
 
         // Date Range Filter
         $query->when($this->startDate, fn (Builder $q) =>

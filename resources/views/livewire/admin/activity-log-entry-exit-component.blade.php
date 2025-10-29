@@ -109,6 +109,7 @@
             <label for="areaFilter" class="form-label fw-bold">Area</label>
             <select id="areaFilter" class="form-select form-select-sm" wire:model.live="areaFilter">
                 <option value="">All Areas</option>
+                <option value="null">Main Gate</option>
                 @foreach($parkingAreas as $area)
                     <option value="{{ $area->id }}">{{ $area->name }}</option>
                 @endforeach
