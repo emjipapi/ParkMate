@@ -85,13 +85,14 @@
         {{-- Submit --}}
         <div class="mt-3 mt-md-4 d-flex gap-2">
             <button type="button" wire:click="submitReport('pending')" class="btn btn-warning px-3 px-md-4 py-2"
-                wire:loading.attr="disabled" wire:target="license_plate,submitReport">
+                wire:loading.attr="disabled" wire:target="license_plate,submitReport,evidence"
+                @disabled($isUploadingEvidence)>
                 Submit as Pending
             </button>
             @canaccess("submit_approved_report")
             <button type="button" wire:click="submitReport('approved')" class="btn btn-success px-3 px-md-4 py-2"
-                @disabled($violatorStatus !=='found' ) wire:loading.attr="disabled"
-                wire:target="license_plate,submitReport">
+                @disabled($violatorStatus !=='found' || $isUploadingEvidence) wire:loading.attr="disabled"
+                wire:target="license_plate,submitReport,evidence">
                 Submit as Approved
             </button>
             @endcanaccess

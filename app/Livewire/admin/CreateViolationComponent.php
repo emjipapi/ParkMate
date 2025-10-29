@@ -25,7 +25,7 @@ class CreateViolationComponent extends Component
     public $areas = [];
     public $area_id;
     public $evidence;
-    public $compressedEvidence;
+    public bool $isUploadingEvidence = false;
 
     public $violatorStatus = null;
     public $violatorName = null;
@@ -41,52 +41,11 @@ class CreateViolationComponent extends Component
         $this->areas = ParkingArea::all();
     }
 
-public function updatedEvidence()
-{
-    // livewire temporary uploaded file detection
-    if ($this->evidence instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-        try {
-            \Log::info('📥 File upload detected — dispatching compression job (admin)...');
-
-            // deterministic filename so we can set $this->compressedEvidence right away
-            $hash = substr(md5(uniqid((string)rand(), true)), 0, 8);
-            $adminId = Auth::guard('admin')->id();
-            $filename = 'evidence_admin_' . $adminId . '_' . $hash . '.jpg';
-
-            // store original uploaded file to local disk (not public)
-            // you can use 'local' disk which points to storage/app/
-            $tmpOriginalPath = 'evidence/uploads/originals/' . $filename;
-            // Livewire TemporaryUploadedFile has storeAs() helper
-            $this->evidence->storeAs('evidence/uploads/originals', $filename, 'local');
-
-            // set the expected compressed path (what the job will write to 'public' disk)
-            $compressedPath = 'evidence/tmp/' . $filename;
-            $this->compressedEvidence = $compressedPath;
-
-            \Log::info('⚙️ Compression job dispatched. Input: '.$tmpOriginalPath.' Output: '.$compressedPath);
-
-            // Dispatch job: read from 'local' input, write processed image(s) to 'public' disk
-            // If you want multiple write locations, pass multiple output paths in the array.
-            \App\Jobs\ProcessEvidenceImage::dispatch(
-                'local',                 // input disk
-                $tmpOriginalPath,        // input path
-                'public',                // output disk
-                [$compressedPath],       // output paths array (you can add others here)
-                1200,                    // maxWidth
-                1200,                    // maxHeight
-                90                       // quality
-            );
-
-        } catch (\Exception $e) {
-            \Log::error('❌ Failed to dispatch compression job: ' . $e->getMessage());
-            session()->flash('error', 'Failed to process the uploaded image. Please try again.');
-            $this->compressedEvidence = null;
-        }
-    } else {
-        \Log::warning('⚠️ updatedEvidence() called, but $this->evidence is not a TemporaryUploadedFile.');
+    public function updatedEvidence()
+    {
+        // Upload finished, disable the flag
+        $this->isUploadingEvidence = false;
     }
-}
-
 
 public $violator_id = null;
 
@@ -119,6 +78,12 @@ public $violator_id = null;
 
     public function submitReport($status = 'approved')
     {
+        // Check if upload is still in progress
+        if ($this->isUploadingEvidence) {
+            session()->flash('error', 'Please wait for the image upload to complete.');
+            return;
+        }
+
         // Defensive: re-run lookup (synchronous, server-side) to avoid race conditions
         $plate = strtoupper(trim($this->license_plate ?? ''));
         $vehicle = null;
@@ -146,24 +111,17 @@ public $violator_id = null;
         $this->validate([
             'description' => 'required|string',
             'area_id' => 'required|exists:parking_areas,id',
-            'evidence' => 'nullable|file|mimes:jpg,jpeg,png|max:10240',
-            'license_plate' => 'nullable|string|max:255',
+            'evidence' => 'required|file|mimes:jpg,jpeg,png|max:10240',
+            'license_plate' => 'required|string|max:255',
             'violator' => 'nullable|integer|exists:users,id',
         ]);
 
-         // move compressed evidence if exists
-    $evidencePath = null;
-    if ($this->compressedEvidence) {
-        $finalPath = str_replace('tmp/', 'reported/', $this->compressedEvidence);
-        Storage::disk('public')->move($this->compressedEvidence, $finalPath);
-        $evidencePath = $finalPath;
-    }
-
-    $desc = $this->description === "Other" ? $this->otherDescription : $this->description;
-    $evidenceData = [
-        'reported' => $status === 'pending' ? $evidencePath : null,
-        'approved' => $status === 'approved' ? $evidencePath : null,
-    ];
+        $desc = $this->description === "Other" ? $this->otherDescription : $this->description;
+        
+        $evidenceData = [
+            'reported' => $status === 'pending' ? ($this->evidence ? $this->evidence->store('evidence/reported', 'public') : null) : null,
+            'approved' => $status === 'approved' ? ($this->evidence ? $this->evidence->store('evidence/reported', 'public') : null) : null,
+        ];
 
     $admin = Auth::guard('admin')->user();
     if (! $admin) abort(403, 'Admin not authenticated');
@@ -307,7 +265,7 @@ public function resetFormInputs()
     $this->violator = null;
     $this->area_id = null;
     $this->evidence = null;
-    $this->compressedEvidence = null;
+    $this->isUploadingEvidence = false;
     $this->violatorStatus = null;
     $this->violatorName = null;
     $this->violator_id = null;

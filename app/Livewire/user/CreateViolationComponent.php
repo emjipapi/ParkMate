@@ -20,7 +20,7 @@ class CreateViolationComponent extends Component
     public $areas = [];   // list of areas
     public $area_id;      // selected area ID
     public $evidence;
-public $compressedEvidence;
+    public bool $isUploadingEvidence = false;
 
 
     public function mount()
@@ -28,48 +28,16 @@ public $compressedEvidence;
         $this->areas = ParkingArea::all(); // store the list here
     }
 
-
-public function updatedEvidence()
-{
-    if ($this->evidence instanceof \Livewire\Features\SupportFileUploads\TemporaryUploadedFile) {
-        try {
-            \Log::info('📥 File upload detected — dispatching compression job (user)...');
-
-            // Generate deterministic filename
-            $hash = substr(md5(uniqid((string)rand(), true)), 0, 8);
-            $userId = auth()->id();
-            $filename = 'evidence_user_' . $userId . '_' . $hash . '.jpg';
-
-            // Store original to local disk temporarily
-            $tmpOriginalPath = 'evidence/uploads/originals/' . $filename;
-            $this->evidence->storeAs('evidence/uploads/originals', $filename, 'local');
-
-            // Set expected compressed path
-            $compressedPath = 'evidence/tmp/' . $filename;
-            $this->compressedEvidence = $compressedPath;
-
-            \Log::info('⚙️ Compression job dispatched. Input: '.$tmpOriginalPath.' Output: '.$compressedPath);
-
-            // Dispatch job
-            \App\Jobs\ProcessEvidenceImage::dispatch(
-                'local',                 // input disk
-                $tmpOriginalPath,        // input path
-                'public',                // output disk
-                [$compressedPath],       // output paths array
-                1200,                    // maxWidth
-                1200,                    // maxHeight
-                90                       // quality
-            );
-
-        } catch (\Exception $e) {
-            \Log::error('❌ Failed to dispatch compression job: ' . $e->getMessage());
-            session()->flash('error', 'Failed to process the uploaded image. Please try again.');
-            $this->compressedEvidence = null;
-        }
-    } else {
-        \Log::warning('⚠️ updatedEvidence() called, but $this->evidence is not a TemporaryUploadedFile.');
+    public function updatingEvidence()
+    {
+        $this->isUploadingEvidence = true;
     }
-}
+
+    public function updatedEvidence()
+    {
+        // When the file finishes uploading, this gets called
+        $this->isUploadingEvidence = false;
+    }
 
 
 
@@ -93,29 +61,25 @@ public function updatedLicensePlate()
 }
 public function submitReport()
 {
+    // Check if upload is still in progress
+    if ($this->isUploadingEvidence) {
+        session()->flash('error', 'Please wait for the image to finish uploading.');
+        return;
+    }
+
     // Validate FIRST
     $this->validate([
         'description' => 'required|string',
         'area_id' => 'required|exists:parking_areas,id',
         'license_plate' => 'nullable|string|max:255',
+        'evidence' => 'nullable|file|mimes:jpg,jpeg,png|max:10240',
         'violator' => 'nullable|integer|exists:users,id',
     ]);
 
     // Process the evidence file AFTER validation
     $evidencePath = null;
-    if ($this->compressedEvidence) {
-        // Check if file exists (job may still be processing)
-        if (Storage::disk('public')->exists($this->compressedEvidence)) {
-            $finalPath = str_replace('tmp/', 'reported/', $this->compressedEvidence);
-            Storage::disk('public')->move($this->compressedEvidence, $finalPath);
-            $evidencePath = $finalPath;
-        } else {
-            \Log::warning('Compressed evidence not ready yet', [
-                'expected_path' => $this->compressedEvidence
-            ]);
-            session()->flash('error', 'Image is still processing. Please wait a moment and try again.');
-            return;
-        }
+    if ($this->evidence) {
+        $evidencePath = $this->evidence->store('evidence/reported', 'public');
     }
 
     // Rest of your existing code...
@@ -176,7 +140,7 @@ public function resetFormInputs()
     $this->violator = null;
     $this->area_id = null;
     $this->evidence = null;
-    $this->compressedEvidence = null;
+    $this->isUploadingEvidence = false;
 }
 
 
