@@ -1,5 +1,25 @@
 {{-- resources\views\livewire\admin\for-endorsement-component.blade.php --}}
 <div>
+    <style>
+        .accordion-button:focus {
+            box-shadow: none;
+            outline: none;
+        }
+        
+        .accordion-button:active {
+            box-shadow: none;
+        }
+        
+        .accordion-button:focus,
+        .accordion-button:hover {
+            background-color: transparent;
+            color: inherit;
+        }
+        
+        .accordion-button::after {
+            filter: none !important;
+        }
+    </style>
 
     <div class="d-flex w-100 flex-wrap justify-content-between gap-2 mb-3 align-items-center">
 
@@ -55,12 +75,18 @@
         </div>
 
     </div>
-    <!-- Report Modal -->
-    <!-- Generate Report Section (no modal) -->
-    <div class="bg-white rounded-lg shadow-md p-6 mb-4">
-        <h4 class="mb-4">Generate For Endorsement Report</h4>
-        
-        <form wire:submit.prevent="generateEndorsementReport" class="mb-4">
+
+    <!-- Generate Report Section in Accordion -->
+    <div class="accordion mb-4" id="reportAccordion" wire:ignore.self>
+        <div class="accordion-item" wire:ignore.self>
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#reportCollapse" aria-expanded="false" aria-controls="reportCollapse">
+                    <i class="bi bi-file-earmark-pdf me-2"></i> Generate For Endorsement Report
+                </button>
+            </h2>
+            <div id="reportCollapse" class="accordion-collapse collapse" data-bs-parent="#reportAccordion" wire:ignore.self>
+                <div class="accordion-body p-4">
+                    <form wire:submit.prevent="generateEndorsementReport" class="mb-4">
             <!-- Report Type Row -->
             <div class="row g-3 mb-3">
                 <div class="col-md-4">
@@ -126,8 +152,10 @@
                 </div>
             @endif
         </div>
+                </div>
+            </div>
+        </div>
     </div>
-
 
     <!-- Table -->
     <!-- Responsive: Desktop table (hidden on xs) -->
