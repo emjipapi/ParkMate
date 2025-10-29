@@ -1,22 +1,6 @@
 {{-- resources\views\livewire\admin\for-endorsement-component.blade.php --}}
 <div>
 
-    <div class="d-flex flex-column flex-md-row justify-content-md-between align-items-md-center gap-3 mb-3">
-        <!-- Generate For Endorsement Report Button -->
-        <button type="button" class="btn-add-slot btn btn-primary mb-3" data-bs-toggle="modal"
-            data-bs-target="#endorsementReportModal">
-            Generate Report
-        </button>
-        {{-- <div class="d-flex align-items-center gap-1">
-            <span>Show</span>
-            <select wire:model.live="perPage" class="form-select form-select-sm w-auto">
-                @foreach($perPageOptions as $option)
-                <option value="{{ $option }}">{{ $option }}</option>
-                @endforeach
-            </select>
-            <span>entries</span>
-        </div> --}}
-    </div>
     <div class="d-flex w-100 flex-wrap justify-content-between gap-2 mb-3 align-items-center">
 
         <!-- LEFT: filters -->
@@ -72,70 +56,78 @@
 
     </div>
     <!-- Report Modal -->
-    <div class="modal fade" id="endorsementReportModal" tabindex="-1" aria-labelledby="endorsementReportModalLabel"
-        aria-hidden="true" wire:ignore.self>
-        <div class="modal-dialog modal-dialog-centered modal-custom-width">
-            <div class="modal-content" x-data="{ type: @entangle('endorsementReportType') }">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="endorsementReportModalLabel">Generate For Endorsement Report</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <!-- Generate Report Section (no modal) -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-4">
+        <h4 class="mb-4">Generate For Endorsement Report</h4>
+        
+        <form wire:submit.prevent="generateEndorsementReport" class="mb-4">
+            <!-- Report Type Row -->
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label for="endorsementReportType" class="form-label">Report Type</label>
+                    <select id="endorsementReportType" class="form-select" wire:model.live="endorsementReportType" required>
+                        <option value="day">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="range">Custom Range</option>
+                    </select>
                 </div>
-
-                <div class="modal-body">
-                    <form wire:submit.prevent="generateEndorsementReport">
-                        <!-- Report Type -->
-                        <div class="mb-3">
-                            <label for="endorsementReportType" class="form-label">Report Type</label>
-                            <select id="endorsementReportType" class="form-select" wire:model="endorsementReportType"
-                                required>
-                                <option value="day">Today</option>
-                                <option value="week">This Week</option>
-                                <option value="month">This Month</option>
-                                <option value="range">Custom Range</option>
-                            </select>
-                        </div>
-
-                        <!-- Custom Date Range -->
-                        <div class="row g-2 mt-2" x-show="type === 'range'" x-cloak>
-                            <div class="col-md-6">
-                                <label for="endorsementReportStartDate" class="form-label">Start Date</label>
-                                <input type="date" id="endorsementReportStartDate" class="form-control"
-                                    wire:model="endorsementReportStartDate" onfocus="this.showPicker();"
-                                    onmousedown="event.preventDefault(); this.showPicker();">
-                            </div>
-                            <div class="col-md-6">
-                                <label for="endorsementReportEndDate" class="form-label">End Date</label>
-                                <input type="date" id="endorsementReportEndDate" class="form-control"
-                                    wire:model="endorsementReportEndDate" onfocus="this.showPicker();"
-                                    onmousedown="event.preventDefault(); this.showPicker();">
-                            </div>
-                        </div>
-
-                        <!-- Modal Footer -->
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-
-                            @php
-                            // disable when using custom range but dates are missing
-                            $disabled = ($endorsementReportType === 'range' &&
-                            (empty($endorsementReportStartDate) || empty($endorsementReportEndDate)));
-                            @endphp
-
-                            <button type="submit" class="btn btn-success" @if($endorsementReportType==='range' &&
-                                (empty($endorsementReportStartDate) || empty($endorsementReportEndDate))) disabled
-                                title="Please select start and end date for custom range" @endif
-                                wire:loading.attr="disabled" wire:target="generateEndorsementReport">
-                                <span wire:loading.remove wire:target="generateEndorsementReport">Generate</span>
-                                <span wire:loading wire:target="generateEndorsementReport">Generating...</span>
-
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
             </div>
+
+            <!-- Date Range Row (only show when custom range) -->
+            @if($endorsementReportType === 'range')
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="endorsementReportStartDate" class="form-label">Start Date</label>
+                    <input type="date" id="endorsementReportStartDate" class="form-control"
+                        wire:model="endorsementReportStartDate" onfocus="this.showPicker();"
+                        onmousedown="event.preventDefault(); this.showPicker();">
+                </div>
+                <div class="col-md-6">
+                    <label for="endorsementReportEndDate" class="form-label">End Date</label>
+                    <input type="date" id="endorsementReportEndDate" class="form-control"
+                        wire:model="endorsementReportEndDate" onfocus="this.showPicker();"
+                        onmousedown="event.preventDefault(); this.showPicker();">
+                </div>
+            </div>
+            @endif
+
+            <!-- Generate Button Row -->
+            <div class="row g-3">
+                <div class="col-12">
+                    <button type="submit" class="btn-add-slot btn btn-primary" wire:loading.attr="disabled" wire:target="generateEndorsementReport">
+                        <span wire:loading.remove wire:target="generateEndorsementReport">Generate Report</span>
+                        <span wire:loading wire:target="generateEndorsementReport">Generating...</span>
+                    </button>
+                </div>
+            </div>
+            @if($isGeneratingReport)
+                <div class="mt-2 text-sm text-muted">
+                    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    Generating report… this runs in background. This page will generate a download link.<br>
+                    ⚠️ Please do not refresh or close this page until generation is complete.
+                </div>
+            @endif
+        </form>
+
+        <!-- Polling area (poll only while generating) -->
+        <div @if($isGeneratingReport) wire:poll.3s="checkReportStatus" @endif>
+            @if($lastGeneratedReportFileName && !$isGeneratingReport)
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-3" style="max-width: 400px;">
+                    <div class="flex items-center justify-between" style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h4 class="font-medium text-green-800" style="font-weight: 500; color: #166534; margin: 0 0 0.25rem 0;">Report Generated!</h4>
+                            <p class="text-sm text-green-600" style="font-size: 0.875rem; color: #16a34a; margin: 0;">Your endorsement report is ready for download.</p>
+                        </div>
+                        <a href="{{ $this->downloadUrl }}" class="btn-add-slot btn btn-success" style="white-space: nowrap; margin-left: 1rem;">
+                            <i class="bi bi-download"></i> Download PDF
+                        </a>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
+
 
     <!-- Table -->
     <!-- Responsive: Desktop table (hidden on xs) -->

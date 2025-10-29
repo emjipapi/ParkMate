@@ -24,6 +24,8 @@ class GenerateEndorsementReport implements ShouldQueue
 
     public $tries = 3;
     public $timeout = 120; // 2 minutes for PDF generation
+    public $maxExceptions = 3;
+    public $backoff = [5, 10]; // Backoff strategy
 
     public function __construct($startDate, $endDate, $adminId, $fileName = null)
     {
@@ -31,6 +33,9 @@ class GenerateEndorsementReport implements ShouldQueue
         $this->endDate = $endDate;
         $this->adminId = $adminId;
         $this->fileName = $fileName;
+        
+        // Lower priority - this job should not starve other jobs
+        $this->onQueue('default')->delay(0);
     }
 
     public function handle()
@@ -78,11 +83,25 @@ class GenerateEndorsementReport implements ShouldQueue
                 'disable-smart-shrinking' => true,
                 'load-error-handling' => 'ignore',
                 'load-media-error-handling' => 'ignore',
+                // Reduce resource usage
+                'disable-javascript' => true,
+                'no-outline' => true,
             ]);
+
+            // Generate PDF output
+            $pdfOutput = $pdf->output();
 
             // Store in storage/app/private/reports/
             $path = 'reports/' . $fileName;
-            Storage::disk('private')->put($path, $pdf->output());
+            Storage::disk('private')->put($path, $pdfOutput);
+
+            // Force garbage collection and free memory
+            unset($pdf);
+            unset($pdfOutput);
+            unset($violations);
+            if (function_exists('gc_collect_cycles')) {
+                gc_collect_cycles();
+            }
 
         } catch (\Exception $e) {
             \Log::error('Endorsement Report Generation Failed:', [

@@ -42,6 +42,8 @@ public $sortOrder = 'desc';
 public $endorsementReportType = 'day';
 public $endorsementReportStartDate = null;
 public $endorsementReportEndDate = null;
+public $lastGeneratedReportFileName = null;
+public $isGeneratingReport = false;
     public $perPage = 15; // default
     public $perPageOptions = [15, 25, 50, 100];
     public $evidence;
@@ -113,10 +115,10 @@ public function generateEndorsementReport()
             return;
         }
     }
-        ActivityLog::create([
+    ActivityLog::create([
         'actor_type' => 'admin',
         'actor_id'   => Auth::guard('admin')->id(),
-        'area_id'    => null, // or set a relevant area if applicable
+        'area_id'    => null,
         'action'     => 'generate_report',
         'details'    => 'Admin ' 
             . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
@@ -124,12 +126,51 @@ public function generateEndorsementReport()
         'created_at' => now(),
     ]);
 
-    // Use Livewire's redirect method
-return $this->redirect(route('reports.endorsement', [
-    'startDate' => $start,
-    'endDate'   => $end,
-]));
+    // Generate filename
+    $fileName = sprintf(
+        'endorsement-report-%s-to-%s-%s.pdf',
+        Carbon::parse($start)->format('Ymd'),
+        Carbon::parse($end)->format('Ymd'),
+        \Illuminate\Support\Str::random(8)
+    );
+
+    // Dispatch job to queue (don't wait for it)
+    \App\Jobs\GenerateEndorsementReport::dispatch(
+        $start,
+        $end,
+        Auth::guard('admin')->id(),
+        $fileName
+    );
+
+    // Set report state for polling
+    $this->isGeneratingReport = true;
+    $this->lastGeneratedReportFileName = $fileName;
 }
+
+public function checkReportStatus()
+{
+    if (!$this->lastGeneratedReportFileName) {
+        return;
+    }
+
+    $path = 'reports/' . $this->lastGeneratedReportFileName;
+    if (\Illuminate\Support\Facades\Storage::disk('private')->exists($path)) {
+        // File is ready
+        $this->isGeneratingReport = false;
+    }
+}
+
+public function getDownloadUrlProperty()
+{
+    if (!$this->lastGeneratedReportFileName) {
+        return null;
+    }
+
+    return route('reports.download-endorsement', ['file' => $this->lastGeneratedReportFileName]);
+}
+
+
+
     public function updatedSearchTerm()
     {
         if (strlen($this->searchTerm) >= 2) { // start searching after 2 characters

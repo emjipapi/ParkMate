@@ -121,27 +121,23 @@ class ReportController extends Controller
             $fileName
         );
 
-        // Redirect to the download endpoint with a small delay built into the download method
-        // The download method will check if the file exists and wait if needed
-        return redirect()->route('reports.download-endorsement', ['file' => $fileName]);
-    }public function downloadEndorsementReport($file)
-{
-    $path = 'reports/' . $file;
-    
-    // Wait up to 30 seconds for the file to be generated
-    $maxAttempts = 30;
-    $attempts = 0;
-    
-    while (!Storage::disk('private')->exists($path) && $attempts < $maxAttempts) {
-        sleep(1);
-        $attempts++;
-    }
-    
-    if (!Storage::disk('private')->exists($path)) {
-        abort(404, 'Report generation failed or took too long. Please try again.');
+        // Return immediately - don't redirect or wait
+        return response()->json([
+            'success' => true,
+            'message' => 'Report generation started',
+            'fileName' => $fileName,
+        ]);
     }
 
-    $fullPath = storage_path('app/private/' . $path);
-    return response()->download($fullPath, $file);
-}
+    public function downloadEndorsementReport($file)
+    {
+        $path = 'reports/' . $file;
+        
+        if (!Storage::disk('private')->exists($path)) {
+            abort(404, 'Report not found.');
+        }
+
+        $fullPath = storage_path('app/private/' . $path);
+        return response()->download($fullPath, $file);
+    }
 }
