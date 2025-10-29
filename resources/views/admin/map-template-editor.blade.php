@@ -564,26 +564,34 @@
         @endcanaccess
 
         @canaccess("violation_tracking")
-        <div href="/violation-tracking" wire:navigate class="btn-wrapper">
-            <button class="btn">Violation Tracking</button>
+        <div class="btn-wrapper">
+            <a href="/violation-tracking" style="text-decoration: none;">
+                <button class="btn">Violation Tracking</button>
+            </a>
         </div>
         @endcanaccess
 
         @canaccess("users")
-        <div href="/users" wire:navigate class="btn-wrapper">
-            <button class="btn">Users</button>
+        <div class="btn-wrapper">
+            <a href="/users" style="text-decoration: none;">
+                <button class="btn">Users</button>
+            </a>
         </div>
         @endcanaccess
 
         @canaccess("sticker_generator")
-        <div class="btn-wrapper" href="/sticker-generator" wire:navigate>
-            <button class="btn">Sticker Generator</button>
+        <div class="btn-wrapper">
+            <a href="/sticker-generator" style="text-decoration: none;">
+                <button class="btn">Sticker Generator</button>
+            </a>
         </div>
         @endcanaccess
 
         @canaccess("activity_log")
-        <div href="/activity-log" wire:navigate class="btn-wrapper">
-            <button class="btn">Activity Log</button>
+        <div class="btn-wrapper">
+            <a href="/activity-log" style="text-decoration: none;">
+                <button class="btn">Activity Log</button>
+            </a>
         </div>
         @endcanaccess
 
