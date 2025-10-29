@@ -202,6 +202,14 @@
                             title="{{ $allPermissions['admins_table'] ?? '' }}" tabindex="0" role="button"></i>
                     </label>
                 </div>
+                                <div class="form-check">
+                    <input class="form-check-input group-child" type="checkbox" value="guests_table" data-group="users"
+                        wire:model="permissions" wire:change="syncParent('users')">
+                    <label class="form-check-label">Guests Table
+                        <i class="bi bi-info-circle ms-1 text-secondary" wire:ignore data-bs-toggle="tooltip"
+                            title="{{ $allPermissions['guests_table'] ?? '' }}" tabindex="0" role="button"></i>
+                    </label>
+                </div>
                 <div class="form-check">
                     <input class="form-check-input group-child" type="checkbox" value="create_user" data-group="users"
                         wire:model="permissions" wire:change="syncParent('users')">

@@ -24,6 +24,13 @@
                     Admins
                 </a>
             </li>
+
+            <li class="flex-shrink-0">
+                <a class="nav-link px-4 py-2 cursor-pointer no-underline text-black whitespace-nowrap {{ $activeTab === 'guests' ? 'active font-semibold border-b-2 border-blue-500 text-black' : 'text-gray-600' }}"
+                    wire:click="setActiveTab('guests')">
+                    Guests
+                </a>
+            </li>
         </ul>
     </div>
 
@@ -53,6 +60,16 @@
         @elseif ($activeTab === 'admins')
             @canaccess('admins_table')
                 <livewire:admin.admins-table />
+            @else
+                <div class="alert alert-danger text-center mt-3">
+                    You don't have permission to view this tab.
+                </div>
+            @endcanaccess
+
+        {{-- Guests Tab --}}
+        @elseif ($activeTab === 'guests')
+            @canaccess('guests_table')
+                <livewire:admin.guests-table />
             @else
                 <div class="alert alert-danger text-center mt-3">
                     You don't have permission to view this tab.

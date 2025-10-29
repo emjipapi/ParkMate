@@ -44,7 +44,7 @@ class AdminForm extends Component
             'dashboard' => ['analytics_dashboard', 'live_attendance', 'manage_guest', 'manage_guest_tag'],
             'parking_slots' => ['manage_map', 'add_parking_area', 'edit_parking_area'],
             'violation_tracking' => ['create_report', 'pending_reports', 'approved_reports', 'for_endorsement', 'submit_approved_report'],
-            'users' => ['users_table', 'vehicles_table', 'admins_table', 'create_user', 'edit_user', 'create_admin', 'edit_admin'],
+            'users' => ['users_table', 'vehicles_table', 'admins_table', 'guests_table', 'create_user', 'edit_user', 'create_admin', 'edit_admin'],
             'sticker_generator' => ['generate_sticker', 'manage_sticker'],
             'activity_log' => ['system_logs', 'entry_exit_logs', 'unknown_tags'],
         ];
@@ -66,7 +66,7 @@ class AdminForm extends Component
             'dashboard' => ['analytics_dashboard', 'live_attendance', 'manage_guest', 'manage_guest_tag'],
             'parking_slots' => ['manage_map', 'add_parking_area', 'edit_parking_area'],
             'violation_tracking' => ['create_report', 'pending_reports', 'approved_reports', 'for_endorsement', 'submit_approved_report'],
-            'users' => ['users_table', 'vehicles_table', 'admins_table', 'create_user', 'edit_user', 'create_admin', 'edit_admin'],
+            'users' => ['users_table', 'vehicles_table', 'admins_table', 'guests_table', 'create_user', 'edit_user', 'create_admin', 'edit_admin'],
             'sticker_generator' => ['generate_sticker', 'manage_sticker'],
             'activity_log' => ['system_logs', 'entry_exit_logs', 'unknown_tags'],
         ];

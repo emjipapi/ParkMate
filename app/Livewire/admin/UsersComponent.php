@@ -21,8 +21,10 @@ class UsersComponent extends Component
             $this->activeTab = 'vehicles';
         } elseif (in_array('admins_table', $permissions)) {
             $this->activeTab = 'admins';
+        } elseif (in_array('guests_table', $permissions)) {
+            $this->activeTab = 'guests';
         } else {
-            // fallback if user has none of the three
+            // fallback if user has none of the tabs
             $this->activeTab = null;
         }
     }
