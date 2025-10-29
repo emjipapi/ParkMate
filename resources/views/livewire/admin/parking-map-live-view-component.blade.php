@@ -184,7 +184,7 @@ $areaStatuses[$areaKey] = [
             align-items: center;
             gap: 10px;
             box-sizing: border-box;
-            max-width: 220px;
+            max-width: 400px;
             /* don't translate here; JS will set transform for vertical centering */
         }
 
@@ -195,7 +195,7 @@ $areaStatuses[$areaKey] = [
             /* flexible width based on content */
             min-width: 20px;
             /* minimum width */
-            max-width: 250px;
+            max-width: 400px;
             /* maximum width to prevent it from getting too large */
             display: flex;
             align-items: center;
