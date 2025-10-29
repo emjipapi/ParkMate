@@ -9,7 +9,8 @@
             font-family: Arial, sans-serif;
             font-size: 12px;
             color: #222;
-            margin: 20px;
+            margin: 0;
+            padding: 20px;
         }
 
         h1,
@@ -73,16 +74,45 @@
             background-color: #dc3545;
         }
 
-        .violator-header {
-            background-color: #e9ecef;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 4px;
+        /* Cover page styling */
+        .cover-page {
+            page-break-after: always;
+            margin: 0;
+            padding: 0;
+            height: 750px;
+            position: relative;
+            display: block;
         }
 
-        .violator-header h1 {
-            margin: 0 0 10px 0;
+        .cover-card {
+            border: 2px solid #333;
+            padding: 40px;
+            border-radius: 8px;
+            background-color: #f5f5f5;
+            width: 350px;
+            text-align: center;
+            margin: 0 auto;
+            margin-top: 280px;
+        }
+
+        .cover-card h1 {
+            font-size: 32px;
+            margin: 0 0 30px 0;
+            text-align: center;
+        }
+
+        .cover-info {
             text-align: left;
+            font-size: 14px;
+            line-height: 2;
+        }
+
+        .cover-info p {
+            margin: 10px 0;
+        }
+
+        .cover-label {
+            font-weight: bold;
         }
 
         .summary-list {
@@ -97,24 +127,29 @@
 </head>
 
 <body>
-    <!-- Violator Header -->
-    <div class="violator-header">
-        <h1>{{ $violator ? $violator->firstname . ' ' . $violator->lastname : 'Unknown Violator' }}</h1>
-        <p><span class="label">Student ID:</span> {{ $violator->student_id ?? 'N/A' }}</p>
-        <p><span class="label">Employee ID:</span> {{ $violator->employee_id ?? 'N/A' }}</p>
-        <p><span class="label">Report Period:</span> {{ $startDate }} — {{ $endDate }}</p>
+    <!-- Cover Page -->
+    <div style="width: 100%; height: 750px; display: -webkit-box; -webkit-box-align: center; -webkit-box-pack: center;">
+        <div style="border: 2px solid #333; padding: 40px; background-color: #f5f5f5; width: 350px;">
+            <h1 style="font-size: 32px; margin: 0 0 30px 0; text-align: center;">{{ $violator ? $violator->firstname . ' ' . $violator->lastname : 'Unknown Violator' }}</h1>
+                    <div style="text-align: left; font-size: 14px; line-height: 2;">
+                        @if($violator && $violator->student_id)
+                        <p style="margin: 10px 0;"><span style="font-weight: bold;">Student ID:</span> {{ $violator->student_id }}</p>
+                        @endif
+                        @if($violator && $violator->employee_id)
+                        <p style="margin: 10px 0;"><span style="font-weight: bold;">Employee ID:</span> {{ $violator->employee_id }}</p>
+                        @endif
+                        @if(!$violator || (!$violator->student_id && !$violator->employee_id))
+                        <p style="margin: 10px 0;"><span style="font-weight: bold;">ID:</span> N/A</p>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Summary -->
-    <div class="section">
-        <h3>Summary</h3>
-        <ul class="summary-list">
-            <li><strong>Total Violations:</strong> {{ $summary['total_reports'] ?? 0 }}</li>
-            <li><strong>Unique Reporters:</strong> {{ $summary['unique_reporters'] ?? 0 }}</li>
-        </ul>
-    </div>
+    <div style="page-break-after: always;"></div>
 
-    <!-- Violations -->
+    <!-- Violations - Each on separate page -->
     @if($violations->count() > 0)
     @foreach($violations as $v)
     <div class="violation-box">
