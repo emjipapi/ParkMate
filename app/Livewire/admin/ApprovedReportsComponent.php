@@ -275,6 +275,7 @@ $violationsQuery->when($this->reporterType === 'admin', fn (Builder $q) =>
 
         // Update status to the appropriate violation level
         $violation->status = $newStatus;
+        $violation->endorsed_at = now();
         $violation->save();
 
         // optional: create activity log entry for audit

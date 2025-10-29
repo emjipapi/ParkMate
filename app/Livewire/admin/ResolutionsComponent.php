@@ -115,6 +115,19 @@ public function generateEndorsementReport()
             return;
         }
     }
+
+    // Find violators with at least one third_violation endorsed in the date range
+    $thirdViolationViolators = Violation::where('status', 'third_violation')
+        ->whereBetween('endorsed_at', [Carbon::parse($start)->startOfDay(), Carbon::parse($end)->endOfDay()])
+        ->pluck('violator_id')
+        ->unique()
+        ->filter();
+
+    if ($thirdViolationViolators->isEmpty()) {
+        session()->flash('message', 'No violators with 3rd violation found in the selected date range.');
+        return;
+    }
+
     ActivityLog::create([
         'actor_type' => 'admin',
         'actor_id'   => Auth::guard('admin')->id(),
@@ -122,13 +135,13 @@ public function generateEndorsementReport()
         'action'     => 'generate_report',
         'details'    => 'Admin ' 
             . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname
-            . ' generated a resolutions report for the period ' . $start . ' to ' . $end . '.',
+            . ' generated third violation endorsement reports for the period ' . $start . ' to ' . $end . '.',
         'created_at' => now(),
     ]);
 
-    // Generate filename
+    // Generate filename for the zip
     $fileName = sprintf(
-        'resolutions-report-%s-to-%s-%s.pdf',
+        'third-violation-endorsements-%s-to-%s-%s.zip',
         Carbon::parse($start)->format('Ymd'),
         Carbon::parse($end)->format('Ymd'),
         \Illuminate\Support\Str::random(8)
