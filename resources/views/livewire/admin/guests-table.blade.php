@@ -37,35 +37,35 @@
         <table class="table table-striped custom-table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Firstname</th>
-                    <th>Middlename</th>
-                    <th>Lastname</th>
+                    <th>Guest Name</th>
                     <th>Contact Number</th>
-                    <th>Address</th>
+                    <th>Vehicle</th>
+                    <th>Plate</th>
+                    <th>Visit Reason</th>
+                    <th>RFID Tag</th>
                     <th>Status</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse ($guests as $guest)
+                @forelse ($guests as $registration)
                 @php
-                    $isDeleted = $guest->deleted_at !== null;
-                    $statusBadgeClass = $isDeleted ? 'badge bg-danger' : 'badge bg-success';
-                    $statusText = $isDeleted ? 'Inactive' : 'Active';
+                    $isActive = $registration->guestPass && $registration->guestPass->status === 'in_use';
+                    $statusBadgeClass = $isActive ? 'badge bg-success' : 'badge bg-secondary';
+                    $statusText = $isActive ? 'Active' : 'Inactive';
                 @endphp
                 <tr>
-                    <td>{{ $guest->id }}</td>
-                    <td>{{ $guest->firstname }}</td>
-                    <td>{{ $guest->middlename }}</td>
-                    <td>{{ $guest->lastname }}</td>
-                    <td>{{ $guest->contact_number ?? 'N/A' }}</td>
-                    <td>{{ $guest->address ?? 'N/A' }}</td>
+                    <td>{{ $registration->user->firstname ?? 'N/A' }} {{ $registration->user->lastname ?? '' }}</td>
+                    <td>{{ $registration->user->contact_number ?? 'N/A' }}</td>
+                    <td>{{ ucfirst($registration->vehicle_type ?? 'N/A') }}</td>
+                    <td>{{ $registration->license_plate ?? 'N/A' }}</td>
+                    <td>{{ $registration->reason ?? 'N/A' }}</td>
+                    <td>{{ $registration->guestPass->rfid_tag ?? 'N/A' }}</td>
                     <td><span class="{{ $statusBadgeClass }}">{{ $statusText }}</span></td>
                     <td>
                         <!-- More Info Icon -->
                         <a href="#" class="text-info text-decoration-none"
-                            wire:click.prevent="$dispatch('openGuestModal', { id: {{ $guest->id }} })">
+                            wire:click.prevent="$dispatch('openGuestModal', { id: {{ $registration->id }} })">
                             <i class="bi bi-info-circle"></i>
                         </a>
                     </td>

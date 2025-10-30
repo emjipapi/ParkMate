@@ -12,7 +12,7 @@
 
                 <div class="modal-body">
                     {{-- Loading state --}}
-                    @if($loading || ! $guest)
+                    @if($loading || ! $guest || ! $registration)
                     <div class="text-center py-5">
                         <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
                         <div class="mt-2 text-muted">Loading guest details…</div>
@@ -63,60 +63,54 @@
                         <div class="col-8">{{ $guest->address ?? '—' }}</div>
                     </div>
 
-                    <!-- Vehicles Section -->
+                    <!-- Current Registration Section -->
                     <hr>
-                    <h6 class="mb-3">Vehicles</h6>
-                    <div class="vehicle-rows">
-                        @forelse($guest->vehicles as $vehicle)
-                        <div class="card mb-3">
-                            <div class="card-body p-3">
-                                <div class="row mb-1">
-                                    <div class="col-md-4"><strong>Type:</strong></div>
-                                    <div class="col-md-8">{{ ucfirst($vehicle->type) }}</div>
-                                </div>
-                                <div class="row mb-1">
-                                    <div class="col-md-4"><strong>License Plate:</strong></div>
-                                    <div class="col-md-8">{{ $vehicle->license_plate ?? '—' }}</div>
-                                </div>
-                    <!-- RFID Tag Section -->
-                    @if($guestPass)
-                    <div class="row mb-1">
-                        <div class="col-4"><strong>RFID Tag:</strong></div>
-                        <div class="col-8">
-                            <span class="badge bg-info text-dark me-2">{{ $guestPass->name }}</span>
-                            <code>{{ $guestPass->rfid_tag }}</code>
-                        </div>
-                    </div>
-                    @else
-                    <div class="row mb-2">
-                        <div class="col-4"><strong>RFID Tag:</strong></div>
-                        <div class="col-8">—</div>
-                    </div>
-                    @endif
-                                <div class="row mb-0">
-                                    <div class="col-md-4"><strong>Registered:</strong></div>
-                                    <div class="col-md-8">{{ $vehicle->created_at?->format('F d, Y h:i A') }}</div>
+                    <h6 class="mb-3">Current Visit Details</h6>
+                    <div class="card">
+                        <div class="card-body p-3">
+                            <div class="row mb-2">
+                                <div class="col-md-4"><strong>Vehicle Type:</strong></div>
+                                <div class="col-md-8">{{ ucfirst($registration->vehicle_type ?? 'N/A') }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-md-4"><strong>License Plate:</strong></div>
+                                <div class="col-md-8">{{ $registration->license_plate ?? '—' }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-md-4"><strong>Visit Reason:</strong></div>
+                                <div class="col-md-8">{{ $registration->reason ?? '—' }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-md-4"><strong>RFID Tag:</strong></div>
+                                <div class="col-md-8">
+                                    @if($registration->guestPass)
+                                    <span class="badge bg-info text-dark me-2">{{ $registration->guestPass->name }}</span>
+                                    <code>{{ $registration->guestPass->rfid_tag }}</code>
+                                    @else
+                                    —
+                                    @endif
                                 </div>
                             </div>
+                            <div class="row mb-0">
+                                <div class="col-md-4"><strong>Check-in Time:</strong></div>
+                                <div class="col-md-8">{{ $registration->created_at?->format('F d, Y h:i A') }}</div>
+                            </div>
                         </div>
-                        @empty
-                        <p class="text-muted">No vehicles registered for this guest.</p>
-                        @endforelse
                     </div>
 
-                    <div class="row mb-2">
+                    <div class="row mb-2 mt-3">
                         <div class="col-4 text-muted"><strong>Status:</strong></div>
                         <div class="col-8">
-                            @if($guest->deleted_at)
-                                <span class="badge bg-danger">Inactive</span>
-                            @else
+                            @if($registration->guestPass && $registration->guestPass->status === 'in_use')
                                 <span class="badge bg-success">Active</span>
+                            @else
+                                <span class="badge bg-secondary">Inactive</span>
                             @endif
                         </div>
                     </div>
 
                     <div class="row mb-2">
-                        <div class="col-4 text-muted"><strong>Created:</strong></div>
+                        <div class="col-4 text-muted"><strong>Registered At:</strong></div>
                         <div class="col-8">{{ $guest->created_at?->format('F d, Y h:i A') }}</div>
                     </div>
                     @endif

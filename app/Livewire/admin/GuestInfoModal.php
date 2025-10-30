@@ -2,32 +2,28 @@
 namespace App\Livewire\Admin;
 
 use Livewire\Component;
-use App\Models\User;
-use App\Models\GuestPass;
+use App\Models\GuestRegistration;
 
 class GuestInfoModal extends Component
 {
+    public $registration = null;
     public $guest = null;
     public $loading = false;
-    public $guestPass = null;
 
     #[\Livewire\Attributes\On('openGuestModal')]
     public function openModal($id)
     {
         $this->loading = true;
-        // Use withTrashed() to find both active and deleted guests, and eager load vehicles with trashed
-        $this->guest = User::withTrashed()
-            ->with(['vehicles' => function($query) {
+        // Fetch the registration with its relationships
+        $this->registration = GuestRegistration::withTrashed()
+            ->with(['user' => function($query) {
                 $query->withTrashed();
-            }])
+            }, 'guestPass'])
             ->find($id);
         
-        // Find the guest pass by matching the RFID tag from the guest's vehicle (including soft-deleted)
-        if ($this->guest && $this->guest->vehicles->count() > 0) {
-            $vehicle = $this->guest->vehicles->first();
-            if ($vehicle) {
-                $this->guestPass = GuestPass::where('rfid_tag', $vehicle->rfid_tag)->first();
-            }
+        // Set guest to the user for easy access in blade
+        if ($this->registration) {
+            $this->guest = $this->registration->user;
         }
         
         $this->loading = false;
