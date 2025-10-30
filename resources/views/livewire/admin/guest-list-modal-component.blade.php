@@ -26,9 +26,7 @@
                         <thead>
                             <tr>
                                 <th scope="col">Name</th>
-                                <th scope="col">Vehicle</th>
-                                <th scope="col">Plate</th>
-                                <th scope="col">RFID Tag</th>
+                                <th scope="col">Plate Number</th>
                                 <th scope="col">Time In</th>
                                 <th scope="col">Current Location</th>
                                 <th scope="col">Actions</th>
@@ -40,14 +38,8 @@
                                     {{-- Access the user's name through the relationship --}}
                                     <td>{{ $guest->user->firstname ?? 'N/A' }} {{ $guest->user->lastname ?? '' }}</td>
                                     
-                                    {{-- Vehicle type from registration --}}
-                                    <td>{{ ucfirst($guest->vehicle_type ?? 'N/A') }}</td>
-
-                                    {{-- License plate from registration --}}
-                                    <td>{{ $guest->license_plate ?? 'N/A' }}</td>
-
-                                    {{-- RFID tag from guest pass --}}
-                                    <td>{{ $guest->guestPass?->rfid_tag ?? 'N/A' }}</td>
+                                    {{-- A user might have multiple vehicles, so we get the first one associated with the guest --}}
+                                    <td>{{ $guest->user?->vehicles?->first()?->license_plate ?? 'N/A' }}</td>
 
                                     {{-- The 'updated_at' timestamp reflects when the status changed to 'in_use' --}}
                                     <td>{{ $guest->updated_at->format('h:i A') }}</td>
@@ -69,7 +61,7 @@
                             @empty
                                 <tr>
                                     {{-- Updated colspan to match the new number of columns --}}
-                                    <td colspan="7" class="text-center">No active guests found.</td>
+                                    <td colspan="5" class="text-center">No active guests found.</td>
                                 </tr>
                             @endforelse
                         </tbody>
