@@ -36,6 +36,48 @@ class GuestListModalComponent extends Component
     }
 
     /**
+     * Get entry and exit location for a guest registration
+     */
+    private function getLocationSummary($registrationId, $userId)
+    {
+        // Get entry scan (earliest)
+        $entry = ActivityLog::where('actor_type', 'user')
+            ->where('actor_id', $userId)
+            ->where('action', 'entry')
+            ->where('created_at', '>=', now()->subHours(24)) // Last 24 hours
+            ->oldest('created_at')
+            ->first();
+
+        // Get exit scan (latest)
+        $exit = ActivityLog::where('actor_type', 'user')
+            ->where('actor_id', $userId)
+            ->where('action', 'exit')
+            ->where('created_at', '>=', now()->subHours(24)) // Last 24 hours
+            ->latest('created_at')
+            ->first();
+
+        $entryLocation = $entry && $entry->details ? $this->extractLocation($entry->details) : 'Entry not recorded';
+        $exitLocation = $exit && $exit->details ? $this->extractLocation($exit->details) : 'Still inside';
+
+        return $entryLocation . ' → ' . $exitLocation;
+    }
+
+    /**
+     * Extract location from activity log details
+     */
+    private function extractLocation($details)
+    {
+        // Try to extract area/location name from details
+        if (preg_match('/area[s]?\s+([^.]+)/i', $details, $matches)) {
+            return trim($matches[1]);
+        }
+        if (preg_match('/at\s+([^.]+)/i', $details, $matches)) {
+            return trim($matches[1]);
+        }
+        return 'Unknown location';
+    }
+
+    /**
      * Clears guest information and makes the tag available again
      */
     public function clearGuestInfo($registrationId)

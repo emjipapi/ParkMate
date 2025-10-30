@@ -52,7 +52,7 @@
                                     {{-- The 'updated_at' timestamp reflects when the status changed to 'in_use' --}}
                                     <td>{{ $guest->updated_at->format('h:i A') }}</td>
                                     
-                                    <td>{{ $guest->current_location }}</td>
+                                    <td>{{ $this->getLocationSummary($guest->id, $guest->user->id) }}</td>
 
                                     <td>
                                         {{-- <button class="btn btn-sm btn-info">Edit</button> --}}
