@@ -44,7 +44,9 @@
                                         data-bs-target="#registerTagModal">
                                         Edit
                                     </button>
+                                    @if($tag->status == 'available')
                                     <button class="btn btn-sm btn-danger" wire:click="deleteTag({{ $tag->id }})">Delete</button>
+                                    @endif
                                 </td>
                             </tr>
                             @empty
