@@ -13,10 +13,44 @@
                         {{-- General Errors --}}
                         @error('general') 
                             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                                {{ $message }}
+                                <strong>Error!</strong> {{ $message }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>
                         @enderror
+
+                        {{-- Search Existing Guest --}}
+                        <div class="card mb-3 bg-light">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0">Search Existing Guest (Optional)</h6>
+                            </div>
+                            <div class="card-body">
+                                <label for="guestSearch" class="form-label">Search by Name or License Plate</label>
+                                <input type="text" class="form-control" id="guestSearch" placeholder="e.g., John Doe or ABC 1234" 
+                                       wire:model.live.debounce-300ms="guestSearch"
+                                       style="position: relative; z-index: 2000;">
+                            </div>
+                        </div>
+
+                        @if(!empty($searchResults) && $guestSearch)
+                        <div class="card mb-3" style="position: relative; z-index: 2000; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                            <div class="list-group list-group-flush">
+                                @foreach($searchResults as $registration)
+                                <button type="button" class="list-group-item list-group-item-action text-start py-2" 
+                                        wire:click="populateGuestData({{ $registration['id'] }})">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong>{{ $registration['user']['firstname'] ?? 'N/A' }} {{ $registration['user']['lastname'] ?? 'N/A' }}</strong>
+                                            <small class="d-block text-muted">
+                                                {{ ucfirst($registration['vehicle_type']) }} - {{ $registration['license_plate'] }}
+                                            </small>
+                                            <small class="d-block text-muted">{{ $registration['reason'] }}</small>
+                                        </div>
+                                    </div>
+                                </button>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
 
                         {{-- Personal Information Section --}}
                         <div class="card mb-3">
@@ -28,20 +62,23 @@
                                     <div class="col-md-4 mb-3">
                                         <label for="firstname" class="form-label">First Name <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control @error('firstname') is-invalid @enderror" 
-                                               placeholder="First Name" wire:model.live="firstname">
+                                               placeholder="First Name" wire:model.live="firstname"
+                                               @if($isReturningGuest) readonly style="background-color: #e9ecef;" @endif>
                                         @error('firstname') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                     </div>
 
                                     <div class="col-md-4 mb-3">
                                         <label for="middlename" class="form-label">Middle Name</label>
                                         <input type="text" class="form-control" 
-                                               placeholder="Middle Name (Optional)" wire:model.live="middlename">
+                                               placeholder="Middle Name (Optional)" wire:model.live="middlename"
+                                               @if($isReturningGuest) readonly style="background-color: #e9ecef;" @endif>
                                     </div>
 
                                     <div class="col-md-4 mb-3">
                                         <label for="lastname" class="form-label">Last Name <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control @error('lastname') is-invalid @enderror" 
-                                               placeholder="Last Name" wire:model.live="lastname">
+                                               placeholder="Last Name" wire:model.live="lastname"
+                                               @if($isReturningGuest) readonly style="background-color: #e9ecef;" @endif>
                                         @error('lastname') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                     </div>
                                 </div>
@@ -49,7 +86,8 @@
                                 <div class="mb-3">
                                     <label for="contactNumber" class="form-label">Contact Number <span class="text-danger">*</span></label>
                                     <input type="text" class="form-control @error('contactNumber') is-invalid @enderror" 
-                                           placeholder="e.g., +63 9XX XXX XXXX" wire:model.live="contactNumber">
+                                           placeholder="e.g., +63 9XX XXX XXXX" wire:model.live="contactNumber"
+                                           @if($isReturningGuest) readonly style="background-color: #e9ecef;" @endif>
                                     @error('contactNumber') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                 </div>
                             </div>
@@ -112,6 +150,16 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <div class="modal-body" style="border-top: 1px solid #dee2e6;">
+                        {{-- General Errors (Bottom) --}}
+                        @error('general') 
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <strong>Error!</strong> {{ $message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        @enderror
                     </div>
 
                     <div class="modal-footer">
