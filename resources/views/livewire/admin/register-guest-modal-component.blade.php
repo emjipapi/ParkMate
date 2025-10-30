@@ -91,19 +91,21 @@
                                     </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label for="contactNumber" class="form-label">Contact Number <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control @error('contactNumber') is-invalid @enderror" 
-                                           placeholder="e.g., +63 9XX XXX XXXX" wire:model.live="contactNumber"
-                                           @if($isReturningGuest) readonly style="background-color: #e9ecef;" @endif>
-                                    @error('contactNumber') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="contactNumber" class="form-label">Contact Number <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control @error('contactNumber') is-invalid @enderror" 
+                                               placeholder="e.g., +63 9XX XXX XXXX" wire:model.live="contactNumber"
+                                               @if($isReturningGuest) readonly style="background-color: #e9ecef;" @endif>
+                                        @error('contactNumber') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                                    </div>
 
-                                <div class="mb-3">
-                                    <label for="address" class="form-label">Address</label>
-                                    <input type="text" class="form-control" 
-                                           placeholder="Street, Barangay, City" wire:model.live="address"
-                                           @if($isReturningGuest) readonly style="background-color: #e9ecef;" @endif>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="address" class="form-label">Address</label>
+                                        <input type="text" class="form-control" 
+                                               placeholder="Street, Barangay, City" wire:model.live="address"
+                                               @if($isReturningGuest) readonly style="background-color: #e9ecef;" @endif>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -140,15 +142,24 @@
                                 <h6 class="mb-0">Guest Details</h6>
                             </div>
                             <div class="card-body">
-                                <div class="mb-3">
-                                    <label for="reason" class="form-label">Reason for Visit <span class="text-danger">*</span></label>
-                                    <select class="form-select @error('reason') is-invalid @enderror" wire:model.live="reason">
-                                        <option value="">-- Select a Reason --</option>
-                                        @foreach($reasons as $key => $label)
-                                            <option value="{{ $key }}">{{ $label }}</option>
-                                        @endforeach
-                                    </select>
-                                    @error('reason') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="reason" class="form-label">Reason for Visit <span class="text-danger">*</span></label>
+                                        <select class="form-select @error('reason') is-invalid @enderror" wire:model.live="reason">
+                                            <option value="">-- Select a Reason --</option>
+                                            @foreach($reasons as $key => $label)
+                                                <option value="{{ $key }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        @error('reason') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                                    </div>
+
+                                    <div class="col-md-6 mb-3">
+                                        <label for="office" class="form-label">Office</label>
+                                        <input type="text" class="form-control @error('office') is-invalid @enderror" 
+                                               id="office" placeholder="e.g., Main Office, Sales Dept" wire:model.live="office">
+                                        @error('office') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                                    </div>
                                 </div>
 
                                 @if($reason === 'other')
@@ -159,13 +170,6 @@
                                     @error('customReason') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                 </div>
                                 @endif
-
-                                <div class="mb-3">
-                                    <label for="office" class="form-label">Office</label>
-                                    <input type="text" class="form-control @error('office') is-invalid @enderror" 
-                                           id="office" placeholder="e.g., Main Office, Sales Dept" wire:model.live="office">
-                                    @error('office') <span class="invalid-feedback">{{ $message }}</span> @enderror
-                                </div>
 
                                 <div class="mb-3" wire:key="guest-tags-{{ count($guestTags) }}">
                                     <label for="selectedTag" class="form-label">Guest Tag <span class="text-danger">*</span></label>
