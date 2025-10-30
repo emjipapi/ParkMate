@@ -151,6 +151,15 @@
                                     @error('reason') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                 </div>
 
+                                @if($reason === 'other')
+                                <div class="mb-3">
+                                    <label for="customReason" class="form-label">Please Specify <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control @error('customReason') is-invalid @enderror" 
+                                           id="customReason" placeholder="Enter the reason for visit" wire:model.live="customReason">
+                                    @error('customReason') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                                </div>
+                                @endif
+
                                 <div class="mb-3">
                                     <label for="office" class="form-label">Office</label>
                                     <input type="text" class="form-control @error('office') is-invalid @enderror" 

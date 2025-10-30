@@ -24,6 +24,7 @@ class RegisterGuestModalComponent extends Component
 
     // Guest fields
     public $reason = '';
+    public $customReason = ''; // For "other" reason
     public $selectedTag = '';
     public $office = ''; // New office field
 
@@ -78,6 +79,7 @@ class RegisterGuestModalComponent extends Component
         $this->licensePlate = '';
         $this->vehicleType = '';
         $this->reason = '';
+        $this->customReason = '';
         $this->selectedTag = '';
         $this->office = '';
         $this->guestSearch = '';
@@ -141,7 +143,16 @@ class RegisterGuestModalComponent extends Component
         $this->licensePlate = $registration->license_plate;
         $this->vehicleType = $registration->vehicle_type;
         $this->originalLicensePlate = $registration->license_plate; // Store original for comparison
-        $this->reason = $registration->reason; // Populate reason from last visit
+        
+        // Check if reason is "other" and populate custom reason
+        if ($registration->reason === 'other' || !array_key_exists($registration->reason, $this->reasons)) {
+            $this->reason = 'other';
+            $this->customReason = $registration->reason;
+        } else {
+            $this->reason = $registration->reason;
+            $this->customReason = '';
+        }
+        
         $this->office = $registration->office; // Populate office from last visit
         
         $this->selectedTag = '';
@@ -160,6 +171,7 @@ class RegisterGuestModalComponent extends Component
             'licensePlate' => 'required|string|max:255',
             'vehicleType' => 'required|in:motorcycle,car',
             'reason' => 'required|in:' . implode(',', array_keys($this->reasons)),
+            'customReason' => 'nullable|required_if:reason,other|string|max:255',
             'selectedTag' => 'required|exists:guest_passes,id',
             'office' => 'nullable|string|max:255',
         ]);
@@ -265,10 +277,12 @@ class RegisterGuestModalComponent extends Component
             }
 
             // Create guest registration
+            $finalReason = $this->reason === 'other' ? $this->customReason : $this->reason;
+            
             GuestRegistration::create([
                 'user_id' => $user->id,
                 'guest_pass_id' => $tag->id,
-                'reason' => $this->reason,
+                'reason' => $finalReason,
                 'vehicle_type' => $this->vehicleType,
                 'license_plate' => $this->licensePlate,
                 'registered_by' => Auth::guard('admin')->id(),
@@ -282,6 +296,8 @@ class RegisterGuestModalComponent extends Component
             ]);
 
             // Log activity
+            $reasonLabel = $this->reason === 'other' ? $this->customReason : ($this->reasons[$this->reason] ?? $this->reason);
+            
             ActivityLog::create([
                 'actor_type' => 'admin',
                 'actor_id'   => Auth::guard('admin')->id(),
@@ -292,7 +308,7 @@ class RegisterGuestModalComponent extends Component
                     . ' registered guest "' 
                     . $this->firstname . ' ' . $this->lastname 
                     . '" with vehicle ' . $this->vehicleType . ' (' . $this->licensePlate . ')'
-                    . ' for reason: ' . $this->reasons[$this->reason]
+                    . ' for reason: ' . $reasonLabel
                     . ' going to office: ' . ($this->office ?: 'Not specified')
                     . ' using tag "' . $tag->name . '" (RFID: ' . $tag->rfid_tag . ').',
             ]);
