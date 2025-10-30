@@ -50,7 +50,8 @@
             <tbody>
                 @forelse ($guests as $registration)
                 @php
-                    $isActive = $registration->guestPass && $registration->guestPass->status === 'in_use';
+                    // A registration is active if it's NOT soft-deleted AND guest pass is in_use
+                    $isActive = !$registration->trashed() && $registration->guestPass && $registration->guestPass->status === 'in_use';
                     $statusBadgeClass = $isActive ? 'badge bg-success' : 'badge bg-secondary';
                     $statusText = $isActive ? 'Active' : 'Inactive';
                 @endphp
