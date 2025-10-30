@@ -15,6 +15,7 @@ class Violation extends Model
         'reporter_id',
         'reporter_type',
         'area_id',
+        'custom_area',
         'description',
         'evidence',
         'violator_id',

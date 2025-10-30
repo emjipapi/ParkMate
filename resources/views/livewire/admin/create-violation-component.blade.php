@@ -49,13 +49,20 @@
         {{-- Area --}}
         <div class="mb-3 mb-md-4">
             <label class="form-label fw-bold">Area <span class="text-danger">*</span></label>
-            <select wire:model="area_id" class="form-control mt-1 mt-md-2" required>
+            <select wire:model.live="area_id" class="form-control mt-1 mt-md-2" required>
                 <option value="">Select Area</option>
                 @foreach($areas as $area)
                 <option value="{{ $area->id }}">{{ $area->name }}</option>
                 @endforeach
+                <option value="other">Other</option>
             </select>
             @error('area_id') <span class="text-danger">{{ $message }}</span> @enderror
+
+            @if($area_id === 'other')
+            <input type="text" wire:model.live="customArea" placeholder="Enter area name/description"
+                class="form-control mt-2" required />
+            @error('customArea') <span class="text-danger">{{ $message }}</span> @enderror
+            @endif
         </div>
 
         {{-- License Plate --}}

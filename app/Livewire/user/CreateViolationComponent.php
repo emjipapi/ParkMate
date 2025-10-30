@@ -19,6 +19,7 @@ class CreateViolationComponent extends Component
 
     public $areas = [];   // list of areas
     public $area_id;      // selected area ID
+    public $customArea = '';
     public $evidence;
     public bool $isUploadingEvidence = false;
 
@@ -70,11 +71,20 @@ public function submitReport()
     // Validate FIRST
     $this->validate([
         'description' => 'required|string',
-        'area_id' => 'required|exists:parking_areas,id',
+        'area_id' => 'required|string',
+        'customArea' => 'nullable|required_if:area_id,other|string|max:255',
         'license_plate' => 'nullable|string|max:255',
         'evidence' => 'nullable|file|mimes:jpg,jpeg,png|max:10240',
         'violator' => 'nullable|integer|exists:users,id',
     ]);
+
+    // Additional validation: if area_id is not 'other', it must be a valid parking area
+    if ($this->area_id !== 'other') {
+        if (!is_numeric($this->area_id) || !ParkingArea::find($this->area_id)) {
+            $this->addError('area_id', 'Invalid area selected.');
+            return;
+        }
+    }
 
     // Process the evidence file AFTER validation
     $evidencePath = null;
@@ -98,7 +108,8 @@ public function submitReport()
     $data = [
         'description'   => $desc,
         'evidence'      => $evidenceData,
-        'area_id'       => $this->area_id,
+        'area_id'       => $this->area_id !== 'other' ? (int)$this->area_id : null,
+        'custom_area'   => $this->area_id === 'other' ? $this->customArea : null,
         'license_plate' => strtoupper(trim($this->license_plate)),
         'violator_id'   => $this->violator,
         'status'        => 'pending',
@@ -107,7 +118,7 @@ public function submitReport()
 
     $violation = $user->reportedViolations()->create($data);
 
-$area = ParkingArea::find($this->area_id);
+$area = $this->area_id !== 'other' ? ParkingArea::find($this->area_id) : null;
 
 $userName = trim(($user->firstname ?? '') . ' ' . ($user->lastname ?? ''));
 $licensePlate = !empty($this->license_plate)
@@ -116,12 +127,12 @@ $licensePlate = !empty($this->license_plate)
 
 $areaName = $area
     ? $area->name
-    : '(empty)';
+    : ($this->customArea ?: '(empty)');
 
 ActivityLog::create([
     'actor_type' => 'user',
     'actor_id'   => $user->getKey(),
-    'area_id'    => $this->area_id,
+    'area_id'    => $this->area_id !== 'other' ? $this->area_id : null,
     'action'     => 'report',
     'details'    => "User {$userName} submitted a violation report "
                   . "with license plate {$licensePlate} in area {$areaName}.",
@@ -139,6 +150,7 @@ public function resetFormInputs()
     $this->license_plate = null;
     $this->violator = null;
     $this->area_id = null;
+    $this->customArea = null;
     $this->evidence = null;
     $this->isUploadingEvidence = false;
 }
