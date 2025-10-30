@@ -42,6 +42,7 @@
                     <th>Vehicle</th>
                     <th>Plate</th>
                     <th>Visit Reason</th>
+                    <th>Office</th>
                     <th>RFID Tag</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -61,6 +62,7 @@
                     <td>{{ ucfirst($registration->vehicle_type ?? 'N/A') }}</td>
                     <td>{{ $registration->license_plate ?? 'N/A' }}</td>
                     <td>{{ $registration->reason ?? 'N/A' }}</td>
+                    <td>{{ $registration->office ?? 'N/A' }}</td>
                     <td>{{ $registration->guestPass->rfid_tag ?? 'N/A' }}</td>
                     <td><span class="{{ $statusBadgeClass }}">{{ $statusText }}</span></td>
                     <td>

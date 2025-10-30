@@ -143,6 +143,13 @@
                                     @error('reason') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                 </div>
 
+                                <div class="mb-3">
+                                    <label for="office" class="form-label">Office</label>
+                                    <input type="text" class="form-control @error('office') is-invalid @enderror" 
+                                           id="office" placeholder="e.g., Main Office, Sales Dept" wire:model.live="office">
+                                    @error('office') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                                </div>
+
                                 <div class="mb-3" wire:key="guest-tags-{{ count($guestTags) }}">
                                     <label for="selectedTag" class="form-label">Guest Tag <span class="text-danger">*</span></label>
                                     <select class="form-select @error('selectedTag') is-invalid @enderror" wire:model.live="selectedTag">

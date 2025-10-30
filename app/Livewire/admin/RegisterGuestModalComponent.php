@@ -25,6 +25,7 @@ class RegisterGuestModalComponent extends Component
     // Guest fields
     public $reason = '';
     public $selectedTag = '';
+    public $office = ''; // New office field
 
     // Dropdowns data
     public $guestTags = [];
@@ -78,6 +79,7 @@ class RegisterGuestModalComponent extends Component
         $this->vehicleType = '';
         $this->reason = '';
         $this->selectedTag = '';
+        $this->office = '';
         $this->guestSearch = '';
         $this->searchResults = [];
         $this->isReturningGuest = false;
@@ -140,6 +142,7 @@ class RegisterGuestModalComponent extends Component
         $this->vehicleType = $registration->vehicle_type;
         $this->originalLicensePlate = $registration->license_plate; // Store original for comparison
         $this->reason = $registration->reason; // Populate reason from last visit
+        $this->office = $registration->office; // Populate office from last visit
         
         $this->selectedTag = '';
         $this->guestSearch = '';
@@ -158,6 +161,7 @@ class RegisterGuestModalComponent extends Component
             'vehicleType' => 'required|in:motorcycle,car',
             'reason' => 'required|in:' . implode(',', array_keys($this->reasons)),
             'selectedTag' => 'required|exists:guest_passes,id',
+            'office' => 'nullable|string|max:255',
         ]);
 
         try {
@@ -268,6 +272,7 @@ class RegisterGuestModalComponent extends Component
                 'vehicle_type' => $this->vehicleType,
                 'license_plate' => $this->licensePlate,
                 'registered_by' => Auth::guard('admin')->id(),
+                'office' => $this->office,
             ]);
 
             // Update the guest tag
@@ -288,6 +293,7 @@ class RegisterGuestModalComponent extends Component
                     . $this->firstname . ' ' . $this->lastname 
                     . '" with vehicle ' . $this->vehicleType . ' (' . $this->licensePlate . ')'
                     . ' for reason: ' . $this->reasons[$this->reason]
+                    . ' going to office: ' . ($this->office ?: 'Not specified')
                     . ' using tag "' . $tag->name . '" (RFID: ' . $tag->rfid_tag . ').',
             ]);
 

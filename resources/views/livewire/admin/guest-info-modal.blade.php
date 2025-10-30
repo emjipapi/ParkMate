@@ -81,6 +81,10 @@
                                 <div class="col-md-8">{{ $registration->reason ?? '—' }}</div>
                             </div>
                             <div class="row mb-2">
+                                <div class="col-md-4"><strong>Office:</strong></div>
+                                <div class="col-md-8">{{ $registration->office ?? '—' }}</div>
+                            </div>
+                            <div class="row mb-2">
                                 <div class="col-md-4"><strong>RFID Tag:</strong></div>
                                 <div class="col-md-8">
                                     @if($registration->guestPass)

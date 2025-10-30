@@ -16,6 +16,7 @@ class GuestRegistration extends Model
         'vehicle_type',
         'license_plate',
         'registered_by',
+        'office',
     ];
 
     /**
