@@ -25,8 +25,8 @@ class ParkingSlotsComponent extends Component
     {
         Log::info('Loading parking areas data...'); // 👈 log when loading
 
-        // Fetch all parking areas
-        $areas = DB::table('parking_areas')->get();
+        // Fetch all parking areas (excluding soft-deleted)
+        $areas = DB::table('parking_areas')->whereNull('deleted_at')->get();
 
         $this->areas = $areas->map(function ($area) {
             // Motorcycle availability
