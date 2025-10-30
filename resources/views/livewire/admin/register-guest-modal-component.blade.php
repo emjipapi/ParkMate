@@ -90,6 +90,13 @@
                                            @if($isReturningGuest) readonly style="background-color: #e9ecef;" @endif>
                                     @error('contactNumber') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                 </div>
+
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Address</label>
+                                    <input type="text" class="form-control" 
+                                           placeholder="Street, Barangay, City" wire:model.live="address"
+                                           @if($isReturningGuest) readonly style="background-color: #e9ecef;" @endif>
+                                </div>
                             </div>
                         </div>
 
@@ -193,6 +200,7 @@
         $wire.middlename = '';
         $wire.lastname = '';
         $wire.contactNumber = '';
+        $wire.address = '';
         $wire.licensePlate = '';
         $wire.vehicleType = '';
         $wire.reason = '';

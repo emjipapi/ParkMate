@@ -16,6 +16,7 @@ class RegisterGuestModalComponent extends Component
     public $middlename = '';
     public $lastname = '';
     public $contactNumber = '';
+    public $address = '';
 
     // Vehicle fields
     public $licensePlate = '';
@@ -72,6 +73,7 @@ class RegisterGuestModalComponent extends Component
         $this->middlename = '';
         $this->lastname = '';
         $this->contactNumber = '';
+        $this->address = '';
         $this->licensePlate = '';
         $this->vehicleType = '';
         $this->reason = '';
@@ -128,6 +130,7 @@ class RegisterGuestModalComponent extends Component
         $this->middlename = $user->middlename;
         $this->lastname = $user->lastname;
         $this->contactNumber = $user->contact_number;
+        $this->address = $user->address;
         $this->licensePlate = $registration->license_plate;
         $this->vehicleType = $registration->vehicle_type;
         $this->originalLicensePlate = $registration->license_plate; // Store original for comparison
@@ -238,9 +241,9 @@ class RegisterGuestModalComponent extends Component
                     'middlename' => $this->middlename,
                     'lastname' => $this->lastname,
                     'contact_number' => $this->contactNumber,
+                    'address' => $this->address,
                     'student_id' => null,
                     'employee_id' => null,
-                    'address' => null,
                 ]);
 
                 // Create the vehicle
