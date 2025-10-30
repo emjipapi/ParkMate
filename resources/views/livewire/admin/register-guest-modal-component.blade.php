@@ -172,7 +172,7 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="button" class="btn btn-warning" wire:click="resetForm">
-                            <i class="bi bi-arrow-clockwise me-1"></i>Clear Info
+                            <i class="bi bi-arrow-clockwise me-1"></i>Clear Inputs
                         </button>
                         <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="registerGuest">
                             <span wire:loading.remove wire:target="registerGuest">Register Guest</span>

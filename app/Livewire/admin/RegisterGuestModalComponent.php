@@ -92,6 +92,7 @@ class RegisterGuestModalComponent extends Component
             return;
         }
         
+        // Get the latest registration per user + vehicle combination
         $results = GuestRegistration::withTrashed()
             ->whereHas('user', function ($q) {
                 $q->withTrashed()
@@ -107,8 +108,12 @@ class RegisterGuestModalComponent extends Component
                 $q->withTrashed();
             }])
             ->latest('created_at')
-            ->limit(10)
-            ->get();
+            ->get()
+            ->unique(function ($item) {
+                // Create a unique key combining user_id and license_plate
+                return $item->user_id . '-' . $item->license_plate;
+            })
+            ->values(); // Re-index the collection
         
         $this->searchResults = $results->toArray();
     }

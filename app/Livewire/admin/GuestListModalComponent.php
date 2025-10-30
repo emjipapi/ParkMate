@@ -51,20 +51,10 @@ class GuestListModalComponent extends Component
             $guestPass = $registration->guestPass;
             $user = $registration->user;
 
-            // Soft delete the registration
+            // Soft delete the registration only
             $registration->delete();
 
-            // Soft delete the user's vehicles
-            if ($user && $user->vehicles) {
-                $user->vehicles()->delete();
-            }
-
-            // Soft delete the user
-            if ($user) {
-                $user->delete();
-            }
-
-            // Update the guest pass
+            // Update the guest pass to available
             if ($guestPass) {
                 $guestPass->update([
                     'user_id' => null,
@@ -77,7 +67,7 @@ class GuestListModalComponent extends Component
                 'actor_id'   => Auth::guard('admin')->id(),
                 'action'     => 'update',
                 'details'    => 'Admin ' . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname .
-                                ' cleared guest information for user "' . ($user->firstname ?? 'Unknown') . ' ' . ($user->lastname ?? '') .
+                                ' cleared guest registration for user "' . ($user->firstname ?? 'Unknown') . ' ' . ($user->lastname ?? '') .
                                 '" with vehicle ' . ucfirst($registration->vehicle_type) . ' (' . $registration->license_plate . ')' .
                                 ' and freed guest pass "' . ($guestPass->name ?? 'Unknown') . '".',
             ]);
@@ -85,7 +75,7 @@ class GuestListModalComponent extends Component
             // Refresh the guest list
             $this->loadGuests();
             
-            session()->flash('message', 'Guest information cleared successfully!');
+            session()->flash('message', 'Guest checked out successfully!');
             
             // Close and reopen the modal
             $this->js('
