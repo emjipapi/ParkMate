@@ -245,7 +245,13 @@
 
                     {{-- Area --}}
                     <td class="px-4 py-2 text-sm text-gray-800">
-                        {{ $violation->area->name ?? 'N/A' }}
+                        @if($violation->area)
+                            {{ $violation->area->name }}
+                        @elseif($violation->custom_area)
+                            {{ $violation->custom_area }}
+                        @else
+                            N/A
+                        @endif
                     </td>
 
                     {{-- License Plate --}}
@@ -474,7 +480,15 @@
             <div class="mt-2 row g-3 small">
                 <div class="col-6">
                     <div class="small text-muted">Area</div>
-                    <div class="text-dark">{{ $violation->area->name ?? 'N/A' }}</div>
+                    <div class="text-dark">
+                        @if($violation->area)
+                            {{ $violation->area->name }}
+                        @elseif($violation->custom_area)
+                            {{ $violation->custom_area }}
+                        @else
+                            N/A
+                        @endif
+                    </div>
                 </div>
 
                 <div class="col-6">
