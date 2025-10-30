@@ -54,14 +54,14 @@
             </div>
 
             <!-- Right: Date & Time -->
-            {{-- <div class="d-flex flex-column align-items-end justify-content-center ps-4" style="min-width: 200px;">
+            <div class="d-flex flex-column align-items-end justify-content-center ps-4" style="min-width: 200px;">
                 <div style="font-size: {{ $loop->first ? '1.4rem' : '0.95rem' }}; font-weight: 500; color: #666;">
                     {{ \Carbon\Carbon::parse($scan['time'])->format('M d, Y') }}
                 </div>
                 <div style="font-size: {{ $loop->first ? '1.2rem' : '0.85rem' }}; color: #999;">
                     {{ \Carbon\Carbon::parse($scan['time'])->format('h:i:s A') }}
                 </div>
-            </div> --}}
+            </div>
         </div>
     @endforeach
 
