@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\GuestPass;
+use App\Models\GuestRegistration;
 use Livewire\Component;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
@@ -24,10 +25,12 @@ class GuestListModalComponent extends Component
      */
     public function loadGuests()
     {
-        // We fetch guest passes that are currently in use, and eager load
-        // the associated user and their vehicle information for efficiency.
-        $this->guests = GuestPass::with(['user.vehicles'])
-            ->where('status', 'in_use')
+        // Fetch guest registrations where the guest pass is in_use
+        // and eager load user and guest pass relationships
+        $this->guests = GuestRegistration::whereHas('guestPass', function ($q) {
+            $q->where('status', 'in_use');
+        })
+            ->with(['user', 'guestPass'])
             ->latest('updated_at') // Sort by the most recent guest first
             ->get();
     }
@@ -35,17 +38,21 @@ class GuestListModalComponent extends Component
     /**
      * Clears guest information and makes the tag available again
      */
-public function clearGuestInfo($guestPassId)
+    public function clearGuestInfo($registrationId)
     {
         try {
-            $guestPass = GuestPass::find($guestPassId);
+            $registration = GuestRegistration::find($registrationId);
             
-            if (!$guestPass) {
-                session()->flash('error', 'Guest pass not found.');
+            if (!$registration) {
+                session()->flash('error', 'Guest registration not found.');
                 return;
             }
 
-            $user = $guestPass->user;
+            $guestPass = $registration->guestPass;
+            $user = $registration->user;
+
+            // Soft delete the registration
+            $registration->delete();
 
             // Soft delete the user's vehicles
             if ($user && $user->vehicles) {
@@ -58,19 +65,22 @@ public function clearGuestInfo($guestPassId)
             }
 
             // Update the guest pass
-            $guestPass->update([
-                'reason' => null,
-                'user_id' => null,
-                'status' => 'available',
-            ]);
+            if ($guestPass) {
+                $guestPass->update([
+                    'user_id' => null,
+                    'status' => 'available',
+                ]);
+            }
+
             ActivityLog::create([
-    'actor_type' => 'admin',
-    'actor_id'   => Auth::guard('admin')->id(),
-    'action'     => 'update',
-    'details'    => 'Admin ' . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname .
-                    ' cleared guest information for user "' . $user->firstname . ' ' . $user->lastname .
-                    '" and freed guest pass "' . $guestPass->name . '".',
-]);
+                'actor_type' => 'admin',
+                'actor_id'   => Auth::guard('admin')->id(),
+                'action'     => 'update',
+                'details'    => 'Admin ' . Auth::guard('admin')->user()->firstname . ' ' . Auth::guard('admin')->user()->lastname .
+                                ' cleared guest information for user "' . ($user->firstname ?? 'Unknown') . ' ' . ($user->lastname ?? '') .
+                                '" with vehicle ' . ucfirst($registration->vehicle_type) . ' (' . $registration->license_plate . ')' .
+                                ' and freed guest pass "' . ($guestPass->name ?? 'Unknown') . '".',
+            ]);
 
             // Refresh the guest list
             $this->loadGuests();
