@@ -39,12 +39,13 @@
                                     @endif
                                 </td>
                                 <td>
+                                    @if($tag->status == 'available')
                                     <button type="button" wire:click="editTag({{ $tag->id }})"
                                         class="btn btn-sm btn-info" data-bs-toggle="modal"
                                         data-bs-target="#registerTagModal">
                                         Edit
                                     </button>
-                                    @if($tag->status == 'available')
+                                    
                                     <button class="btn btn-sm btn-danger" wire:click="deleteTag({{ $tag->id }})">Delete</button>
                                     @endif
                                 </td>
