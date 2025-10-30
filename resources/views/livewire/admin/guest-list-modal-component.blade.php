@@ -39,7 +39,7 @@
                                     <td>{{ $guest->user->firstname ?? 'N/A' }} {{ $guest->user->lastname ?? '' }}</td>
                                     
                                     {{-- A user might have multiple vehicles, so we get the first one associated with the guest --}}
-                                    <td>{{ $guest->user->vehicles->first()->license_plate ?? 'N/A' }}</td>
+                                    <td>{{ $guest->user?->vehicles?->first()?->license_plate ?? 'N/A' }}</td>
 
                                     {{-- The 'updated_at' timestamp reflects when the status changed to 'in_use' --}}
                                     <td>{{ $guest->updated_at->format('h:i A') }}</td>
