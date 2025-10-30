@@ -108,7 +108,7 @@ class RegisterGuestModalComponent extends Component
             ->orWhere('license_plate', 'LIKE', "%{$this->guestSearch}%")
             ->with(['user' => function ($q) {
                 $q->withTrashed();
-            }])
+            }, 'guestPass'])
             ->latest('created_at')
             ->get()
             ->unique(function ($item) {

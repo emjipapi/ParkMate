@@ -45,6 +45,14 @@
                                             </small>
                                             <small class="d-block text-muted">{{ $registration['reason'] }}</small>
                                         </div>
+                                        <div>
+                                            @php
+                                                $isInUse = isset($registration['guest_pass']['status']) && $registration['guest_pass']['status'] === 'in_use';
+                                            @endphp
+                                            @if($isInUse)
+                                            <span class="badge bg-warning text-dark">In Use</span>
+                                            @endif
+                                        </div>
                                     </div>
                                 </button>
                                 @endforeach
