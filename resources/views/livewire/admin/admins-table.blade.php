@@ -27,9 +27,13 @@
                 setTimeout(() => this.showAlert = false, 3000);
                 return;
             }
-            $wire.deleteSelected(this.selectedIds);
-            this.selectedIds = [];
-            localStorage.removeItem('adminTable_selectedIds');
+            
+            // Show confirmation dialog
+            if (confirm(`Are you sure you want to delete ${this.selectedIds.length} admin(s)? This action cannot be undone.`)) {
+                $wire.deleteSelected(this.selectedIds);
+                this.selectedIds = [];
+                localStorage.removeItem('adminTable_selectedIds');
+            }
         }
     }">
 

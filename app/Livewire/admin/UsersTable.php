@@ -169,7 +169,27 @@ public function render()
     public function deleteSelected($ids)
     {
         if (empty($ids)) return;
+        
+        // Get user details before deletion for logging
+        $usersToDelete = User::whereIn('id', $ids)->get();
+        $userDetails = $usersToDelete->map(function($user) {
+            return $user->firstname . ' ' . $user->lastname . ' (ID: ' . $user->id . ')';
+        })->implode(', ');
+        
+        // Delete the users (soft delete, which cascades to vehicles)
         User::whereIn('id', $ids)->delete();
+        
+        // Log the activity
+        ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id'   => Auth::guard('admin')->id(),
+            'action'     => 'delete',
+            'details'    => 'Admin ' 
+                . Auth::guard('admin')->user()->firstname . ' ' 
+                . Auth::guard('admin')->user()->lastname 
+                . ' deleted ' . count($ids) . ' user(s): ' . $userDetails,
+        ]);
+        
         $this->resetPage($this->pageName);
         session()->flash('message', count($ids) . ' user(s) deleted successfully.');
     }

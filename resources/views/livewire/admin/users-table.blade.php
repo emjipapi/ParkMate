@@ -30,12 +30,15 @@
         return;
     }
 
-    // Call Livewire backend
-    $wire.deleteSelected(this.selectedIds);
+    // Show confirmation dialog
+    if (confirm(`Are you sure you want to delete ${this.selectedIds.length} user(s)? This action cannot be undone.`)) {
+        // Call Livewire backend
+        $wire.deleteSelected(this.selectedIds);
 
-    // Clear selection
-    this.selectedIds = [];
-    localStorage.removeItem('userTable_selectedIds');
+        // Clear selection
+        this.selectedIds = [];
+        localStorage.removeItem('userTable_selectedIds');
+    }
 }
 
     }">

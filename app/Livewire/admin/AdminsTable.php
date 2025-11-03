@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Admin;
+use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth; 
 use Illuminate\Support\Str; 
 
@@ -55,7 +56,7 @@ public function updatedPerPage()
         if (empty($ids)) return;
 
         // Protect Super Admin (id 1) and current logged in admin from deletion
-        $current = (int) Auth::id(); // adjust if you use a different guard
+        $current = (int) Auth::guard('admin')->id();
         $filtered = array_values(array_filter($ids, fn($id) => (int)$id !== 1 && (int)$id !== $current));
 
         if (empty($filtered)) {
@@ -63,8 +64,25 @@ public function updatedPerPage()
             return;
         }
 
+        // Get admin details before deletion for logging
+        $adminsToDelete = Admin::whereIn('admin_id', $filtered)->get();
+        $adminDetails = $adminsToDelete->map(function($admin) {
+            return $admin->firstname . ' ' . $admin->lastname . ' (ID: ' . $admin->admin_id . ')';
+        })->implode(', ');
+
         // Soft-delete
         Admin::whereIn('admin_id', $filtered)->delete();
+
+        // Log the activity
+        ActivityLog::create([
+            'actor_type' => 'admin',
+            'actor_id'   => Auth::guard('admin')->id(),
+            'action'     => 'delete',
+            'details'    => 'Admin ' 
+                . Auth::guard('admin')->user()->firstname . ' ' 
+                . Auth::guard('admin')->user()->lastname 
+                . ' deleted ' . count($filtered) . ' admin(s): ' . $adminDetails,
+        ]);
 
         // OPTIONAL: Revoke credentials (recommended) — uncomment to enable
         /*
