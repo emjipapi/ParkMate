@@ -160,11 +160,15 @@
         .bottom-bar {
             position: fixed;
             bottom: 0;
+            left: 0;
+            right: 0;
+            width: 100%;
+            z-index: 1000;
             left: 250px;
             width: calc(100% - 250px);
             height: 48px;
-            background-color: 'white';
-            color: 'black';
+            background-color: white;
+            color: black;
             display: flex;
             justify-content: space-between;
             align-items: center;
