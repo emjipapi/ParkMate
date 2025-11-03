@@ -41,69 +41,40 @@ class GuestListModalComponent extends Component
      */
     private function getLocationSummary($registrationId, $userId)
     {
-        // Get the most recent main gate entry
-        $mainGateEntry = ActivityLog::where('actor_type', 'user')
+        // Get all recent entry logs (both main gate and area)
+        $entries = ActivityLog::where('actor_type', 'user')
             ->where('actor_id', $userId)
             ->where('action', 'entry')
-            ->whereNull('area_id')
             ->where('created_at', '>=', now()->subHours(24))
-            ->latest('created_at')
-            ->first();
+            ->orderBy('id', 'desc')
+            ->get();
 
-        // Get the most recent area entry (after main gate entry)
-        $areaEntry = ActivityLog::where('actor_type', 'user')
+        // Find the most recent entry by ID
+        $mostRecentEntry = null;
+        foreach ($entries as $entry) {
+            $mostRecentEntry = $entry;
+            break;
+        }
+
+        if (!$mostRecentEntry) {
+            return 'Entry not recorded';
+        }
+
+        // Determine entry location based on the most recent entry
+        $entryLocation = $mostRecentEntry->area_id 
+            ? $this->extractAreaName($mostRecentEntry->details)
+            : 'Main Gate';
+        
+        $entryReferenceId = $mostRecentEntry->id;
+
+        // Look for the most recent exit after the entry (by ID)
+        $exitLog = ActivityLog::where('actor_type', 'user')
             ->where('actor_id', $userId)
-            ->where('action', 'entry')
-            ->whereNotNull('area_id')
+            ->where('action', 'exit')
+            ->where('id', '>', $entryReferenceId)
             ->where('created_at', '>=', now()->subHours(24))
-            ->latest('created_at')
+            ->orderBy('id', 'desc')
             ->first();
-
-        // Determine entry location and get the reference time for exits
-        $entryReferenceTime = null;
-        if ($areaEntry && (!$mainGateEntry || $areaEntry->created_at > $mainGateEntry->created_at)) {
-            // They're in an area (most recent entry is area entry)
-            $entryLocation = $this->extractAreaName($areaEntry->details);
-            $entryReferenceTime = $areaEntry->created_at;
-        } else if ($mainGateEntry) {
-            // They only entered at main gate
-            $entryLocation = 'Main Gate';
-            $entryReferenceTime = $mainGateEntry->created_at;
-        } else {
-            $entryLocation = 'Entry not recorded';
-        }
-
-        // Only look for exits after the current entry
-        $exitLog = null;
-        if ($entryReferenceTime) {
-            // Check if there's a main gate exit after the most recent entry
-            $mainGateExit = ActivityLog::where('actor_type', 'user')
-                ->where('actor_id', $userId)
-                ->where('action', 'exit')
-                ->whereNull('area_id')
-                ->where('created_at', '>', $entryReferenceTime)
-                ->where('created_at', '>=', now()->subHours(24))
-                ->latest('created_at')
-                ->first();
-
-            if ($mainGateExit) {
-                $exitLog = $mainGateExit;
-            } else {
-                // No main gate exit, check for area exit
-                $areaExit = ActivityLog::where('actor_type', 'user')
-                    ->where('actor_id', $userId)
-                    ->where('action', 'exit')
-                    ->whereNotNull('area_id')
-                    ->where('created_at', '>', $entryReferenceTime)
-                    ->where('created_at', '>=', now()->subHours(24))
-                    ->latest('created_at')
-                    ->first();
-                
-                if ($areaExit) {
-                    $exitLog = $areaExit;
-                }
-            }
-        }
 
         // Extract exit location
         $exitLocation = $exitLog 
