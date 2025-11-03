@@ -1,6 +1,6 @@
 {{-- resources\views\livewire\admin\guest-list-modal-component.blade.php --}}
 <div>
-    <div class="modal fade" id="guestListModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="guestListModal" tabindex="-1" aria-hidden="true" wire:ignore.self>
         <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
@@ -92,3 +92,29 @@
         </div>
     </div>
 </div>
+
+@script
+<script>
+    const modalEl = document.getElementById('guestListModal');
+    let pollInterval = null;
+    
+    modalEl.addEventListener('shown.bs.modal', function() {
+        // Load guests immediately when modal opens
+        $wire.call('loadGuests');
+        
+        // Start polling every 5 seconds while modal is open
+        if (pollInterval) clearInterval(pollInterval);
+        pollInterval = setInterval(() => {
+            $wire.call('loadGuests');
+        }, 5000);
+    });
+    
+    modalEl.addEventListener('hidden.bs.modal', function() {
+        // Stop polling when modal closes
+        if (pollInterval) {
+            clearInterval(pollInterval);
+            pollInterval = null;
+        }
+    });
+</script>
+@endscript
