@@ -253,6 +253,11 @@ class RegisterGuestModalComponent extends Component
                             'rfid_tag' => [$tag->rfid_tag],
                             'license_plate' => $this->licensePlate,
                         ]);
+                    } else {
+                        // Update the vehicle with new RFID tag
+                        $vehicle->update([
+                            'rfid_tag' => [$tag->rfid_tag],
+                        ]);
                     }
                 }
             } else {
