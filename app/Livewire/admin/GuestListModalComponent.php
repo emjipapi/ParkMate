@@ -40,41 +40,62 @@ class GuestListModalComponent extends Component
      */
     private function getLocationSummary($registrationId, $userId)
     {
-        // Get entry scan (earliest)
-        $entry = ActivityLog::where('actor_type', 'user')
+        // Get the most recent area scan (entry to any parking area)
+        $areaEntry = ActivityLog::where('actor_type', 'user')
             ->where('actor_id', $userId)
             ->where('action', 'entry')
-            ->where('created_at', '>=', now()->subHours(24)) // Last 24 hours
-            ->oldest('created_at')
-            ->first();
-
-        // Get exit scan (latest)
-        $exit = ActivityLog::where('actor_type', 'user')
-            ->where('actor_id', $userId)
-            ->where('action', 'exit')
-            ->where('created_at', '>=', now()->subHours(24)) // Last 24 hours
+            ->whereNotNull('area_id')
+            ->where('created_at', '>=', now()->subHours(24))
             ->latest('created_at')
             ->first();
 
-        $entryLocation = $entry && $entry->details ? $this->extractLocation($entry->details) : 'Entry not recorded';
-        $exitLocation = $exit && $exit->details ? $this->extractLocation($exit->details) : 'Still inside';
+        // Check if there's a main gate exit after the area entry
+        $mainGateExit = null;
+        if ($areaEntry) {
+            $mainGateExit = ActivityLog::where('actor_type', 'user')
+                ->where('actor_id', $userId)
+                ->where('action', 'exit')
+                ->whereNull('area_id')
+                ->where('created_at', '>', $areaEntry->created_at)
+                ->where('created_at', '>=', now()->subHours(24))
+                ->latest('created_at')
+                ->first();
+        }
+
+        // If they exited to main gate, show that; otherwise show area exit
+        $exitLog = $mainGateExit ?: ActivityLog::where('actor_type', 'user')
+            ->where('actor_id', $userId)
+            ->where('action', 'exit')
+            ->whereNotNull('area_id')
+            ->where('created_at', '>=', now()->subHours(24))
+            ->latest('created_at')
+            ->first();
+
+        // Extract locations
+        $entryLocation = $areaEntry ? $this->extractAreaName($areaEntry->details) : 'Entry not recorded';
+        $exitLocation = $exitLog 
+            ? ($exitLog->area_id ? $this->extractAreaName($exitLog->details) : 'Main Gate')
+            : 'Still inside';
 
         return $entryLocation . ' → ' . $exitLocation;
     }
 
     /**
-     * Extract location from activity log details
+     * Extract area name from activity log details
      */
-    private function extractLocation($details)
+    private function extractAreaName($details)
     {
-        // Try to extract area/location name from details
-        if (preg_match('/area[s]?\s+([^.]+)/i', $details, $matches)) {
-            return trim($matches[1]);
+        // Try to extract area name - look for patterns like "area {name}" before the period
+        if (preg_match('/area\s+([^.]+)/i', $details, $matches)) {
+            $areaName = trim($matches[1]);
+            // Remove everything after the first pipe if exists
+            if (strpos($areaName, '|') !== false) {
+                $areaName = trim(explode('|', $areaName)[0]);
+            }
+            return $areaName ?: 'Parking Area';
         }
-        if (preg_match('/at\s+([^.]+)/i', $details, $matches)) {
-            return trim($matches[1]);
-        }
-        return 'Unknown location';
+        
+        return 'Parking Area';
     }
 
     /**
