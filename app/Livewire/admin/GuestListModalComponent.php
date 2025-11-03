@@ -41,44 +41,35 @@ class GuestListModalComponent extends Component
      */
     private function getLocationSummary($registrationId, $userId)
     {
-        // Get all recent entry logs (both main gate and area)
-        $entries = ActivityLog::where('actor_type', 'user')
+        // Get the most recent entry (by ID) within last 24 hours
+        $mostRecentEntry = ActivityLog::where('actor_type', 'user')
             ->where('actor_id', $userId)
             ->where('action', 'entry')
             ->where('created_at', '>=', now()->subHours(24))
-            ->orderBy('id', 'desc')
-            ->get();
-
-        // Find the most recent entry by ID
-        $mostRecentEntry = null;
-        foreach ($entries as $entry) {
-            $mostRecentEntry = $entry;
-            break;
-        }
+            ->orderByDesc('id')
+            ->first();
 
         if (!$mostRecentEntry) {
             return 'Entry not recorded';
         }
 
-        // Determine entry location based on the most recent entry
+        // Determine entry location
         $entryLocation = $mostRecentEntry->area_id 
             ? $this->extractAreaName($mostRecentEntry->details)
             : 'Main Gate';
-        
-        $entryReferenceId = $mostRecentEntry->id;
 
-        // Look for the most recent exit after the entry (by ID)
-        $exitLog = ActivityLog::where('actor_type', 'user')
+        // Check if there's an exit AFTER this entry (by ID)
+        $exitAfterEntry = ActivityLog::where('actor_type', 'user')
             ->where('actor_id', $userId)
             ->where('action', 'exit')
-            ->where('id', '>', $entryReferenceId)
+            ->where('id', '>', $mostRecentEntry->id)
             ->where('created_at', '>=', now()->subHours(24))
-            ->orderBy('id', 'desc')
+            ->orderByDesc('id')
             ->first();
 
-        // Extract exit location
-        $exitLocation = $exitLog 
-            ? ($exitLog->area_id ? $this->extractAreaName($exitLog->details) : 'Main Gate')
+        // Extract exit location or mark as still inside
+        $exitLocation = $exitAfterEntry
+            ? ($exitAfterEntry->area_id ? $this->extractAreaName($exitAfterEntry->details) : 'Main Gate')
             : 'Still inside';
 
         return $entryLocation . ' → ' . $exitLocation;
