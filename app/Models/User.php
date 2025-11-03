@@ -64,6 +64,28 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        // When a user is soft-deleted, soft-delete their vehicles too
+        static::deleting(function ($user) {
+            if ($user->isForceDeleting()) {
+                // If force deleting, force delete vehicles too
+                $user->vehicles()->forceDelete();
+            } else {
+                // If soft deleting, soft delete vehicles too
+                $user->vehicles()->delete();
+            }
+        });
+
+        // When a user is restored, restore their vehicles too
+        static::restored(function ($user) {
+            $user->vehicles()->restore();
+        });
+    }
+
     // App\Models\User.php
 
 public function latestScan()
