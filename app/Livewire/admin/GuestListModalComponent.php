@@ -7,6 +7,7 @@ use App\Models\GuestRegistration;
 use Livewire\Component;
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class GuestListModalComponent extends Component
 {
@@ -40,7 +41,16 @@ class GuestListModalComponent extends Component
      */
     private function getLocationSummary($registrationId, $userId)
     {
-        // Get the most recent area scan (entry to any parking area)
+        // Get the most recent main gate entry
+        $mainGateEntry = ActivityLog::where('actor_type', 'user')
+            ->where('actor_id', $userId)
+            ->where('action', 'entry')
+            ->whereNull('area_id')
+            ->where('created_at', '>=', now()->subHours(24))
+            ->latest('created_at')
+            ->first();
+
+        // Get the most recent area entry (after main gate entry)
         $areaEntry = ActivityLog::where('actor_type', 'user')
             ->where('actor_id', $userId)
             ->where('action', 'entry')
@@ -49,30 +59,53 @@ class GuestListModalComponent extends Component
             ->latest('created_at')
             ->first();
 
-        // Check if there's a main gate exit after the area entry
-        $mainGateExit = null;
-        if ($areaEntry) {
+        // Determine entry location and get the reference time for exits
+        $entryReferenceTime = null;
+        if ($areaEntry && (!$mainGateEntry || $areaEntry->created_at > $mainGateEntry->created_at)) {
+            // They're in an area (most recent entry is area entry)
+            $entryLocation = $this->extractAreaName($areaEntry->details);
+            $entryReferenceTime = $areaEntry->created_at;
+        } else if ($mainGateEntry) {
+            // They only entered at main gate
+            $entryLocation = 'Main Gate';
+            $entryReferenceTime = $mainGateEntry->created_at;
+        } else {
+            $entryLocation = 'Entry not recorded';
+        }
+
+        // Only look for exits after the current entry
+        $exitLog = null;
+        if ($entryReferenceTime) {
+            // Check if there's a main gate exit after the most recent entry
             $mainGateExit = ActivityLog::where('actor_type', 'user')
                 ->where('actor_id', $userId)
                 ->where('action', 'exit')
                 ->whereNull('area_id')
-                ->where('created_at', '>', $areaEntry->created_at)
+                ->where('created_at', '>', $entryReferenceTime)
                 ->where('created_at', '>=', now()->subHours(24))
                 ->latest('created_at')
                 ->first();
+
+            if ($mainGateExit) {
+                $exitLog = $mainGateExit;
+            } else {
+                // No main gate exit, check for area exit
+                $areaExit = ActivityLog::where('actor_type', 'user')
+                    ->where('actor_id', $userId)
+                    ->where('action', 'exit')
+                    ->whereNotNull('area_id')
+                    ->where('created_at', '>', $entryReferenceTime)
+                    ->where('created_at', '>=', now()->subHours(24))
+                    ->latest('created_at')
+                    ->first();
+                
+                if ($areaExit) {
+                    $exitLog = $areaExit;
+                }
+            }
         }
 
-        // If they exited to main gate, show that; otherwise show area exit
-        $exitLog = $mainGateExit ?: ActivityLog::where('actor_type', 'user')
-            ->where('actor_id', $userId)
-            ->where('action', 'exit')
-            ->whereNotNull('area_id')
-            ->where('created_at', '>=', now()->subHours(24))
-            ->latest('created_at')
-            ->first();
-
-        // Extract locations
-        $entryLocation = $areaEntry ? $this->extractAreaName($areaEntry->details) : 'Entry not recorded';
+        // Extract exit location
         $exitLocation = $exitLog 
             ? ($exitLog->area_id ? $this->extractAreaName($exitLog->details) : 'Main Gate')
             : 'Still inside';
@@ -113,16 +146,89 @@ class GuestListModalComponent extends Component
 
             $guestPass = $registration->guestPass;
             $user = $registration->user;
+            $now = now();
 
             // Soft delete the registration only
             $registration->delete();
 
-            // Clear RFID tags from the vehicle
+            // Auto-exit from all active areas
             if ($user) {
+                // Find all areas the user is currently in
+                $activeAreaIds = [];
+                $allUserAreas = ActivityLog::where('actor_type', 'user')
+                    ->where('actor_id', $user->id)
+                    ->whereNotNull('area_id')
+                    ->distinct()
+                    ->pluck('area_id');
+
+                foreach ($allUserAreas as $areaId) {
+                    $lastAreaScan = ActivityLog::where('actor_type', 'user')
+                        ->where('actor_id', $user->id)
+                        ->where('area_id', $areaId)
+                        ->orderBy('created_at', 'desc')
+                        ->first();
+
+                    // If last scan was entry, they're still in this area
+                    if ($lastAreaScan && $lastAreaScan->action === 'entry') {
+                        $activeAreaIds[] = $areaId;
+                    }
+                }
+
+                // Get vehicle info for motorcycle count updates
                 $vehicle = $user->vehicles()
                     ->where('license_plate', $registration->license_plate)
                     ->first();
-                
+
+                // Exit from all active areas
+                foreach ($activeAreaIds as $areaId) {
+                    $area = \App\Models\ParkingArea::find($areaId);
+                    $areaName = $area ? $area->name : 'Unknown area';
+
+                    // Handle motorcycle count
+                    if ($vehicle && $vehicle->type === 'motorcycle') {
+                        $moto = DB::table('motorcycle_counts')
+                            ->where('area_id', $areaId)
+                            ->first();
+
+                        if ($moto && $moto->available_count < $moto->total_available) {
+                            DB::table('motorcycle_counts')
+                                ->where('id', $moto->id)
+                                ->increment('available_count');
+                        }
+                    }
+
+                    // Create exit log
+                    ActivityLog::create([
+                        'actor_type' => 'admin',
+                        'actor_id'   => Auth::guard('admin')->id(),
+                        'action'     => 'exit',
+                        'details'    => "User {$user->firstname} {$user->lastname} automatically exited area {$areaName} (guest cleared by admin). | Vehicle: " . ($vehicle ? $vehicle->type : 'unknown'),
+                        'area_id'    => $areaId,
+                        'created_at' => $now,
+                    ]);
+                }
+
+                // Also exit from main gate if they entered
+                $lastMainGateScan = ActivityLog::where('actor_type', 'user')
+                    ->where('actor_id', $user->id)
+                    ->whereNull('area_id')
+                    ->whereIn('action', ['entry', 'exit'])
+                    ->orderBy('created_at', 'desc')
+                    ->first();
+
+                // If last main gate scan was entry, create an exit log
+                if ($lastMainGateScan && $lastMainGateScan->action === 'entry') {
+                    ActivityLog::create([
+                        'actor_type' => 'admin',
+                        'actor_id'   => Auth::guard('admin')->id(),
+                        'action'     => 'exit',
+                        'details'    => "User {$user->firstname} {$user->lastname} automatically exited main gate (guest cleared by admin). | Vehicle: " . ($vehicle ? $vehicle->type : 'unknown'),
+                        'area_id'    => null,
+                        'created_at' => $now,
+                    ]);
+                }
+
+                // Clear RFID tags from the vehicle
                 if ($vehicle) {
                     $vehicle->update([
                         'rfid_tag' => null,
