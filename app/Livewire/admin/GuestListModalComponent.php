@@ -96,6 +96,19 @@ class GuestListModalComponent extends Component
             // Soft delete the registration only
             $registration->delete();
 
+            // Clear RFID tags from the vehicle
+            if ($user) {
+                $vehicle = $user->vehicles()
+                    ->where('license_plate', $registration->license_plate)
+                    ->first();
+                
+                if ($vehicle) {
+                    $vehicle->update([
+                        'rfid_tag' => null,
+                    ]);
+                }
+            }
+
             // Update the guest pass to available
             if ($guestPass) {
                 $guestPass->update([
