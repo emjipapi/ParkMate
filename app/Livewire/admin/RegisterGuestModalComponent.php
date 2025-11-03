@@ -235,7 +235,6 @@ class RegisterGuestModalComponent extends Component
                     $vehicle = Vehicle::create([
                         'user_id' => $user->id,
                         'type' => $this->vehicleType,
-                        'rfid_tag' => $tag->rfid_tag,
                         'license_plate' => $this->licensePlate,
                     ]);
                 } else {
@@ -250,7 +249,6 @@ class RegisterGuestModalComponent extends Component
                         $vehicle = Vehicle::create([
                             'user_id' => $user->id,
                             'type' => $this->vehicleType,
-                            'rfid_tag' => $tag->rfid_tag,
                             'license_plate' => $this->licensePlate,
                         ]);
                     }
@@ -267,11 +265,10 @@ class RegisterGuestModalComponent extends Component
                     'employee_id' => null,
                 ]);
 
-                // Create the vehicle
+                // Create the vehicle (without RFID tag - it's stored in guest_passes)
                 Vehicle::create([
                     'user_id' => $user->id,
                     'type' => $this->vehicleType,
-                    'rfid_tag' => $tag->rfid_tag,
                     'license_plate' => $this->licensePlate,
                 ]);
             }
