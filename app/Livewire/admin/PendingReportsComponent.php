@@ -750,36 +750,29 @@ private function handleApprovalSideEffects(int $violatorId, int $previousApprove
     ]);
 
     try {
-        // If you have a `violation_notifications` table (recommended), try insertOrIgnore()
-        // to avoid duplicate dispatches under concurrency. If the table doesn't exist,
-        // fall back to dispatching the job (your job is defensive and re-checks thresholds).
-        $schema = DB::getSchemaBuilder();
-        if ($schema->hasTable('violation_notifications')) {
-            $inserted = DB::table('violation_notifications')->insertOrIgnore([
-                'user_id'    => $user->id,
-                'stage'      => $sendStage,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            if ($inserted) {
-                SendViolationWarningEmail::dispatch($user->id, $sendStage);
-                \Log::info("Dispatched SendViolationWarningEmail job (via violation_notifications)", ['user_id' => $user->id, 'stage' => $sendStage]);
-            } else {
-                \Log::info("Notification already exists; skipping dispatch", ['user_id' => $user->id, 'stage' => $sendStage]);
-            }
-        } else {
-            // Table doesn't exist — warn, but still dispatch (job checks the DB itself).
-            \Log::warning("violation_notifications table missing — dispatching without DB guard", ['user_id' => $user->id, 'stage' => $sendStage]);
-            SendViolationWarningEmail::dispatch($user->id, $sendStage);
-            \Log::info("Dispatched SendViolationWarningEmail job (no notification table)", ['user_id' => $user->id, 'stage' => $sendStage]);
-        }
+        // Always dispatch the job - the job itself is defensive and checks thresholds
+        SendViolationWarningEmail::dispatch($user->id, $sendStage);
+        \Log::info("Dispatched SendViolationWarningEmail job", ['user_id' => $user->id, 'stage' => $sendStage]);
     } catch (\Throwable $ex) {
-        \Log::error("Error handling approval side-effects / dispatching job", [
+        \Log::error("Error dispatching job", [
             'violator_id' => $violatorId,
             'error' => $ex->getMessage(),
             'trace' => $ex->getTraceAsString()
         ]);
+    }
+
+    // Optionally log to violation_notifications for record-keeping
+    try {
+        $schema = DB::getSchemaBuilder();
+        if ($schema->hasTable('violation_notifications')) {
+            DB::table('violation_notifications')->updateOrInsert(
+                ['user_id' => $user->id, 'stage' => $sendStage],
+                ['created_at' => now(), 'updated_at' => now()]
+            );
+            \Log::info("Logged notification to violation_notifications table", ['user_id' => $user->id, 'stage' => $sendStage]);
+        }
+    } catch (\Exception $e) {
+        \Log::warning("Could not log to violation_notifications", ['error' => $e->getMessage()]);
     }
 
     \Log::info("=== handleApprovalSideEffects END ===");
