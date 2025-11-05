@@ -47,6 +47,8 @@
 
                 <div class="form-text">
                     Enter comma-separated numbers or ranges (e.g. <code>1,2,5-10,20</code>).
+                    <br>
+                    <strong>Maximum: 4999 stickers per generation</strong>
                 </div>
 
                 @error('numberRange')

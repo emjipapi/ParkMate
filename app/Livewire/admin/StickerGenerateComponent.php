@@ -46,8 +46,9 @@ public function mount()
 public function generateStickers()
 {
     $this->lastGeneratedZip = null;
-$this->progress = 0;
-$this->total = 0;
+    $this->progress = 0;
+    $this->total = 0;
+    
     $this->validate([
         'selectedTemplateId' => 'required|exists:sticker_templates,id',
         'numberRange'        => 'required|string'
@@ -57,6 +58,12 @@ $this->total = 0;
 
     if (empty($numbers)) {
         session()->flash('error', 'No valid numbers found.');
+        return;
+    }
+
+    // Check if total exceeds 4999 limit
+    if (count($numbers) > 4999) {
+        session()->flash('error', 'You can generate a maximum of 4999 stickers at once. You requested ' . count($numbers) . ' stickers.');
         return;
     }
 
@@ -85,7 +92,8 @@ $this->total = 0;
 
     GenerateStickersJob::dispatch($this->selectedTemplateId, $numbers, $key, $userId)
         ->onQueue('default');
-            $template = StickerTemplate::find($this->selectedTemplateId);
+    
+    $template = StickerTemplate::find($this->selectedTemplateId);
     if ($template) {
         ActivityLog::create([
             'actor_type' => 'admin',
