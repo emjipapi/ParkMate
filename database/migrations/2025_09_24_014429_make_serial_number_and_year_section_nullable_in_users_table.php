@@ -15,9 +15,15 @@ return new class extends Migration
 
     public function down(): void
     {
+        // Rollback-safe: keep these columns nullable to avoid failures when
+        // previous migrations re-create columns with NULL values.
         Schema::table('users', function (Blueprint $table) {
-            $table->string('serial_number')->nullable(false)->change();
-            $table->string('year_section')->nullable(false)->change();
+            if (Schema::hasColumn('users', 'serial_number')) {
+                $table->string('serial_number')->nullable()->change();
+            }
+            if (Schema::hasColumn('users', 'year_section')) {
+                $table->string('year_section')->nullable()->change();
+            }
         });
     }
 };

@@ -15,8 +15,12 @@ return new class extends Migration
 
     public function down(): void
     {
+        // Rollback-safe: don't enforce unique or NOT NULL on down if column might have NULLs
+        // from previous migration rollbacks
         Schema::table('users', function (Blueprint $table) {
-            $table->char('serial_number', 6)->unique()->change();
+            if (Schema::hasColumn('users', 'serial_number')) {
+                $table->char('serial_number', 6)->nullable()->change();
+            }
         });
     }
 };
