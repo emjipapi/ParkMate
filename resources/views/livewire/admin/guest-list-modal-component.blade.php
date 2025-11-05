@@ -46,8 +46,8 @@
                                     {{-- License plate from registration --}}
                                     <td>{{ $guest->license_plate ?? 'N/A' }}</td>
 
-                                    {{-- RFID tag from guest pass --}}
-                                    <td>{{ $guest->guestPass?->rfid_tag ?? 'N/A' }}</td>
+                                    {{-- RFID tag name from guest pass --}}
+                                    <td>{{ $guest->guestPass?->name ?? 'N/A' }}</td>
 
                                     {{-- The 'updated_at' timestamp reflects when the status changed to 'in_use' --}}
                                     <td>{{ $guest->updated_at->format('h:i A') }}</td>
