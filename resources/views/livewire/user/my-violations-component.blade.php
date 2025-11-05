@@ -47,13 +47,13 @@
         <table class="table table-striped custom-table">
             <thead class="bg-light">
                 <tr>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">Description</th>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">License Plate</th>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">Action Taken</th>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">Filed On</th>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">Resolved On</th>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">Evidence</th>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">Status</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">Description</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">License Plate</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">Action Taken</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">Filed On</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">Resolved On</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">Evidence</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">Status</th>
                 </tr>
             </thead>
 

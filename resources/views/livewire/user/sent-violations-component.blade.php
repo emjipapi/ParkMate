@@ -41,14 +41,14 @@
         <table class="table table-striped custom-table d-none d-sm-table">
             <thead class="bg-light">
                 <tr>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">Description</th>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">Message</th>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">License Plate</th>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">Action Taken</th>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">Filed On</th>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">Resolved On</th>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">Evidence</th>
-                    <th class="px-3 py-2 text-start small fw-semibold text-dark">Status</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">Description</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">Message</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">License Plate</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">Action Taken</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">Filed On</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">Resolved On</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">Evidence</th>
+                    <th class="px-3 py-2 text-center small fw-semibold text-dark">Status</th>
                 </tr>
             </thead>
 
@@ -140,9 +140,7 @@
                         'pending' => 'bg-warning text-dark',
                         'rejected' => 'bg-danger text-white',
                         'approved' => 'bg-success text-white',
-                        'first_offense' => 'bg-info text-white',
-                        'second_offense' => 'bg-warning text-dark',
-                        'third_offense' => 'bg-danger text-white',
+                        'for_endorsement' => 'bg-primary text-white',
                         'resolved' => 'bg-success text-white',
                         ];
 
@@ -176,9 +174,7 @@
                     'pending' => 'bg-warning text-dark',
                     'rejected' => 'bg-danger text-white',
                     'approved' => 'bg-success text-white',
-                    'first_offense' => 'bg-info text-white',
-                    'second_offense' => 'bg-warning text-dark',
-                    'third_offense' => 'bg-danger text-white',
+                    'for_endorsement' => 'bg-primary text-white',
                     'resolved' => 'bg-success text-white',
                     ];
                     $badgeClass = $statusMap[$status] ?? 'bg-secondary text-white';
