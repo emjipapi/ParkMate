@@ -102,7 +102,7 @@
             </div>
             <div class="col-md">
                 <label>Contact Number</label>
-                <input type="text" wire:model="contact_number" class="form-control" required>
+                <input type="text" wire:model="contact_number" class="form-control" maxlength="11" placeholder="09XXXXXXXXX" required>
             </div>
         </div>
 
@@ -164,7 +164,7 @@
                         <div class="row mb-2 align-items-end">
                             <div class="col-md">
                                 <label>Serial Number <span class="text-muted" style="font-size:0.75rem;">(Number only)</span></label>
-                                <input type="text" wire:model="vehicles.{{ $index }}.serial_number" class="form-control" placeholder="123" required>
+                                <input type="text" wire:model="vehicles.{{ $index }}.serial_number" class="form-control" placeholder="123" maxlength="4" required>
                             </div>
 
                             <div class="col-md">

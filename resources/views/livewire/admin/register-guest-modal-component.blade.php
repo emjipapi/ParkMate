@@ -95,7 +95,7 @@
                                     <div class="col-md-6 mb-3">
                                         <label for="contactNumber" class="form-label">Contact Number <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control @error('contactNumber') is-invalid @enderror" 
-                                               placeholder="e.g., +63 9XX XXX XXXX" wire:model.live="contactNumber"
+                                               placeholder="e.g., 09XXXXXXXXX" wire:model.live="contactNumber" maxlength="11"
                                                @if($isReturningGuest) readonly style="background-color: #e9ecef;" @endif>
                                         @error('contactNumber') <span class="invalid-feedback">{{ $message }}</span> @enderror
                                     </div>
