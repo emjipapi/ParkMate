@@ -51,13 +51,32 @@ Route::get('area-status', function (Request $request) {
     ]);
 });
 
+// TODO: Re-enable API key protection when ready
+// Route::middleware('check.rfid.key')->group(function () {
+    // main gate
+    Route::post('/rfid', [RfidController::class, 'logScan']);
+    Route::post('/rfid-area', [RfidController::class, 'logScanArea']);
+    Route::get('car-slots/update', function (Request $request) {
+        $label = $request->query('slot');       // C1, C2, etc.
+        $occupied = $request->query('occupied');
 
-// main gate
-Route::post('/rfid', [RfidController::class, 'logScan']);
+        if (! $label || ! is_numeric($occupied)) {
+            return response()->json(['error' => 'Invalid input'], 400);
+        }
 
-Route::post('/rfid-area', [RfidController::class, 'logScanArea']);
+        $slot = CarSlot::where('label', $label)->first();
 
-Route::get('heartbeat', [DeviceController::class, 'heartbeat']);
+        if (! $slot) {
+            return response()->json(['error' => 'Slot not found'], 404);
+        }
+
+        $slot->occupied = $occupied;
+        $slot->save();
+
+        return response()->json(['message' => 'Slot updated', 'slot' => $slot]);
+    });
+    Route::get('heartbeat', [DeviceController::class, 'heartbeat']);
+// });
 
 Route::get('/parking-map/{map}/statuses', function (ParkingMap $map) {
     $areaConfig = (array) ($map->area_config ?? []);

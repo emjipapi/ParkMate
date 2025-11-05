@@ -8,6 +8,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use App\Http\Middleware\AdminMiddleware;
 use \App\Http\Middleware\Authenticate;
 use \App\Http\Middleware\CheckPermission;
+use \App\Http\Middleware\CheckRfidApiKey;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__ . '/../routes/web.php',
@@ -21,6 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => AdminMiddleware::class,
             'auth' => Authenticate::class,
             'permission' => CheckPermission::class,
+            'check.rfid.key' => CheckRfidApiKey::class,
         ]);
 
         // Optional: default web middleware group

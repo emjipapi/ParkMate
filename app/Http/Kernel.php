@@ -17,6 +17,7 @@ class Kernel extends HttpKernel
 protected $routeMiddleware = [
     'auth' => \App\Http\Middleware\Authenticate::class,
     'admin' => \App\Http\Middleware\AdminMiddleware::class, // ✅ must be exactly like this
+    'check.rfid.key' => \App\Http\Middleware\CheckRfidApiKey::class,
 ];
 
 

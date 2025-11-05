@@ -98,6 +98,8 @@ return [
     'cipher' => 'AES-256-CBC',
 
     'key' => env('APP_KEY'),
+    
+    'rfid_api_key' => env('RFID_API_KEY'),
 
     'previous_keys' => [
         ...array_filter(
