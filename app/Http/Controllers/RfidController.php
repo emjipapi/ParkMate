@@ -155,7 +155,7 @@ private function checkViolationStatus($userId): bool
 
                 ActivityLog::create([
                     'actor_type' => 'system',
-                    'actor_id' => 1,
+                    'actor_id' => $user->id,
                     'action' => 'denied_entry',
                     'details' => "User {$user->firstname} {$user->lastname} denied entry due to 3 or more approved violations | {$epc} - {$vehicle->type}",
                     'area_id' => null,
@@ -431,7 +431,7 @@ public function logScanArea(Request $request)
 
                 ActivityLog::create([
                     'actor_type' => 'system',
-                    'actor_id' => 1,
+                    'actor_id' => $user->id,
                     'action' => 'denied_entry',
                     'details' => "User {$user->firstname} {$user->lastname} denied entry (main gate check) due to 3 or more approved violations | {$epc} - {$vehicle->type}",
                     'area_id' => null,
