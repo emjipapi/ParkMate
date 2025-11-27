@@ -23,6 +23,7 @@ class LiveAttendanceFullscreenComponent extends Component
 public function loadLatestScans()
 {
     $this->scans = ActivityLog::with('user')
+        ->whereNull('area_id')
         ->where(function ($q) {
             // Regular entry/exit
             $q->where(function ($sub) {
