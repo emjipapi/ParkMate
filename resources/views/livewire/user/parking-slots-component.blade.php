@@ -59,6 +59,22 @@
             <div id="collapse-{{ $area['id'] }}" class="accordion-collapse collapse"
                 aria-labelledby="heading-{{ $area['id'] }}" wire:ignore.self>
                 <div class="accordion-body pt-3 pb-4">
+
+                    <div class="mb-3">
+                        <strong>Allowed Users:</strong>
+                        <div class="mt-2 d-inline-flex gap-1">
+                            @if($area['allow_students'])
+                            <span class="badge bg-primary">Students</span>
+                            @endif
+                            @if($area['allow_employees'])
+                            <span class="badge bg-success">Employees</span>
+                            @endif
+                            @if($area['allow_guests'])
+                            <span class="badge bg-warning text-dark">Guests</span>
+                            @endif
+                        </div>
+                    </div>
+
                     {{-- Motorcycles: counter style --}}
                     <div class="d-flex align-items-center justify-content-between mb-4">
                         <div class="d-flex align-items-center gap-3">

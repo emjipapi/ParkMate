@@ -77,6 +77,9 @@ class ParkingSlotsComponent extends Component
                 'car_total' => $carTotal,
                 'car_available' => $carAvailable,
                 'car_slots' => $carSlots,
+                'allow_students' => (bool) $area->allow_students,
+                'allow_employees' => (bool) $area->allow_employees,
+                'allow_guests' => (bool) $area->allow_guests,
             ];
         })->toArray();
     }
