@@ -48,6 +48,7 @@ $motorcycleTotal = $mc->total_available !== null ? (int) $mc->total_available : 
 }
 
 $availableCarSlots = max(0, $totalCarSlots - $occupiedCarSlots);
+$occupiedMotorcycleCount = ($motorcycleTotal !== null && $availableMotorcycleCount !== null) ? ($motorcycleTotal - $availableMotorcycleCount) : null;
 
 // Determine state - exact same logic as Livewire
 $state = 'unknown';
@@ -80,6 +81,7 @@ $areaStatuses[$areaKey] = [
 'occupied' => (int) $occupiedCarSlots,
 'available_cars' => (int) $availableCarSlots,
 'motorcycle_available' => $availableMotorcycleCount !== null ? (int) $availableMotorcycleCount : null,
+'motorcycle_occupied' => $occupiedMotorcycleCount !== null ? (int) $occupiedMotorcycleCount : null,
 'motorcycle_total' => $motorcycleTotal !== null ? (int) $motorcycleTotal : null,
 ];
 }
@@ -292,10 +294,10 @@ $areaStatuses[$areaKey] = [
                                         <div class="caption">Motorcycles</div>
                                         <div class="value" x-text="areaStatuses[areaKey]
                                 ? (
-                                    (areaStatuses[areaKey].motorcycle_available !== null && areaStatuses[areaKey].motorcycle_available !== undefined
-                                      ? areaStatuses[areaKey].motorcycle_available
+                                    (areaStatuses[areaKey].motorcycle_occupied !== null && areaStatuses[areaKey].motorcycle_occupied !== undefined
+                                      ? areaStatuses[areaKey].motorcycle_occupied
                                       : '—')
-                                    + ' Available / ' +
+                                    + ' Occupied / ' +
                                     (areaStatuses[areaKey].motorcycle_total !== null && areaStatuses[areaKey].motorcycle_total !== undefined
                                       ? areaStatuses[areaKey].motorcycle_total + ' Total'
                                       : '-')

@@ -101,6 +101,7 @@ Route::get('/parking-map/{map}/statuses', function (ParkingMap $map) {
         }
         
         $availableCarSlots = max(0, $totalCarSlots - $occupiedCarSlots);
+        $occupiedMotorcycleCount = ($motorcycleTotal !== null && $availableMotorcycleCount !== null) ? ($motorcycleTotal - $availableMotorcycleCount) : null;
         
         // Determine state - exact same logic as Livewire component
         $state = 'unknown';
@@ -132,6 +133,7 @@ Route::get('/parking-map/{map}/statuses', function (ParkingMap $map) {
             'occupied' => (int)$occupiedCarSlots,
             'available_cars' => (int)$availableCarSlots,
             'motorcycle_available' => $availableMotorcycleCount !== null ? (int)$availableMotorcycleCount : null,
+            'motorcycle_occupied' => $occupiedMotorcycleCount !== null ? (int)$occupiedMotorcycleCount : null,
             'motorcycle_total' => $motorcycleTotal !== null ? (int)$motorcycleTotal : null,
         ];
     }
