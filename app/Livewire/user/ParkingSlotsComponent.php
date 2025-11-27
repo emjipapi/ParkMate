@@ -38,11 +38,15 @@ class ParkingSlotsComponent extends Component
                 ->where('area_id', $area->id)
                 ->value('total_available') ?? 0;
 
+            // Calculate occupied count (total - available)
+            $motoOccupiedCount = $motoTotalCount - $motoAvailableCount;
+
             Log::info('Area data loaded', [
                 'area_id' => $area->id,
                 'area_name' => $area->name,
                 'moto_total' => $motoTotalCount,
                 'moto_available' => $motoAvailableCount,
+                'moto_occupied' => $motoOccupiedCount,
             ]);
 
             // Car slots for this area
@@ -69,6 +73,7 @@ class ParkingSlotsComponent extends Component
                 'name' => $area->name,
                 'moto_total' => $motoTotalCount,
                 'moto_available_count' => $motoAvailableCount,
+                'moto_occupied_count' => $motoOccupiedCount,
                 'car_total' => $carTotal,
                 'car_available' => $carAvailable,
                 'car_slots' => $carSlots,

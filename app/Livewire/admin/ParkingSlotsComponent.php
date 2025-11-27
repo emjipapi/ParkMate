@@ -60,11 +60,15 @@ public ?int $defaultMapId = null;
                 ->where('area_id', $area->id)
                 ->value('total_available') ?? 0;
 
+            // Calculate occupied count (total - available)
+            $motoOccupiedCount = $motoTotalCount - $motoAvailableCount;
+
             Log::info('Area data loaded', [
                 'area_id' => $area->id,
                 'area_name' => $area->name,
                 'moto_total' => $motoTotalCount,
                 'moto_available' => $motoAvailableCount,
+                'moto_occupied' => $motoOccupiedCount,
             ]);
 
             // Car slots for this area
@@ -92,6 +96,7 @@ public ?int $defaultMapId = null;
                 'name' => $area->name,
                 'moto_total' => $motoTotalCount,
                 'moto_available_count' => $motoAvailableCount,
+                'moto_occupied_count' => $motoOccupiedCount,
                 'car_total' => $carTotal,
                 'car_available' => $carAvailable,
                 'car_slots' => $carSlots,
@@ -110,51 +115,51 @@ public ?int $defaultMapId = null;
 
 public function incrementMoto(int $areaId)
 {
-    Log::info('Incrementing motorcycle slot', ['area_id' => $areaId]);
+    Log::info('Incrementing motorcycle (one enters)', ['area_id' => $areaId]);
 
-    $mc = DB::table('motorcycle_counts')->where('area_id', $areaId)->first();
+    $before = DB::table('motorcycle_counts')->where('area_id', $areaId)->value('available_count');
+    Log::info('Before increment', ['area_id' => $areaId, 'available_count' => $before]);
 
-    if (! $mc) {
-        Log::warning('No motorcycle_counts row found for area', ['area_id' => $areaId]);
-        return;
-    }
-
-    $before = (int) $mc->available_count;
-    $total  = (int) $mc->total_available;
-    Log::info('Before increment', ['area_id' => $areaId, 'available_count' => $before, 'total_available' => $total]);
-
-    // Only increment if available_count < total_available
-    $updated = DB::table('motorcycle_counts')
+    // Decrement available_count when motorcycle enters (one less available)
+    DB::table('motorcycle_counts')
         ->where('area_id', $areaId)
-        ->whereColumn('available_count', '<', 'total_available')
-        ->increment('available_count');
+        ->where('available_count', '>', 0)
+        ->decrement('available_count');
 
-    if ($updated) {
-        $after = DB::table('motorcycle_counts')->where('area_id', $areaId)->value('available_count');
-        Log::info('After increment', ['area_id' => $areaId, 'available_count' => $after]);
-        $this->loadAreasData();
-    } else {
-        Log::info('Increment skipped — already at max', ['area_id' => $areaId, 'available_count' => $before, 'total_available' => $total]);
-        // optional: $this->dispatch('notify', ['type'=>'info','message'=>'No more available motorcycle slots.']);
-    }
+    $after = DB::table('motorcycle_counts')->where('area_id', $areaId)->value('available_count');
+    Log::info('After increment', ['area_id' => $areaId, 'available_count' => $after]);
+
+    $this->loadAreasData();
 }
 
     public function decrementMoto(int $areaId)
     {
-        Log::info('Decrementing motorcycle slot', ['area_id' => $areaId]);
+        Log::info('Decrementing motorcycle (one exits)', ['area_id' => $areaId]);
 
-        $before = DB::table('motorcycle_counts')->where('area_id', $areaId)->value('available_count');
-        Log::info('Before decrement', ['area_id' => $areaId, 'available_count' => $before]);
+        $mc = DB::table('motorcycle_counts')->where('area_id', $areaId)->first();
 
-        DB::table('motorcycle_counts')
+        if (! $mc) {
+            Log::warning('No motorcycle_counts row found for area', ['area_id' => $areaId]);
+            return;
+        }
+
+        $before = (int) $mc->available_count;
+        $total  = (int) $mc->total_available;
+        Log::info('Before decrement', ['area_id' => $areaId, 'available_count' => $before, 'total_available' => $total]);
+
+        // Increment available_count when motorcycle exits (one more available)
+        $updated = DB::table('motorcycle_counts')
             ->where('area_id', $areaId)
-            ->where('available_count', '>', 0)
-            ->decrement('available_count');
+            ->whereColumn('available_count', '<', 'total_available')
+            ->increment('available_count');
 
-        $after = DB::table('motorcycle_counts')->where('area_id', $areaId)->value('available_count');
-        Log::info('After decrement', ['area_id' => $areaId, 'available_count' => $after]);
-
-        $this->loadAreasData();
+        if ($updated) {
+            $after = DB::table('motorcycle_counts')->where('area_id', $areaId)->value('available_count');
+            Log::info('After decrement', ['area_id' => $areaId, 'available_count' => $after]);
+            $this->loadAreasData();
+        } else {
+            Log::info('Decrement skipped — already at max', ['area_id' => $areaId, 'available_count' => $before, 'total_available' => $total]);
+        }
     }
 
 public function openSlot(int $areaId, int $slotId)

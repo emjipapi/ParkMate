@@ -45,7 +45,7 @@
                             @endif
                             @if ((int) ($area['moto_total'] ?? 0) > 0)
                             <span class="text-muted">
-                                🛵 {{ $area['moto_available_count'] }} Available / {{ $area['moto_total'] }} motorcycles
+                                🛵 {{ $area['moto_occupied_count'] }} Occupied / {{ $area['moto_total'] }} motorcycles
                             </span>
                             @endif
                         </div>
@@ -64,7 +64,7 @@
                         <div class="d-flex align-items-center gap-3">
                             <span class="fw-semibold">🛵 Motorcycles</span>
                             <span class="badge bg-secondary">
-                                {{ $area['moto_available_count'] }} / {{ $area['moto_total'] }}
+                                {{ $area['moto_occupied_count'] }} / {{ $area['moto_total'] }}
                             </span>
                         </div>
 
