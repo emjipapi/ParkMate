@@ -53,28 +53,31 @@ $occupiedMotorcycleCount = ($motorcycleTotal !== null && $availableMotorcycleCou
 // Determine state - exact same logic as Livewire
 $state = 'unknown';
 if (!$enabled) {
-$state = 'disabled';
+    $state = 'disabled';
 } elseif ($totalCarSlots > 0 && $availableCarSlots > 0) {
-$state = 'available';
+    // Check if motorcycles are full while cars are available
+    if ($availableMotorcycleCount !== null && (int) $availableMotorcycleCount === 0) {
+        $state = 'car_only';
+    } else {
+        $state = 'available';
+    }
 } elseif ($totalCarSlots > 0 && $availableCarSlots === 0) {
-if ($availableMotorcycleCount === null) {
-$state = 'full';
-} elseif ((int) $availableMotorcycleCount > 0) {
-$state = 'moto_only';
+    if ($availableMotorcycleCount === null) {
+        $state = 'full';
+    } elseif ((int) $availableMotorcycleCount > 0) {
+        $state = 'moto_only';
+    } else {
+        $state = 'full';
+    }
 } else {
-$state = 'full';
+    if ($availableMotorcycleCount !== null && (int) $availableMotorcycleCount > 0) {
+        $state = 'available';
+    } elseif ($availableMotorcycleCount === 0) {
+        $state = 'full';
+    } else {
+        $state = 'unknown';
+    }
 }
-} else {
-if ($availableMotorcycleCount !== null && (int) $availableMotorcycleCount > 0) {
-$state = 'available';
-} elseif ($availableMotorcycleCount === 0) {
-$state = 'full';
-} else {
-$state = 'unknown';
-}
-}
-
-
 $areaStatuses[$areaKey] = [
 'state' => $state,
 'total' => (int) $totalCarSlots,
@@ -452,18 +455,17 @@ $areaStatuses[$areaKey] = [
                         });
                     },
 
-                    getMarkerColor(areaKey) {
-                        const status = this.areaStatuses[areaKey]?.state || 'unknown';
-                        const colorMap = {
-                            'full': '#dc2626',
-                            'available': '#16a34a',
-                            'moto_only': '#f59e0b',
-                            'disabled': '#94a3b8'
-                        };
-                        return colorMap[status] || '#6b7280';
-                    },
-
-                    setupPositioning() {
+                getMarkerColor(areaKey) {
+                    const status = this.areaStatuses[areaKey]?.state || 'unknown';
+                    const colorMap = {
+                        'full': '#dc2626',
+                        'available': '#16a34a',
+                        'moto_only': '#fb923c',
+                        'car_only': '#fb923c',
+                        'disabled': '#94a3b8'
+                    };
+                    return colorMap[status] || '#6b7280';
+                },                    setupPositioning() {
                         if (this.positioningSetup) return;
                         this.positioningSetup = true;
 

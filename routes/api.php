@@ -108,7 +108,12 @@ Route::get('/parking-map/{map}/statuses', function (ParkingMap $map) {
         if (!$enabled) {
             $state = 'disabled';
         } elseif ($totalCarSlots > 0 && $availableCarSlots > 0) {
-            $state = 'available';
+            // Check if motorcycles are full while cars are available
+            if ($availableMotorcycleCount !== null && (int) $availableMotorcycleCount === 0) {
+                $state = 'car_only';
+            } else {
+                $state = 'available';
+            }
         } elseif ($totalCarSlots > 0 && $availableCarSlots === 0) {
             if ($availableMotorcycleCount === null) {
                 $state = 'full';
