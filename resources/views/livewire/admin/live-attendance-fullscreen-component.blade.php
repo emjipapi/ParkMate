@@ -50,6 +50,24 @@
                             </small>
                         @endif
                     </div>
+                    @if (!empty($scan['user_type']) || !empty($scan['vehicle_type']))
+                        <div class="text-muted mt-2" style="font-size: {{ $loop->first ? '1.1rem' : '0.85rem' }};">
+                            @if (!empty($scan['user_type']))
+                                @php
+                                    $badgeColor = match($scan['user_type']) {
+                                        'Employee' => 'bg-success',
+                                        'Student' => 'bg-primary',
+                                        'Guest' => 'bg-secondary',
+                                        default => 'bg-secondary'
+                                    };
+                                @endphp
+                                <span class="badge {{ $badgeColor }} me-2">{{ $scan['user_type'] }}</span>
+                            @endif
+                            @if (!empty($scan['vehicle_type']))
+                                <span class="badge bg-secondary">{{ $scan['vehicle_type'] }}</span>
+                            @endif
+                        </div>
+                    @endif
                 </div>
             </div>
 

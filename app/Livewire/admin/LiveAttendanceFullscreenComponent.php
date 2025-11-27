@@ -47,6 +47,28 @@ public function loadLatestScans()
 
             $status = $log->action === 'denied_entry' ? 'DENIED' : ($log->action === 'entry' ? 'IN' : 'OUT');
 
+            // Determine user type
+            $userType = 'Unknown';
+            if ($user) {
+                if (!empty($user->student_id)) {
+                    $userType = 'Student';
+                } elseif (!empty($user->employee_id)) {
+                    $userType = 'Employee';
+                } else {
+                    $userType = 'Guest';
+                }
+            }
+
+            // Extract vehicle type from details if available
+            $vehicleType = null;
+            if ($log->details) {
+                if (stripos($log->details, 'motorcycle') !== false) {
+                    $vehicleType = 'Motorcycle';
+                } elseif (stripos($log->details, 'car') !== false) {
+                    $vehicleType = 'Car';
+                }
+            }
+
             return [
                 'name'    => $user ? "{$user->lastname}, {$user->firstname}" : 'Unknown',
                 'status'  => $status,
@@ -54,6 +76,8 @@ public function loadLatestScans()
                     ? route('profile.picture', ['filename' => $user->profile_picture])
                     : asset('images/placeholder.jpg'),
                 'time'    => optional($log->created_at)->toDateTimeString(),
+                'user_type' => $userType,
+                'vehicle_type' => $vehicleType,
             ];
         })
         ->toArray();
