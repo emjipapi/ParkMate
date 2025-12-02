@@ -54,42 +54,69 @@
                 isUpdating: false,
                 updateTimeout: null,
                 currentChartType: @json($chartType),
+                eventListenerAdded: false,
                 
                 init() {
-                    const ctx = this.$refs.canvas.getContext('2d');
-                    const initialLabels = @json($labels);
-                    const initialData = @json($data);
+                    console.log('Chart component initializing...');
+                    this.createChart();
+                    this.setupEventListener();
+                },
 
-                    this.chart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: initialLabels,
-                            datasets: [{
-                                label: this.getDatasetLabel(this.currentChartType),
-                                data: initialData,
-                                borderColor: this.getBorderColor(this.currentChartType),
-                                backgroundColor: this.getBackgroundColor(this.currentChartType),
-                                borderWidth: 2
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    title: {
-                                        display: true,
-                                        text: this.getYAxisLabel(this.currentChartType)
+                createChart() {
+                    try {
+                        const ctx = this.$refs.canvas.getContext('2d');
+                        if (!ctx) {
+                            console.error('Failed to get canvas context');
+                            return;
+                        }
+
+                        const initialLabels = @json($labels);
+                        const initialData = @json($data);
+
+                        console.log('Creating initial chart with:', { initialLabels, initialData });
+
+                        this.chart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: initialLabels.length > 0 ? initialLabels : ['No Data'],
+                                datasets: [{
+                                    label: this.getDatasetLabel(this.currentChartType),
+                                    data: initialData.length > 0 ? initialData : [0],
+                                    borderColor: this.getBorderColor(this.currentChartType),
+                                    backgroundColor: this.getBackgroundColor(this.currentChartType),
+                                    borderWidth: 2
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                scales: {
+                                    y: {
+                                        beginAtZero: true,
+                                        title: {
+                                            display: true,
+                                            text: this.getYAxisLabel(this.currentChartType)
+                                        }
                                     }
                                 }
                             }
-                        }
-                    });
+                        });
+
+                        console.log('Chart created successfully');
+                    } catch (error) {
+                        console.error('Error creating chart:', error);
+                    }
+                },
+
+                setupEventListener() {
+                    if (this.eventListenerAdded) {
+                        console.log('Event listener already added, skipping');
+                        return;
+                    }
 
                     // Listen for chart updates
                     document.addEventListener('chartDataUpdated', (event) => {
-                        console.log('Chart data updated:', event.detail);
+                        console.log('Chart data updated event received:', event.detail);
 
                         if (this.updateTimeout) {
                             clearTimeout(this.updateTimeout);
@@ -97,17 +124,25 @@
 
                         this.updateTimeout = setTimeout(() => {
                             this.updateChart(event.detail);
-                        }, 100);
+                        }, 150);
                     });
+
+                    this.eventListenerAdded = true;
+                    console.log('Event listener added');
                 },
 
                 updateChart(eventData) {
+                    console.log('updateChart called, isUpdating:', this.isUpdating);
+
                     if (this.isUpdating) {
                         console.log('Update skipped - already updating');
                         return;
                     }
 
                     this.isUpdating = true;
+                    
+                    // Disable controls immediately when update starts
+                    this.disableControls();
 
                     try {
                         const data = eventData.data || [];
@@ -115,30 +150,53 @@
                         const chartType = eventData.chartType || 'entries';
                         this.currentChartType = chartType;
 
-                        console.log('Updating chart with:', { labels, data, chartType });
+                        console.log('Updating chart with:', { 
+                            labels, 
+                            data, 
+                            chartType,
+                            labelsLength: labels.length,
+                            dataLength: data.length
+                        });
 
-                        // Destroy and recreate chart (your working approach)
+                        // Destroy existing chart properly with full cleanup
                         if (this.chart) {
-                            this.chart.destroy();
-                            this.chart = null;
+                            console.log('Destroying existing chart');
+                            try {
+                                // Stop animations and rendering
+                                this.chart.stop();
+                                // Clear canvas manually before destroying
+                                const ctx = this.$refs.canvas.getContext('2d');
+                                if (ctx) {
+                                    ctx.clearRect(0, 0, this.$refs.canvas.width, this.$refs.canvas.height);
+                                }
+                                // Now destroy
+                                this.chart.destroy();
+                                this.chart = null;
+                            } catch (e) {
+                                console.warn('Error during chart destruction:', e);
+                                this.chart = null;
+                            }
                         }
 
+                        // Recreate chart after longer delay to ensure cleanup completes
                         setTimeout(() => {
                             try {
                                 const ctx = this.$refs.canvas.getContext('2d');
                                 if (!ctx) {
-                                    console.error('Canvas context is null');
+                                    console.error('Canvas context is null during update');
                                     this.isUpdating = false;
                                     return;
                                 }
 
+                                console.log('Recreating chart...');
+
                                 this.chart = new Chart(ctx, {
                                     type: 'bar',
                                     data: {
-                                        labels: labels,
+                                        labels: labels.length > 0 ? labels : ['No Data'],
                                         datasets: [{
                                             label: this.getDatasetLabel(chartType),
-                                            data: Array.isArray(data) ? data : [],
+                                            data: data.length > 0 ? data : [0],
                                             borderColor: this.getBorderColor(chartType),
                                             backgroundColor: this.getBackgroundColor(chartType),
                                             borderWidth: 2
@@ -160,19 +218,19 @@
                                 });
 
                                 console.log('Chart recreated successfully');
+                                this.isUpdating = false;
 
-                                setTimeout(() => {
-                                    this.isUpdating = false;
-                                }, 1000);
                             } catch (error) {
                                 console.error('Error recreating chart:', error);
                                 this.isUpdating = false;
+                                this.enableControls(); // Re-enable on error
                             }
-                        }, 50);
+                        }, 200); // Increased from 100ms to 200ms
 
                     } catch (error) {
                         console.error('Error in updateChart:', error);
                         this.isUpdating = false;
+                        this.enableControls(); // Re-enable on error
                     }
                 },
 
@@ -214,6 +272,27 @@
                         'admin_logins': 'rgba(255, 206, 86, 0.2)'
                     };
                     return colors[chartType] || 'rgba(0, 0, 0, 0.2)';
+                },
+
+                disableControls() {
+                    const dateInput = document.getElementById('dateSelect');
+                    const chartTypeSelect = document.getElementById('chartType');
+                    
+                    if (dateInput) dateInput.disabled = true;
+                    if (chartTypeSelect) chartTypeSelect.disabled = true;
+
+                    setTimeout(() => {
+                        if (dateInput) dateInput.disabled = false;
+                        if (chartTypeSelect) chartTypeSelect.disabled = false;
+                    }, 1000);
+                },
+
+                enableControls() {
+                    const dateInput = document.getElementById('dateSelect');
+                    const chartTypeSelect = document.getElementById('chartType');
+                    
+                    if (dateInput) dateInput.disabled = false;
+                    if (chartTypeSelect) chartTypeSelect.disabled = false;
                 }
             }
         }
