@@ -3,24 +3,8 @@
     <div class="w-full" style="max-width: 1200px; margin: auto;">
 <!-- Filters Row -->
 <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center gap-3 mb-3" wire:loading.class="opacity-50">
-    <!-- Date Selector -->
+        <!-- Chart Type Selector -->
     <div class="d-flex flex-column">
-        <label for="dateSelect" class="form-label mb-1 text-sm">Date:</label>
-        <input 
-            type="date" 
-            id="dateSelect" 
-            wire:model.change="selectedDate" 
-            class="form-control form-control-sm w-100 w-md-auto"
-            wire:loading.attr="disabled"
-            wire:target="selectedDate,chartType"
-            min="{{ min($dates) }}" 
-            max="{{ max($dates) }}"
-            onfocus="this.showPicker();" 
-            onmousedown="event.preventDefault(); this.showPicker();">
-    </div>
-
-    <!-- Chart Type Selector -->
-    <div class="d-flex flex-column flex-grow-1">
         <label for="chartType" class="form-label mb-1 text-sm">Chart Type:</label>
         <select 
             id="chartType" 
@@ -34,6 +18,22 @@
             <option value="logins">User Logins</option>
             <option value="admin_logins">Admin Logins</option>
         </select>
+    </div>
+    <!-- Date Selector -->
+    <div class="d-flex flex-column">
+        <label for="dateSelect" class="form-label mb-1 text-sm">Date:</label>
+        <input 
+            type="date" 
+            id="dateSelect" 
+            wire:model.change="selectedDate" 
+            class="form-control form-control-sm w-100 w-md-auto"
+            style="max-width: 200px;"
+            wire:loading.attr="disabled"
+            wire:target="selectedDate,chartType"
+            min="{{ min($dates) }}" 
+            max="{{ max($dates) }}"
+            onfocus="this.showPicker();" 
+            onmousedown="event.preventDefault(); this.showPicker();">
     </div>
 </div>
 
