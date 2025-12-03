@@ -177,7 +177,7 @@ class AnalyticsChartComponent extends Component
 
     private function loadDurationData()
     {
-        // Calculate average duration of stays by matching entry/exit pairs for users
+        // Calculate average duration of stays by matching entry/exit pairs for users at Main Gate only
         $durations = DB::select("
             SELECT 
                 HOUR(entries.created_at) as hour,
@@ -189,10 +189,12 @@ class AnalyticsChartComponent extends Component
                 AND exits.action = 'exit'
                 AND exits.created_at > entries.created_at
                 AND DATE(exits.created_at) = DATE(entries.created_at)
+                AND exits.area_id IS NULL
             WHERE 
                 entries.action = 'entry'
                 AND entries.actor_type = 'user'
                 AND DATE(entries.created_at) = ?
+                AND entries.area_id IS NULL
                 AND exits.id IS NOT NULL
             GROUP BY HOUR(entries.created_at)
             ORDER BY hour
