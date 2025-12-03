@@ -35,6 +35,13 @@ class AnalyticsChartComponent extends Component
     public $averagePerDateMonth = 0;
     public $busiestDateMonth = null;
     
+    // Duration summary statistics
+    public $averageDurationOverall = 0;
+    public $longestDuration = 0;
+    public $shortestDuration = 0;
+    public $busiestDurationPeriod = null;
+    public $quietestDurationPeriod = null;
+    
     public $vehicleTypeBreakdown = [];
     public $userTypeBreakdown = [];
     public $userTypeVehicleBreakdown = [];
@@ -221,6 +228,9 @@ class AnalyticsChartComponent extends Component
 
         $this->labels = collect($durations)->pluck('hour')->map(fn($h) => sprintf('%02d:00', $h))->toArray();
         $this->data = collect($durations)->pluck('avg_duration')->map(fn($d) => round($d, 1))->toArray();
+        
+        // Calculate daily duration summary statistics
+        $this->calculateDurationDailySummaryStats();
     }
 
     private function loadDurationDataWeekly()
@@ -262,6 +272,9 @@ class AnalyticsChartComponent extends Component
             $this->labels[] = $date->format('M d');
             $this->data[] = isset($durationsByDate[$dateStr]) ? round($durationsByDate[$dateStr]->avg_duration, 1) : 0;
         }
+        
+        // Calculate weekly duration summary statistics
+        $this->calculateDurationWeeklySummaryStats($startDate, $endDate);
     }
 
     private function loadDurationDataMonthly()
@@ -305,6 +318,9 @@ class AnalyticsChartComponent extends Component
             $this->labels[] = $date->format('M d');
             $this->data[] = isset($durationsByDate[$dateStr]) ? round($durationsByDate[$dateStr]->avg_duration, 1) : 0;
         }
+        
+        // Calculate monthly duration summary statistics
+        $this->calculateDurationMonthlySummaryStats($startDate, $endDate);
     }
 
     private function loadLoginsData($actorType)
@@ -335,6 +351,154 @@ class AnalyticsChartComponent extends Component
                 detail: " . json_encode($eventData) . " 
             }));
         ");
+    }
+
+    private function calculateDurationDailySummaryStats()
+    {
+        if (empty($this->data)) {
+            $this->averageDurationOverall = 0;
+            $this->longestDuration = 0;
+            $this->shortestDuration = 0;
+            $this->busiestDurationPeriod = null;
+            $this->quietestDurationPeriod = null;
+            return;
+        }
+        
+        // Average duration overall
+        $nonZeroDurations = array_filter($this->data, fn($d) => $d > 0);
+        $this->averageDurationOverall = count($nonZeroDurations) > 0 ? round(array_sum($nonZeroDurations) / count($nonZeroDurations), 1) : 0;
+        
+        // Longest and shortest duration
+        $this->longestDuration = count($nonZeroDurations) > 0 ? round(max($nonZeroDurations), 1) : 0;
+        $this->shortestDuration = count($nonZeroDurations) > 0 ? round(min($nonZeroDurations), 1) : 0;
+        
+        // Busiest duration hour (highest average)
+        if (count($nonZeroDurations) > 0) {
+            $maxIndex = array_key_first(array_filter($this->data, fn($d) => $d === max($nonZeroDurations)));
+            $this->busiestDurationPeriod = [
+                'hour' => $maxIndex,
+                'duration' => $this->data[$maxIndex],
+                'formatted' => sprintf('%02d:00', $maxIndex)
+            ];
+        }
+        
+        // Quietest duration hour (lowest non-zero average)
+        $quietestIndex = null;
+        $quietestValue = PHP_INT_MAX;
+        foreach ($this->data as $index => $value) {
+            if ($value > 0 && $value < $quietestValue) {
+                $quietestValue = $value;
+                $quietestIndex = $index;
+            }
+        }
+        
+        if ($quietestIndex !== null) {
+            $this->quietestDurationPeriod = [
+                'hour' => $quietestIndex,
+                'duration' => $this->data[$quietestIndex],
+                'formatted' => sprintf('%02d:00', $quietestIndex)
+            ];
+        }
+    }
+
+    private function calculateDurationWeeklySummaryStats($startDate, $endDate)
+    {
+        if (empty($this->data)) {
+            $this->averageDurationOverall = 0;
+            $this->longestDuration = 0;
+            $this->shortestDuration = 0;
+            $this->busiestDurationPeriod = null;
+            $this->quietestDurationPeriod = null;
+            return;
+        }
+        
+        // Average duration overall
+        $nonZeroDurations = array_filter($this->data, fn($d) => $d > 0);
+        $this->averageDurationOverall = count($nonZeroDurations) > 0 ? round(array_sum($nonZeroDurations) / count($nonZeroDurations), 1) : 0;
+        
+        // Longest and shortest duration
+        $this->longestDuration = count($nonZeroDurations) > 0 ? round(max($nonZeroDurations), 1) : 0;
+        $this->shortestDuration = count($nonZeroDurations) > 0 ? round(min($nonZeroDurations), 1) : 0;
+        
+        // Busiest duration day (highest average)
+        if (count($nonZeroDurations) > 0) {
+            $maxIndex = array_key_first(array_filter($this->data, fn($d) => $d === max($nonZeroDurations)));
+            $busiestDate = $startDate->copy()->addDays($maxIndex);
+            $this->busiestDurationPeriod = [
+                'day' => $busiestDate->format('l'),
+                'date' => $busiestDate->format('M d'),
+                'duration' => $this->data[$maxIndex]
+            ];
+        }
+        
+        // Quietest duration day (lowest non-zero average)
+        $quietestIndex = null;
+        $quietestValue = PHP_INT_MAX;
+        foreach ($this->data as $index => $value) {
+            if ($value > 0 && $value < $quietestValue) {
+                $quietestValue = $value;
+                $quietestIndex = $index;
+            }
+        }
+        
+        if ($quietestIndex !== null) {
+            $quietestDate = $startDate->copy()->addDays($quietestIndex);
+            $this->quietestDurationPeriod = [
+                'day' => $quietestDate->format('l'),
+                'date' => $quietestDate->format('M d'),
+                'duration' => $this->data[$quietestIndex]
+            ];
+        }
+    }
+
+    private function calculateDurationMonthlySummaryStats($startDate, $endDate)
+    {
+        if (empty($this->data)) {
+            $this->averageDurationOverall = 0;
+            $this->longestDuration = 0;
+            $this->shortestDuration = 0;
+            $this->busiestDurationPeriod = null;
+            $this->quietestDurationPeriod = null;
+            return;
+        }
+        
+        // Average duration overall
+        $nonZeroDurations = array_filter($this->data, fn($d) => $d > 0);
+        $this->averageDurationOverall = count($nonZeroDurations) > 0 ? round(array_sum($nonZeroDurations) / count($nonZeroDurations), 1) : 0;
+        
+        // Longest and shortest duration
+        $this->longestDuration = count($nonZeroDurations) > 0 ? round(max($nonZeroDurations), 1) : 0;
+        $this->shortestDuration = count($nonZeroDurations) > 0 ? round(min($nonZeroDurations), 1) : 0;
+        
+        // Busiest duration date (highest average)
+        if (count($nonZeroDurations) > 0) {
+            $maxIndex = array_key_first(array_filter($this->data, fn($d) => $d === max($nonZeroDurations)));
+            $busiestDate = $startDate->copy()->addDays($maxIndex);
+            $this->busiestDurationPeriod = [
+                'day' => $busiestDate->format('l'),
+                'date' => $busiestDate->format('M d'),
+                'duration' => $this->data[$maxIndex]
+            ];
+        }
+        
+        // Quietest duration date (lowest non-zero average)
+        $quietestIndex = null;
+        $quietestValue = PHP_INT_MAX;
+        foreach ($this->data as $index => $value) {
+            if ($value > 0 && $value < $quietestValue) {
+                $quietestValue = $value;
+                $quietestIndex = $index;
+            }
+        }
+        
+        if ($quietestIndex !== null) {
+            $quietestDate = $startDate->copy()->addDays($quietestIndex);
+            $this->quietestDurationPeriod = [
+                'day' => $quietestDate->format('l'),
+                'date' => $quietestDate->format('M d'),
+                'duration' => $this->data[$quietestIndex]
+            ];
+        }
     }
 
     private function calculateDailySummaryStats()

@@ -312,6 +312,224 @@
         </div>
         @endif
 
+        <!-- Summary Statistics Cards for Duration (Daily) -->
+        @if($chartType === 'duration' && $period === 'daily')
+        <div class="mt-5">
+            <h5 class="mb-3">Summary Statistics</h5>
+            <div class="row g-3">
+                <!-- Average Duration Overall -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Average Duration</h6>
+                            <p class="card-text">
+                                Average stay: <strong>{{ $averageDurationOverall }}</strong> minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Longest Duration -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Longest Duration</h6>
+                            <p class="card-text">
+                                Longest stay: <strong>{{ $longestDuration }}</strong> minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shortest Duration -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Shortest Duration</h6>
+                            <p class="card-text">
+                                Shortest stay: <strong>{{ $shortestDuration }}</strong> minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Busiest Duration Hour -->
+                @if($busiestDurationPeriod)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Longest Stay Hour</h6>
+                            <p class="card-text">
+                                Hour with longest average: <strong>{{ $busiestDurationPeriod['formatted'] }}</strong><br>
+                                {{ $busiestDurationPeriod['duration'] }} minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Quietest Duration Hour -->
+                @if($quietestDurationPeriod)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Shortest Stay Hour</h6>
+                            <p class="card-text">
+                                Hour with shortest average: <strong>{{ $quietestDurationPeriod['formatted'] }}</strong><br>
+                                {{ $quietestDurationPeriod['duration'] }} minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+        @elseif($chartType === 'duration' && $period === 'weekly')
+        <!-- Summary Statistics Cards for Duration (Weekly) -->
+        <div class="mt-5">
+            <h5 class="mb-3">Summary Statistics</h5>
+            <div class="row g-3">
+                <!-- Average Duration Overall -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Average Duration</h6>
+                            <p class="card-text">
+                                Average stay: <strong>{{ $averageDurationOverall }}</strong> minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Longest Duration -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Longest Duration</h6>
+                            <p class="card-text">
+                                Longest stay: <strong>{{ $longestDuration }}</strong> minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shortest Duration -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Shortest Duration</h6>
+                            <p class="card-text">
+                                Shortest stay: <strong>{{ $shortestDuration }}</strong> minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Busiest Duration Day -->
+                @if($busiestDurationPeriod)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Longest Stay Day</h6>
+                            <p class="card-text">
+                                Day with longest average: <strong>{{ $busiestDurationPeriod['day'] }}</strong> ({{ $busiestDurationPeriod['date'] }})<br>
+                                {{ $busiestDurationPeriod['duration'] }} minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Quietest Duration Day -->
+                @if($quietestDurationPeriod)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Shortest Stay Day</h6>
+                            <p class="card-text">
+                                Day with shortest average: <strong>{{ $quietestDurationPeriod['day'] }}</strong> ({{ $quietestDurationPeriod['date'] }})<br>
+                                {{ $quietestDurationPeriod['duration'] }} minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+        @elseif($chartType === 'duration' && $period === 'monthly')
+        <!-- Summary Statistics Cards for Duration (Monthly) -->
+        <div class="mt-5">
+            <h5 class="mb-3">Summary Statistics</h5>
+            <div class="row g-3">
+                <!-- Average Duration Overall -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Average Duration</h6>
+                            <p class="card-text">
+                                Average stay: <strong>{{ $averageDurationOverall }}</strong> minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Longest Duration -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Longest Duration</h6>
+                            <p class="card-text">
+                                Longest stay: <strong>{{ $longestDuration }}</strong> minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shortest Duration -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Shortest Duration</h6>
+                            <p class="card-text">
+                                Shortest stay: <strong>{{ $shortestDuration }}</strong> minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Busiest Duration Date -->
+                @if($busiestDurationPeriod)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Longest Stay Date</h6>
+                            <p class="card-text">
+                                Date with longest average: <strong>{{ $busiestDurationPeriod['day'] }}</strong> ({{ $busiestDurationPeriod['date'] }})<br>
+                                {{ $busiestDurationPeriod['duration'] }} minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Quietest Duration Date -->
+                @if($quietestDurationPeriod)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Shortest Stay Date</h6>
+                            <p class="card-text">
+                                Date with shortest average: <strong>{{ $quietestDurationPeriod['day'] }}</strong> ({{ $quietestDurationPeriod['date'] }})<br>
+                                {{ $quietestDurationPeriod['duration'] }} minutes
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endif
+
         <!-- Breakdown Section (Daily Only) -->
         @if($chartType === 'entries' && $period === 'daily')
         <div class="mt-5">
