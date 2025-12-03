@@ -20,8 +20,8 @@
         </select>
     </div>
 
-    <!-- Period Selector (only for Entry Analytics) -->
-    @if($chartType === 'entries')
+    <!-- Period Selector (for Entry Analytics and Average Duration of Stays) -->
+    @if($chartType === 'entries' || $chartType === 'duration')
     <div class="d-flex flex-column">
         <label for="period" class="form-label mb-1 text-sm">Period:</label>
         <select 
@@ -39,7 +39,7 @@
     @endif
     <!-- Date Selector -->
     <div class="d-flex flex-column">
-        @if($chartType === 'entries' && $period === 'weekly')
+        @if(($chartType === 'entries' || $chartType === 'duration') && $period === 'weekly')
             <label for="dateSelect" class="form-label mb-1 text-sm">Week:</label>
             <input 
                 type="week" 
@@ -49,7 +49,7 @@
                 style="max-width: 200px;"
                 wire:loading.attr="disabled"
                 wire:target="selectedDate,chartType,period">
-        @elseif($chartType === 'entries' && $period === 'monthly')
+        @elseif(($chartType === 'entries' || $chartType === 'duration') && $period === 'monthly')
             <label for="dateSelect" class="form-label mb-1 text-sm">Month:</label>
             <input 
                 type="month" 

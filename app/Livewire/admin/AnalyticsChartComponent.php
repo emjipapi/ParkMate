@@ -14,6 +14,7 @@ class AnalyticsChartComponent extends Component
     public $chartType = 'entries'; // Default to entries
     public $dates = [];
     public $period = 'daily'; // For entry analytics: daily, weekly, monthly
+    public $locationFilter = 'all'; // For entry analytics: all, main_gate_only
     
     // Daily summary statistics
     public $peakHour = null;
@@ -73,6 +74,13 @@ class AnalyticsChartComponent extends Component
     public function updatedPeriod()
     {
         \Log::info('Period changed to: ' . $this->period);
+        $this->loadData();
+        $this->emitChartUpdate();
+    }
+
+    public function updatedLocationFilter()
+    {
+        \Log::info('Location filter changed to: ' . $this->locationFilter);
         $this->loadData();
         $this->emitChartUpdate();
     }
@@ -177,6 +185,17 @@ class AnalyticsChartComponent extends Component
 
     private function loadDurationData()
     {
+        if ($this->period === 'daily') {
+            $this->loadDurationDataDaily();
+        } elseif ($this->period === 'weekly') {
+            $this->loadDurationDataWeekly();
+        } elseif ($this->period === 'monthly') {
+            $this->loadDurationDataMonthly();
+        }
+    }
+
+    private function loadDurationDataDaily()
+    {
         // Calculate average duration of stays by matching entry/exit pairs for users at Main Gate only
         $durations = DB::select("
             SELECT 
@@ -202,6 +221,90 @@ class AnalyticsChartComponent extends Component
 
         $this->labels = collect($durations)->pluck('hour')->map(fn($h) => sprintf('%02d:00', $h))->toArray();
         $this->data = collect($durations)->pluck('avg_duration')->map(fn($d) => round($d, 1))->toArray();
+    }
+
+    private function loadDurationDataWeekly()
+    {
+        // Calculate average duration by day for the week
+        $startDate = Carbon::parse($this->selectedDate);
+        $endDate = $startDate->copy()->addDays(6);
+
+        $durations = DB::select("
+            SELECT 
+                DATE(entries.created_at) as date,
+                AVG(TIMESTAMPDIFF(MINUTE, entries.created_at, exits.created_at)) as avg_duration
+            FROM activity_logs entries
+            LEFT JOIN activity_logs exits ON 
+                entries.actor_type = exits.actor_type 
+                AND entries.actor_id = exits.actor_id
+                AND exits.action = 'exit'
+                AND exits.created_at > entries.created_at
+                AND DATE(exits.created_at) = DATE(entries.created_at)
+                AND exits.area_id IS NULL
+            WHERE 
+                entries.action = 'entry'
+                AND entries.actor_type = 'user'
+                AND DATE(entries.created_at) BETWEEN ? AND ?
+                AND entries.area_id IS NULL
+                AND exits.id IS NOT NULL
+            GROUP BY DATE(entries.created_at)
+            ORDER BY date
+        ", [$startDate->toDateString(), $endDate->toDateString()]);
+
+        $durationsByDate = collect($durations)->keyBy('date')->toArray();
+
+        // Generate labels and data for all 7 days
+        $this->labels = [];
+        $this->data = [];
+        for ($i = 0; $i < 7; $i++) {
+            $date = $startDate->copy()->addDays($i);
+            $dateStr = $date->format('Y-m-d');
+            $this->labels[] = $date->format('M d');
+            $this->data[] = isset($durationsByDate[$dateStr]) ? round($durationsByDate[$dateStr]->avg_duration, 1) : 0;
+        }
+    }
+
+    private function loadDurationDataMonthly()
+    {
+        // Calculate average duration by date for the month
+        $date = Carbon::parse($this->selectedDate);
+        $startDate = $date->copy()->startOfMonth();
+        $endDate = $date->copy()->endOfMonth();
+        $daysInMonth = $date->daysInMonth;
+
+        $durations = DB::select("
+            SELECT 
+                DATE(entries.created_at) as date,
+                AVG(TIMESTAMPDIFF(MINUTE, entries.created_at, exits.created_at)) as avg_duration
+            FROM activity_logs entries
+            LEFT JOIN activity_logs exits ON 
+                entries.actor_type = exits.actor_type 
+                AND entries.actor_id = exits.actor_id
+                AND exits.action = 'exit'
+                AND exits.created_at > entries.created_at
+                AND DATE(exits.created_at) = DATE(entries.created_at)
+                AND exits.area_id IS NULL
+            WHERE 
+                entries.action = 'entry'
+                AND entries.actor_type = 'user'
+                AND DATE(entries.created_at) BETWEEN ? AND ?
+                AND entries.area_id IS NULL
+                AND exits.id IS NOT NULL
+            GROUP BY DATE(entries.created_at)
+            ORDER BY date
+        ", [$startDate->toDateString(), $endDate->toDateString()]);
+
+        $durationsByDate = collect($durations)->keyBy('date')->toArray();
+
+        // Generate labels and data for all days in month
+        $this->labels = [];
+        $this->data = [];
+        for ($i = 1; $i <= $daysInMonth; $i++) {
+            $date = $startDate->copy()->addDays($i - 1);
+            $dateStr = $date->format('Y-m-d');
+            $this->labels[] = $date->format('M d');
+            $this->data[] = isset($durationsByDate[$dateStr]) ? round($durationsByDate[$dateStr]->avg_duration, 1) : 0;
+        }
     }
 
     private function loadLoginsData($actorType)
