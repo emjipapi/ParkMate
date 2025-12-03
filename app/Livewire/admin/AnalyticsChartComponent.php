@@ -112,6 +112,33 @@ class AnalyticsChartComponent extends Component
                 $this->data[] = $entries->get($dateStr)?->total ?? 0;
             }
         }
+        elseif ($this->period === 'monthly') {
+            // Daily breakdown for all days in selected month
+            $date = Carbon::parse($this->selectedDate);
+            $startDate = $date->copy()->startOfMonth();
+            $endDate = $date->copy()->endOfMonth();
+            $daysInMonth = $date->daysInMonth;
+
+            $entries = DB::table('activity_logs')
+                ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
+                ->where('action', 'entry')
+                ->where('actor_type', 'user')
+                ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get()
+                ->keyBy('date');
+
+            // Generate labels and data for all days in month (fill missing days with 0)
+            $this->labels = [];
+            $this->data = [];
+            for ($i = 1; $i <= $daysInMonth; $i++) {
+                $date = $startDate->copy()->addDays($i - 1);
+                $dateStr = $date->format('Y-m-d');
+                $this->labels[] = $date->format('M d');
+                $this->data[] = $entries->get($dateStr)?->total ?? 0;
+            }
+        }
     }
 
     private function loadDurationData()

@@ -49,6 +49,16 @@
                 style="max-width: 200px;"
                 wire:loading.attr="disabled"
                 wire:target="selectedDate,chartType,period">
+        @elseif($chartType === 'entries' && $period === 'monthly')
+            <label for="dateSelect" class="form-label mb-1 text-sm">Month:</label>
+            <input 
+                type="month" 
+                id="dateSelect" 
+                wire:model.change="selectedDate" 
+                class="form-control form-control-sm w-100 w-md-auto"
+                style="max-width: 200px;"
+                wire:loading.attr="disabled"
+                wire:target="selectedDate,chartType,period">
         @else
             <label for="dateSelect" class="form-label mb-1 text-sm">Date:</label>
             <input 
@@ -323,7 +333,7 @@
                         if (dateInput) dateInput.disabled = false;
                         if (chartTypeSelect) chartTypeSelect.disabled = false;
                         if (periodSelect) periodSelect.disabled = false;
-                    }, 2000);
+                    }, 3000);
                 },
 
                 enableControls() {
