@@ -13,6 +13,7 @@ class AnalyticsChartComponent extends Component
     public $selectedDate;
     public $chartType = 'entries'; // Default to entries
     public $dates = [];
+    public $period = 'daily'; // For entry analytics: daily, weekly, monthly
 
     public function mount()
     {
@@ -44,6 +45,13 @@ class AnalyticsChartComponent extends Component
         $this->emitChartUpdate();
     }
 
+    public function updatedPeriod()
+    {
+        \Log::info('Period changed to: ' . $this->period);
+        $this->loadData();
+        $this->emitChartUpdate();
+    }
+
     public function loadData()
     {
         if ($this->chartType === 'entries') {
@@ -59,17 +67,51 @@ class AnalyticsChartComponent extends Component
 
     private function loadEntriesData()
     {
-        $entries = DB::table('activity_logs')
-            ->selectRaw('HOUR(created_at) as hour, COUNT(*) as total')
-            ->where('action', 'entry')
-            ->where('actor_type', 'user') // Only count user entries, not admin logins
-            ->whereDate('created_at', $this->selectedDate)
-            ->groupBy('hour')
-            ->orderBy('hour')
-            ->get();
+        if ($this->period === 'daily') {
+            // Hourly breakdown for selected date
+            $entries = DB::table('activity_logs')
+                ->selectRaw('HOUR(created_at) as hour, COUNT(*) as total')
+                ->where('action', 'entry')
+                ->where('actor_type', 'user')
+                ->whereDate('created_at', $this->selectedDate)
+                ->groupBy('hour')
+                ->orderBy('hour')
+                ->get()
+                ->keyBy('hour');
 
-        $this->labels = $entries->pluck('hour')->map(fn($h) => sprintf('%02d:00', $h))->toArray();
-        $this->data = $entries->pluck('total')->toArray();
+            // Generate labels and data for all 24 hours (fill missing hours with 0)
+            $this->labels = [];
+            $this->data = [];
+            for ($hour = 0; $hour < 24; $hour++) {
+                $this->labels[] = sprintf('%02d:00', $hour);
+                $this->data[] = $entries->get($hour)?->total ?? 0;
+            }
+        } 
+        elseif ($this->period === 'weekly') {
+            // Daily breakdown for 7 days starting from selected date
+            $startDate = Carbon::parse($this->selectedDate);
+            $endDate = $startDate->copy()->addDays(6);
+
+            $entries = DB::table('activity_logs')
+                ->selectRaw('DATE(created_at) as date, COUNT(*) as total')
+                ->where('action', 'entry')
+                ->where('actor_type', 'user')
+                ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get()
+                ->keyBy('date');
+
+            // Generate labels and data for all 7 days (fill missing days with 0)
+            $this->labels = [];
+            $this->data = [];
+            for ($i = 0; $i < 7; $i++) {
+                $date = $startDate->copy()->addDays($i);
+                $dateStr = $date->format('Y-m-d');
+                $this->labels[] = $date->format('M d');
+                $this->data[] = $entries->get($dateStr)?->total ?? 0;
+            }
+        }
     }
 
     private function loadDurationData()

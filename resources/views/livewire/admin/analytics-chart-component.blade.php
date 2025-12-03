@@ -13,27 +13,57 @@
             style="max-width: 200px;"
             wire:loading.attr="disabled" 
             wire:target="selectedDate,chartType">
-            <option value="entries">Peak Entry Hours</option>
+            <option value="entries">Entry Analytics</option>
             <option value="duration">Average Duration of Stays</option>
             <option value="logins">User Logins</option>
             <option value="admin_logins">Admin Logins</option>
         </select>
     </div>
+
+    <!-- Period Selector (only for Entry Analytics) -->
+    @if($chartType === 'entries')
+    <div class="d-flex flex-column">
+        <label for="period" class="form-label mb-1 text-sm">Period:</label>
+        <select 
+            id="period" 
+            wire:model.change="period"
+            class="form-select form-select-sm w-100 w-md-auto"
+            style="max-width: 200px;"
+            wire:loading.attr="disabled" 
+            wire:target="selectedDate,chartType,period">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+        </select>
+    </div>
+    @endif
     <!-- Date Selector -->
     <div class="d-flex flex-column">
-        <label for="dateSelect" class="form-label mb-1 text-sm">Date:</label>
-        <input 
-            type="date" 
-            id="dateSelect" 
-            wire:model.change="selectedDate" 
-            class="form-control form-control-sm w-100 w-md-auto"
-            style="max-width: 200px;"
-            wire:loading.attr="disabled"
-            wire:target="selectedDate,chartType"
-            min="{{ min($dates) }}" 
-            max="{{ max($dates) }}"
-            onfocus="this.showPicker();" 
-            onmousedown="event.preventDefault(); this.showPicker();">
+        @if($chartType === 'entries' && $period === 'weekly')
+            <label for="dateSelect" class="form-label mb-1 text-sm">Week:</label>
+            <input 
+                type="week" 
+                id="dateSelect" 
+                wire:model.change="selectedDate" 
+                class="form-control form-control-sm w-100 w-md-auto"
+                style="max-width: 200px;"
+                wire:loading.attr="disabled"
+                wire:target="selectedDate,chartType,period">
+        @else
+            <label for="dateSelect" class="form-label mb-1 text-sm">Date:</label>
+            <input 
+                type="date" 
+                id="dateSelect" 
+                wire:model.change="selectedDate" 
+                class="form-control form-control-sm w-100 w-md-auto"
+                style="max-width: 200px;"
+                wire:loading.attr="disabled"
+                wire:target="selectedDate,chartType"
+                min="{{ min($dates) }}" 
+                max="{{ max($dates) }}"
+                onfocus="this.showPicker();" 
+                onmousedown="event.preventDefault(); this.showPicker();">
+        @endif
     </div>
 </div>
 
@@ -90,6 +120,9 @@
                             options: {
                                 responsive: true,
                                 maintainAspectRatio: false,
+                                // animation: {
+                                //     duration: 500
+                                // },
                                 scales: {
                                     y: {
                                         beginAtZero: true,
@@ -205,6 +238,9 @@
                                     options: {
                                         responsive: true,
                                         maintainAspectRatio: false,
+                                        // animation: {
+                                        //     duration: 500
+                                        // },
                                         scales: {
                                             y: {
                                                 beginAtZero: true,
@@ -236,7 +272,7 @@
 
                 getDatasetLabel(chartType) {
                     const labels = {
-                        'entries': 'Peak Entries',
+                        'entries': 'Entry Analytics',
                         'duration': 'Avg Duration (minutes)',
                         'logins': 'User Logins',
                         'admin_logins': 'Admin Logins'
@@ -277,22 +313,27 @@
                 disableControls() {
                     const dateInput = document.getElementById('dateSelect');
                     const chartTypeSelect = document.getElementById('chartType');
+                    const periodSelect = document.getElementById('period');
                     
                     if (dateInput) dateInput.disabled = true;
                     if (chartTypeSelect) chartTypeSelect.disabled = true;
+                    if (periodSelect) periodSelect.disabled = true;
 
                     setTimeout(() => {
                         if (dateInput) dateInput.disabled = false;
                         if (chartTypeSelect) chartTypeSelect.disabled = false;
-                    }, 1000);
+                        if (periodSelect) periodSelect.disabled = false;
+                    }, 2000);
                 },
 
                 enableControls() {
                     const dateInput = document.getElementById('dateSelect');
                     const chartTypeSelect = document.getElementById('chartType');
+                    const periodSelect = document.getElementById('period');
                     
                     if (dateInput) dateInput.disabled = false;
                     if (chartTypeSelect) chartTypeSelect.disabled = false;
+                    if (periodSelect) periodSelect.disabled = false;
                 }
             }
         }
