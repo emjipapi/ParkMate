@@ -21,6 +21,13 @@ class AnalyticsChartComponent extends Component
     public $quietestHour = null;
     public $averagePerHour = 0;
     public $busyPeriod = null;
+    
+    // Weekly summary statistics
+    public $peakDay = null;
+    public $quietestDay = null;
+    public $averagePerDay = 0;
+    public $busiestDay = null;
+    
     public $vehicleTypeBreakdown = [];
     public $userTypeBreakdown = [];
     public $userTypeVehicleBreakdown = [];
@@ -126,6 +133,9 @@ class AnalyticsChartComponent extends Component
                 $this->labels[] = $date->format('M d');
                 $this->data[] = $entries->get($dateStr)?->total ?? 0;
             }
+            
+            // Calculate weekly summary statistics
+            $this->calculateWeeklySummaryStats($startDate, $endDate);
         }
         elseif ($this->period === 'monthly') {
             // Daily breakdown for all days in selected month
@@ -285,15 +295,24 @@ class AnalyticsChartComponent extends Component
             $this->peakHour = null;
             $this->quietestHour = null;
             $this->busyPeriod = null;
-            $this->totalEntries = 0;
             $this->averagePerHour = 0;
             $this->vehicleTypeBreakdown = [];
             $this->userTypeBreakdown = [];
             $this->userTypeVehicleBreakdown = [];
             $this->parkingAreaBreakdown = [];
             $this->timeRanges = [];
-        } else {
-            // Calculate breakdowns for daily view
+        }
+        
+        // Clear weekly stats if not in weekly mode
+        if ($this->period !== 'weekly') {
+            $this->peakDay = null;
+            $this->quietestDay = null;
+            $this->busiestDay = null;
+            $this->averagePerDay = 0;
+        }
+        
+        // Only calculate breakdowns for daily view
+        if ($this->period === 'daily') {
             $this->calculateVehicleTypeBreakdown();
             $this->calculateUserTypeBreakdown();
             $this->calculateParkingAreaBreakdown();
@@ -316,6 +335,59 @@ class AnalyticsChartComponent extends Component
                 $range['count'] += $this->data[$i] ?? 0;
             }
         }
+    }
+
+    private function calculateWeeklySummaryStats($startDate, $endDate)
+    {
+        // Total entries for the week
+        $this->totalEntries = array_sum($this->data);
+
+        // Find peak and quietest days
+        if (count($this->data) > 0) {
+            $maxValue = PHP_INT_MIN;
+            $minValue = PHP_INT_MAX;
+            $peakIndex = 0;
+            $quietIndex = 0;
+
+            foreach ($this->data as $index => $value) {
+                if ($value > $maxValue) {
+                    $maxValue = $value;
+                    $peakIndex = $index;
+                }
+                if ($value < $minValue) {
+                    $minValue = $value;
+                    $quietIndex = $index;
+                }
+            }
+
+            $peakDate = $startDate->copy()->addDays($peakIndex);
+            $quietDate = $startDate->copy()->addDays($quietIndex);
+
+            $this->peakDay = [
+                'day' => $peakDate->format('l'),
+                'date' => $peakDate->format('M d'),
+                'count' => $this->data[$peakIndex]
+            ];
+
+            $this->quietestDay = [
+                'day' => $quietDate->format('l'),
+                'date' => $quietDate->format('M d'),
+                'count' => $this->data[$quietIndex]
+            ];
+
+            // Busiest day (same as peak day)
+            $this->busiestDay = [
+                'day' => $peakDate->format('l'),
+                'date' => $peakDate->format('M d'),
+                'count' => $this->data[$peakIndex]
+            ];
+        }
+
+        // Average per day
+        $this->averagePerDay = $this->totalEntries > 0 ? round($this->totalEntries / 7, 1) : 0;
+        
+        // Calculate weekly breakdowns
+        $this->calculateWeeklyBreakdowns($startDate, $endDate);
     }
 
     private function calculateVehicleTypeBreakdown()
@@ -483,6 +555,221 @@ class AnalyticsChartComponent extends Component
                 'name' => $area->name,
                 'count' => isset($areaEntryCounts[$area->id]) ? $areaEntryCounts[$area->id]->count : 0
             ];
+        }
+    }
+
+    private function calculateWeeklyBreakdowns($startDate, $endDate)
+    {
+        // Get all data for the week
+        $weekData = DB::table('activity_logs')
+            ->where('action', 'entry')
+            ->where('actor_type', 'user')
+            ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+            ->get();
+
+        // Calculate vehicle type breakdown
+        $this->calculateWeeklyVehicleTypeBreakdown($weekData);
+        
+        // Calculate user type breakdown
+        $this->calculateWeeklyUserTypeBreakdown($startDate, $endDate);
+        
+        // Calculate user type vehicle breakdown
+        $this->calculateWeeklyUserTypeVehicleBreakdown($startDate, $endDate);
+        
+        // Calculate parking area breakdown
+        $this->calculateWeeklyParkingAreaBreakdown($startDate, $endDate);
+        
+        // Calculate time ranges
+        $this->calculateWeeklyTimeRanges($weekData);
+    }
+
+    private function calculateWeeklyVehicleTypeBreakdown($weekData)
+    {
+        // Get all vehicle types from system
+        $allVehicleTypes = DB::table('vehicles')
+            ->distinct('type')
+            ->pluck('type');
+
+        // Count vehicles in entries
+        $vehicleCounts = [];
+        $totalVehicles = 0;
+
+        foreach ($weekData as $entry) {
+            $userVehicles = DB::table('vehicles')
+                ->where('user_id', $entry->actor_id)
+                ->pluck('type');
+
+            foreach ($userVehicles as $type) {
+                $vehicleCounts[$type] = ($vehicleCounts[$type] ?? 0) + 1;
+                $totalVehicles++;
+            }
+        }
+
+        // Build breakdown with all vehicle types
+        $this->vehicleTypeBreakdown = [];
+        foreach ($allVehicleTypes as $type) {
+            $count = $vehicleCounts[$type] ?? 0;
+            $percentage = $totalVehicles > 0 ? round(($count / $totalVehicles) * 100, 1) : 0;
+
+            $this->vehicleTypeBreakdown[] = (object)[
+                'type' => $type,
+                'count' => $count,
+                'percentage' => $percentage
+            ];
+        }
+    }
+
+    private function calculateWeeklyUserTypeBreakdown($startDate, $endDate)
+    {
+        $userTypeCounts = DB::table('activity_logs')
+            ->selectRaw("
+                CASE
+                    WHEN users.student_id IS NOT NULL THEN 'Student'
+                    WHEN users.employee_id IS NOT NULL THEN 'Employee'
+                    ELSE 'Guest'
+                END as user_type,
+                COUNT(*) as count
+            ")
+            ->leftJoin('users', 'activity_logs.actor_id', '=', 'users.id')
+            ->where('activity_logs.action', 'entry')
+            ->where('activity_logs.actor_type', 'user')
+            ->whereBetween('activity_logs.created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+            ->groupBy('user_type')
+            ->get()
+            ->keyBy('user_type')
+            ->toArray();
+
+        $this->userTypeBreakdown = [];
+        $userTypes = ['Student', 'Employee', 'Guest'];
+        $totalUsers = array_sum(array_map(fn($item) => $item->count, $userTypeCounts));
+
+        foreach ($userTypes as $type) {
+            $count = isset($userTypeCounts[$type]) ? $userTypeCounts[$type]->count : 0;
+            $percentage = $totalUsers > 0 ? round(($count / $totalUsers) * 100, 1) : 0;
+
+            $this->userTypeBreakdown[] = (object)[
+                'type' => $type,
+                'count' => $count,
+                'percentage' => $percentage
+            ];
+        }
+    }
+
+    private function calculateWeeklyParkingAreaBreakdown($startDate, $endDate)
+    {
+        // Get all active parking areas
+        $allAreas = DB::table('parking_areas')->whereNull('deleted_at')->select('id', 'name')->get();
+
+        // Get entry counts by area for this week (only from active areas)
+        $activeAreaIds = $allAreas->pluck('id')->toArray();
+        $areaEntryCounts = DB::table('activity_logs')
+            ->where('action', 'entry')
+            ->where('actor_type', 'user')
+            ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+            ->whereIn('area_id', $activeAreaIds)
+            ->selectRaw('area_id, COUNT(*) as count')
+            ->groupBy('area_id')
+            ->get()
+            ->keyBy('area_id')
+            ->toArray();
+
+        // Build complete breakdown with all active areas
+        $this->parkingAreaBreakdown = [];
+
+        // Add Main Gate (entries with NULL area_id)
+        $mainGateCount = DB::table('activity_logs')
+            ->where('action', 'entry')
+            ->where('actor_type', 'user')
+            ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()])
+            ->whereNull('area_id')
+            ->count();
+
+        $this->parkingAreaBreakdown[] = (object)[
+            'name' => 'Main Gate',
+            'count' => $mainGateCount
+        ];
+
+        // Add all active parking areas
+        foreach ($allAreas as $area) {
+            $this->parkingAreaBreakdown[] = (object)[
+                'name' => $area->name,
+                'count' => isset($areaEntryCounts[$area->id]) ? $areaEntryCounts[$area->id]->count : 0
+            ];
+        }
+    }
+
+    private function calculateWeeklyTimeRanges($weekData)
+    {
+        // Calculate entries by time range for the week
+        $this->timeRanges = [
+            ['name' => 'Morning', 'label' => 'Morning (06:00-12:00)', 'start' => 6, 'end' => 12, 'count' => 0],
+            ['name' => 'Afternoon', 'label' => 'Afternoon (12:00-18:00)', 'start' => 12, 'end' => 18, 'count' => 0],
+            ['name' => 'Evening', 'label' => 'Evening (18:00-00:00)', 'start' => 18, 'end' => 24, 'count' => 0],
+            ['name' => 'Night', 'label' => 'Night (00:00-06:00)', 'start' => 0, 'end' => 6, 'count' => 0],
+        ];
+
+        foreach ($weekData as $entry) {
+            $hour = Carbon::parse($entry->created_at)->hour;
+
+            foreach ($this->timeRanges as &$range) {
+                if ($hour >= $range['start'] && $hour < $range['end']) {
+                    $range['count']++;
+                    break;
+                }
+            }
+        }
+    }
+
+    private function calculateWeeklyUserTypeVehicleBreakdown($startDate, $endDate)
+    {
+        // Get all vehicle types from system
+        $allVehicleTypes = DB::table('vehicles')
+            ->distinct('type')
+            ->pluck('type')
+            ->toArray();
+
+        // Get user types with their vehicles for the week
+        $this->userTypeVehicleBreakdown = [];
+        
+        $userTypes = ['student', 'employee', 'guest'];
+        
+        foreach ($userTypes as $userType) {
+            // Get users of this type
+            if ($userType === 'student') {
+                $userIds = DB::table('users')
+                    ->whereNotNull('student_id')
+                    ->pluck('id');
+            } elseif ($userType === 'employee') {
+                $userIds = DB::table('users')
+                    ->whereNotNull('employee_id')
+                    ->whereNull('student_id')
+                    ->pluck('id');
+            } else {
+                $userIds = DB::table('users')
+                    ->whereNull('student_id')
+                    ->whereNull('employee_id')
+                    ->pluck('id');
+            }
+
+            // Get vehicle counts for these users in the week
+            $vehicleCounts = DB::table('vehicles')
+                ->whereIn('user_id', $userIds)
+                ->selectRaw('type, COUNT(*) as count')
+                ->groupBy('type')
+                ->get()
+                ->keyBy('type')
+                ->toArray();
+
+            // Build complete breakdown with all vehicle types
+            $completeBreakdown = [];
+            foreach ($allVehicleTypes as $vehicleType) {
+                $completeBreakdown[] = (object)[
+                    'type' => $vehicleType,
+                    'count' => isset($vehicleCounts[$vehicleType]) ? $vehicleCounts[$vehicleType]->count : 0
+                ];
+            }
+
+            $this->userTypeVehicleBreakdown[$userType] = $completeBreakdown;
         }
     }
 
