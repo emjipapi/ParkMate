@@ -157,6 +157,111 @@
                 </div>
                 @endif
             </div>
+
+            <!-- Breakdown Section -->
+            <h5 class="mb-3 mt-4">Breakdown</h5>
+            <div class="row g-3">
+                <!-- Vehicle Type Breakdown -->
+                @if(count($vehicleTypeBreakdown) > 0)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Vehicle Type</h6>
+                            @php
+                                $totalVehicles = collect($vehicleTypeBreakdown)->sum('count');
+                            @endphp
+                            <p class="card-text small">
+                                @foreach($vehicleTypeBreakdown as $vehicle)
+                                    @php
+                                        $percentage = $totalVehicles > 0 ? round(($vehicle->count / $totalVehicles) * 100, 1) : 0;
+                                    @endphp
+                                    <strong>{{ ucfirst($vehicle->type) }}</strong>: {{ $vehicle->count }} ({{ $percentage }}%)
+                                    @if(!$loop->last)<br>@endif
+                                @endforeach
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- User Type Breakdown -->
+                @if(count($userTypeBreakdown) > 0)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">User Type</h6>
+                            <p class="card-text small">
+                                @foreach($userTypeBreakdown as $user)
+                                    @php
+                                        $percentage = $totalEntries > 0 ? round(($user->count / $totalEntries) * 100, 1) : 0;
+                                    @endphp
+                                    <strong>{{ ucfirst($user->user_type) }}</strong>: {{ $user->count }} ({{ $percentage }}%)
+                                    @if(!$loop->last)<br>@endif
+                                @endforeach
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Parking Area Breakdown -->
+                @if(count($parkingAreaBreakdown) > 0)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Parking Area</h6>
+                            <p class="card-text small">
+                                @foreach($parkingAreaBreakdown as $area)
+                                    <strong>{{ $area->name }}</strong>: {{ $area->count }} entries
+                                    @if(!$loop->last)<br>@endif
+                                @endforeach
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+
+            <!-- User Type Vehicle Breakdown Section -->
+            @if(count($userTypeVehicleBreakdown) > 0)
+            <h5 class="mb-3 mt-4">Vehicle Types by User</h5>
+            <div class="row g-3">
+                @foreach($userTypeVehicleBreakdown as $userType => $vehicles)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">{{ ucfirst($userType) }} Vehicles</h6>
+                            <p class="card-text small">
+                                @foreach($vehicles as $vehicle)
+                                    <strong>{{ ucfirst($vehicle->type) }}</strong>: {{ $vehicle->count }}
+                                    @if(!$loop->last)<br>@endif
+                                @endforeach
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
+
+            <!-- Time Ranges Section -->
+            @if(count($timeRanges) > 0)
+            <h5 class="mb-3 mt-4">Time Ranges</h5>
+            <div class="row g-3">
+                @foreach($timeRanges as $range)
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">{{ $range['label'] }}</h6>
+                            <p class="card-text">
+                                <strong>{{ $range['count'] }}</strong> entries
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
         </div>
         @endif
     </div>

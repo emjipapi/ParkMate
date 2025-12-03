@@ -21,6 +21,11 @@ class AnalyticsChartComponent extends Component
     public $quietestHour = null;
     public $averagePerHour = 0;
     public $busyPeriod = null;
+    public $vehicleTypeBreakdown = [];
+    public $userTypeBreakdown = [];
+    public $userTypeVehicleBreakdown = [];
+    public $parkingAreaBreakdown = [];
+    public $timeRanges = [];
 
     public function mount()
     {
@@ -282,6 +287,202 @@ class AnalyticsChartComponent extends Component
             $this->busyPeriod = null;
             $this->totalEntries = 0;
             $this->averagePerHour = 0;
+            $this->vehicleTypeBreakdown = [];
+            $this->userTypeBreakdown = [];
+            $this->userTypeVehicleBreakdown = [];
+            $this->parkingAreaBreakdown = [];
+            $this->timeRanges = [];
+        } else {
+            // Calculate breakdowns for daily view
+            $this->calculateVehicleTypeBreakdown();
+            $this->calculateUserTypeBreakdown();
+            $this->calculateParkingAreaBreakdown();
+            $this->calculateTimeRanges();
+        }
+    }
+
+    private function calculateTimeRanges()
+    {
+        // Calculate entries by time range
+        $this->timeRanges = [
+            ['name' => 'Morning', 'label' => 'Morning (06:00-12:00)', 'start' => 6, 'end' => 12, 'count' => 0],
+            ['name' => 'Afternoon', 'label' => 'Afternoon (12:00-18:00)', 'start' => 12, 'end' => 18, 'count' => 0],
+            ['name' => 'Evening', 'label' => 'Evening (18:00-00:00)', 'start' => 18, 'end' => 24, 'count' => 0],
+            ['name' => 'Night', 'label' => 'Night (00:00-06:00)', 'start' => 0, 'end' => 6, 'count' => 0],
+        ];
+
+        foreach ($this->timeRanges as &$range) {
+            for ($i = $range['start']; $i < $range['end']; $i++) {
+                $range['count'] += $this->data[$i] ?? 0;
+            }
+        }
+    }
+
+    private function calculateVehicleTypeBreakdown()
+    {
+        // Get all vehicle types in the system
+        $allVehicleTypes = DB::table('vehicles')
+            ->distinct()
+            ->pluck('type')
+            ->toArray();
+
+        // Get all users who had entries on this date
+        $userIds = DB::table('activity_logs')
+            ->where('action', 'entry')
+            ->where('actor_type', 'user')
+            ->whereDate('created_at', $this->selectedDate)
+            ->distinct()
+            ->pluck('actor_id');
+
+        // Count vehicles by type for these users
+        $vehicleTypeCounts = [];
+        if ($userIds->count() > 0) {
+            $vehicleTypeCounts = DB::table('vehicles')
+                ->whereIn('user_id', $userIds)
+                ->selectRaw('type, COUNT(*) as count')
+                ->groupBy('type')
+                ->get()
+                ->keyBy('type')
+                ->toArray();
+        }
+
+        // Include all vehicle types with their counts (0 if not found)
+        $this->vehicleTypeBreakdown = [];
+        foreach ($allVehicleTypes as $vehicleType) {
+            $this->vehicleTypeBreakdown[] = (object)[
+                'type' => $vehicleType,
+                'count' => isset($vehicleTypeCounts[$vehicleType]) ? $vehicleTypeCounts[$vehicleType]->count : 0
+            ];
+        }
+    }
+
+    private function calculateUserTypeBreakdown()
+    {
+        // Get total entries by user type on this date
+        // User type is determined by: if student_id is filled = student, if employee_id = employee, if both null = guest
+        $userTypeCounts = DB::table('activity_logs')
+            ->join('users', 'activity_logs.actor_id', '=', 'users.id')
+            ->where('activity_logs.action', 'entry')
+            ->where('activity_logs.actor_type', 'user')
+            ->whereDate('activity_logs.created_at', $this->selectedDate)
+            ->selectRaw("
+                CASE 
+                    WHEN users.student_id IS NOT NULL THEN 'student'
+                    WHEN users.employee_id IS NOT NULL THEN 'employee'
+                    ELSE 'guest'
+                END as user_type,
+                COUNT(*) as count
+            ")
+            ->groupByRaw("
+                CASE 
+                    WHEN users.student_id IS NOT NULL THEN 'student'
+                    WHEN users.employee_id IS NOT NULL THEN 'employee'
+                    ELSE 'guest'
+                END
+            ")
+            ->get()
+            ->keyBy('user_type')
+            ->toArray();
+
+        // Always include all user types with counts (0 if not found)
+        $userTypes = ['student', 'employee', 'guest'];
+        $this->userTypeBreakdown = [];
+        foreach ($userTypes as $userType) {
+            $this->userTypeBreakdown[] = (object)[
+                'user_type' => $userType,
+                'count' => isset($userTypeCounts[$userType]) ? $userTypeCounts[$userType]->count : 0
+            ];
+        }
+
+        // Get vehicle type breakdown by user type
+        $this->userTypeVehicleBreakdown = [];
+        
+        // First, get all vehicle types used in the system
+        $allVehicleTypes = DB::table('vehicles')
+            ->distinct()
+            ->pluck('type')
+            ->toArray();
+        
+        $userTypeMap = [
+            'student' => 'users.student_id IS NOT NULL',
+            'employee' => 'users.employee_id IS NOT NULL AND users.student_id IS NULL',
+            'guest' => 'users.student_id IS NULL AND users.employee_id IS NULL'
+        ];
+
+        foreach ($userTypeMap as $userType => $condition) {
+            $userIds = DB::table('activity_logs')
+                ->join('users', 'activity_logs.actor_id', '=', 'users.id')
+                ->where('activity_logs.action', 'entry')
+                ->where('activity_logs.actor_type', 'user')
+                ->whereDate('activity_logs.created_at', $this->selectedDate)
+                ->whereRaw($condition)
+                ->distinct()
+                ->pluck('activity_logs.actor_id');
+
+            $vehicleBreakdown = [];
+            if ($userIds->count() > 0) {
+                $vehicleBreakdown = DB::table('vehicles')
+                    ->whereIn('user_id', $userIds)
+                    ->selectRaw('type, COUNT(*) as count')
+                    ->groupBy('type')
+                    ->get()
+                    ->keyBy('type')
+                    ->toArray();
+            }
+
+            // Include all vehicle types, with 0 for missing ones
+            $completeBreakdown = [];
+            foreach ($allVehicleTypes as $vehicleType) {
+                $completeBreakdown[] = (object)[
+                    'type' => $vehicleType,
+                    'count' => isset($vehicleBreakdown[$vehicleType]) ? $vehicleBreakdown[$vehicleType]->count : 0
+                ];
+            }
+
+            $this->userTypeVehicleBreakdown[$userType] = $completeBreakdown;
+        }
+    }
+
+    private function calculateParkingAreaBreakdown()
+    {
+        // Get all parking areas from database (excluding soft deleted)
+        $allAreas = DB::table('parking_areas')->whereNull('deleted_at')->select('id', 'name')->get();
+
+        // Get entry counts by area for this date (only from active areas)
+        $activeAreaIds = $allAreas->pluck('id')->toArray();
+        $areaEntryCounts = DB::table('activity_logs')
+            ->where('action', 'entry')
+            ->where('actor_type', 'user')
+            ->whereDate('created_at', $this->selectedDate)
+            ->whereIn('area_id', $activeAreaIds)
+            ->selectRaw('area_id, COUNT(*) as count')
+            ->groupBy('area_id')
+            ->get()
+            ->keyBy('area_id')
+            ->toArray();
+
+        // Build complete breakdown with all active areas
+        $this->parkingAreaBreakdown = [];
+
+        // Add Main Gate (entries with NULL area_id)
+        $mainGateCount = DB::table('activity_logs')
+            ->where('action', 'entry')
+            ->where('actor_type', 'user')
+            ->whereDate('created_at', $this->selectedDate)
+            ->whereNull('area_id')
+            ->count();
+
+        $this->parkingAreaBreakdown[] = (object)[
+            'name' => 'Main Gate',
+            'count' => $mainGateCount
+        ];
+
+        // Add all active parking areas
+        foreach ($allAreas as $area) {
+            $this->parkingAreaBreakdown[] = (object)[
+                'name' => $area->name,
+                'count' => isset($areaEntryCounts[$area->id]) ? $areaEntryCounts[$area->id]->count : 0
+            ];
         }
     }
 
