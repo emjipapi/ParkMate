@@ -235,6 +235,83 @@
         </div>
         @endif
 
+        <!-- Summary Statistics Cards for Monthly -->
+        @if($chartType === 'entries' && $period === 'monthly')
+        <div class="mt-5">
+            <h5 class="mb-3">Summary Statistics</h5>
+            <div class="row g-3">
+                <!-- Peak Date -->
+                @if($peakDateMonth)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Peak Date</h6>
+                            <p class="card-text">
+                                Busiest date: <strong>{{ $peakDateMonth['day'] }}</strong> ({{ $peakDateMonth['date'] }})<br>
+                                {{ $peakDateMonth['count'] }} entries
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Total Entries -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Total Entries</h6>
+                            <p class="card-text">
+                                Total entries for the month: <strong>{{ $totalEntries }}</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quietest Date -->
+                @if($quietestDateMonth)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Quietest Date</h6>
+                            <p class="card-text">
+                                Least busy: <strong>{{ $quietestDateMonth['day'] }}</strong> ({{ $quietestDateMonth['date'] }})<br>
+                                {{ $quietestDateMonth['count'] }} entries
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Average Per Date -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Average Per Date</h6>
+                            <p class="card-text">
+                                Average: <strong>{{ $averagePerDateMonth }}</strong> entries per date
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Busiest Date -->
+                @if($busiestDateMonth)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Busiest Date</h6>
+                            <p class="card-text">
+                                Most entries: <strong>{{ $busiestDateMonth['day'] }}</strong> ({{ $busiestDateMonth['date'] }})<br>
+                                {{ $busiestDateMonth['count'] }} entries
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endif
+
         <!-- Breakdown Section (Daily Only) -->
         @if($chartType === 'entries' && $period === 'daily')
         <div class="mt-5">
@@ -443,6 +520,106 @@
                 </div>
                 @endforeach
             </div>
+        </div>
+        @endif
+
+        <!-- Breakdown Section (Monthly) -->
+        @if($chartType === 'entries' && $period === 'monthly')
+        <div class="mt-5">
+            <h5 class="mb-3 mt-4">Breakdown</h5>
+            <div class="row g-3">
+                <!-- Vehicle Type Breakdown -->
+                @if(count($vehicleTypeBreakdown) > 0)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Vehicle Type</h6>
+                            <p class="card-text small">
+                                @foreach($vehicleTypeBreakdown as $vehicle)
+                                    <strong>{{ ucfirst($vehicle->type) }}</strong>: {{ $vehicle->count }} ({{ $vehicle->percentage }}%)
+                                    @if(!$loop->last)<br>@endif
+                                @endforeach
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- User Type Breakdown -->
+                @if(count($userTypeBreakdown) > 0)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">User Type</h6>
+                            <p class="card-text small">
+                                @foreach($userTypeBreakdown as $user)
+                                    <strong>{{ ucfirst($user->type) }}</strong>: {{ $user->count }} ({{ $user->percentage }}%)
+                                    @if(!$loop->last)<br>@endif
+                                @endforeach
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Parking Area Breakdown -->
+                @if(count($parkingAreaBreakdown) > 0)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Parking Area</h6>
+                            <p class="card-text small">
+                                @foreach($parkingAreaBreakdown as $area)
+                                    <strong>{{ $area->name }}</strong>: {{ $area->count }} entries
+                                    @if(!$loop->last)<br>@endif
+                                @endforeach
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+
+            <!-- Time Ranges Section -->
+            @if(count($timeRanges) > 0)
+            <h5 class="mb-3 mt-4">Time Ranges</h5>
+            <div class="row g-3">
+                @foreach($timeRanges as $range)
+                <div class="col-md-6 col-lg-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">{{ $range['label'] }}</h6>
+                            <p class="card-text">
+                                <strong>{{ $range['count'] }}</strong> entries
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
+
+            <!-- Vehicle Types by User Section -->
+            @if(count($userTypeVehicleBreakdown) > 0)
+            <h5 class="mb-3 mt-4">Vehicle Types by User</h5>
+            <div class="row g-3">
+                @foreach($userTypeVehicleBreakdown as $userType => $vehicles)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">{{ ucfirst($userType) }} Vehicles</h6>
+                            <p class="card-text small">
+                                @foreach($vehicles as $vehicle)
+                                    <strong>{{ ucfirst($vehicle->type) }}</strong>: {{ $vehicle->count }}
+                                    @if(!$loop->last)<br>@endif
+                                @endforeach
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+            @endif
         </div>
         @endif
     </div>
