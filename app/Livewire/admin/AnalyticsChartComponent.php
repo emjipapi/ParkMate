@@ -14,6 +14,13 @@ class AnalyticsChartComponent extends Component
     public $chartType = 'entries'; // Default to entries
     public $dates = [];
     public $period = 'daily'; // For entry analytics: daily, weekly, monthly
+    
+    // Daily summary statistics
+    public $peakHour = null;
+    public $totalEntries = 0;
+    public $quietestHour = null;
+    public $averagePerHour = 0;
+    public $busyPeriod = null;
 
     public function mount()
     {
@@ -86,6 +93,9 @@ class AnalyticsChartComponent extends Component
                 $this->labels[] = sprintf('%02d:00', $hour);
                 $this->data[] = $entries->get($hour)?->total ?? 0;
             }
+            
+            // Calculate daily summary statistics
+            $this->calculateDailySummaryStats();
         } 
         elseif ($this->period === 'weekly') {
             // Daily breakdown for 7 days starting from selected date
@@ -196,6 +206,83 @@ class AnalyticsChartComponent extends Component
                 detail: " . json_encode($eventData) . " 
             }));
         ");
+    }
+
+    private function calculateDailySummaryStats()
+    {
+        // Total entries
+        $this->totalEntries = array_sum($this->data);
+        
+        // Peak hour and quietest hour
+        if (!empty($this->data)) {
+            $peakIndex = 0;
+            $quietIndex = 0;
+            $maxValue = $this->data[0];
+            $minValue = $this->data[0];
+            
+            foreach ($this->data as $index => $value) {
+                if ($value > $maxValue) {
+                    $maxValue = $value;
+                    $peakIndex = $index;
+                }
+                if ($value < $minValue) {
+                    $minValue = $value;
+                    $quietIndex = $index;
+                }
+            }
+            
+            $this->peakHour = [
+                'hour' => $peakIndex,
+                'count' => $this->data[$peakIndex],
+                'formatted' => sprintf('%02d:00', $peakIndex)
+            ];
+            
+            $this->quietestHour = [
+                'hour' => $quietIndex,
+                'count' => $this->data[$quietIndex],
+                'formatted' => sprintf('%02d:00', $quietIndex)
+            ];
+        }
+        
+        // Average per hour
+        $this->averagePerHour = $this->totalEntries > 0 ? round($this->totalEntries / 24, 1) : 0;
+        
+        // Busiest period (6-hour windows: Night, Morning, Afternoon, Evening)
+        $periods = [
+            ['name' => 'Night', 'start' => 0, 'end' => 6],
+            ['name' => 'Morning', 'start' => 6, 'end' => 12],
+            ['name' => 'Afternoon', 'start' => 12, 'end' => 18],
+            ['name' => 'Evening', 'start' => 18, 'end' => 24],
+        ];
+        
+        $maxPeriodCount = 0;
+        $this->busyPeriod = null;
+        
+        foreach ($periods as $period) {
+            $count = 0;
+            for ($i = $period['start']; $i < $period['end']; $i++) {
+                $count += $this->data[$i] ?? 0;
+            }
+            
+            if ($count > $maxPeriodCount) {
+                $maxPeriodCount = $count;
+                $this->busyPeriod = [
+                    'name' => $period['name'],
+                    'start' => sprintf('%02d:00', $period['start']),
+                    'end' => sprintf('%02d:00', $period['end']),
+                    'count' => $count
+                ];
+            }
+        }
+        
+        // Clear stats for non-daily periods
+        if ($this->period !== 'daily') {
+            $this->peakHour = null;
+            $this->quietestHour = null;
+            $this->busyPeriod = null;
+            $this->totalEntries = 0;
+            $this->averagePerHour = 0;
+        }
     }
 
     public function render()

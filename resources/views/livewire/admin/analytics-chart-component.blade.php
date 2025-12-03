@@ -85,6 +85,80 @@
         <p class="text-muted text-center d-block d-md-none mt-2" style="font-size: 0.9rem;">
     📊 Best viewed on desktop for full chart details.
 </p>
+
+        <!-- Summary Statistics Cards (only show for Entry Analytics Daily) -->
+        @if($chartType === 'entries' && $period === 'daily')
+        <div class="mt-5">
+            <h5 class="mb-3">Summary Statistics</h5>
+            <div class="row g-3">
+                <!-- Peak Hour -->
+                @if($peakHour)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Peak Hour</h6>
+                            <p class="card-text">
+                                Busiest time: <strong>{{ $peakHour['formatted'] }}</strong> with <strong>{{ $peakHour['count'] }}</strong> entries
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Total Entries -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Total Entries</h6>
+                            <p class="card-text">
+                                Total entries for the day: <strong>{{ $totalEntries }}</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quietest Hour -->
+                @if($quietestHour)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Quietest Hour</h6>
+                            <p class="card-text">
+                                Least busy: <strong>{{ $quietestHour['formatted'] }}</strong> with <strong>{{ $quietestHour['count'] }}</strong> entries
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                <!-- Average Per Hour -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Average Per Hour</h6>
+                            <p class="card-text">
+                                Average: <strong>{{ $averagePerHour }}</strong> entries per hour
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Busiest Period -->
+                @if($busyPeriod)
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted">Busiest Period</h6>
+                            <p class="card-text">
+                                Peak period: <strong>{{ $busyPeriod['start'] }}-{{ $busyPeriod['end'] }}</strong> ({{ $busyPeriod['name'] }})
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+        @endif
     </div>
 
     <script>
