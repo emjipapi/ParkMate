@@ -74,7 +74,7 @@ public ?int $defaultMapId = null;
             // Car slots for this area
             $carSlots = DB::table('car_slots')
                 ->where('area_id', $area->id)
-                ->select('id', 'label', 'occupied', 'disabled')
+                ->select('id', 'label', 'occupied', 'disabled', 'updated_at')
                 ->get()
                 ->map(function ($slot) {
                     return [
@@ -82,7 +82,7 @@ public ?int $defaultMapId = null;
                         'label' => $slot->label,
                         'occupied' => (bool) $slot->occupied,
                         'disabled' => (bool) $slot->disabled,
-                        
+                        'updated_at' => $slot->updated_at,
                     ];
                 })
                 ->toArray();

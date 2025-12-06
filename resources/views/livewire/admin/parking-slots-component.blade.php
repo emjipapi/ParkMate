@@ -3,7 +3,6 @@
     <h4 class="mb-2 mb-sm-0">Map</h4>
         <div class="live-map-viewport mb-4 mt-3" role="main">
         <div class="livewire-component-wrapper" id="livewire-map-root">
-            {{-- your Livewire component — exact tag you asked for --}}
 
             <livewire:admin.parking-map-live-view-component :map-id="$defaultMapId" />
 
@@ -134,13 +133,15 @@
                         $show = $filter === 'all'
                         || ($filter === 'available' && !$occupied)
                         || ($filter === 'occupied' && $occupied);
+                        $lastSeen = isset($slot['updated_at']) ? \Carbon\Carbon::parse($slot['updated_at'])->format('M d, Y H:i') : 'N/A';
                         @endphp
                         @if($show)
                         <div class="col">
                             <div class="slot-tile 
                             {{ $disabled ? 'bg-secondary' : ($occupied ? 'bg-danger' : 'bg-success') }} 
                                 text-white p-2 rounded d-flex justify-content-center align-items-center"
-                                title="Slot {{ $slot['label'] }} — {{ $disabled ? 'Disabled' : ($occupied ? 'Occupied' : 'Available') }}"
+                                title="Slot {{ $slot['label'] }} — {{ $disabled ? 'Disabled' : ($occupied ? 'Occupied' : 'Available') }}
+Last seen: {{ $lastSeen }}"
                                 wire:click="openSlot({{ $area['id'] }}, {{ $slot['id'] }})" role="button"
                                 style="{{ $disabled ? 'opacity: 0.6; height: 40px;' : 'cursor: pointer; height: 40px;' }}">
                                 <span class="slot-label fw-semibold">{{ $slot['label'] }}</span>
@@ -178,7 +179,6 @@
             }
         }
         
-        // Also clear any setIntervals that might be running
         // Get the highest interval ID and clear them all as a safety measure
         let id = setInterval(() => {}, 0);
         while (id--) {
