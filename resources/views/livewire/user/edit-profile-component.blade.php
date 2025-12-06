@@ -1,5 +1,5 @@
 {{-- resources\views\livewire\admin\user-form-create.blade.php --}}
-<div class="flex-grow-1 d-flex justify-content-center align-items-center square-box">
+<div class="flex-grow-1 d-flex justify-content-center align-items-center">
     {{-- DEBUG: temporary diagnostics — remove when done --}}
     {{-- <div class="mb-3 p-2 border rounded bg-light w-100 text-monospace" style="font-size:0.85rem;">
         <strong>DEBUG STATE</strong>
