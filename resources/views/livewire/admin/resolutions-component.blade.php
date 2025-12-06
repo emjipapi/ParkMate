@@ -213,7 +213,7 @@
 
                     <!-- Date -->
                     <td class="px-3 py-2 text-sm text-gray-700">
-                        @if($violation->created_at)
+                        @if($violation->endorsed_at)
                         @php
                         $tooltip = "";
                         if ($violation->submitted_at) {
@@ -233,10 +233,10 @@
                         @endphp
 
                         <span title="{{ $tooltip }}" class="cursor-pointer">
-                            {{ $violation->created_at->format('M j, Y H:i') }}
+                            {{ $violation->endorsed_at->format('M j, Y H:i') }}
                         </span>
                         <div class="text-xs text-muted">
-                            ({{ $violation->created_at->diffForHumans() }})
+                            ({{ $violation->endorsed_at->diffForHumans() }})
                         </div>
                         @else
                         <span class="text-muted">N/A</span>
@@ -449,7 +449,7 @@
 
             <div class="mt-3 small text-muted">Date</div>
             <div class="small text-dark">
-                @if($violation->created_at)
+                @if($violation->endorsed_at)
                 @php
                 $tooltip = "";
                 if ($violation->submitted_at) {
@@ -467,10 +467,10 @@
                 @endphp
 
                 <span title="{{ $tooltip }}" style="cursor: pointer;">
-                    {{ $violation->created_at->format('M j, Y H:i') }}
+                    {{ $violation->endorsed_at->format('M j, Y H:i') }}
                 </span>
                 <div class="small text-muted">
-                    ({{ $violation->created_at->diffForHumans() }})
+                    ({{ $violation->endorsed_at->diffForHumans() }})
                 </div>
                 @else
                 <span class="text-muted">N/A</span>
