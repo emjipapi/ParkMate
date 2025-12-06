@@ -253,9 +253,15 @@
             @endforeach
         </div>
         <div class="d-flex flex-column">
-            <button type="button" wire:click="addVehicleRow" class="btn btn-secondary mb-5">
-                Add Vehicle
-            </button>
+            @if(count($vehicles) >= 3)
+                <button type="button" class="btn btn-secondary mb-5" disabled title="Maximum 3 vehicles per user">
+                    Add Vehicle
+                </button>
+            @else
+                <button type="button" wire:click="addVehicleRow" class="btn btn-secondary mb-5">
+                    Add Vehicle
+                </button>
+            @endif
             <button type="submit" class="btn btn-primary">
 
                 <span wire:loading.remove wire:target="update">Update User</span>

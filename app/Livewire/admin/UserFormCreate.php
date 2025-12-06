@@ -327,6 +327,10 @@ class UserFormCreate extends Component
 
     public function addVehicleRow()
     {
+        if (count($this->vehicles) >= 3) {
+            $this->addError('vehicles', 'Maximum 3 vehicles per user.');
+            return;
+        }
         $this->vehicles[] = $this->defaultVehicle();
     }
 
