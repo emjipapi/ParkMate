@@ -48,7 +48,9 @@
                 class="form-control form-control-sm w-100 w-md-auto"
                 style="max-width: 200px;"
                 wire:loading.attr="disabled"
-                wire:target="selectedDate,chartType,period">
+                wire:target="selectedDate,chartType,period"
+                                onfocus="this.showPicker();" 
+                onmousedown="event.preventDefault(); this.showPicker();">
         @elseif(($chartType === 'entries' || $chartType === 'duration') && $period === 'monthly')
             <label for="dateSelect" class="form-label mb-1 text-sm">Month:</label>
             <input 
@@ -58,7 +60,9 @@
                 class="form-control form-control-sm w-100 w-md-auto"
                 style="max-width: 200px;"
                 wire:loading.attr="disabled"
-                wire:target="selectedDate,chartType,period">
+                wire:target="selectedDate,chartType,period"
+                                onfocus="this.showPicker();" 
+                onmousedown="event.preventDefault(); this.showPicker();">
         @else
             <label for="dateSelect" class="form-label mb-1 text-sm">Date:</label>
             <input 
