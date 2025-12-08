@@ -249,7 +249,7 @@
                 </tr>
                 @empty
                 <tr>
-                    <td :colspan="check2 ? 9 : 8" class="text-center">No users found.</td>
+                    <td :colspan="9" class="text-center">No users found.</td>
                 </tr>
                 @endforelse
             </tbody>
